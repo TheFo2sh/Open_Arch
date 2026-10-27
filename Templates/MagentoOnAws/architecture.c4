@@ -1,0 +1,115 @@
+// Magento e-commerce on AWS, after AWS's reference architecture
+// (https://docs.aws.amazon.com/architecture-diagrams/latest/magento-ecommerce-on-aws/).
+// Read together with the repository's specification.c4. Systems and users are slots:
+// applying the template maps them onto the project's own.
+model {
+  shopper = user 'Shopper' {
+    description 'Browses the store, searches the catalog and places orders.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      description 'Routes the store domain to CloudFront.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    waf = platform 'AWS WAF' {
+      description 'Filters malicious requests before CloudFront serves them.'
+      metadata {
+        uses 'aws-waf'
+      }
+    }
+    cloudfront = platform 'Amazon CloudFront' {
+      description 'Caches static content at the edge and forwards the rest.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    alb = platform 'Elastic Load Balancing' {
+      description 'Application Load Balancers in front of the Varnish and the Magento tiers.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+
+    autoscaling = platform 'Amazon EC2 Auto Scaling' {
+      description 'Varnish and Magento instances in two availability zones.'
+      metadata {
+        uses 'amazon-ec2-auto-scaling'
+      }
+
+      storefront = system 'Online store' {
+        description 'The Magento store: catalog, cart, checkout and the admin.'
+
+        cache = container 'Full-page cache' {
+          description 'Varnish instances that serve cached pages and pass misses to Magento.'
+          technology 'Varnish Cache'
+          metadata {
+            uses 'varnish-cache'
+          }
+        }
+        web = container 'Magento application' {
+          description 'Magento on PHP: renders the store and runs checkout.'
+          technology 'Magento Open Source, PHP'
+          metadata {
+            uses 'magento-open-source, php'
+          }
+        }
+      }
+    }
+
+    aurora = platform 'Amazon Aurora MySQL' {
+      metadata {
+        uses 'amazon-aurora-mysql'
+      }
+      storeDb = database 'Store database' {
+        description 'Products, customers and orders; a replica takes reads in the second availability zone.'
+      }
+    }
+    elasticache = platform 'Amazon ElastiCache for Redis' {
+      metadata {
+        uses 'amazon-elasticache-redis'
+      }
+      sessionStore = database 'Session and cache store' {
+        description 'Magento sessions and its cache.'
+      }
+    }
+    opensearch = platform 'Amazon OpenSearch Service' {
+      metadata {
+        uses 'amazon-opensearch-service'
+      }
+      searchIndex = database 'Catalog search index' {
+        description 'The product catalog, indexed for search.'
+      }
+    }
+    efs = platform 'Amazon Elastic File System' {
+      description 'Media and generated files shared by every Magento instance.'
+      metadata {
+        uses 'amazon-efs'
+      }
+    }
+  }
+
+  shopper -> aws.autoscaling.storefront 'Shops on'
+  aws.route53 -> aws.cloudfront 'Resolves the store domain to'
+  aws.waf -> aws.cloudfront 'Filters requests to'
+  aws.cloudfront -> aws.alb 'Forwards uncached requests to'
+  aws.alb -> aws.autoscaling.storefront.cache 'Balances requests over'
+  aws.autoscaling.storefront.cache -> aws.autoscaling.storefront.web 'Passes cache misses to'
+  aws.autoscaling.storefront.web -> aws.aurora.storeDb 'Reads from and writes to'
+  aws.autoscaling.storefront.web -> aws.elasticache.sessionStore 'Keeps sessions and cache in'
+  aws.autoscaling.storefront.web -> aws.opensearch.searchIndex 'Searches the catalog in'
+  aws.autoscaling.storefront.web -> aws.efs 'Shares media files on'
+}
+
+views {
+  view index {
+    title 'Magento e-commerce on AWS'
+    include *, aws.*, aws.autoscaling.*, aws.autoscaling.storefront.*, aws.aurora.*, aws.elasticache.*, aws.opensearch.*
+  }
+}

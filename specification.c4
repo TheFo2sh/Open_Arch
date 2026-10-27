@@ -1,0 +1,42 @@
+// The custom C4 schema of M1Spec architecture templates.
+// Every Templates/<Template>/architecture.c4 is read together with this file:
+// it uses these element kinds, and nothing else. See README.md.
+specification {
+  // A logical zone: where systems run. metadata { platform '<software platform>' }
+  element zone {
+    style {
+      border dotted
+      opacity 10%
+    }
+  }
+  // A technology of a zone - a managed service, a compute or data platform.
+  // metadata { uses '<technology key>' }. Inside another platform, it runs inside it.
+  element platform {
+    style {
+      color slate
+    }
+  }
+  // A software system: a slot, mapped onto one of the project's own systems
+  // when the template is applied. Inside a platform, it runs on it.
+  element system
+  // A database, created when the template is applied. It runs on the platform it is inside.
+  element database {
+    style {
+      shape cylinder
+    }
+  }
+  // A container of a system, and a component of a container: metadata { uses '<key>, <key>' }.
+  element container
+  element component {
+    style {
+      color sky
+    }
+  }
+  // A person: a slot, mapped onto one of the project's users.
+  element user {
+    style {
+      shape person
+      color indigo
+    }
+  }
+}

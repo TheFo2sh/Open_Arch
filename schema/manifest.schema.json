@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Architecture template manifest",
+  "type": "object",
+  "required": ["PackageId", "Name", "Description", "Version"],
+  "additionalProperties": false,
+  "properties": {
+    "PackageId": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9]*(\\.[A-Za-z][A-Za-z0-9]*)+$", "description": "Stable identity, e.g. OpenArch.MagentoOnAws"},
+    "Name": {"type": "string", "minLength": 1},
+    "Description": {"type": "string", "minLength": 1},
+    "Version": {"type": "string", "pattern": "^\\d+\\.\\d+\\.\\d+$"},
+    "Icon": {"type": "string", "description": "An iconify slug, e.g. logos:aws"},
+    "Publisher": {"type": "string"},
+    "Tags": {"type": "array", "items": {"type": "string"}}
+  }
+}

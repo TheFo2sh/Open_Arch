@@ -1,0 +1,7 @@
+PackageId: OpenArch.MagentoOnAws
+Name: Magento e-commerce on AWS
+Description: A highly available Magento store on AWS - CloudFront and WAF in front, Varnish and Magento on EC2 Auto Scaling behind load balancers, Aurora MySQL, ElastiCache for Redis, OpenSearch and EFS.
+Version: 1.0.0
+Icon: logos:magento
+Publisher: Open_Arch
+Tags: [e-commerce, aws, magento, php]

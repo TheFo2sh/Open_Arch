@@ -1,0 +1,54 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Architecture template technologies",
+  "type": "object",
+  "required": ["technologies"],
+  "additionalProperties": false,
+  "properties": {
+    "technologies": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["key", "name", "description", "types"],
+        "additionalProperties": false,
+        "properties": {
+          "key": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "description": "What the blueprint's metadata { uses } names it by"},
+          "name": {"type": "string", "minLength": 1, "description": "As the technology catalog names it; matched to the catalog by name"},
+          "description": {"type": "string", "minLength": 1},
+          "vendor": {"type": "string"},
+          "url": {"type": "string", "format": "uri"},
+          "types": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {"enum": ["library", "managed-service", "compute-platform", "data-platform", "third-party"]}
+          },
+          "platform": {
+            "type": "string",
+            "description": "The software platform it runs on: aws, azure, gcp, kubernetes, docker, openshift, or another platform's name. Required for anything but a library or a 3rd party."
+          },
+          "hosts": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {"enum": ["system", "database"]},
+            "description": "What a team runs on it in a logical zone"
+          },
+          "packages": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["manager", "name"],
+              "additionalProperties": false,
+              "properties": {
+                "manager": {"enum": ["npm", "nuget", "maven", "pypi", "cargo", "go", "composer", "rubygems", "terraform", "pulumi", "docker", "helm"]},
+                "name": {"type": "string", "minLength": 1}
+              }
+            },
+            "description": "Packages it is used through; a catalog technology whose usage guides name one of them is this technology"
+          }
+        }
+      }
+    }
+  }
+}

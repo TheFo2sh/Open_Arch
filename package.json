@@ -1,0 +1,15 @@
+{
+  "name": "open-arch",
+  "private": true,
+  "type": "module",
+  "description": "Architecture templates for M1Spec",
+  "scripts": {
+    "validate": "node scripts/validate.mjs"
+  },
+  "devDependencies": {
+    "ajv": "8.17.1",
+    "ajv-formats": "3.0.1",
+    "likec4": "1.59.2",
+    "yaml": "2.8.1"
+  }
+}

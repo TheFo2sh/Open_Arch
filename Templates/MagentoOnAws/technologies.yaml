@@ -1,0 +1,103 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: Highly available DNS service that routes shoppers to the store's domain.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-waf
+    name: AWS WAF
+    description: Web application firewall that filters malicious requests before they reach the store.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/waf/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Content delivery network that caches static content close to shoppers and forwards the rest to the store.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Application Load Balancers that spread traffic over the Varnish and Magento instances across availability zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2-auto-scaling
+    name: Amazon EC2 Auto Scaling
+    description: Groups of EC2 instances, in two availability zones, that grow and shrink with the store's traffic.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/autoscaling/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-aurora-mysql
+    name: Amazon Aurora MySQL
+    description: MySQL-compatible relational database with a primary and a replica in another availability zone.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-elasticache-redis
+    name: Amazon ElastiCache for Redis
+    description: In-memory Redis store for Magento's sessions and cache, replicated across availability zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticache/redis/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-opensearch-service
+    name: Amazon OpenSearch Service
+    description: Managed OpenSearch cluster that powers Magento's catalog search.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/opensearch-service/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-efs
+    name: Amazon Elastic File System
+    description: Shared file system mounted by every Magento instance for media and generated files.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/efs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: varnish-cache
+    name: Varnish Cache
+    description: HTTP accelerator that serves Magento's full-page cache.
+    vendor: Varnish Software
+    url: https://varnish-cache.org/
+    types: [library]
+  - key: magento-open-source
+    name: Magento Open Source
+    description: PHP e-commerce platform - catalog, cart, checkout and the admin.
+    vendor: Adobe
+    url: https://business.adobe.com/products/magento/open-source.html
+    types: [library]
+    packages: [{manager: composer, name: magento/product-community-edition}]
+  - key: php
+    name: PHP
+    description: The language and runtime Magento runs on.
+    vendor: The PHP Group
+    url: https://www.php.net/
+    types: [library]
