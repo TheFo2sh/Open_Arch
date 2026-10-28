@@ -1,0 +1,66 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Global content delivery network that provides a single edge endpoint and forwards API requests to the selected regional endpoint.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: DNS service used for the API domain and latency-based selection of a regional API endpoint.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-certificate-manager
+    name: AWS Certificate Manager
+    description: Manages the custom domain's SSL/TLS certificate attached to the CloudFront distribution.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/certificate-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-lambda-edge
+    name: AWS Lambda@Edge
+    description: Runs edge logic that queries Route 53 to select a regional endpoint and abstracts endpoint-specific authorization for clients.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/edge/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Regional API endpoints that receive requests forwarded from CloudFront.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Serverless compute that runs the regional API request handlers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-aurora-global-database
+    name: Amazon Aurora Global Database
+    description: Relational database spanning AWS Regions, routing writes to its primary cluster and replicating changes to secondary clusters.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/global-database/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]

@@ -1,0 +1,185 @@
+// Architecture for Airline Crew Management Systems, after AWS's reference
+// architecture (https://docs.aws.amazon.com/reference-architecture-diagrams/latest/crew-management-systems/crew-management-systems.html).
+// Systems and users are slots: applying the template maps them onto the project's own.
+model {
+  crewMember = user 'Crew member' {
+    description 'Uses the crew applications from a mobile app or browser.'
+  }
+  corporateUser = user 'Corporate user' {
+    description 'Connects to crew management from the corporate data center.'
+  }
+  corporateSystems = system 'Corporate systems' {
+    description 'Unspecified corporate systems connected to crew management.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Primary corporate data center connection to AWS.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    siteToSiteVpn = platform 'AWS Site-to-Site VPN' {
+      description 'Secondary corporate data center connection to AWS.'
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    transitGateway = platform 'AWS Transit Gateway' {
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    globalAccelerator = platform 'AWS Global Accelerator' {
+      metadata {
+        uses 'amazon-global-accelerator'
+      }
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      description 'Public hosted zone for crew application domain names.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    waf = platform 'AWS WAF' {
+      description 'Protects the public web and API resources.'
+      metadata {
+        uses 'aws-waf'
+      }
+    }
+    cloudfront = platform 'Amazon CloudFront' {
+      description 'Serves static pages and assets.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    cognito = platform 'Amazon Cognito' {
+      description 'Authenticates users and controls access to crew applications.'
+      metadata {
+        uses 'amazon-cognito'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Provides the API entry point to the application tier.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores static website assets and data lake objects.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      websiteAssets = database 'Website assets'
+      rawCrewData = database 'Raw crew data'
+      computedCrewData = database 'Computed crew data'
+    }
+    glacier = platform 'Amazon S3 Glacier' {
+      metadata {
+        uses 'amazon-s3-glacier'
+      }
+      archivedCrewData = database 'Archived crew data'
+    }
+    alb = platform 'Private Application Load Balancer' {
+      description 'Routes application-tier requests to the crew management microservices.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+    eks = platform 'Amazon Elastic Kubernetes Service' {
+      description 'Orchestrates the application tier across two Availability Zones.'
+      metadata {
+        uses 'amazon-eks'
+      }
+      crewManagement = system 'Crew management applications' {
+        description 'Crew application system; map this slot to a system in the adopting project.'
+        training = container 'Training'
+        hotelTransport = container 'Hotel and transport'
+        logistics = container 'Logistics'
+        fatigueRisk = container 'Fatigue risk management'
+      }
+    }
+    aurora = platform 'Amazon Aurora PostgreSQL-Compatible Edition' {
+      description 'High availability across multiple Availability Zones with Aurora Replicas.'
+      metadata {
+        uses 'amazon-aurora-postgresql'
+      }
+      crewData = database 'Crew operational data'
+    }
+
+    kms = platform 'AWS Key Management Service' {
+      description 'Part of the architecture AWS cloud encryption services.'
+      metadata {
+        uses 'aws-kms'
+      }
+    }
+    secretsManager = platform 'AWS Secrets Manager' {
+      description 'Protects credentials and private keys.'
+      metadata {
+        uses 'aws-secrets-manager'
+      }
+    }
+    certificateManager = platform 'AWS Certificate Manager' {
+      metadata {
+        uses 'aws-certificate-manager'
+      }
+    }
+    cloudwatch = platform 'Amazon CloudWatch' {
+      description 'Monitoring for operational health.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    cloudtrail = platform 'AWS CloudTrail' {
+      metadata {
+        uses 'aws-cloudtrail'
+      }
+    }
+    personalHealthDashboard = platform 'AWS Personal Health Dashboard' {
+      metadata {
+        uses 'aws-personal-health-dashboard'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Business intelligence for crew planning, training statistics, and crew utilization.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+  }
+
+  crewMember -> aws.eks.crewManagement 'Uses'
+  corporateUser -> aws.eks.crewManagement 'Uses'
+  corporateSystems -> aws.directConnect 'Connects through the primary link'
+  corporateSystems -> aws.siteToSiteVpn 'Connects through the secondary link'
+  aws.directConnect -> aws.transitGateway 'Connects to'
+  aws.siteToSiteVpn -> aws.transitGateway 'Connects to'
+  aws.transitGateway -> aws.globalAccelerator 'Routes corporate traffic through'
+  aws.globalAccelerator -> aws.alb 'Connects to the application tier'
+  aws.route53 -> aws.cloudfront 'Resolves crew application domains to'
+  aws.route53 -> aws.apiGateway 'Resolves crew API domains to'
+  aws.waf -> aws.cloudfront 'Protects'
+  aws.waf -> aws.apiGateway 'Protects'
+  aws.cloudfront -> aws.s3.websiteAssets 'Serves static pages and assets from'
+  aws.cognito -> aws.apiGateway 'Provides authentication and access control for'
+  aws.apiGateway -> aws.alb 'Provides access to the application tier through'
+  aws.alb -> aws.eks.crewManagement 'Routes requests to'
+  aws.eks.crewManagement -> aws.aurora.crewData 'Reads and writes crew data'
+  aws.aurora.crewData -> aws.s3.rawCrewData 'Supplies crew data to the data lake'
+  aws.s3.rawCrewData -> aws.s3.computedCrewData 'Feeds data processing'
+  aws.s3.computedCrewData -> aws.glacier.archivedCrewData 'Stores crew data for archive'
+  aws.s3.computedCrewData -> aws.quickSight 'Provides data for analytics'
+  aws.eks.crewManagement -> aws.cloudwatch 'Monitors operational health'
+}
+
+views {
+  view index {
+    title 'Architecture for Airline Crew Management Systems'
+    include *, aws.*
+  }
+}
