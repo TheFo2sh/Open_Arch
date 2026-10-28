@@ -1,0 +1,7 @@
+PackageId: OpenArch.AccountAndSecurityStrategyForTheServerlessDataPlatform
+Name: Account and Security Strategy for the Serverless Data Platform
+Description: A governed multi-account AWS data platform for secure ingestion, analytics, machine learning, and customer-facing dashboards.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, data-platform, analytics, security, serverless]

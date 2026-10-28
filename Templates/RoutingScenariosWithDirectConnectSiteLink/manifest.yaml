@@ -1,0 +1,7 @@
+PackageId: OpenArch.RoutingScenariosWithDirectConnectSiteLink
+Name: Routing Scenarios with AWS Direct Connect SiteLink
+Description: Hybrid network routing patterns that use AWS Direct Connect SiteLink to connect on-premises locations and AWS resources.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, networking, hybrid-cloud, direct-connect, sitelink]
