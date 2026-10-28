@@ -1,0 +1,98 @@
+# Technologies named in the AWS reference page and its architecture diagram.
+technologies:
+  - key: aws-outposts
+    name: AWS Outposts
+    description: AWS infrastructure deployed at a customer site for workloads that need to run locally.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/outposts/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-eks
+    name: Amazon Elastic Kubernetes Service
+    description: Managed Kubernetes used to run containerized 5G network functions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eks/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Regional and Outposts VPC networking for subnets, routing, and private service endpoints.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-outposts-local-gateway
+    name: AWS Outposts Local Gateway
+    description: Routes traffic between an Outposts subnet and the local network.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/outposts/latest/userguide/outposts-local-gateways.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-transit-gateway
+    name: AWS Transit Gateway
+    description: Connects the VPCs used for 5G management and control services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Provides high-throughput connectivity from on-premises data centers to an AWS Region.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Regional AWS service accessed through a service endpoint rather than traversing the internet.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-app-mesh
+    name: AWS App Mesh
+    description: Service mesh shown with the containerized network functions in the reference diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/app-mesh/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-x-ray
+    name: AWS X-Ray
+    description: Distributed tracing service shown with the containerized network functions in the reference diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/xray/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: multus
+    name: Multus
+    description: Kubernetes CNI meta-plugin used to provide multiple network interfaces to a pod.
+    vendor: Kubernetes SIG Network
+    url: https://github.com/k8snetworkplumbingwg/multus-cni
+    types: [library]
+  - key: prometheus
+    name: Prometheus
+    description: Monitoring system shown collecting telemetry from the Outposts workload.
+    vendor: The Prometheus Authors
+    url: https://prometheus.io/
+    types: [library]
+  - key: grafana
+    name: Grafana
+    description: Observability dashboard shown with the Outposts workload.
+    vendor: Grafana Labs
+    url: https://grafana.com/oss/grafana/
+    types: [library]
+  - key: fluentd
+    name: Fluentd
+    description: Log collector shown with the Outposts workload.
+    vendor: Fluentd Project
+    url: https://www.fluentd.org/
+    types: [library]
