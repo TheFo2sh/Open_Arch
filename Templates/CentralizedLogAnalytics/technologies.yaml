@@ -1,0 +1,82 @@
+# The technologies named by metadata { uses } in the blueprint.
+technologies:
+  - key: amazon-cloudtrail
+    name: AWS CloudTrail
+    description: AWS service log producer shown sending logs to Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudtrail/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform shown as a source of machine logs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-vpc-flow-logs
+    name: Amazon VPC Flow Logs
+    description: Flow-log producer labeled “flow logs” in the source diagram.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: fluent-bit
+    name: Fluent Bit
+    description: Open-source log collector listed by AWS as one possible collector.
+    vendor: Fluent Bit
+    url: https://fluentbit.io/
+    types: [library, third-party]
+  - key: amazon-kinesis-agent
+    name: Amazon Kinesis Agent
+    description: AWS log collector listed as one possible collector in the source.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/firehose/latest/dev/writing-with-agents.html
+    types: [library]
+  - key: amazon-cloudwatch-agent
+    name: Amazon CloudWatch Agent
+    description: AWS log collector listed as one possible collector in the source.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html
+    types: [library]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores log lines and emits object-create events for new objects.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-sqs
+    name: Amazon SQS
+    description: Receives an S3 object-create event and invokes the transformation function.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sqs/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the function that transforms log strings to structured JSON when necessary.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: amazon-opensearch-service
+    name: Amazon OpenSearch Service
+    description: Receives JSON-formatted logs through the OpenSearch bulk API and provides OpenSearch Dashboards.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/opensearch-service/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [system, database]
+  - key: opensearch-dashboards
+    name: OpenSearch Dashboards
+    description: Provides interactive log analytics, visualizations, notebooks, and dashboards.
+    vendor: OpenSearch Project
+    url: https://opensearch.org/docs/latest/dashboards/
+    types: [library]

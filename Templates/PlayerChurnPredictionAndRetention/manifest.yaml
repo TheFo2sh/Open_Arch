@@ -1,0 +1,7 @@
+PackageId: OpenArch.PlayerChurnPredictionAndRetention
+Name: Player Churn Prediction and Retention
+Description: Predicts player churn with SageMaker AI and supports batch or real-time retention actions for free-to-play games.
+Version: 1.0.0
+Icon: game-icons:gamepad
+Publisher: Open_Arch
+Tags: [aws, gaming, analytics, machine-learning]
