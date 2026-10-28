@@ -1,0 +1,142 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Connects Siemens LOGO! controllers, receives device messages, and enables device data exchange.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs functions that transform incoming data and support the Alexa integration.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-iot-events
+    name: AWS IoT Events
+    description: Detects changes and anomalies in IoT device data and triggers notifications.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-events/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: Delivers notifications triggered by AWS IoT Events.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-data-firehose
+    name: Amazon Data Firehose
+    description: Ingests data into the Amazon S3 data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores the industrial data lake used for ETL, cataloging, and predictive analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-glue
+    name: AWS Glue
+    description: Crawls and catalogs data and performs ETL jobs for the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-iot-sitewise
+    name: AWS IoT SiteWise
+    description: Models and stores data from industrial equipment for large-scale deployments.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-sitewise/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-managed-grafana
+    name: Amazon Managed Grafana
+    description: Visualizes near real-time industrial data in dashboards.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/grafana/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: amazon-forecast
+    name: Amazon Forecast
+    description: Uses curated data lake content for predictive health analysis.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/forecast/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-lookout-for-equipment
+    name: Amazon Lookout for Equipment
+    description: Analyzes curated data for predictive equipment health.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lookout-for-equipment/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Supports AI and machine learning analysis of curated data lake content.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-timestream
+    name: Amazon Timestream
+    description: Stores time-series data for fast analytical queries.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/timestream/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: mendix
+    name: Mendix
+    description: Third-party low-code platform used to build the custom web and mobile applications shown in the reference.
+    vendor: Mendix
+    url: https://www.mendix.com/platform/
+    types: [third-party]
+  - key: alexa-skills-kit
+    name: Alexa Skills Kit
+    description: Amazon's third-party tools and services for building custom Alexa skills.
+    vendor: Amazon
+    url: https://developer.amazon.com/en-US/alexa/alexa-skills-kit
+    types: [third-party]
+  - key: siemens-logo
+    name: Siemens LOGO!
+    description: Siemens programmable logic controllers shown controlling industrial equipment and exchanging data through AWS IoT Core.
+    vendor: Siemens
+    url: https://www.siemens.com/global/en/products/automation/systems/industrial/plc/logo.html
+    types: [third-party]
+  - key: mqtt
+    name: MQTT
+    description: Messaging protocol labeled between Siemens LOGO! controllers and AWS IoT Core in the reference diagram.
+    vendor: OASIS
+    url: https://mqtt.org/
+    types: [third-party]
+  - key: s7-communication
+    name: S7 communication
+    description: Communication protocol labeled between Siemens LOGO! controllers and industrial equipment in the reference diagram.
+    vendor: Siemens
+    types: [third-party]
+  - key: modbus-tcp
+    name: Modbus TCP
+    description: Industrial communication protocol labeled between Siemens LOGO! controllers and industrial equipment in the reference diagram.
+    vendor: Modbus Organization
+    url: https://www.modbus.org/
+    types: [third-party]
