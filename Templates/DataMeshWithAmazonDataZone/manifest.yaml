@@ -1,0 +1,7 @@
+PackageId: OpenArch.DataMeshWithAmazonDataZone
+Name: Data Mesh Reference Architecture with Amazon DataZone
+Description: A governed AWS data mesh that ingests enterprise data, registers producer assets in Amazon DataZone, and enables subscribed consumers to use them for analytics and AI/ML.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, data-mesh, datazone, data-governance, analytics]
