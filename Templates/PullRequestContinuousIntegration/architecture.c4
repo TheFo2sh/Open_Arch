@@ -40,10 +40,10 @@ model {
         description 'Starts the CodeBuild path for CodeCommit pull request events.'
       }
       queueConsumer = system 'Pull request queue consumer' {
-        description 'Checks prerequisites, starts CI, copies source to Pipeline Source, and removes obsolete queued versions of updated pull requests.'
+        description 'Polls the queue, checks prerequisites, starts CI, copies source to Pipeline Source, and removes obsolete queued versions of updated pull requests.'
       }
       statusReporter = system 'CI status reporter' {
-        description 'Reports stage progress, failure, or success to the selected Git provider.'
+        description 'Reports stage progress, failure, success, or completion to the selected Git provider.'
       }
     }
     s3 = platform 'Amazon S3' {
@@ -85,15 +85,15 @@ model {
   aws.lambda.codecommitTrigger -> aws.codebuild 'Triggers'
   aws.codebuild -> aws.s3.gitArtifactsBucket 'Archives pull request source in'
   aws.codebuild -> aws.readyQueue 'Enqueues a ready message in'
-  aws.readyQueue -> aws.lambda.queueConsumer 'Delivers ready messages to'
+  aws.lambda.queueConsumer -> aws.readyQueue 'Polls and consumes ready messages from'
   aws.lambda.queueConsumer -> aws.s3.gitArtifactsBucket 'Reads archived source from'
   aws.lambda.queueConsumer -> aws.s3.pipelineSourceBucket 'Copies source into'
   aws.lambda.queueConsumer -> aws.readyQueue 'Removes obsolete queued versions of updated pull requests from'
   aws.lambda.queueConsumer -> aws.apiGateway 'Starts CI coordination through'
   aws.apiGateway -> aws.codebuild 'Coordinates validation, unit testing, artifact build, and integration/end-to-end test work with'
   aws.eventBridge -> aws.lambda.statusReporter 'Routes stage changes to'
-  aws.lambda.statusReporter -> github 'Reports progress, failure, or success to'
-  aws.lambda.statusReporter -> bitbucket 'Alternatively reports progress, failure, or success to'
+  aws.lambda.statusReporter -> github 'Reports progress, failure, success, or completion to'
+  aws.lambda.statusReporter -> bitbucket 'Alternatively reports progress, failure, success, or completion to'
 }
 
 views {

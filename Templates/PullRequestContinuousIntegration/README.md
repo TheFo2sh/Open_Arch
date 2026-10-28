@@ -5,6 +5,7 @@ An AWS architecture for running continuous integration on pull requests before t
 ## Sources
 
 - [AWS Pull Request Continuous Integration reference architecture](https://docs.aws.amazon.com/reference-architecture-diagrams/latest/pull-request-continuous-integration/pull-request-continuous-integration.html)
+- [AWS architecture diagram](https://docs.aws.amazon.com/reference-architecture-diagrams/latest/pull-request-continuous-integration/images/pull-request-continuous-integration.png) and [PDF](https://docs.aws.amazon.com/pdfs/reference-architecture-diagrams/latest/pull-request-continuous-integration/pull-request-continuous-integration.pdf)
 - [AWS Reference Architecture Diagrams catalog](https://docs.aws.amazon.com/reference-architecture-diagrams/)
 
 ## What it is for
@@ -15,9 +16,9 @@ Use the pattern to give developers CI feedback on a proposed change before it re
 
 1. A GitHub or Bitbucket webhook notifies AWS CodeBuild when a pull request is created or updated. AWS CodeCommit is an alternative source; its pull request events use a Lambda trigger.
 2. CodeBuild archives the pull request source in the **Git Artifacts** S3 bucket and enqueues a ready message in SQS.
-3. A consuming Lambda checks prerequisites, starts CI, copies the source into a separate **Pipeline Source** S3 bucket, and removes obsolete queued versions when an existing pull request is updated.
+3. A Lambda polls and consumes the SQS message. It starts CI, checks prerequisites, moves the source into a separate **Pipeline Source** S3 bucket, and removes obsolete queued versions when an existing pull request is updated.
 4. Amazon API Gateway coordinates validation, unit testing, artifact build, preview environment creation, and integration/end-to-end tests. API Gateway is retained as named in the AWS architecture.
-5. Amazon EventBridge tracks stage changes. A status Lambda reports progress, failure, or success to the selected Git provider.
+5. Amazon EventBridge tracks stage changes. A status Lambda reports in-progress, failure, success, or completion status to the selected Git provider.
 
 ## Assumptions and details not specified
 
