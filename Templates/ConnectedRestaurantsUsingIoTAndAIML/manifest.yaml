@@ -1,0 +1,7 @@
+PackageId: OpenArch.ConnectedRestaurantsUsingIoTAndAIML
+Name: Connected Restaurants using IoT and AI/ML
+Description: A connected restaurant architecture using edge IoT, operational services, a governed data lake, analytics, and machine learning on AWS.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, iot, ai-ml, restaurant, data-lake]
