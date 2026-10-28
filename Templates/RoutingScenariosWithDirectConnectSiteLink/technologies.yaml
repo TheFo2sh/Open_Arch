@@ -1,0 +1,61 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Dedicated network connections and virtual interfaces that link customer networks with AWS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect-sitelink
+    name: AWS Direct Connect SiteLink
+    description: A Direct Connect feature that exchanges routes between SiteLink-enabled virtual interfaces over the AWS global network backbone.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/directconnect/latest/UserGuide/using-sitelink.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect-gateway
+    name: AWS Direct Connect gateway
+    description: A globally available resource that associates Direct Connect virtual interfaces with AWS gateways and shares routes between associated resources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-global-network
+    name: AWS global network
+    description: AWS network backbone that carries SiteLink traffic between Direct Connect locations without traversing an AWS Region.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/about-aws/global-infrastructure/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-transit-gateway
+    name: AWS Transit Gateway
+    description: Regional network transit service that routes traffic between a Direct Connect gateway and associated VPCs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: An AWS virtual network that receives routes through its associated Transit Gateway.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: mpls-private-network
+    name: MPLS private network
+    description: An example of an existing private network that can be the preferred inter-site path while SiteLink provides a backup; the provider is not specified by AWS.
+    types: [third-party]
+  - key: bgp
+    name: Border Gateway Protocol (BGP)
+    description: Routing protocol used to advertise prefixes and influence path preference in the documented scenarios.
+    vendor: Internet Engineering Task Force
+    url: https://www.rfc-editor.org/rfc/rfc4271
+    types: [third-party]
