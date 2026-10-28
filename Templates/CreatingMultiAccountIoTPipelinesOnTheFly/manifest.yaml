@@ -1,0 +1,7 @@
+PackageId: OpenArch.CreatingMultiAccountIoTPipelinesOnTheFly
+Name: Creating Multi-Account IoT Pipelines On-The-Fly
+Description: Automatically provisions AWS IoT Analytics pipelines across AWS accounts as new IoT device groups appear.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, iot, analytics, streaming, multi-account]
