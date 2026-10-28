@@ -1,0 +1,7 @@
+PackageId: OpenArch.AdvancedDistributionManagementSystemOnAWS
+Name: Advanced Distribution Management System on AWS
+Description: A resilient, low-latency ADMS deployment on AWS Outposts across two isolated sites, connected to regional AWS services for energy analytics and machine learning.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, power-and-utilities, energy, adms]
