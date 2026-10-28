@@ -1,0 +1,224 @@
+// Open Banking on AWS, based on AWS's financial services reference architecture.
+// Systems and users are slots. The AWS diagrams show multiple accounts and VPCs;
+// these logical boundaries are described without implying a deployable network design.
+model {
+  consumer = user 'Consumer' {
+    description 'Provides consent for an accredited third party to access account data or initiate a payment.'
+  }
+  thirdParty = system 'Licensed or accredited third-party application' {
+    description 'Uses customer consent to request account information or submit payments.'
+  }
+  trustServiceProvider = system 'Trust Service Provider (TSP)' {
+    description 'External provider, authorized by a supervisory body, that issues digital certificates to third parties.'
+  }
+  bankCore = system 'Bank core systems' {
+    description 'Bank data-center environment; the source does not specify its implementation.'
+    systemOfRecord = container 'Core system of record' {
+      description 'Source for near-real-time synchronization of bank data to AWS.'
+    }
+    paymentRails = container 'Payment rails integration' {
+      description 'Connects bank payment services to the bank payment rails.'
+    }
+    transactionStream = container 'Transaction event stream' {
+      description 'AWS names streaming technologies such as Apache Kafka and message queues, without selecting a mechanism.'
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    directConnect = platform 'AWS Direct Connect' {
+      metadata { uses 'aws-direct-connect' }
+    }
+    siteToSiteVpn = platform 'AWS Site-to-Site VPN' {
+      metadata { uses 'aws-site-to-site-vpn' }
+    }
+    transitGateway = platform 'AWS Transit Gateway' {
+      metadata { uses 'aws-transit-gateway' }
+    }
+    route53 = platform 'Amazon Route 53' {
+      metadata { uses 'amazon-route-53' }
+    }
+    waf = platform 'AWS WAF' {
+      metadata { uses 'aws-waf' }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Open Banking and authorization APIs; accepts mutual TLS and integrates privately with microservices.'
+      metadata { uses 'amazon-api-gateway' }
+    }
+    cloudfront = platform 'Amazon CloudFront' {
+      metadata { uses 'amazon-cloudfront' }
+    }
+    shield = platform 'AWS Shield' {
+      metadata { uses 'aws-shield' }
+    }
+
+    outboundVpc = platform 'Outbound VPC' {
+      metadata { uses 'amazon-vpc' }
+      proxy = system 'Outbound proxy' {
+        description 'Proxy implementation is not specified by AWS.'
+      }
+    }
+    privateIntegrationVpc = platform 'Private integration VPC' {
+      metadata { uses 'amazon-vpc' }
+      privateLink = platform 'AWS PrivateLink' {
+        metadata { uses 'aws-privatelink' }
+      }
+      nlb = platform 'Network Load Balancer' {
+        metadata { uses 'elastic-load-balancing' }
+      }
+    }
+
+    apiRuntime = platform 'Amazon ECS with AWS Fargate' {
+      metadata { uses 'amazon-ecs-fargate' }
+      openBankingApis = system 'Open Banking API services' {
+        description 'Account Information and Payments services, deployed as container-based microservices.'
+        accountInformation = container 'Account Information services' {
+          description 'Customer profile, deposits, transactions, and other account information APIs.'
+        }
+        payments = container 'Payments services' {
+          description 'Domestic payments, standing instructions, and other payment APIs.'
+        }
+        webhooks = container 'Payment status webhooks' {
+          description 'Hosts webhooks for payment status.'
+        }
+      }
+    }
+
+    rds = platform 'Amazon RDS' {
+      metadata { uses 'amazon-rds' }
+      bankDataCopy = database 'Bank system-of-record copy' {
+        description 'AWS-hosted copy synchronized from the bank core system in near real time; engine and schema are not specified.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata { uses 'amazon-dynamodb' }
+      consentData = database 'Consents and aggregated data' {
+        description 'Stores consumer consents, aggregated data, and API performance metrics.'
+      }
+    }
+    elasticache = platform 'Amazon ElastiCache' {
+      metadata { uses 'amazon-elasticache' }
+      accountCache = database 'Customer account information cache'
+    }
+    s3 = platform 'Amazon S3' {
+      metadata { uses 'amazon-s3' }
+      trustStore = database 'Client certificate trust store' {
+        description 'Public client certificates used to validate requests.'
+      }
+      serviceLogs = database 'Service logs'
+    }
+    openSearch = platform 'Amazon OpenSearch Service' {
+      metadata { uses 'amazon-opensearch-service' }
+      logAnalysis = database 'Log analysis data'
+    }
+
+    identityProvider = system 'OAuth 2.0 identity provider' {
+      description 'Hosted in a separate AWS account for secure consumption by other bank workloads. AWS depicts ForgeRock, Ping Identity, Keycloak, and a custom option; no selection is specified.'
+    }
+    developerSandbox = system 'Third-party developer sandbox' {
+      description 'Separate sandbox for third parties to integrate with the bank environment and build products.'
+      mockApis = container 'Mock APIs'
+    }
+
+    guardDuty = platform 'Amazon GuardDuty' {
+      metadata { uses 'amazon-guardduty' }
+    }
+    securityHub = platform 'AWS Security Hub CSPM' {
+      metadata { uses 'aws-security-hub' }
+    }
+    networkFirewall = platform 'AWS Network Firewall' {
+      metadata { uses 'aws-network-firewall' }
+    }
+    iam = platform 'AWS Identity and Access Management' {
+      metadata { uses 'aws-identity-and-access-management' }
+    }
+    kms = platform 'AWS Key Management Service' {
+      metadata { uses 'aws-key-management-service' }
+    }
+    inspector = platform 'Amazon Inspector' {
+      metadata { uses 'amazon-inspector' }
+    }
+    secretsManager = platform 'AWS Secrets Manager' {
+      metadata { uses 'aws-secrets-manager' }
+    }
+    certificateManager = platform 'AWS Certificate Manager' {
+      metadata { uses 'aws-certificate-manager' }
+    }
+    macie = platform 'Amazon Macie' {
+      metadata { uses 'amazon-macie' }
+    }
+
+    cloudWatch = platform 'Amazon CloudWatch' {
+      metadata { uses 'amazon-cloudwatch' }
+    }
+    cloudTrail = platform 'AWS CloudTrail' {
+      metadata { uses 'aws-cloudtrail' }
+    }
+    xray = platform 'AWS X-Ray' {
+      metadata { uses 'aws-x-ray' }
+    }
+    systemsManager = platform 'AWS Systems Manager' {
+      metadata { uses 'aws-systems-manager' }
+    }
+    cloudFormation = platform 'AWS CloudFormation' {
+      metadata { uses 'aws-cloudformation' }
+    }
+    codeServices = platform 'AWS Code Services' {
+      metadata { uses 'aws-code-services' }
+    }
+    eventBridge = platform 'Amazon EventBridge' {
+      metadata { uses 'amazon-eventbridge' }
+    }
+    sqs = platform 'Amazon SQS' {
+      metadata { uses 'amazon-sqs' }
+    }
+    sns = platform 'Amazon SNS' {
+      metadata { uses 'amazon-sns' }
+    }
+  }
+
+  consumer -> thirdParty 'Provides consent to'
+  thirdParty -> aws.apiGateway 'Calls APIs over mutual TLS'
+  thirdParty -> aws.identityProvider 'Obtains OAuth 2.0 authorization'
+  trustServiceProvider -> thirdParty 'Issues digital certificates to'
+
+  bankCore.systemOfRecord -> aws.directConnect 'Synchronizes transaction and account data over'
+  bankCore.paymentRails -> aws.siteToSiteVpn 'Connects through'
+  aws.directConnect -> aws.transitGateway 'Connects the bank network through'
+  aws.siteToSiteVpn -> aws.transitGateway 'Provides resilient connectivity through'
+  aws.transitGateway -> aws.rds.bankDataCopy 'Routes near-real-time data to'
+
+  aws.route53 -> aws.apiGateway 'Resolves API domains to'
+  aws.route53 -> aws.cloudfront 'Resolves static-content domains to'
+  aws.waf -> aws.apiGateway 'Protects'
+  aws.shield -> aws.cloudfront 'Protects'
+  aws.apiGateway -> aws.privateIntegrationVpc.privateLink 'Privately integrates through'
+  aws.privateIntegrationVpc.privateLink -> aws.privateIntegrationVpc.nlb 'Connects to'
+  aws.privateIntegrationVpc.nlb -> aws.apiRuntime.openBankingApis 'Routes to'
+  aws.apiGateway -> aws.s3.trustStore 'Validates client certificates against'
+  aws.cloudfront -> aws.developerSandbox.mockApis 'Delivers static sandbox data for'
+
+  aws.apiRuntime.openBankingApis.accountInformation -> aws.rds.bankDataCopy 'Reads account data from'
+  aws.apiRuntime.openBankingApis.accountInformation -> aws.dynamodb.consentData 'Reads consent and aggregated data from'
+  aws.apiRuntime.openBankingApis.accountInformation -> aws.elasticache.accountCache 'Caches account information in'
+  aws.apiRuntime.openBankingApis.payments -> aws.dynamodb.consentData 'Reads consumer consent from'
+  aws.apiRuntime.openBankingApis.payments -> bankCore.paymentRails 'Submits authorized payments to'
+  aws.apiRuntime.openBankingApis.webhooks -> aws.apiRuntime.openBankingApis.payments 'Reports payment status for'
+  aws.apiRuntime.openBankingApis -> aws.cloudWatch 'Publishes operational metrics to'
+  aws.apiRuntime.openBankingApis -> aws.xray 'Publishes traces to'
+
+  aws.developerSandbox -> thirdParty 'Provides a test environment for'
+  aws.guardDuty -> aws.securityHub 'Sends security findings to'
+  aws.cloudTrail -> aws.s3.serviceLogs 'Delivers activity logs to'
+  aws.cloudWatch -> aws.s3.serviceLogs 'Exports service logs to'
+  aws.s3.serviceLogs -> aws.openSearch.logAnalysis 'Feeds log analysis in'
+
+  aws.systemsManager -> aws.apiRuntime.openBankingApis 'Manages configuration for'
+  aws.cloudFormation -> aws.apiRuntime.openBankingApis 'Deploys environments for'
+  aws.codeServices -> aws.apiRuntime.openBankingApis 'Supports delivery of'
+  aws.eventBridge -> aws.sqs 'Uses for service notifications'
+  aws.eventBridge -> aws.sns 'Uses for service notifications'
+}
