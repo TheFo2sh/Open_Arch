@@ -13,7 +13,7 @@ technologies:
     description: The buyer uses the AWS Management Console to subscribe to the seller's AWS Marketplace model listing.
     vendor: Amazon Web Services
     url: https://aws.amazon.com/console/
-    types: [managed-service, compute-platform]
+    types: [managed-service]
     platform: aws
     hosts: [system]
   - key: aws-marketplace
