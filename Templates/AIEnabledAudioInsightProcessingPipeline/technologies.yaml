@@ -1,0 +1,74 @@
+# The AWS services named by the blueprint, by the key its metadata { uses } names them by.
+technologies:
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage for uploaded audio, transcribed text, and translated text files.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Serverless compute that runs the transcription, translation, text-insights, and match functions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-transcribe
+    name: Amazon Transcribe
+    description: Converts uploaded audio into text through its transcription API.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transcribe/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores each file's name and metadata, including translation and text-insight results.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-translate
+    name: Amazon Translate
+    description: Translates transcribed text from its input language to an output language.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/translate/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-comprehend
+    name: Amazon Comprehend
+    description: Analyzes translated text for entities, sentiment, and key phrases.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/comprehend/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Routes HTTP GET match requests to the Lambda function that finds suitable files.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-kendra
+    name: Amazon Kendra
+    description: Searches translated text to find file matches for the HTTP GET match request.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kendra/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]

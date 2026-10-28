@@ -1,0 +1,116 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Receives connected vehicle messages and routes them with rules to processing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Processes IoT messages and S3 events, writes vehicle data, and starts data preparation jobs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores vehicle attributes and vehicle status.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores raw source data, synchronized CRM data, and prepared data products.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Provides the factory data ingestion connection into AWS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Ingests factory data sent to AWS over Direct Connect.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service]
+    platform: aws
+  - key: aws-datasync
+    name: AWS DataSync
+    description: Synchronizes the source CRM database data to Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/datasync/
+    types: [managed-service]
+    platform: aws
+  - key: aws-glue
+    name: AWS Glue
+    description: Runs crawlers that discover producer datasets and create Data Catalog entities.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+  - key: aws-glue-data-catalog
+    name: AWS Glue Data Catalog
+    description: Catalogs producer datasets and the replicated metadata in the central governance account.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/features/#DataCatalog
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-lake-formation
+    name: AWS Lake Formation
+    description: Governs data discovery and grants cross-account access using direct sharing or tag-based controls.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lake-formation/
+    types: [managed-service]
+    platform: aws
+  - key: aws-fargate
+    name: AWS Fargate
+    description: Runs the batch job that prepares data after an S3 event triggers processing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fargate/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Queries governed data products for consumer applications.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-sagemaker-ai-data-wrangler
+    name: Amazon SageMaker AI Data Wrangler
+    description: Supports consumer data exploration and preparation.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/ai/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-redshift-spectrum
+    name: Amazon Redshift Spectrum
+    description: Queries data in S3 from consumer analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/features/spectrum/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Exposes data-backed APIs to call-center clients and end-user applications and businesses.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+  - key: vehicle-network-provider
+    name: Vehicle network provider
+    description: The third-party connectivity provider that carries vehicle data to AWS IoT Core; AWS does not name a provider.
+    types: [third-party]
