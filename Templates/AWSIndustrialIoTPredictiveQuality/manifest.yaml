@@ -1,0 +1,7 @@
+PackageId: OpenArch.AWSIndustrialIoTPredictiveQuality
+Name: AWS Industrial IoT Predictive Quality
+Description: Detect factory product defects with computer vision, local edge inference, and AWS IoT analytics and alerts.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, industrial-iot, manufacturing, predictive-quality, computer-vision]

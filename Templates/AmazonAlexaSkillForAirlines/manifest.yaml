@@ -1,0 +1,7 @@
+PackageId: OpenArch.AmazonAlexaSkillForAirlines
+Name: Amazon Alexa Skill for Airlines
+Description: A conversational airline experience that integrates an Amazon Alexa skill with airline passenger systems, authentication, NLU, content, and analytics services on AWS.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, travel, airlines, alexa, conversational-ai]

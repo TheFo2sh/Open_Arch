@@ -1,0 +1,7 @@
+PackageId: OpenArch.ConnectedHomeMachineLearningAtTheEdge
+Name: "Connected Home: Machine Learning at the Edge"
+Description: Train compact machine learning models on AWS and deploy them to connected-home cameras for local inference.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, iot, machine-learning, edge-computing, connected-home]

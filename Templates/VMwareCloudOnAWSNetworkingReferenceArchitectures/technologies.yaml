@@ -1,0 +1,119 @@
+# Technologies named by metadata { uses } in the blueprint.
+technologies:
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Provides dedicated connectivity between customer networks and AWS Regions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect-private-vif
+    name: AWS Direct Connect private virtual interface
+    description: Private VIF used for direct SDDC connectivity or to reach a Direct Connect gateway, depending on the reference pattern.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/directconnect/latest/UserGuide/WorkingWithVirtualInterfaces.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect-public-vif
+    name: AWS Direct Connect public virtual interface
+    description: Public VIF used to access AWS public services and endpoints, including a public VPN endpoint.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/directconnect/latest/UserGuide/WorkingWithVirtualInterfaces.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect-transit-vif
+    name: AWS Direct Connect transit virtual interface
+    description: Transit VIF that connects through a Direct Connect gateway to AWS Transit Gateway.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/directconnect/latest/UserGuide/WorkingWithVirtualInterfaces.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect-gateway
+    name: AWS Direct Connect gateway
+    description: Gateway associated with Transit Gateways or virtual private gateways to route connectivity across AWS Regions.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/directconnect/latest/UserGuide/direct-connect-gateways-intro.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-site-to-site-vpn
+    name: AWS Site-to-Site VPN
+    description: VPN connectivity used for backup paths and for Transit Gateway attachments to VMware SDDC networks.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-virtual-private-gateway
+    name: AWS virtual private gateway
+    description: Virtual private gateway associated with an Amazon VPC for Direct Connect gateway and Site-to-Site VPN connectivity.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-transit-gateway
+    name: AWS Transit Gateway
+    description: Regional virtual router connecting VPCs, VPNs, Direct Connect gateways, and peered networks.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc
+    name: Amazon VPC
+    description: AWS virtual networks, including workload VPCs, attached VPCs, and the optional security VPC.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-internet-gateway
+    name: AWS internet gateway
+    description: VPC component providing centralized internet access for AWS workloads in the security VPC pattern.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-network-firewall
+    name: AWS Network Firewall
+    description: AWS firewall option for inspection of SDDC ingress and egress traffic in the security VPC pattern.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/network-firewall/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: vmware-cloud-on-aws
+    name: VMware Cloud on AWS
+    description: VMware-managed cloud service containing the VMware Cloud SDDCs shown in the networking reference diagrams.
+    vendor: VMware
+    url: https://aws.amazon.com/vmware/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: vmware-cloud-sddc
+    name: VMware Cloud SDDC
+    description: VMware software-defined data center hosting workloads and network connectivity in a VMware Cloud on AWS Region.
+    vendor: VMware
+    url: https://aws.amazon.com/vmware/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: vmware-transit-connect
+    name: VMware Transit Connect
+    description: VMware-managed high-bandwidth, low-latency connectivity for SDDCs in a group and attached networks.
+    vendor: VMware
+    url: https://aws.amazon.com/vmware/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: third-party-firewall
+    name: Third-party firewall
+    description: Optional third-party firewall alternative for the security VPC; AWS does not specify a product or vendor.
+    vendor: Not specified by AWS
+    types: [third-party]

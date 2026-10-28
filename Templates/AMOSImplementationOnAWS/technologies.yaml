@@ -1,0 +1,87 @@
+# The technologies used by the blueprint, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Virtual network containing the AMOS production and failover Availability Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute instances for AMOS production and failover application and database workloads.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system, database]
+  - key: amazon-appstream-2-0
+    name: Amazon AppStream 2.0
+    description: Provides HTML5 browser access to AMOS for remote users and administrators.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/appstream2/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-directory-service
+    name: AWS Directory Service
+    description: User authentication service for the AMOS deployment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directoryservice/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: DNS translation for access to the AMOS deployment; DNS records and targets are not specified.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-client-vpn
+    name: AWS Client VPN
+    description: Secure remote connectivity for users who need direct access to AMOS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/client-vpn/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Connectivity used with AWS Client VPN for the documented secure direct-access path.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Object storage for AMOS application binaries, database devices, web drivers, and backups.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Monitoring for AMOS servers and the surrounding ecosystem.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-systems-manager
+    name: AWS Systems Manager
+    description: Operating system patch management for the Amazon EC2 instances.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/systems-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amos-mro-system
+    name: AMOS aircraft maintenance and engineering system
+    description: Third-party MRO software deployed in the primary and standby application instances; AWS does not specify its vendor or release.
+    types: [third-party]

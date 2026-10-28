@@ -1,0 +1,7 @@
+PackageId: OpenArch.AmazonRDSOnAWSOutposts
+Name: Amazon Relational Database Service on AWS Outposts
+Description: A hybrid architecture for running Amazon RDS databases on AWS Outposts, with regional connectivity, backups, restore, and monitoring.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, database, hybrid, outposts]
