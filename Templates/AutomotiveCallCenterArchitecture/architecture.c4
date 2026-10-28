@@ -31,7 +31,7 @@ model {
     }
 
     connect = platform 'Amazon Connect' {
-      description 'Handles contact flows, caller routing and queues, agent calls, and customer email and text notifications.'
+      description 'Handles contact flows, caller routing and queues, agent calls, and customer email and text reminders, vehicle issues, and recommendations.'
       metadata {
         uses 'amazon-connect'
       }
@@ -40,7 +40,7 @@ model {
         description 'Supports eCall and bCall safety cases, hCall and cCall service and concierge requests, and handoff to an agent.'
       }
       contactLens = platform 'Amazon Connect Contact Lens' {
-        description 'Analyzes live and completed conversations, detects sentiment and issues, categorizes contacts, and creates call summaries.'
+        description 'Analyzes live and completed conversations using transcription and intelligent search, detects sentiment and issues, categorizes contacts, and creates call summaries.'
         metadata {
           uses 'amazon-connect-contact-lens'
         }
@@ -115,7 +115,7 @@ model {
         uses 'amazon-s3'
       }
       analyticsData = database 'Call and product feedback data' {
-        description 'Call metrics, sentiment analysis, and product feedback data used by the analytics flow.'
+        description 'Call matrix, sentiment analysis, and product feedback data used by the analytics flow.'
       }
     }
 
@@ -142,6 +142,7 @@ model {
   aws.lambda.caseAndVehicleFunctions.assignCase -> connectedVehicleBackend 'Associates case ID with vehicle data'
   agentClient -> aws.apiGateway 'Requests current vehicle data by case ID'
   aws.apiGateway -> connectedVehicleBackend 'Routes the call-center data request'
+  connectedVehicleBackend -> agentClient 'Returns current vehicle and location data for the case'
   aws.connect.contactCenter -> agentClient 'Presents the call and customer context'
   aws.connect.contactCenter -> crm 'Integrates customer profiles from multiple sources'
   aws.connect.contactCenter -> aws.connect.voiceId 'Authenticates real-time callers'

@@ -12,9 +12,9 @@ The documented design connects vehicle-triggered calls to a contact center. It s
 
 1. A connected vehicle initiates an eCall or bCall and sends a sensor and location snapshot through Amazon API Gateway to a connected-vehicle backend. Amazon Connect invokes AWS Lambda to assign a case ID to the call and vehicle data. The backend associates the current vehicle and location data with the case; the call center client retrieves it using an API request and call metadata.
 2. Amazon Connect contact flows authenticate real-time callers using Voice ID, integrate with a CRM for a unified customer profile, and queue calls for the next available agent. The source also describes customer reminders and notifications by email and text through Connect.
-3. Contact Lens analyzes agent conversations using transcription, natural-language processing, sentiment and issue detection, categorization, and intelligent search. Its real-time insights and call summaries help agents handle the call with case, vehicle, location, and customer context.
+3. Contact Lens analyzes agent conversations using transcription, natural-language processing, intelligent search, sentiment and issue detection, and categorization. Its real-time insights and call summaries help agents handle the call with case, vehicle, location, and customer context.
 4. For hCall and cCall, Amazon Connect can route callers to Amazon Lex. Lex identifies intent and works with DynamoDB and Lambda to formulate replies. Lambda can retrieve connected-vehicle data when needed; callers who want a person are forwarded to an agent.
-5. Amazon Kinesis Data Streams sends call metrics and insights to Amazon S3. Amazon Athena queries call sentiment, call metrics, and product feedback there; Amazon QuickSight visualizes business metrics and KPIs. The resulting feedback informs OEM development, production, and product-roadmap processes.
+5. Amazon Kinesis Data Streams sends call metrics and insights to Amazon S3. Amazon Athena queries call sentiment, call matrix, and product feedback data there; Amazon QuickSight visualizes business metrics and KPIs. The resulting feedback informs OEM development, production, and product-roadmap processes.
 
 ## What applying it brings
 
@@ -24,7 +24,7 @@ The documented design connects vehicle-triggered calls to a contact center. It s
 | Managed services | Amazon Connect, Contact Lens, Voice ID, API Gateway, Lambda, Lex, DynamoDB, Kinesis Data Streams, S3, Athena, and QuickSight |
 | User slots | **Vehicle owner** and **Call center agent** |
 | System slots | Connected vehicle, connected-vehicle backend, call center agent client, CRM, and OEM product/development processes |
-| Databases | Intent response data on DynamoDB; call and product feedback data on S3 |
+| Databases | Intent response data on DynamoDB; call matrix, sentiment, and product feedback data on S3 |
 
 ## Assumptions and unspecified details
 

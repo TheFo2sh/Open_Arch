@@ -10,7 +10,7 @@ technologies:
     packages: [{manager: terraform, name: hashicorp/aws}]
   - key: amazon-connect-contact-lens
     name: Amazon Connect Contact Lens
-    description: Amazon Connect capability for conversation transcription, sentiment and issue analysis, contact categorization, and call summaries.
+    description: Amazon Connect capability for conversation transcription, intelligent search, sentiment and issue analysis, contact categorization, and call summaries.
     vendor: Amazon Web Services
     url: https://aws.amazon.com/connect/contact-lens/
     types: [managed-service]
@@ -73,7 +73,7 @@ technologies:
     packages: [{manager: terraform, name: hashicorp/aws}]
   - key: amazon-s3
     name: Amazon Simple Storage Service (Amazon S3)
-    description: Stores streamed call metrics, sentiment analysis, call metrics, and product feedback for analytics.
+    description: Stores streamed call metrics, sentiment analysis, call matrix, and product feedback for analytics.
     vendor: Amazon Web Services
     url: https://aws.amazon.com/s3/
     types: [managed-service, data-platform]
