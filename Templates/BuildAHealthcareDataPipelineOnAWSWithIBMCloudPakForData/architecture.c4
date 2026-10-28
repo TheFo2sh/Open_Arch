@@ -1,0 +1,143 @@
+// Build a Healthcare Data Pipeline on AWS with IBM Cloud Pak for Data,
+// after https://docs.aws.amazon.com/reference-architecture-diagrams/latest/build-healthcare-data-pipeline-on-aws-ibm-cp4d/build-healthcare-data-pipeline-on-aws-ibm-cp4d.html.
+// Systems are slots that map to the adopting project's systems.
+model {
+  devices = system 'Connected medical devices' {
+    description 'Source of the patient-health information streamed into the pipeline.'
+  }
+  reprocessingApi = system 'Re-processing API' {
+    description 'API invoked after a stream transformation failure; its implementation is not specified by the reference.'
+  }
+  healthcare = system 'Healthcare application' {
+    description 'Consumes deployed model endpoints to provide insights into patient condition.'
+
+    dashboards = container 'Patient insight dashboards' {
+      description 'Presents treatment, predicted outcome, readmission, and disease-progression information.'
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    firehose = platform 'Amazon Data Firehose' {
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      patientData = database 'Transformed patient-health data' {
+        description 'Successfully transformed records persisted by Firehose; schema, retention, and bucket organization are not specified.'
+      }
+    }
+    ec2 = platform 'Amazon Elastic Compute Cloud' {
+      metadata {
+        uses 'amazon-ec2'
+      }
+
+      qradar = platform 'IBM Security QRadar XDR' {
+        description 'Security monitoring and threat-alert platform running on EC2.'
+        metadata {
+          uses 'ibm-security-qradar-xdr'
+        }
+      }
+    }
+    vpc = platform 'Amazon Virtual Private Cloud' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+    cloudtrail = platform 'AWS CloudTrail' {
+      metadata {
+        uses 'aws-cloudtrail'
+      }
+    }
+  }
+
+  onPremises = zone 'On-premises data' {
+    metadata {
+      platform 'other'
+    }
+    source = platform 'On-premises data source' {
+      metadata {
+        uses 'on-premises-data-source'
+      }
+      data = database 'On-premises patient-health data' {
+        description 'Data available to Cloud Pak for Data; source system, database engine, and connectivity are not specified.'
+      }
+    }
+  }
+
+  ibm = zone 'IBM Cloud Pak for Data environment' {
+    description 'Logical zone only; the reference does not specify whether this environment is on premises or hosted on a particular cloud.'
+    metadata {
+      platform 'other'
+    }
+
+    cp4d = platform 'IBM Cloud Pak for Data' {
+      description 'Uses its connection services to access data in Amazon S3 and on premises.'
+      metadata {
+        uses 'ibm-cloud-pak-for-data'
+      }
+
+      knowledgeCatalog = platform 'IBM Watson Knowledge Catalog' {
+        metadata {
+          uses 'ibm-watson-knowledge-catalog'
+        }
+      }
+      datastage = platform 'IBM DataStage' {
+        metadata {
+          uses 'ibm-datastage'
+        }
+      }
+      watsonStudio = platform 'IBM Watson Studio' {
+        metadata {
+          uses 'ibm-watson-studio'
+        }
+      }
+      watsonMachineLearning = platform 'IBM Watson Machine Learning' {
+        metadata {
+          uses 'ibm-watson-machine-learning'
+        }
+      }
+    }
+  }
+
+  devices -> aws.firehose 'Streams patient-health information to'
+  aws.firehose -> aws.lambda 'Passes stream data to for format transformation'
+  aws.lambda -> aws.sns 'Notifies on transformation failure'
+  aws.sns -> reprocessingApi 'Invokes to rectify a failure'
+  aws.firehose -> aws.s3.patientData 'Persists successfully transformed data to'
+
+  aws.s3.patientData -> ibm.cp4d 'Is accessed through Cloud Pak for Data connections'
+  onPremises.source.data -> ibm.cp4d 'Is accessed through Cloud Pak for Data connections'
+  ibm.cp4d.knowledgeCatalog -> ibm.cp4d.datastage 'Provides governed data for transformation'
+  ibm.cp4d.datastage -> ibm.cp4d.watsonStudio 'Produces enriched data for analysis and model training'
+  ibm.cp4d.watsonStudio -> ibm.cp4d.watsonMachineLearning 'Deploys trained models to'
+  ibm.cp4d.watsonMachineLearning -> healthcare 'Exposes model endpoints to'
+
+  aws.vpc -> aws.ec2.qradar 'Provides VPC flow logs to'
+  aws.cloudtrail -> aws.ec2.qradar 'Provides CloudTrail logs to'
+  ibm.cp4d -> aws.ec2.qradar 'Provides Cloud Pak for Data logs to'
+}
+
+views {
+  view index {
+    title 'Healthcare data pipeline on AWS with IBM Cloud Pak for Data'
+    include *, aws.*, onPremises.*, ibm.*, ibm.cp4d.*, aws.ec2.*
+  }
+}

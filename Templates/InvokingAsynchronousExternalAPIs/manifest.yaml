@@ -1,0 +1,7 @@
+PackageId: OpenArch.InvokingAsynchronousExternalAPIs
+Name: Invoking Asynchronous External APIs
+Description: Orchestrate long-running third-party API jobs with task-token callbacks, rate-limited dispatch, and result processing on AWS.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, integration, serverless, asynchronous]
