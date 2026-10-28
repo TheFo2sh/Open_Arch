@@ -1,0 +1,99 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-opensearch-service
+    name: Amazon OpenSearch Service
+    description: Managed search service that returns article results and supplies the search-query use case.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/opensearch-service/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: API proxy for search-query logging and the trending-query API.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Streams search-query logs received through the API Gateway proxy.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-data-firehose
+    name: Amazon Data Firehose
+    description: Buffers and consolidates search-query logs, up to the diagram's 15-minute maximum buffer interval.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs query-log compression, Bedrock-assisted query selection, and trending-query API functions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores compressed raw query logs, transformed Parquet data, and clustered query data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-eventbridge
+    name: Amazon EventBridge
+    description: Daily scheduler that starts the trending-query identification workflow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eventbridge/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Orchestrates the scheduled crawling, transformation, clustering, and trending-query workflow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-glue
+    name: AWS Glue
+    description: Crawls query datasets into catalog tables and transforms and clusters query logs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [system, database]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Queries clustered search data to select the top queries per cluster.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: amazon-bedrock
+    name: Amazon Bedrock
+    description: Uses a large language model to select the most relevant search query in each cluster.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/bedrock/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores selected trending queries for retrieval by the trending-query API.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
