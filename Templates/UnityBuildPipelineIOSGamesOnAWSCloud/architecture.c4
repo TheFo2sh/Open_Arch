@@ -1,0 +1,96 @@
+// Unity Build Pipeline: iOS Games on AWS Cloud.
+// AWS source page and diagram: https://docs.aws.amazon.com/reference-architecture-diagrams/latest/unity-build-pipeline-ios/unity-build-pipeline-ios.html
+// Supplemental implementation detail: https://www.jenkins.io/blog/2022/09/14/create-ios-unity-build-pipelines-on-aws-with-jenkins-and-ec2-mac-instances/
+// Systems and users are slots. The model omits deployment-specific network and scaling settings.
+model {
+  developer = user 'Game developer' {
+    description 'Starts and monitors builds through the CI/CD pipeline.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Amazon VPC' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      ec2 = platform 'Amazon EC2' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+
+        orchestration = system 'Build orchestration' {
+          description 'Jenkins CI/CD controller and pipeline configuration.'
+          controller = container 'Jenkins controller' {
+            description 'Orchestrates build stages and connects to the build agents.'
+          }
+        }
+
+        unityLicensing = system 'Unity Build Server license service' {
+          description 'Optional Unity Build Server licensing service, hosted on EC2 when that license model is used.'
+        }
+
+        macBuild = system 'iOS build and signing' {
+          description 'Mac build agent running on an EC2 Mac instance allocated to a dedicated host.'
+          xcodeBuild = container 'Xcode build agent' {
+            description 'Builds and signs the prepared iOS project with Xcode.'
+          }
+        }
+      }
+
+      linuxWorkers = platform 'EC2 Auto Scaling Linux Spot workers' {
+        description 'Scalable Linux capacity for the compute-heavy Unity project preparation stage.'
+        metadata {
+          uses 'amazon-ec2-auto-scaling'
+        }
+
+        unityPreparation = system 'Unity project preparation' {
+          description 'Generates an Xcode project before the macOS build stage.'
+          unityBuild = container 'Containerized Unity build' {
+            description 'Runs the Unity Editor in a Docker container on Linux workers.'
+          }
+        }
+      }
+
+      natGateways = platform 'NAT gateways' {
+        description 'Outbound internet access for private build resources; placement is deployment-specific.'
+        metadata {
+          uses 'amazon-vpc-nat-gateway'
+        }
+      }
+    }
+
+    secrets = platform 'AWS Secrets Manager' {
+      metadata {
+        uses 'aws-secrets-manager'
+      }
+    }
+
+    artifacts = platform 'Amazon S3' {
+      description 'Optional destination for build artifacts.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+  }
+
+  developer -> aws.vpc.ec2.orchestration 'Starts and monitors builds in'
+  aws.vpc.ec2.orchestration -> aws.vpc.linuxWorkers.unityPreparation 'Schedules Unity project preparation on'
+  aws.vpc.linuxWorkers.unityPreparation -> aws.vpc.ec2.macBuild 'Passes the prepared Xcode project to'
+  aws.vpc.linuxWorkers.unityPreparation -> aws.vpc.ec2.unityLicensing 'Uses Unity Build Server licensing when configured'
+  aws.vpc.ec2.macBuild -> aws.secrets 'Retrieves signing assets from'
+  aws.vpc.ec2.macBuild -> aws.artifacts 'Can publish build artifacts to'
+  aws.vpc.ec2.orchestration -> aws.vpc.natGateways 'Uses outbound connectivity through'
+  aws.vpc.linuxWorkers.unityPreparation -> aws.vpc.natGateways 'Uses outbound connectivity through'
+  aws.vpc.ec2.macBuild -> aws.vpc.natGateways 'Uses outbound connectivity through'
+}
+
+views {
+  view index {
+    title 'Unity Build Pipeline: iOS Games on AWS Cloud'
+    include *, aws.*, aws.vpc.*, aws.vpc.ec2.*, aws.vpc.linuxWorkers.*
+  }
+}

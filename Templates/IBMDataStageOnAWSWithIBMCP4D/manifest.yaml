@@ -1,0 +1,7 @@
+PackageId: OpenArch.IBMDataStageOnAWSWithIBMCP4D
+Name: IBM DataStage on AWS with IBM CP4D
+Description: A cloud-native data integration and analytics architecture using IBM DataStage on Red Hat OpenShift Service on AWS, IBM Db2 Warehouse, and AWS data stores.
+Version: 1.0.0
+Icon: logos:ibm
+Publisher: Open_Arch
+Tags: [aws, data-integration, analytics, ibm, openshift]
