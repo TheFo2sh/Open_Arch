@@ -1,0 +1,69 @@
+technologies:
+  - key: aws-iot-greengrass
+    name: AWS IoT Greengrass
+    description: Edge runtime used on the aircraft flight-data acquisition unit to collect avionics and telemetry data and receive deployed models.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/greengrass/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage for flight-data offload and the aggregated flight and fault data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-managed-service-for-apache-flink
+    name: Amazon Managed Service for Apache Flink
+    description: Managed stream-processing platform for engine flight data and anomaly analysis.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/managed-service-apache-flink/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: AWS machine-learning service named by the source architecture for its predictive-maintenance workflow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Query and aggregation service for anonymized flight and fault data stored in the S3 data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service, data-platform]
+    platform: aws
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: API service used by developers building digital solutions for the connected-aircraft ecosystem.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Serverless compute used by developers building digital solutions for the connected-aircraft ecosystem.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-data-exchange
+    name: AWS Data Exchange
+    description: Subscription service through which anonymized aircraft data is offered to third-party developers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/data-exchange/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-quick
+    name: Amazon Quick
+    description: Analytics service used with Athena for fleet-wide analysis by the Engine Health Management team.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
