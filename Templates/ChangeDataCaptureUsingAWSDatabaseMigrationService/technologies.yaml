@@ -1,0 +1,222 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+technologies:
+  - key: aws-dms
+    name: AWS Database Migration Service
+    description: Migrates databases and captures ongoing changes for replication or streaming.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dms/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-schema-conversion-tool
+    name: AWS Schema Conversion Tool
+    description: Tool that converts source schemas and code objects for heterogeneous migrations.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/SchemaConversionTool/latest/userguide/Welcome.html
+    types: [library]
+  - key: amazon-aurora
+    name: Amazon Aurora
+    description: AWS relational database option shown as a CDC source or target.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-documentdb
+    name: Amazon DocumentDB
+    description: AWS document database option shown as a CDC source or target.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/documentdb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-rds
+    name: Amazon RDS
+    description: Managed relational database option shown as a CDC source or target.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Streaming destination for CDC records.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-msk
+    name: Amazon Managed Streaming for Apache Kafka
+    description: Managed Apache Kafka streaming destination for CDC records.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/msk/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-glue
+    name: AWS Glue
+    description: Managed data integration service used for Spark streaming in the reference diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-emr
+    name: Amazon EMR
+    description: Managed big-data platform shown processing streaming data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/emr/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-kinesis-data-analytics
+    name: Amazon Kinesis Data Analytics for Apache Flink
+    description: Managed Apache Flink application platform shown processing streaming data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/managed-service-for-apache-flink/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-kinesis-data-firehose
+    name: Amazon Kinesis Data Firehose
+    description: Managed delivery service shown moving streaming data to data targets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: NoSQL database target shown in the streaming architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-elasticsearch-service
+    name: Amazon Elasticsearch Service
+    description: Search and analytics target under the name used in the reference diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/opensearch-service/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage target used for a data lake and streaming delivery.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Data warehouse target shown in the streaming architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sagemaker-notebook
+    name: Amazon SageMaker Notebook
+    description: Notebook environment shown consuming and visualizing analytics data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Business intelligence service shown consuming and visualizing analytics data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Serverless query service shown consuming data lake data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-redshift-spectrum
+    name: Amazon Redshift Spectrum
+    description: Redshift feature shown querying data lake data.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: apache-spark
+    name: Apache Spark
+    description: Distributed processing engine for the Glue and EMR streaming jobs.
+    vendor: Apache Software Foundation
+    url: https://spark.apache.org/
+    types: [library]
+  - key: apache-flink
+    name: Apache Flink
+    description: Stream-processing engine used by the Kinesis Data Analytics application.
+    vendor: Apache Software Foundation
+    url: https://flink.apache.org/
+    types: [library]
+  - key: oracle-database
+    name: Oracle Database
+    description: External database option listed as a CDC source and target.
+    vendor: Oracle
+    url: https://www.oracle.com/database/
+    types: [third-party, data-platform]
+    platform: other
+    hosts: [database]
+  - key: microsoft-sql-server
+    name: Microsoft SQL Server
+    description: External database option listed as a CDC source and target.
+    vendor: Microsoft
+    url: https://www.microsoft.com/sql-server
+    types: [third-party, data-platform]
+    platform: other
+    hosts: [database]
+  - key: mysql
+    name: MySQL
+    description: External database option listed as a CDC source and target.
+    vendor: Oracle
+    url: https://www.mysql.com/
+    types: [third-party, data-platform]
+    platform: other
+    hosts: [database]
+  - key: postgresql
+    name: PostgreSQL
+    description: External database option listed as a CDC source and target.
+    vendor: PostgreSQL Global Development Group
+    url: https://www.postgresql.org/
+    types: [third-party, data-platform]
+    platform: other
+    hosts: [database]
+  - key: mongodb
+    name: MongoDB
+    description: External database option listed as a CDC source and target.
+    vendor: MongoDB, Inc.
+    url: https://www.mongodb.com/
+    types: [third-party, data-platform]
+    platform: other
+    hosts: [database]
