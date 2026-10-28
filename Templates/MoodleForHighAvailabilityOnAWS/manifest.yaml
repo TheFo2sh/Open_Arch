@@ -1,0 +1,7 @@
+PackageId: OpenArch.MoodleForHighAvailabilityOnAWS
+Name: Moodle for High Availability on AWS
+Description: A highly available Moodle learning platform on AWS, with a multi-AZ application tier, shared storage, managed data services, edge delivery, and a deployment pipeline.
+Version: 1.0.0
+Icon: logos:moodle
+Publisher: Open_Arch
+Tags: [aws, education, moodle, high-availability]
