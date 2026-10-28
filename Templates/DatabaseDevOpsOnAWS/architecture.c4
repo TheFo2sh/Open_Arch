@@ -1,0 +1,135 @@
+// Database DevOps on AWS, based on the development and production workflows:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/database-devops/
+model {
+  developer = user 'Developer' {
+    description 'Checks application and database code into source control.'
+  }
+  reviewers = user 'Application and database code reviewers' {
+    description 'Review changes under the repository approval rules.'
+  }
+  releaseManager = user 'Release manager' {
+    description 'Issues a production deployment request.'
+  }
+  operations = user 'DevOps team and release managers' {
+    description 'Receive notifications about captured events.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    application = system 'Application' {
+      description 'The application deployed to the target development and production environments; its runtime is not specified by AWS.'
+    }
+    operationsSystem = system 'Operations and release management' {
+      description 'The teams appointed to receive notifications and take corrective actions.'
+    }
+
+    codecommit = platform 'AWS CodeCommit' {
+      metadata {
+        uses 'aws-codecommit'
+      }
+    }
+    codeguru = platform 'Amazon CodeGuru Reviewer' {
+      metadata {
+        uses 'amazon-codeguru-reviewer'
+      }
+    }
+    pipeline = platform 'AWS CodePipeline' {
+      metadata {
+        uses 'aws-codepipeline'
+      }
+    }
+    codebuild = platform 'AWS CodeBuild' {
+      description 'Runs application build and database test actions using a build management tool; AWS shows Maven as an example but prescribes no choice.'
+      metadata {
+        uses 'aws-codebuild'
+      }
+    }
+    codedeploy = platform 'AWS CodeDeploy' {
+      metadata {
+        uses 'aws-codedeploy'
+      }
+    }
+    codeartifact = platform 'AWS CodeArtifact' {
+      metadata {
+        uses 'aws-codeartifact'
+      }
+    }
+    ec2 = platform 'Amazon EC2' {
+      metadata {
+        uses 'amazon-ec2'
+      }
+      databaseChangeTooling = system 'Database change tooling' {
+        description 'Downloads database change scripts and runs them against the target database. AWS gives Flyway and Liquibase as examples but does not select a tool.'
+      }
+    }
+    rds = platform 'Amazon RDS' {
+      metadata {
+        uses 'amazon-rds'
+      }
+      developmentDatabase = database 'Development database' {
+        description 'Target database for the development workflow; its engine and configuration are unspecified.'
+      }
+      productionDatabase = database 'Production database' {
+        description 'Target database for the production workflow; its engine and configuration are unspecified.'
+      }
+      performanceInsights = platform 'Amazon RDS Performance Insights' {
+        description 'Optional capability for detecting database performance bottlenecks.'
+        metadata {
+          uses 'amazon-rds-performance-insights'
+        }
+      }
+    }
+    devopsGuru = platform 'Amazon DevOps Guru' {
+      description 'Optional analysis for performance bottlenecks and operational issues.'
+      metadata {
+        uses 'amazon-devops-guru'
+      }
+    }
+    cloudwatch = platform 'Amazon CloudWatch' {
+      description 'Shown in the development workflow diagram; the source does not describe its event sources or behavior.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    eventbridge = platform 'Amazon EventBridge' {
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    sns = platform 'Amazon SNS' {
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+  }
+
+  developer -> application 'Develops application code'
+  reviewers -> application 'Reviews application and database changes'
+  releaseManager -> application 'Requests a production release for'
+  operations -> operationsSystem 'Receives notifications as'
+  application -> aws.codecommit 'Stores application code and database scripts in'
+  aws.codecommit -> aws.codeguru 'Submits code changes for review to'
+  aws.codecommit -> aws.pipeline 'Starts the pipeline after a push'
+  aws.pipeline -> aws.codecommit 'Checks out application and database code from'
+  aws.pipeline -> aws.codebuild 'Runs build and test actions with'
+  aws.codebuild -> aws.ec2.databaseChangeTooling 'Calls database change tooling on'
+  aws.ec2.databaseChangeTooling -> aws.rds.developmentDatabase 'Applies database scripts to'
+  aws.ec2.databaseChangeTooling -> aws.rds.productionDatabase 'Applies database scripts to'
+  aws.pipeline -> aws.codedeploy 'Runs the deploy action with'
+  aws.codedeploy -> aws.application 'Deploys code to the target environment'
+  aws.codebuild -> aws.codeartifact 'Publishes build artifacts to'
+  aws.rds.developmentDatabase -> aws.rds.performanceInsights 'Can use (optional)'
+  aws.rds.productionDatabase -> aws.rds.performanceInsights 'Can use (optional)'
+  aws.eventbridge -> aws.sns 'Sends captured events to'
+  aws.sns -> aws.operationsSystem 'Sends notifications to'
+}
+
+views {
+  view index {
+    title 'Database DevOps on AWS'
+    include *, aws.*
+  }
+}
