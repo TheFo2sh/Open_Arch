@@ -34,4 +34,3 @@ The following flow follows AWS's numbered description:
 - Select market-data and broker providers and define their interfaces, authentication, and data agreements.
 - Specify the market-data, transaction, and historical-data formats, retention, and access controls.
 - Choose model and strategy implementations, training and backtesting processes, task/service sizing, schedules, monitoring signals, and operational controls.
-
