@@ -1,0 +1,7 @@
+PackageId: OpenArch.ActiveActiveAndActivePassiveConfigurationsInDirectConnect
+Name: Active/Active and Active/Passive Configurations in AWS Direct Connect
+Description: Redundant AWS Direct Connect connectivity patterns for customer networks, using Active/Active or Active/Passive routing with Private/Transit or Public VIFs.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, networking, hybrid-cloud, direct-connect]

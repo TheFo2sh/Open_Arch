@@ -1,0 +1,107 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-iot-greengrass
+    name: AWS IoT Greengrass
+    description: Edge runtime and connector environment shown on the factory gateway.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/greengrass/v2/developerguide/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-iot-sitewise-connector
+    name: AWS IoT SiteWise Connector
+    description: Greengrass connector that collects factory machine data over OPC-UA for AWS IoT SiteWise.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot-sitewise/latest/userguide/
+    types: [library]
+  - key: aws-iot-greengrass-lambda-connector
+    name: AWS IoT Greengrass Connector for AWS Lambda functions
+    description: Greengrass connector for Lambda functions that interface with local Modbus, MQTT, or HTTP traffic.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/greengrass/v2/developerguide/
+    types: [library]
+  - key: opc-ua
+    name: OPC-UA
+    description: Industrial protocol used by the SiteWise Connector to collect factory machine data.
+    url: https://opcfoundation.org/about/opc-technologies/opc-ua/
+    types: [third-party]
+  - key: modbus
+    name: Modbus
+    description: Local industrial protocol named for Greengrass connector integration.
+    url: https://www.modbus.org/
+    types: [third-party]
+  - key: mqtt
+    name: MQTT
+    description: Local messaging protocol named for Greengrass connector integration.
+    url: https://mqtt.org/
+    types: [third-party]
+  - key: http
+    name: HTTP
+    description: Local protocol named for Greengrass connector integration.
+    url: https://www.rfc-editor.org/rfc/rfc9110.html
+    types: [third-party]
+  - key: aws-iot-sitewise
+    name: AWS IoT SiteWise
+    description: Models industrial assets and manages their equipment data and health metrics.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot-sitewise/latest/userguide/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-iot-sitewise-monitor
+    name: AWS IoT SiteWise Monitor
+    description: Web portal for visualizing equipment data and health metrics in near real time.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot-sitewise/latest/userguide/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Connects factory devices and routes telemetry and mitigation commands.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot/latest/developerguide/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-analytics
+    name: AWS IoT Analytics
+    description: Collects and processes device telemetry through channels, pipelines, and a data store.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iotanalytics/latest/userguide/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-iot-events
+    name: AWS IoT Events
+    description: Detects complex events across data sources and triggers response messages.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot-events/latest/developerguide/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Provides analytics and insights from AWS IoT Analytics data.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/quicksight/latest/user/welcome.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sns
+    name: Amazon SNS
+    description: Publishes event notifications to operators when fault conditions are detected.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/sns/latest/dg/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs a function that sends mitigation commands back to factory assets through AWS IoT Core.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/lambda/latest/dg/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
