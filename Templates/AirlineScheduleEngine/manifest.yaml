@@ -1,0 +1,7 @@
+PackageId: OpenArch.AirlineScheduleEngine
+Name: Airline Schedule Engine
+Description: A scalable airline schedule and flight lookup architecture combining batch schedules and real-time flight feeds with AWS serverless compute, purpose-built databases, and a data lake.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, travel, airline, data-processing, serverless]

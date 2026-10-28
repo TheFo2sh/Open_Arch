@@ -1,0 +1,7 @@
+PackageId: OpenArch.PaymentSystemInterfaceModernizationOnAWSModernCloudNativePaymentSystems
+Name: "Payment System Interface Modernization on AWS: Modern Cloud-Native Payment Systems"
+Description: A cloud-native payment interface on AWS using microservices, APIs, and events, integrated with bank data-center systems.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, payments, modernization, microservices]

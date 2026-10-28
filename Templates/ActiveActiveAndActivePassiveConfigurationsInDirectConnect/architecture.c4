@@ -1,0 +1,132 @@
+// AWS's Active/Active and Active/Passive Direct Connect reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/active-active-and-active-passive-configurations-in-aws-direct-connect/active-active-and-active-passive-configurations-in-aws-direct-connect.html
+// The VIF and routing modes are alternatives; systems are slots for a project's workloads.
+model {
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Redundant connections at separate Direct Connect locations; the reference recommends distinct endpoints and routers.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+
+      location1 = platform 'Direct Connect location 1' {
+        description 'A Direct Connect location with multiple endpoints for resilient connectivity.'
+        metadata {
+          uses 'aws-direct-connect'
+        }
+      }
+      location2 = platform 'Direct Connect location 2' {
+        description 'A separate Direct Connect location for location-level resilience.'
+        metadata {
+          uses 'aws-direct-connect'
+        }
+      }
+      privateTransitVif = platform 'Private/Transit VIF' {
+        description 'Alternative to Public VIFs; use Active/Active or Active/Passive route policy.'
+        metadata {
+          uses 'aws-direct-connect'
+        }
+      }
+      publicVif = platform 'Public VIF' {
+        description 'Alternative to Private/Transit VIFs; AWS does not identify the destination services.'
+        metadata {
+          uses 'aws-direct-connect'
+        }
+      }
+    }
+
+    directConnectGateway = platform 'AWS Direct Connect gateway' {
+      description 'Global construct associated with a Transit Gateway in the Private/Transit VIF pattern.'
+      metadata {
+        uses 'aws-direct-connect-gateway'
+      }
+    }
+    transitGateway = platform 'AWS Transit Gateway' {
+      description 'Transit Gateway connected through the Direct Connect gateway.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    vpc = platform 'Amazon VPC' {
+      description 'The VPC attached to the Transit Gateway; AWS does not specify its workloads.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+
+  }
+
+  locationRouters = zone 'Customer or partner equipment at Direct Connect locations' {
+    metadata {
+      platform 'other'
+    }
+    locationRouter1 = platform 'Customer or partner router at location 1' {
+      description 'A router at location 1; the diagram shows redundant endpoints and routers.'
+      metadata {
+        uses 'customer-partner-router'
+      }
+    }
+    locationRouter2 = platform 'Customer or partner router at location 2' {
+      description 'A router at location 2; the diagram shows redundant endpoints and routers.'
+      metadata {
+        uses 'customer-partner-router'
+      }
+    }
+  }
+
+  dataCenter1 = zone 'Corporate data center 1' {
+    metadata {
+      platform 'other'
+    }
+    customerRouter1 = platform 'Customer router' {
+      description 'Customer-side router connected to Direct Connect location 1; AWS does not specify its make or configuration.'
+      metadata {
+        uses 'customer-partner-router'
+      }
+    }
+    workloads1 = system 'Customer workloads 1' {
+      description 'Workloads represented by the servers in the source diagram; their applications and AWS destinations are unspecified.'
+    }
+  }
+
+  dataCenter2 = zone 'Corporate data center 2' {
+    metadata {
+      platform 'other'
+    }
+    customerRouter2 = platform 'Customer router' {
+      description 'Customer-side router connected to Direct Connect location 2; AWS does not specify its make or configuration.'
+      metadata {
+        uses 'customer-partner-router'
+      }
+    }
+    workloads2 = system 'Customer workloads 2' {
+      description 'Workloads represented by the servers in the source diagram; their applications and AWS destinations are unspecified.'
+    }
+  }
+
+  dataCenter1.workloads1 -> dataCenter1.customerRouter1 'Routes through'
+  dataCenter1.customerRouter1 -> locationRouters.locationRouter1 'Connects over redundant Direct Connect paths'
+  locationRouters.locationRouter1 -> aws.directConnect.location1 'Connects to endpoints at'
+  dataCenter2.workloads2 -> dataCenter2.customerRouter2 'Routes through'
+  dataCenter2.customerRouter2 -> locationRouters.locationRouter2 'Connects over redundant Direct Connect paths'
+  locationRouters.locationRouter2 -> aws.directConnect.location2 'Connects to endpoints at'
+
+  aws.directConnect.location1 -> aws.directConnect.privateTransitVif 'Carries Private/Transit VIF traffic'
+  aws.directConnect.location2 -> aws.directConnect.privateTransitVif 'Carries Private/Transit VIF traffic'
+  aws.directConnect.location1 -> aws.directConnect.publicVif 'Carries Public VIF traffic'
+  aws.directConnect.location2 -> aws.directConnect.publicVif 'Carries Public VIF traffic'
+  aws.directConnect.privateTransitVif -> aws.directConnectGateway 'Associates with'
+  aws.directConnectGateway -> aws.transitGateway 'Associates with'
+  aws.transitGateway -> aws.vpc 'Routes through a Transit Gateway attachment to'
+}
+
+views {
+  view index {
+    title 'Active/Active and Active/Passive Configurations in AWS Direct Connect'
+    include *, aws.*, aws.directConnect.*, locationRouters.*, dataCenter1.*, dataCenter2.*
+  }
+}
