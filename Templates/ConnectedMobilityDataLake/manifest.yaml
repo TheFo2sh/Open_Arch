@@ -1,0 +1,7 @@
+PackageId: OpenArch.ConnectedMobilityDataLake
+Name: Connected Mobility Data Lake
+Description: A serverless AWS data mesh for ingesting connected mobility data, preparing data products, governing cross-account access, and enabling analytics and APIs.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, data-lake, data-mesh, connected-mobility, automotive]

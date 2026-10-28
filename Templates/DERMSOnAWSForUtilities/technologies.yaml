@@ -1,0 +1,173 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-storage-gateway
+    name: AWS Storage Gateway
+    description: Hybrid storage service shown as an ingress option in the reference diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/storagegateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-services
+    name: AWS IoT services
+    description: IoT services shown for integrating DER assets; the source does not specify a particular IoT service.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-kinesis
+    name: Amazon Kinesis
+    description: Streaming data service for real-time utility and DER measurements.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-transfer-family
+    name: AWS Transfer Family
+    description: One documented option for integrating batch data with DERMS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/aws-transfer-family/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-application-integration
+    name: AWS application integration services
+    description: Application integration options for APIs, notifications, queues, and events; the specific services are not selected.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/application-integration/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: An API integration option for DERMS, ADMS, and other systems.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: A notification integration option for DERMS and other systems.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sqs
+    name: Amazon Simple Queue Service
+    description: A queue integration option for DERMS and other systems.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sqs/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-eventbridge
+    name: Amazon EventBridge
+    description: An event integration option for DERMS and other systems.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eventbridge/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-compute-services
+    name: AWS compute services
+    description: Generic compute platform in the diagram; AWS lists EC2, Lambda, and container services as possible deployment choices without selecting one.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/products/compute/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ec2
+    name: Amazon Elastic Compute Cloud
+    description: One compute option AWS lists for deploying a vendor DERMS application; not selected in the reference.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: One compute option AWS lists for deploying a vendor DERMS application; not selected in the reference.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-container-services
+    name: AWS container services
+    description: One compute option AWS lists for deploying a vendor DERMS application; the source does not select a container service.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/containers/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-database-services
+    name: AWS purpose-built database services
+    description: Generic database services for DERMS transactional and operational data; AWS does not specify engines or products.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/products/databases/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-glue
+    name: AWS Glue
+    description: ETL and data catalog service for transforming data and discovering schemas and metadata.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Data lake storage for raw, curated, and archived data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Data warehouse for SQL analytics across structured and semi-structured data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Business intelligence service for publishing and accessing interactive dashboards.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: amazon-forecast
+    name: Amazon Forecast
+    description: Managed ML service cited for anomaly detection, energy usage forecasting, and equipment failure prediction.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/forecast/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Managed service for building, training, and deploying utility-specific ML models.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: vendor-derms-application
+    name: Vendor DERMS application
+    description: Third-party DERMS software required by the architecture; AWS does not identify a vendor or product.
+    vendor: Unspecified DERMS vendor
+    types: [third-party]
+  - key: partner-customer-ml-models
+    name: Partner or customer ML models
+    description: External ML models shown as an option alongside AWS managed ML services.
+    vendor: Partner or customer
+    types: [third-party]

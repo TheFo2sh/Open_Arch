@@ -1,0 +1,7 @@
+PackageId: OpenArch.MultiRegionAPIGatewayWithCloudFront
+Name: Multi-region API Gateway with CloudFront
+Description: A globally accessible API that uses CloudFront and Lambda@Edge to direct clients to regional API Gateway endpoints backed by an Aurora Global Database.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, api-gateway, cloudfront, multi-region, serverless]

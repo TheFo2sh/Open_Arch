@@ -1,0 +1,7 @@
+PackageId: OpenArch.CentralizedInternetEgressWithNATGateway
+Name: Centralized Internet Egress with NAT Gateway
+Description: Centralize outbound internet access for spoke VPCs through an egress VPC, AWS Transit Gateway and a NAT Gateway.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, networking, egress]
