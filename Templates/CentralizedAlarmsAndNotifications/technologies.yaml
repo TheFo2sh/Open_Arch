@@ -1,0 +1,48 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Provides cross-account alarms in the central monitoring account; alarms can be tagged with resource identifiers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: Carries alarm events through a central topic and delivers routed payloads to configured workload topics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sqs
+    name: Amazon Simple Queue Service
+    description: Optionally buffers central Lambda invocations, holds messages without workload configuration in a dead-letter queue, and appears on workload delivery paths in the diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sqs/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the central function that looks up and routes alarm payloads, and workload functions that perform configured actions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-systems-manager-parameter-store
+    name: AWS Systems Manager Parameter Store
+    description: Stores central configuration with account and workload Amazon SNS delivery-topic details.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]

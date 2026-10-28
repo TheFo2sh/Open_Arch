@@ -1,0 +1,111 @@
+// iOS CI/CD Build and Test Pipeline, after AWS's reference architecture.
+// The page describes API Gateway triggers; its diagram instead labels a CodePipeline
+// boundary and does not show API Gateway. See README.md for this source discrepancy.
+model {
+  developer = user 'Developer' {
+    description 'Changes the iOS application source code and pushes it to the repository.'
+  }
+  manager = user 'Manager' {
+    description 'Reviews iOS test results, logs, and recordings.'
+  }
+
+  iosApplication = system 'iOS application' {
+    description 'The application whose source is committed and whose built artifacts are tested.'
+  }
+  testResultReview = system 'iOS test result review' {
+    description 'The result access path through the AWS Device Farm console or Amazon S3 pre-signed URLs.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    codePipeline = platform 'AWS CodePipeline' {
+      description 'The diagram labels the dashed workflow boundary AWS CodePipeline; AWS does not specify its role.'
+      metadata {
+        uses 'aws-codepipeline'
+      }
+    }
+    codeCommit = platform 'AWS CodeCommit' {
+      description 'Receives the developer push containing the iOS application code change.'
+      metadata {
+        uses 'amazon-codecommit'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'The page says it detects CodeCommit changes and built artifacts to start the documented workflows.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Invoked by the documented source-change trigger to start the build process.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Loads build scripts from Amazon S3 and triggers Systems Manager Run Command.'
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+    buildScripts = platform 'Amazon S3 (build scripts)' {
+      description 'Stores the required build scripts loaded by the Lambda function.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    systemsManager = platform 'AWS Systems Manager Run Command' {
+      description 'Runs the build scripts on the Amazon EC2 Mac instance and sends execution logs to CloudWatch.'
+      metadata {
+        uses 'aws-systems-manager'
+      }
+    }
+    ec2Mac = platform 'Amazon EC2 Mac instance' {
+      description 'Runs the iOS build scripts.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+
+      buildWorker = system 'iOS build worker' {
+        description 'Executes the downloaded build scripts and creates the iOS application build artifacts.'
+      }
+    }
+    buildArtifacts = platform 'Amazon S3 (build artifacts)' {
+      description 'Stores the iOS build artifacts, shown as .ipa and .zip files in the diagram.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    cloudWatch = platform 'Amazon CloudWatch' {
+      description 'Receives the Systems Manager Run Command execution logs.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    deviceFarm = platform 'AWS Device Farm' {
+      description 'Tests the iOS build on multiple real devices and generates results, logs, and recordings.'
+      metadata {
+        uses 'aws-device-farm'
+      }
+    }
+  }
+
+  developer -> iosApplication 'Changes source for'
+  iosApplication -> aws.codeCommit 'Source changes are pushed to'
+  aws.codeCommit -> aws.apiGateway 'Change is detected by'
+  aws.apiGateway -> aws.stepFunctions 'Invokes to start the build'
+  aws.stepFunctions -> aws.lambda 'Starts the build process with'
+  aws.lambda -> aws.buildScripts 'Loads required scripts from'
+  aws.lambda -> aws.systemsManager 'Triggers Run Command on'
+  aws.systemsManager -> aws.ec2Mac.buildWorker 'Runs scripts on'
+  aws.ec2Mac.buildWorker -> aws.buildArtifacts 'Stores build artifacts in'
+  aws.systemsManager -> aws.cloudWatch 'Sends run logs to'
+  aws.buildArtifacts -> aws.apiGateway 'Built artifacts are detected by'
+  aws.apiGateway -> aws.deviceFarm 'Starts testing on'
+  aws.buildArtifacts -> aws.deviceFarm 'Provides the build artifact for testing'
+  aws.deviceFarm -> testResultReview 'Publishes test results, logs, and recordings for'
+  manager -> testResultReview 'Reviews'
+}

@@ -1,0 +1,104 @@
+# The AWS services and external schedule provider shown or named by the source.
+technologies:
+  - key: oag-airline-schedules
+    name: OAG airline schedules
+    description: Third-party source of daily airline arrivals and departures, with schedules available up to 330 days ahead.
+    vendor: OAG
+    url: https://www.oag.com/
+    types: [third-party]
+  - key: aws-data-exchange
+    name: AWS Data Exchange
+    description: Batch data exchange path shown feeding airport optimizer inputs into Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/data-exchange/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-transfer-family
+    name: AWS Transfer Family
+    description: SFTP batch-file transfer path shown feeding airport optimizer inputs into Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/aws-transfer-family/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage for batch staging, processed datasets, configuration inputs, and optimized results.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-glue-data-catalog
+    name: AWS Glue Data Catalog
+    description: Catalogs the data assets used by the airport optimizer pipeline.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/glue/latest/dg/catalog-and-crawler.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-glue
+    name: AWS Glue
+    description: Discovers, catalogs, and processes batch input data with Amazon EMR.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-emr
+    name: Amazon EMR
+    description: Processes schedule, airport configuration, and cost data for flight, passenger traffic, landing slot, and assignment outputs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/emr/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Queries optimized data in Amazon S3 for analysis.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Visualizes airport optimization results with analytics dashboards.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: API entry point for the optional configuration management dashboard.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the optional configuration dashboard microservices for what-if analyses.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores configuration data used by the optional what-if dashboard.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-kinesis
+    name: Amazon Kinesis
+    description: Configuration stream shown in the optional dashboard path; the specific Kinesis service is not identified.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/
+    types: [managed-service]
+    platform: aws
+    hosts: []
