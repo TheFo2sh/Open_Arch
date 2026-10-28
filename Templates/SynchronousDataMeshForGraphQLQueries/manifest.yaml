@@ -1,0 +1,7 @@
+PackageId: OpenArch.SynchronousDataMeshForGraphQLQueries
+Name: Synchronous Data Mesh for GraphQL Queries
+Description: Compose synchronous GraphQL queries from domain-owned data in databases, data lakes, and external APIs.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, data-mesh, graphql, api-composition]
