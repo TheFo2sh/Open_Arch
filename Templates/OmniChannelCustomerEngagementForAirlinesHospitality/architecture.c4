@@ -1,0 +1,100 @@
+// Omni-channel Customer Engagement for Airlines, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/omni-channel-customer-engagement-for-airlines/omni-channel-customer-engagement-for-airlines.html
+model {
+  agent = user 'Customer service agent' {
+    description 'A centralized or on-location member of the travel or hospitality customer-service team.'
+  }
+  traveler = user 'Traveler' {
+    description 'Provides input and receives personalized recommendations.'
+  }
+
+  engagement = system 'Customer engagement application' {
+    description 'The unified interface customer-service teams use to engage with travelers across channels.'
+  }
+  chatbot = system 'Traveler chatbot experience' {
+    description 'The chatbot interaction through which travelers provide input and receive personalized interactions and recommendations.'
+  }
+  records = system 'Systems of record' {
+    description 'External source systems; AWS does not identify specific systems or integrations.'
+  }
+  delivery = system 'Mail or mobile push notification service' {
+    description 'External delivery service for recommendations; AWS does not identify a provider.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    s3 = platform 'Amazon Simple Storage Service' {
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    cloudfront = platform 'Amazon CloudFront' {
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    cognito = platform 'Amazon Cognito' {
+      metadata {
+        uses 'amazon-cognito'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      personalization = system 'Personalization functions' {
+        description 'Provide recommendations for travelers and generate application data.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      travelerData = database 'Traveler 360 data store' {
+        description 'Collects key traveler data from multiple sources, personalization workload outputs, and systems of record.'
+      }
+    }
+    lex = platform 'Amazon Lex' {
+      metadata {
+        uses 'amazon-lex'
+      }
+    }
+    opensearch = platform 'Amazon OpenSearch Service' {
+      metadata {
+        uses 'amazon-opensearch-service'
+      }
+      productIndex = database 'Available-products index' {
+        description 'Indexes available products for recommendation searches.'
+      }
+    }
+    pinpoint = platform 'Amazon Pinpoint' {
+      metadata {
+        uses 'amazon-pinpoint'
+      }
+    }
+  }
+
+  agent -> engagement 'Uses the unified interface'
+  traveler -> chatbot 'Provides input through'
+  traveler -> delivery 'Receives recommendations through'
+  aws.s3 -> aws.cloudfront 'Stores the website and configuration files served by'
+  aws.cloudfront -> engagement 'Serves the unified interface for'
+  engagement -> aws.apiGateway 'Calls the application APIs through'
+  aws.cognito -> aws.apiGateway 'Controls access to'
+  aws.apiGateway -> aws.lambda.personalization 'Invokes'
+  records -> aws.dynamodb.travelerData 'Provides source data to'
+  aws.lambda.personalization -> aws.dynamodb.travelerData 'Reads and writes traveler and personalization data'
+  chatbot -> aws.lex 'Uses the chatbot powered by'
+  aws.lex -> aws.lambda.personalization 'Uses personalized functions for interactions and recommendations'
+  aws.lambda.personalization -> aws.opensearch.productIndex 'Searches for available products in'
+  aws.lambda.personalization -> aws.pinpoint 'Schedules traveler recommendations through'
+  aws.pinpoint -> delivery 'Schedules recommendation delivery through'
+}
