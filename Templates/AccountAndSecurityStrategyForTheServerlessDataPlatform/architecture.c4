@@ -1,0 +1,328 @@
+// AWS's Account and Security Strategy for the Serverless Data Platform.
+// The accounts are AWS zones; systems and users are project-mappable slots.
+model {
+  dataConsumer = user 'Data consumer' {
+    description 'Uses governed data and customer-facing dashboards.'
+  }
+  dataEngineer = user 'Data engineer' {
+    description 'Builds and operates ingestion and analytics workflows.'
+  }
+  mlPractitioner = user 'ML practitioner' {
+    description 'Develops and tests machine learning models with governed data.'
+  }
+
+  systemsOfRecord = system 'Travel and business systems of record' {
+    description 'Source systems shown include airline schedules and operations, crew and airline information, ERP, loyalty, reservations, and surveys.'
+  }
+  identityProvider = system 'Third-party identity provider' {
+    description 'Customer-selected identity provider; the diagram gives Okta and Ping Identity as examples.'
+  }
+  casb = system 'Third-party cloud access security broker' {
+    description 'A customer-selected CASB; the diagram gives McAfee and Cloudflare as examples.'
+  }
+  thirdPartyDashboards = system 'Third-party dashboard tools' {
+    description 'Optional customer-selected dashboard tools; the diagram does not name vendors.'
+  }
+  sharedThirdPartyTools = system 'Third-party shared services' {
+    description 'Unspecified third-party tools depicted in the shared services account.'
+  }
+
+  master = zone 'Master account' {
+    metadata { platform 'aws' }
+    controlTower = platform 'AWS Control Tower' {
+      metadata { uses 'aws-control-tower' }
+    }
+    organizations = platform 'AWS Organizations' {
+      metadata { uses 'aws-organizations' }
+    }
+    iam = platform 'AWS Identity and Access Management' {
+      metadata { uses 'aws-iam' }
+    }
+  }
+
+  security = zone 'Security account' {
+    metadata { platform 'aws' }
+    securityHub = platform 'AWS Security Hub' {
+      metadata { uses 'aws-security-hub' }
+    }
+    guardDuty = platform 'Amazon GuardDuty' {
+      metadata { uses 'amazon-guardduty' }
+    }
+    cloudTrail = platform 'AWS CloudTrail' {
+      metadata { uses 'aws-cloudtrail' }
+    }
+    macie = platform 'Amazon Macie' {
+      metadata { uses 'amazon-macie' }
+    }
+    kms = platform 'AWS Key Management Service' {
+      metadata { uses 'aws-kms' }
+    }
+    cloudWatch = platform 'Amazon CloudWatch Logs' {
+      metadata { uses 'amazon-cloudwatch-logs' }
+      auditLogs = database 'Centralized account logs' {
+        description 'Centralized activity and service logs used to monitor and audit accounts.'
+      }
+    }
+  }
+
+  network = zone 'Network account' {
+    metadata { platform 'aws' }
+    directConnect = platform 'AWS Direct Connect' {
+      metadata { uses 'aws-direct-connect' }
+    }
+    transitGateway = platform 'AWS Transit Gateway' {
+      metadata { uses 'aws-transit-gateway' }
+    }
+    vpc = platform 'Amazon Virtual Private Cloud' {
+      metadata { uses 'amazon-vpc' }
+    }
+  }
+
+  shared = zone 'Shared services account' {
+    metadata { platform 'aws' }
+    identityCenter = platform 'AWS IAM Identity Center' {
+      metadata { uses 'aws-iam-identity-center' }
+      federatedAccess = system 'Federated workforce access' {
+        description 'Provides centralized workforce access across AWS accounts.'
+      }
+    }
+    route53 = platform 'Amazon Route 53' {
+      metadata { uses 'amazon-route-53' }
+    }
+    directoryService = platform 'AWS Directory Service' {
+      metadata { uses 'aws-directory-service' }
+    }
+    lakeFormation = platform 'AWS Lake Formation' {
+      metadata { uses 'aws-lake-formation' }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      metadata { uses 'aws-glue-data-catalog' }
+      sharedCatalog = database 'Shared data catalog' {
+        description 'Metadata catalog for governed data repositories.'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      metadata { uses 'aws-glue' }
+    }
+    emr = platform 'Amazon EMR' {
+      metadata { uses 'amazon-emr' }
+      sharedDataProcessing = system 'Shared data processing' {
+        description 'Runs shared analytics transformations against governed data.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      metadata { uses 'amazon-athena' }
+    }
+  }
+
+  ingestion = zone 'Ingestion account' {
+    metadata { platform 'aws' }
+    transfer = platform 'AWS Transfer Family (SFTP)' {
+      metadata { uses 'aws-transfer-family' }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      metadata { uses 'amazon-api-gateway' }
+      ingestionApi = system 'Data ingestion API' {
+        description 'Accepts data through managed APIs.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata { uses 'amazon-dynamodb' }
+      apiData = database 'API data' {
+        description 'API data store shown in the ingestion account.'
+      }
+    }
+    kinesisStreams = platform 'Amazon Kinesis Data Streams' {
+      metadata { uses 'amazon-kinesis-data-streams' }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      metadata { uses 'amazon-kinesis-data-firehose' }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata { uses 'amazon-s3' }
+      batchStaging = database 'Batch staging' {
+        description 'Temporary staging for batch data received by the ingestion account.'
+      }
+      realtimeStaging = database 'Real-time staging' {
+        description 'Staging for streaming data events.'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      metadata { uses 'aws-step-functions' }
+      ingestionWorkflows = system 'Ingestion workflows' {
+        description 'Coordinates ingestion and data processing workflows.'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata { uses 'aws-lambda' }
+      ingestionFunctions = system 'Ingestion functions' {
+        description 'Runs serverless functions used by ingestion workflows.'
+      }
+    }
+  }
+
+  production = zone 'Analytics production account' {
+    metadata { platform 'aws' }
+    ecs = platform 'Amazon Elastic Container Service' {
+      metadata { uses 'amazon-ecs' }
+      productionApplications = system 'Production data applications' {
+        description 'Runs the production data application workloads.'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      metadata { uses 'amazon-api-gateway' }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata { uses 'amazon-dynamodb' }
+      productionApiData = database 'Production API data' {
+        description 'API data store shown in the analytics production account.'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata { uses 'amazon-s3' }
+      productionDataLake = database 'Production data lake' {
+        description 'Domain datasets used by production analytics and model workloads.'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker' {
+      metadata { uses 'amazon-sagemaker' }
+      productionModels = system 'Production model deployment and monitoring' {
+        description 'Hosts deployed models and model monitoring in the production account.'
+      }
+    }
+  }
+
+  mlSandbox = zone 'ML sandbox account' {
+    metadata { platform 'aws' }
+    sagemaker = platform 'Amazon SageMaker' {
+      metadata { uses 'amazon-sagemaker' }
+      mlWorkbench = system 'ML development workbench' {
+        description 'Provides notebooks, model training, processing, and ground-truth labeling.'
+      }
+    }
+  }
+
+  logsAudit = zone 'Logs and audit account' {
+    metadata { platform 'aws' }
+    s3 = platform 'Amazon S3' {
+      metadata { uses 'amazon-s3' }
+      archivedLogs = database 'Log archive' {
+        description 'Amazon S3 log storage shown in the centralized logs and audit account.'
+      }
+      backups = database 'Backups' {
+        description 'Amazon S3 backup storage shown in the centralized logs and audit account.'
+      }
+    }
+  }
+
+  dashboards = zone 'Dashboards account' {
+    metadata { platform 'aws' }
+    redshift = platform 'Amazon Redshift' {
+      metadata { uses 'amazon-redshift' }
+      dashboardWarehouse = database 'Dashboard warehouse' {
+        description 'Data warehouse and Spectrum access for dashboard datasets.'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      metadata { uses 'amazon-quicksight' }
+      dashboardService = system 'Customer dashboards' {
+        description 'Presents data using customer-selected dashboards and reports.'
+      }
+    }
+  }
+
+  devops = zone 'DevOps tools account' {
+    metadata { platform 'aws' }
+    codeCommit = platform 'AWS CodeCommit' {
+      metadata { uses 'aws-codecommit' }
+    }
+    codeBuild = platform 'AWS CodeBuild' {
+      metadata { uses 'aws-codebuild' }
+    }
+    codeDeploy = platform 'AWS CodeDeploy' {
+      metadata { uses 'aws-codedeploy' }
+    }
+    codePipeline = platform 'AWS CodePipeline' {
+      metadata { uses 'aws-codepipeline' }
+      deploymentPipeline = system 'Deployment pipeline' {
+        description 'Deploys code and artifacts to ingestion and analytics accounts.'
+      }
+    }
+  }
+
+  analyticsSandbox = zone 'Analytics sandbox account' {
+    metadata { platform 'aws' }
+    redshift = platform 'Amazon Redshift' {
+      metadata { uses 'amazon-redshift' }
+      sandboxWarehouse = database 'Sandbox warehouse' {
+        description 'Isolated warehouse for analytics development and testing.'
+      }
+    }
+    emr = platform 'Amazon EMR' {
+      metadata { uses 'amazon-emr' }
+      sandboxProcessing = system 'Sandbox data processing' {
+        description 'Runs development and test analytics processing.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      metadata { uses 'amazon-athena' }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata { uses 'amazon-s3' }
+      rawSandbox = database 'Raw sandbox data' {
+        description 'Raw data for analytics development and testing.'
+      }
+      modelSandbox = database 'Model sandbox data' {
+        description 'Model data for analytics development and testing.'
+      }
+      reportsSandbox = database 'Reports sandbox data' {
+        description 'Report data for analytics development and testing.'
+      }
+    }
+  }
+
+  systemsOfRecord -> ingestion.transfer 'Can deliver batch data through'
+  systemsOfRecord -> ingestion.kinesisStreams 'Can provide real-time events to'
+  ingestion.transfer -> ingestion.s3.batchStaging 'Stages batch files in'
+  ingestion.apiGateway.ingestionApi -> ingestion.dynamodb.apiData 'Stores API data in'
+  ingestion.kinesisStreams -> ingestion.firehose 'Delivers streaming data through'
+  ingestion.firehose -> ingestion.s3.realtimeStaging 'Stages streaming data in'
+  ingestion.stepFunctions.ingestionWorkflows -> ingestion.lambda.ingestionFunctions 'Orchestrates'
+  ingestion.stepFunctions.ingestionWorkflows -> shared.sharedDataProcessing 'Feeds data processing in'
+  ingestion.s3.batchStaging -> production.s3.productionDataLake 'Feeds the production data lake'
+  ingestion.s3.realtimeStaging -> production.s3.productionDataLake 'Feeds the production data lake'
+  shared.glueCatalog.sharedCatalog -> production.s3.productionDataLake 'Catalogs metadata for'
+  shared.lakeFormation -> production.s3.productionDataLake 'Governs access to'
+  shared.sharedDataProcessing -> production.s3.productionDataLake 'Transforms data in'
+  shared.athena -> production.s3.productionDataLake 'Queries data in'
+  production.apiGateway -> production.dynamodb.productionApiData 'Serves APIs backed by'
+  production.sagemaker.productionModels -> production.s3.productionDataLake 'Reads governed data from'
+  mlSandbox.sagemaker.mlWorkbench -> production.s3.productionDataLake 'Develops models with governed data from'
+  mlSandbox.sagemaker.mlWorkbench -> production.sagemaker.productionModels 'Publishes final models to'
+  dataConsumer -> dashboards.quickSight.dashboardService 'Uses'
+  thirdPartyDashboards -> dashboards.redshift.dashboardWarehouse 'Can present data from'
+  dashboards.quickSight.dashboardService -> dashboards.redshift.dashboardWarehouse 'Presents data from'
+  dashboards.redshift.dashboardWarehouse -> production.s3.productionDataLake 'Queries data through Spectrum in'
+  dataEngineer -> ingestion.stepFunctions.ingestionWorkflows 'Builds and operates'
+  dataEngineer -> shared.sharedDataProcessing 'Uses'
+  mlPractitioner -> mlSandbox.sagemaker.mlWorkbench 'Develops and tests models with'
+  security.cloudTrail -> security.cloudWatch.auditLogs 'Sends activity logs to'
+  security.guardDuty -> security.cloudWatch.auditLogs 'Provides findings for monitoring in'
+  security.securityHub -> security.cloudWatch.auditLogs 'Provides security findings for monitoring in'
+  security.macie -> security.cloudWatch.auditLogs 'Provides findings for monitoring in'
+  security.cloudWatch.auditLogs -> logsAudit.s3.archivedLogs 'Can be archived to'
+  devops.codePipeline.deploymentPipeline -> ingestion.stepFunctions.ingestionWorkflows 'Deploys code and artifacts to'
+  devops.codePipeline.deploymentPipeline -> production.ecs.productionApplications 'Deploys code and artifacts to'
+  network.directConnect -> network.transitGateway 'Connects on-premises networks through'
+  network.transitGateway -> network.vpc 'Connects account VPCs through'
+  identityProvider -> shared.identityCenter.federatedAccess 'Federates workforce access to'
+  dataEngineer -> shared.identityCenter.federatedAccess 'Uses centralized workforce access'
+  mlPractitioner -> shared.identityCenter.federatedAccess 'Uses centralized workforce access'
+}
+
+views {
+  view index {
+    title 'Account and Security Strategy for the Serverless Data Platform'
+    include *
+  }
+}

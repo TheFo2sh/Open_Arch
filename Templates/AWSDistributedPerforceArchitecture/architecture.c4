@@ -1,0 +1,265 @@
+// AWS Distributed Perforce Architecture
+// Source: https://docs.aws.amazon.com/reference-architecture-diagrams/latest/aws-distributed-perforce-architecture/aws-distributed-perforce-architecture.html
+// Systems and users are slots. Subnets, Availability Zones and network attachments are summarized in descriptions.
+model {
+  inOfficeDeveloper = user 'In-office developer' {
+    description 'Works from the corporate data center and uses its local Perforce Edge Server.'
+  }
+  remoteDeveloper = user 'Remote developer' {
+    description 'Connects with AWS Client VPN or works from a virtual workstation on AWS.'
+  }
+
+  corporate = zone 'Corporate data center' {
+    metadata {
+      platform 'other'
+    }
+
+    corporateEdge = system 'Corporate data center Perforce Edge Server' {
+      description 'On-premises Edge Server and edge storage; the source does not specify their hardware or storage technology.'
+      edge = container 'Helix Core Edge Server' {
+        description 'Provides the local Perforce Edge Server role for in-office developers.'
+        metadata {
+          uses 'perforce-helix-core'
+        }
+      }
+    }
+  }
+
+  primaryRegion = zone 'Primary AWS Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    primaryVpc = platform 'Amazon VPC' {
+      description 'Contains public and private subnets across two Availability Zones.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      natA = platform 'Amazon VPC NAT Gateway — AZ A' {
+        description 'Lets private-subnet instances connect to external services.'
+        metadata {
+          uses 'amazon-vpc-nat-gateway'
+        }
+      }
+      natB = platform 'Amazon VPC NAT Gateway — AZ B' {
+        description 'Lets private-subnet instances connect to external services.'
+        metadata {
+          uses 'amazon-vpc-nat-gateway'
+        }
+      }
+
+      ec2PrimaryA = platform 'Amazon EC2 — AZ A' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        commitPrimary = system 'Primary Region commit server' {
+          description 'Primary Perforce commit server in the first Availability Zone.'
+          server = container 'Commit primary' {
+            description 'Accepts Perforce changes and serves the primary Region.'
+            metadata {
+              uses 'perforce-helix-core'
+            }
+          }
+        }
+        edgePrimaryA = system 'Primary Region edge server — AZ A' {
+          description 'Perforce Edge Server in the first Availability Zone.'
+          server = container 'Edge Server' {
+            description 'Serves local Perforce operations and synchronizes with the commit server.'
+            metadata {
+              uses 'perforce-helix-core'
+            }
+          }
+        }
+      }
+      ec2PrimaryB = platform 'Amazon EC2 — AZ B' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        commitStandby = system 'Primary Region standby server' {
+          description 'Perforce standby server in a separate Availability Zone.'
+          server = container 'Commit standby' {
+            description 'Provides the standby/HA role alongside the primary commit server.'
+            metadata {
+              uses 'perforce-helix-core'
+            }
+          }
+        }
+        edgePrimaryB = system 'Primary Region edge server — AZ B' {
+          description 'Perforce Edge Server in the second Availability Zone.'
+          server = container 'Edge Server' {
+            description 'Serves local Perforce operations and synchronizes with the commit server.'
+            metadata {
+              uses 'perforce-helix-core'
+            }
+          }
+        }
+      }
+
+      ebsPrimaryA = platform 'Amazon EBS gp3 — AZ A' {
+        metadata {
+          uses 'amazon-ebs-gp3'
+        }
+        primaryState = database 'Perforce server state — AZ A' {
+          description 'Root, metadata and logs for the primary Region server in this Availability Zone.'
+        }
+      }
+      ebsPrimaryB = platform 'Amazon EBS gp3 — AZ B' {
+        metadata {
+          uses 'amazon-ebs-gp3'
+        }
+        standbyState = database 'Perforce server state — AZ B' {
+          description 'Root, metadata and logs for the primary Region server in this Availability Zone.'
+        }
+      }
+      efsPrimary = platform 'Amazon EFS' {
+        metadata {
+          uses 'amazon-efs'
+        }
+        largeDepot = database 'Perforce depot — over 16 TB' {
+          description 'Alternative shared depot storage for depots larger than 16 TB; use EFS Standard-Infrequent Access for cost optimization.'
+        }
+      }
+    }
+
+    transitGateway = platform 'AWS Transit Gateway' {
+      description 'Central hub-and-spoke connectivity for VPCs and the corporate network.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Corporate data center connection, shown with a Direct Connect Gateway.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    siteToSiteVpn = platform 'AWS Site-to-Site VPN' {
+      description 'Alternative to Direct Connect for the corporate-to-primary-Region connection.'
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    backup = platform 'AWS Backup' {
+      description 'Backs up the EFS-hosted Perforce depot.'
+      metadata {
+        uses 'aws-backup'
+      }
+    }
+  }
+
+  secondaryRegion = zone 'Secondary AWS Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    secondaryVpc = platform 'Amazon VPC' {
+      description 'Contains public and private subnets across two Availability Zones.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      natA = platform 'Amazon VPC NAT Gateway — AZ A' {
+        description 'Lets private-subnet instances connect to external services.'
+        metadata {
+          uses 'amazon-vpc-nat-gateway'
+        }
+      }
+      natB = platform 'Amazon VPC NAT Gateway — AZ B' {
+        description 'Lets private-subnet instances connect to external services.'
+        metadata {
+          uses 'amazon-vpc-nat-gateway'
+        }
+      }
+
+      ec2SecondaryA = platform 'Amazon EC2 — AZ A' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        edgeSecondaryA = system 'Secondary Region edge server — AZ A' {
+          description 'Perforce Edge Server in the secondary Region.'
+          server = container 'Edge Server' {
+            description 'Serves local Perforce operations and synchronizes with the commit server.'
+            metadata {
+              uses 'perforce-helix-core'
+            }
+          }
+        }
+        workstations = system 'Remote virtual workstations' {
+          description 'Optional AWS-hosted workstations for remote developers.'
+          client = container 'Helix Core client' {
+            description 'Perforce client used from a virtual workstation.'
+            metadata {
+              uses 'perforce-helix-core'
+            }
+          }
+        }
+      }
+      ec2SecondaryB = platform 'Amazon EC2 — AZ B' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        edgeSecondaryB = system 'Secondary Region edge server — AZ B' {
+          description 'Perforce Edge Server HA instance; AWS notes its HA requirement depends on RPO and RTO.'
+          server = container 'Edge Server HA' {
+            description 'Optional high-availability Edge Server in a separate Availability Zone.'
+            metadata {
+              uses 'perforce-helix-core'
+            }
+          }
+        }
+      }
+
+      ebsSecondaryA = platform 'Amazon EBS gp3 — AZ A' {
+        metadata {
+          uses 'amazon-ebs-gp3'
+        }
+        secondaryStateA = database 'Perforce server state — AZ A' {
+          description 'Root, metadata and logs for the secondary Region Edge Server.'
+        }
+      }
+      ebsSecondaryB = platform 'Amazon EBS gp3 — AZ B' {
+        metadata {
+          uses 'amazon-ebs-gp3'
+        }
+        secondaryStateB = database 'Perforce server state — AZ B' {
+          description 'Root, metadata and logs for the secondary Region Edge Server HA instance.'
+        }
+      }
+    }
+
+    clientVpn = platform 'AWS Client VPN' {
+      description 'Remote-user VPN access option.'
+      metadata {
+        uses 'aws-client-vpn'
+      }
+    }
+  }
+
+  inOfficeDeveloper -> corporate.corporateEdge 'Uses the local Edge Server'
+  remoteDeveloper -> secondaryRegion.secondaryVpc.ec2SecondaryA.workstations 'Uses through AWS Client VPN or an AWS virtual workstation'
+  corporate.corporateEdge -> primaryRegion.transitGateway 'Connects to AWS through Direct Connect or Site-to-Site VPN'
+  primaryRegion.directConnect -> primaryRegion.transitGateway 'Connects the corporate network through'
+  primaryRegion.siteToSiteVpn -> primaryRegion.transitGateway 'Alternative corporate network connection through'
+  primaryRegion.transitGateway -> primaryRegion.primaryVpc 'Connects the primary Region VPC'
+  primaryRegion.transitGateway -> secondaryRegion.secondaryVpc 'Connects VPCs and networks through the hub-and-spoke topology'
+  secondaryRegion.clientVpn -> secondaryRegion.secondaryVpc 'Provides remote-user connectivity to'
+  primaryRegion.primaryVpc.natA -> primaryRegion.primaryVpc.ec2PrimaryA.commitPrimary 'Provides outbound access for private instances'
+  primaryRegion.primaryVpc.natB -> primaryRegion.primaryVpc.ec2PrimaryB.commitStandby 'Provides outbound access for private instances'
+  secondaryRegion.secondaryVpc.natA -> secondaryRegion.secondaryVpc.ec2SecondaryA.edgeSecondaryA 'Provides outbound access for private instances'
+  secondaryRegion.secondaryVpc.natB -> secondaryRegion.secondaryVpc.ec2SecondaryB.edgeSecondaryB 'Provides outbound access for private instances'
+
+  primaryRegion.primaryVpc.ec2PrimaryA.commitPrimary -> primaryRegion.primaryVpc.ec2PrimaryB.commitStandby 'Replicates to the standby in another Availability Zone'
+  primaryRegion.primaryVpc.ec2PrimaryA.edgePrimaryA -> primaryRegion.primaryVpc.ec2PrimaryA.commitPrimary 'Uses commit-edge replication'
+  primaryRegion.primaryVpc.ec2PrimaryB.edgePrimaryB -> primaryRegion.primaryVpc.ec2PrimaryA.commitPrimary 'Uses commit-edge replication'
+  corporate.corporateEdge -> primaryRegion.primaryVpc.ec2PrimaryA.commitPrimary 'Synchronizes over the corporate connection'
+  primaryRegion.primaryVpc.ec2PrimaryA.commitPrimary -> secondaryRegion.secondaryVpc.ec2SecondaryA.edgeSecondaryA 'Replicates Perforce content across Regions'
+  secondaryRegion.secondaryVpc.ec2SecondaryA.workstations -> secondaryRegion.secondaryVpc.ec2SecondaryA.edgeSecondaryA 'Connects to Perforce from the workstation'
+
+  primaryRegion.primaryVpc.ec2PrimaryA.commitPrimary -> primaryRegion.primaryVpc.ebsPrimaryA.primaryState 'Persists server state on'
+  primaryRegion.primaryVpc.ec2PrimaryB.commitStandby -> primaryRegion.primaryVpc.ebsPrimaryB.standbyState 'Persists server state on'
+  primaryRegion.primaryVpc.ec2PrimaryA.commitPrimary -> primaryRegion.primaryVpc.efsPrimary.largeDepot 'Uses for depots larger than 16 TB'
+  primaryRegion.backup -> primaryRegion.primaryVpc.efsPrimary.largeDepot 'Backs up'
+  secondaryRegion.secondaryVpc.ec2SecondaryA.edgeSecondaryA -> secondaryRegion.secondaryVpc.ebsSecondaryA.secondaryStateA 'Persists server state on'
+  secondaryRegion.secondaryVpc.ec2SecondaryB.edgeSecondaryB -> secondaryRegion.secondaryVpc.ebsSecondaryB.secondaryStateB 'Persists server state on'
+}

@@ -1,0 +1,7 @@
+PackageId: OpenArch.Deploying5GCoreOnAWS
+Name: Deploying 5G Core on AWS
+Description: A hybrid 5G core architecture that runs the user plane on AWS Outposts and containerized network functions on Amazon EKS, connected to AWS Regions and on-premises data centers.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, telecommunications, 5g, hybrid-cloud]
