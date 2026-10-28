@@ -1,0 +1,167 @@
+// Amazon OpenSearch Trending Queries with AWS Glue and Amazon Bedrock, after AWS's
+// reference architecture (https://docs.aws.amazon.com/reference-architecture-diagrams/latest/opensearch-trending-queries/opensearch-trending-queries.html).
+// Systems and users are slots: applying the template maps them onto the project's own.
+model {
+  endUser = user 'End user' {
+    description 'Searches articles and sees trending queries on the search page.'
+  }
+  analyst = user 'Business analyst' {
+    description 'Uses trending search queries to analyze demand and define content strategy.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    search = system 'Search application' {
+      description 'The article search page and its application logic; AWS does not specify its implementation.'
+      searchPage = container 'Search page' {
+        description 'Sends user queries to OpenSearch and uses the trending-query API to display popular queries.'
+      }
+    }
+    analyticsClient = system 'Trending-query API client' {
+      description 'The business analyst client of the trending-query API; its implementation is not specified.'
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    openSearch = platform 'Amazon OpenSearch Service' {
+      metadata {
+        uses 'amazon-opensearch-service'
+      }
+      searchIndex = database 'Article search index' {
+        description 'Search index used to retrieve article results.'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+      queryStream = database 'Search query log stream' {
+        description 'Streaming search-query log events forwarded by the API Gateway proxy.'
+      }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      logCompression = system 'Query log compression' {
+        compressQueries = container 'Compress query logs' {
+          description 'Compresses delivered query logs before they are stored in Amazon S3.'
+        }
+      }
+      trendingFunctions = system 'Trending-query functions' {
+        classifyQueries = container 'Select trending queries' {
+          description 'Processes Athena query results, invokes Bedrock, and stores selected queries.'
+        }
+        serveTrending = container 'Serve trending-query API' {
+          description 'Reads stored trending queries for requests through API Gateway.'
+        }
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      rawLogs = database 'Compressed raw query logs'
+      parquetLogs = database 'Transformed query logs in Parquet'
+      clusteredQueries = database 'Clustered search queries'
+    }
+    eventBridge = platform 'Amazon EventBridge' {
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      metadata {
+        uses 'aws-glue'
+      }
+      catalog = database 'AWS Glue Data Catalog' {
+        description 'Catalog tables for raw logs, Parquet logs, and clustered queries.'
+      }
+      queryProcessing = system 'Search query data processing' {
+        crawlRaw = container 'Catalog raw query logs' {
+          description 'Glue crawler creates catalog tables for the raw query logs.'
+        }
+        consolidateLogs = container 'Transform query logs to Parquet' {
+          description 'Consolidates and transforms query logs to Parquet for query performance.'
+        }
+        crawlParquet = container 'Catalog Parquet logs' {
+          description 'Glue crawler creates a catalog table for the transformed Parquet data.'
+        }
+        clusterQueries = container 'Cluster search queries' {
+          description 'Uses K-means clustering to group search queries and writes the clusters to Amazon S3.'
+        }
+        crawlClusters = container 'Catalog query clusters' {
+          description 'Glue crawler creates a catalog table for the clustered query data.'
+        }
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    bedrock = platform 'Amazon Bedrock' {
+      metadata {
+        uses 'amazon-bedrock'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      trendingQueries = database 'Trending queries'
+    }
+  }
+
+  endUser -> aws.search 'Searches articles and views trending queries in'
+  analyst -> aws.analyticsClient 'Uses'
+  aws.search.searchPage -> aws.openSearch.searchIndex 'Retrieves article search results from'
+  aws.search.searchPage -> aws.apiGateway 'Submits query logs and requests trending queries through'
+  aws.analyticsClient -> aws.apiGateway 'Requests trending-query analysis through'
+  aws.apiGateway -> aws.kinesis.queryStream 'Proxies search-query log events to'
+  aws.kinesis.queryStream -> aws.firehose 'Streams query logs to'
+  aws.firehose -> aws.lambda.logCompression.compressQueries 'Delivers buffered logs to'
+  aws.lambda.logCompression.compressQueries -> aws.s3.rawLogs 'Stores compressed query logs in'
+
+  aws.eventBridge -> aws.stepFunctions 'Starts the daily workflow in'
+  aws.stepFunctions -> aws.glue.queryProcessing 'Orchestrates'
+  aws.s3.rawLogs -> aws.glue.queryProcessing.crawlRaw 'Supplies raw logs to'
+  aws.glue.queryProcessing.crawlRaw -> aws.glue.catalog 'Creates catalog tables in'
+  aws.glue.queryProcessing.consolidateLogs -> aws.s3.parquetLogs 'Writes transformed logs to'
+  aws.s3.parquetLogs -> aws.glue.queryProcessing.crawlParquet 'Supplies Parquet data to'
+  aws.glue.queryProcessing.crawlParquet -> aws.glue.catalog 'Creates a catalog table in'
+  aws.glue.queryProcessing.clusterQueries -> aws.s3.parquetLogs 'Reads transformed logs from'
+  aws.glue.queryProcessing.clusterQueries -> aws.s3.clusteredQueries 'Writes clustered queries to'
+  aws.s3.clusteredQueries -> aws.glue.queryProcessing.crawlClusters 'Supplies clusters to'
+  aws.glue.queryProcessing.crawlClusters -> aws.glue.catalog 'Creates a catalog table in'
+  aws.glue.catalog -> aws.athena 'Provides catalog metadata to'
+  aws.athena -> aws.s3.clusteredQueries 'Queries clustered search data in'
+  aws.athena -> aws.lambda.trendingFunctions.classifyQueries 'Passes top queries per cluster as CSV to'
+  aws.lambda.trendingFunctions.classifyQueries -> aws.bedrock 'Invokes a language model in'
+  aws.lambda.trendingFunctions.classifyQueries -> aws.dynamodb.trendingQueries 'Stores selected trending queries in'
+  aws.apiGateway -> aws.lambda.trendingFunctions.serveTrending 'Routes trending-query requests to'
+  aws.lambda.trendingFunctions.serveTrending -> aws.dynamodb.trendingQueries 'Reads trending queries from'
+}
+
+views {
+  view index {
+    title 'Amazon OpenSearch Trending Queries with AWS Glue and Amazon Bedrock'
+    include *, aws.*
+  }
+}
