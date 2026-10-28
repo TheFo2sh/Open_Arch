@@ -1,0 +1,7 @@
+PackageId: OpenArch.OmniChannelCustomerEngagementForAirlinesHospitality
+Name: Omni-channel Customer Engagement for Airlines
+Description: A serverless AWS reference architecture for personalized, cross-channel traveler engagement for airline and hospitality customer-service teams.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, travel, hospitality, customer-engagement, serverless]
