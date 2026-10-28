@@ -1,0 +1,7 @@
+PackageId: OpenArch.GuidanceForDriverBasedDemandPlanningWithO9
+Name: Guidance for Driver-based Demand Planning with o9
+Description: Reference architecture for integrating o9 demand planning with AWS data ingestion, storage, analytics, and machine learning services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, demand-planning, supply-chain, data-analytics, o9]

@@ -1,0 +1,129 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: DNS service that directs learners to the closest CloudFront location.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Content delivery network that serves cached content and forwards Moodle requests to the application load balancer.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+  - key: aws-certificate-manager
+    name: AWS Certificate Manager
+    description: Manages SSL/TLS certificates for secure connections through CloudFront or the application load balancer.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/certificate-manager/
+    types: [managed-service]
+    platform: aws
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Application Load Balancer distributes incoming requests across Moodle application servers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-ec2-auto-scaling
+    name: Amazon EC2 Auto Scaling
+    description: Scales the Moodle application server fleet across multiple Availability Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/autoscaling/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute instances that run the Moodle application servers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-efs
+    name: Amazon Elastic File System
+    description: Shared file storage that can hold Moodle data and other content.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/efs/
+    types: [managed-service, data-platform]
+    platform: aws
+  - key: amazon-elasticache
+    name: Amazon ElastiCache
+    description: Managed Redis or Memcached clusters for Moodle sessions and application caches.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticache/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-aurora
+    name: Amazon Aurora
+    description: MySQL- or PostgreSQL-compatible relational database service for Moodle data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-codecommit
+    name: AWS CodeCommit
+    description: Private Git repositories for Moodle PHP code and CI/CD configuration.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codecommit/
+    types: [managed-service]
+    platform: aws
+  - key: aws-codebuild
+    name: AWS CodeBuild
+    description: Builds and tests source code and produces deployable software packages.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codebuild/
+    types: [managed-service]
+    platform: aws
+  - key: aws-codedeploy
+    name: AWS CodeDeploy
+    description: Coordinates application updates and can support blue/green deployments.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codedeploy/
+    types: [managed-service]
+    platform: aws
+  - key: aws-codepipeline
+    name: AWS CodePipeline
+    description: Automates the source, build, test, and deployment stages for code changes.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codepipeline/
+    types: [managed-service]
+    platform: aws
+  - key: aws-secrets-manager
+    name: AWS Secrets Manager
+    description: Protects Moodle application secrets and can rotate them automatically.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/secrets-manager/
+    types: [managed-service]
+    platform: aws
+  - key: aws-systems-manager-parameter-store
+    name: AWS Systems Manager Parameter Store
+    description: Stores Moodle configuration parameters such as shared storage, database, and cache settings.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/systems-manager/features/
+    types: [managed-service]
+    platform: aws
+  - key: aws-systems-manager-agent
+    name: AWS Systems Manager Agent
+    description: Optional instance agent that can provide Systems Manager access without exposing an SSH port.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/systems-manager/latest/userguide/ssm-agent.html
+    types: [library]
+  - key: moodle
+    name: Moodle
+    description: Learning management system software for educators, administrators, and learners.
+    vendor: Moodle
+    url: https://moodle.org/
+    types: [library]
+  - key: php
+    name: PHP
+    description: Server-side programming language used by Moodle.
+    vendor: The PHP Group
+    url: https://www.php.net/
+    types: [library]
