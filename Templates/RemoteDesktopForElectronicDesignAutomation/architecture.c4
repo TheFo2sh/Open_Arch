@@ -1,0 +1,80 @@
+// Remote Desktop for Electronic Design Automation, after AWS's reference architecture
+// (https://docs.aws.amazon.com/reference-architecture-diagrams/latest/remote-desktop-eda/remote-desktop-eda.html).
+// Systems and users are slots, mapped onto the project's own when the template is applied.
+model {
+  engineer = user 'EDA engineer' {
+    description 'Connects from a local system to use the remote FPGA design workstation.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    cloudformation = platform 'AWS CloudFormation' {
+      description 'Deploys the stack using the selected VPC, subnet, and Availability Zone.'
+      metadata {
+        uses 'aws-cloudformation'
+      }
+    }
+
+    marketplace = platform 'AWS Marketplace' {
+      description 'The source for the subscribed FPGA Developer AMI.'
+      metadata {
+        uses 'aws-marketplace'
+      }
+    }
+
+    vpc = platform 'Amazon Virtual Private Cloud' {
+      description 'The selected VPC contains the workstation subnet and a security group.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      ec2 = platform 'Amazon EC2' {
+        description 'A single remote desktop instance in the selected Availability Zone.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+
+        workstation = system 'FPGA design workstation' {
+          description 'The FPGA Developer AMI instance, with Vivado pre-installed.'
+
+          desktop = container 'Remote desktop access' {
+            description 'Amazon DCV provides the desktop session over port 8443.'
+            metadata {
+              uses 'amazon-dcv'
+            }
+          }
+          designTools = container 'FPGA design tools' {
+            description 'The Xilinx Vivado Design Suite included with the FPGA Developer AMI.'
+            metadata {
+              uses 'xilinx-vivado'
+            }
+          }
+        }
+      }
+    }
+
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Optional bucket access for loading design data.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+  }
+
+  engineer -> aws.vpc.ec2.workstation 'Connects to with Amazon DCV over port 8443'
+  aws.cloudformation -> aws.vpc 'Deploys the stack into'
+  aws.cloudformation -> aws.vpc.ec2.workstation 'Creates'
+  aws.marketplace -> aws.vpc.ec2.workstation 'Supplies the FPGA Developer AMI for'
+  aws.vpc.ec2.workstation.desktop -> aws.vpc.ec2.workstation.designTools 'Presents'
+  aws.vpc.ec2.workstation -> aws.s3 'Optionally accesses design data in'
+}
+
+views {
+  view index {
+    title 'Remote Desktop for Electronic Design Automation'
+    include *, aws.*, aws.vpc.*, aws.vpc.ec2.*, aws.vpc.ec2.workstation.*
+  }
+}

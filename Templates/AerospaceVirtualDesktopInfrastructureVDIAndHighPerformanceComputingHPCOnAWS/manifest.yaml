@@ -1,0 +1,7 @@
+PackageId: OpenArch.AerospaceVirtualDesktopInfrastructureVDIAndHighPerformanceComputingHPCOnAWS
+Name: Aerospace Virtual Desktop Infrastructure (VDI) and High Performance Computing (HPC) on AWS
+Description: Aerospace CAE environment with Windows and Linux virtual desktops, HPC compute, centralized directory services, SFTP data exchange, and shared storage.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, aerospace, vdi, hpc, cae]
