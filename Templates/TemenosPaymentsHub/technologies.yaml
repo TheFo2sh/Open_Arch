@@ -1,0 +1,212 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: temenos-payments-hub
+    name: Temenos Payments Hub
+    description: Temenos payment initiation and distribution product represented by the application system slot.
+    vendor: Temenos
+    types: [third-party]
+  - key: aws-client-vpn
+    name: AWS Client VPN
+    description: VPN access path shown for users reaching the private API endpoint.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/client-vpn/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Alternative private on-premises access path named in the service architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Virtual network boundary shown around the private endpoint and application services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-vpc-endpoints
+    name: Amazon VPC endpoints
+    description: Private API and service endpoint access shown in the architecture.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-privatelink
+    name: AWS PrivateLink
+    description: Private connectivity from the application VPC to AWS services through endpoints.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/privatelink/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Manages API access and routes private requests to Lambda microservices and containerized processing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-api-gateway-vpc-link
+    name: Amazon API Gateway VPC Link
+    description: Private integration path from an API Gateway HTTP API to an Application Load Balancer in the availability architecture.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-vpc-links.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the lightweight payment microservices and their optimized data-store integrations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Optimized data store for lightweight Lambda microservices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-kinesis
+    name: Amazon Kinesis
+    description: Stream service shown in the Lambda and private endpoint portion of the service diagram; its specific role is not described.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Distributes requests to the front-end ECS containers; the availability view identifies an Application Load Balancer.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ecs
+    name: Amazon Elastic Container Service
+    description: Runs the scalable front-end and back-end containerized payment processing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecs/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-fargate
+    name: AWS Fargate
+    description: Serverless compute option for the ECS containers in the availability architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fargate/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon Elastic Compute Cloud
+    description: Alternative compute option for ECS containers, alongside Fargate, in the availability architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-mq
+    name: Amazon MQ
+    description: Message broker between front-end and back-end ECS containers; the availability view describes active/standby.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/amazon-mq/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-rds
+    name: Amazon Relational Database Service
+    description: Relational database option shown for the containerized online transaction processing tier.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-rds-for-oracle
+    name: Amazon RDS for Oracle
+    description: Relational database option named by the service architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/oracle/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-aurora
+    name: Amazon Aurora
+    description: Relational database option named by the service architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: nuodb
+    name: NuoDB
+    description: Third-party relational database option named by the service architecture; deployment details are not provided.
+    vendor: NuoDB
+    url: https://www.nuodb.com/
+    types: [third-party]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: AWS service accessed through a VPC endpoint in the service architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ecr
+    name: Amazon Elastic Container Registry
+    description: AWS service accessed through a VPC endpoint in the service architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecr/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-secrets-manager
+    name: AWS Secrets Manager
+    description: AWS service shown as accessible from the VPC through PrivateLink.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/secrets-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: AWS service shown as accessible from the VPC through PrivateLink.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
