@@ -1,0 +1,162 @@
+// Moodle for High Availability on AWS, based on AWS's reference architecture.
+// The AWS reference diagram shows the service topology; network layout details
+// such as VPCs, subnets, and Availability Zones are deployment configuration.
+model {
+  learners = user 'Moodle users' {
+    description 'Learners, educators, and administrators who use the Moodle learning platform.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      description 'Directs users to the Moodle application through CloudFront.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    cloudfront = platform 'Amazon CloudFront' {
+      description 'Serves cached content from edge locations and forwards requests to the load balancer.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    acm = platform 'AWS Certificate Manager' {
+      description 'Provides TLS certificates for CloudFront and/or the Application Load Balancer.'
+      metadata {
+        uses 'aws-certificate-manager'
+      }
+    }
+    internetGateway = platform 'VPC Internet Gateway' {
+      description 'Internet entry and egress path for the VPC.'
+      metadata {
+        uses 'amazon-internet-gateway'
+      }
+    }
+    natGateway = platform 'AWS NAT Gateway' {
+      description 'Provides outbound internet access for resources in private application subnets.'
+      metadata {
+        uses 'amazon-nat-gateway'
+      }
+    }
+    alb = platform 'Application Load Balancer' {
+      description 'Distributes incoming application traffic across Moodle servers in multiple Availability Zones.'
+      metadata {
+        uses 'application-load-balancer'
+      }
+    }
+
+    autoScaling = platform 'Amazon EC2 Auto Scaling' {
+      description 'Maintains and scales the Moodle application server group across Availability Zones.'
+      metadata {
+        uses 'amazon-ec2-auto-scaling'
+      }
+      ec2 = platform 'Amazon EC2' {
+        description 'Runs the Moodle application server instances.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        moodle = system 'Moodle learning platform' {
+          description 'The Moodle system used by learners, educators, and administrators.'
+          web = container 'Moodle web application' {
+            description 'Moodle LMS application running on PHP.'
+            technology 'Moodle, PHP'
+            metadata {
+              uses 'moodle, php'
+            }
+          }
+        }
+      }
+    }
+
+    efs = platform 'Amazon Elastic File System' {
+      description 'Shared Moodle data and content storage mounted by application servers.'
+      metadata {
+        uses 'amazon-efs'
+      }
+    }
+    elasticache = platform 'Amazon ElastiCache for Redis' {
+      description 'Managed cache shown in the reference diagram for Moodle sessions and application caches.'
+      metadata {
+        uses 'amazon-elasticache-redis'
+      }
+      cache = database 'Session and application cache' {
+        description 'Moodle sessions and application cache data.'
+      }
+    }
+    aurora = platform 'Amazon Aurora' {
+      description 'Managed relational database cluster with writer and reader nodes.'
+      metadata {
+        uses 'amazon-aurora'
+      }
+      moodleDb = database 'Moodle database' {
+        description 'Persistent Moodle application data.'
+      }
+    }
+
+    codeCommit = platform 'AWS CodeCommit' {
+      description 'Private Git repository for Moodle source and deployment configuration.'
+      metadata {
+        uses 'aws-codecommit'
+      }
+    }
+    codeBuild = platform 'AWS CodeBuild' {
+      description 'Builds and tests Moodle application artifacts.'
+      metadata {
+        uses 'aws-codebuild'
+      }
+    }
+    codeDeploy = platform 'AWS CodeDeploy' {
+      description 'Deploys application artifacts to Moodle servers.'
+      metadata {
+        uses 'aws-codedeploy'
+      }
+    }
+    codePipeline = platform 'AWS CodePipeline' {
+      description 'Orchestrates source, build, and deployment phases.'
+      metadata {
+        uses 'aws-codepipeline'
+      }
+    }
+    secretsManager = platform 'AWS Secrets Manager' {
+      description 'Protects Moodle application secrets and can rotate them automatically.'
+      metadata {
+        uses 'aws-secrets-manager'
+      }
+    }
+    parameterStore = platform 'AWS Systems Manager Parameter Store' {
+      description 'Stores Moodle environment configuration, including service endpoints.'
+      metadata {
+        uses 'aws-systems-manager-parameter-store'
+      }
+    }
+  }
+
+  learners -> aws.autoScaling.ec2.moodle 'Uses'
+  aws.route53 -> aws.cloudfront 'Directs the domain to'
+  aws.cloudfront -> aws.alb 'Forwards application requests to'
+  aws.acm -> aws.cloudfront 'Provides TLS certificates for'
+  aws.acm -> aws.alb 'Provides TLS certificates for'
+  aws.internetGateway -> aws.alb 'Provides internet connectivity for'
+  aws.natGateway -> aws.internetGateway 'Uses for outbound internet access'
+  aws.autoScaling.ec2.moodle -> aws.natGateway 'Uses for outbound internet access'
+  aws.alb -> aws.autoScaling.ec2.moodle 'Distributes traffic to'
+  aws.autoScaling.ec2.moodle.web -> aws.efs 'Reads and writes shared Moodle files on'
+  aws.autoScaling.ec2.moodle.web -> aws.elasticache.cache 'Stores sessions and application cache in'
+  aws.autoScaling.ec2.moodle.web -> aws.aurora.moodleDb 'Reads and writes application data in'
+  aws.codeCommit -> aws.codePipeline 'Provides source to'
+  aws.codePipeline -> aws.codeBuild 'Orchestrates build with'
+  aws.codeBuild -> aws.codeDeploy 'Provides build artifacts to'
+  aws.codeDeploy -> aws.autoScaling.ec2.moodle 'Deploys application updates to'
+  aws.secretsManager -> aws.autoScaling.ec2.moodle 'Provides application secrets to'
+  aws.parameterStore -> aws.autoScaling.ec2.moodle 'Provides environment configuration to'
+}
+
+views {
+  view index {
+    title 'Moodle for High Availability on AWS'
+    include *, aws.*, aws.autoScaling.*, aws.autoScaling.ec2.*, aws.autoScaling.ec2.moodle.*, aws.elasticache.*, aws.aurora.*
+  }
+}

@@ -1,0 +1,155 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: freertos
+    name: FreeRTOS
+    description: Real-time operating system for the farm sensors and cameras described in the reference architecture.
+    vendor: Amazon Web Services
+    url: https://www.freertos.org/
+    types: [compute-platform]
+    platform: other
+    hosts: [system]
+  - key: aws-iot-greengrass
+    name: AWS IoT Greengrass
+    description: Edge runtime that supports intermittent connectivity and streams edge-device data to AWS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/greengrass/
+    types: [compute-platform]
+    platform: other
+    hosts: [system]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs protocol conversion for third-party devices and imports IoT Device Defender reports into Security Hub CSPM.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Ingests data streamed from AWS IoT Greengrass edge devices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-kinesis-video-streams
+    name: Amazon Kinesis Video Streams
+    description: Streams and replays real-time farm video.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/video-streams/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-managed-service-for-apache-flink
+    name: Amazon Managed Service for Apache Flink
+    description: Derives real-time insights from streaming data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/managed-service-apache-flink/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sns
+    name: Amazon Simple Notification Service (Amazon SNS)
+    description: Delivers notifications about real-time insights to users.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-opensearch-service
+    name: Amazon OpenSearch Service
+    description: Provides analytics capabilities for the farm architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/opensearch-service/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service (Amazon S3)
+    description: Object storage used as the farm data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Securely transfers farm-owned data, such as planting records and farm finances, into the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-privatelink
+    name: AWS PrivateLink
+    description: Provides private access to a sensor ecosystem hosted on AWS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/privatelink/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Delivers farm insights to users through an API.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-quick
+    name: Amazon Quick
+    description: Provides visualizations of farm insights to users.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quick/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Builds and deploys machine-learning models for edge inference.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/ai/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sagemaker-ground-truth
+    name: Amazon SageMaker Ground Truth
+    description: Manages the data-labeling workflow used for machine-learning models.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/groundtruth/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-glue
+    name: AWS Glue
+    description: Its crawler infers schemas from new S3 objects and makes them available in the Glue Data Catalog.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Runs on-demand queries against the farm data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-device-defender
+    name: AWS IoT Device Defender
+    description: Produces device security reports consumed by the Lambda import function.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-device-defender/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-security-hub-cspm
+    name: AWS Security Hub CSPM
+    description: Centralizes incident response findings imported from AWS IoT Device Defender.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/security-hub/
+    types: [managed-service]
+    platform: aws
+    hosts: []

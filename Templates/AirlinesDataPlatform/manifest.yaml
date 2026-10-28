@@ -1,0 +1,7 @@
+PackageId: OpenArch.AirlinesDataPlatform
+Name: Airlines Data Platform
+Description: A domain-owned airline data platform that combines operational events and batch data in an Amazon S3 lake for customer 360, analytics, and machine learning.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, data-platform, analytics, airlines]
