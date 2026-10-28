@@ -1,0 +1,115 @@
+model {
+  aws = zone 'AWS customer account' {
+    metadata { platform 'aws' }
+
+    dms = platform 'AWS Database Migration Service' {
+      metadata { uses 'aws-database-migration-service' }
+    }
+    appFlow = platform 'Amazon AppFlow' {
+      metadata { uses 'amazon-appflow' }
+    }
+    dataSync = platform 'AWS DataSync' {
+      metadata { uses 'aws-datasync' }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      metadata { uses 'amazon-kinesis-data-streams' }
+    }
+    msk = platform 'Amazon Managed Streaming for Apache Kafka' {
+      metadata { uses 'amazon-msk' }
+    }
+    iotCore = platform 'AWS IoT Core' {
+      metadata { uses 'aws-iot-core' }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata { uses 'amazon-s3' }
+      ingestedData = database 'Ingested data' {
+        description 'Stores source and third-party data ingested into the AWS account.'
+      }
+      analyticsData = database 'Curated and analytics data' {
+        description 'Stores o9 output and data prepared for analytics and AI/ML workloads.'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      metadata { uses 'aws-glue' }
+    }
+    dataExchange = platform 'AWS Data Exchange' {
+      metadata { uses 'aws-data-exchange' }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata { uses 'aws-lambda' }
+    }
+    forecast = platform 'Amazon Forecast' {
+      metadata { uses 'amazon-forecast' }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      metadata { uses 'amazon-sagemaker-ai' }
+    }
+    emr = platform 'Amazon EMR' {
+      metadata { uses 'amazon-emr' }
+    }
+    redshift = platform 'Amazon Redshift' {
+      metadata { uses 'amazon-redshift' }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      metadata { uses 'aws-glue-data-catalog' }
+    }
+    lakeFormation = platform 'AWS Lake Formation' {
+      metadata { uses 'aws-lake-formation' }
+    }
+    iam = platform 'AWS Identity and Access Management (IAM)' {
+      metadata { uses 'aws-iam' }
+    }
+  }
+
+  sqlNoSqlSources = system 'SQL and NoSQL source systems' {
+    description 'Slot for customer SQL and NoSQL systems supplying planning data.'
+  }
+  businessApplicationSources = system 'ERP, CRM, and SaaS sources' {
+    description 'Slot for customer ERP, CRM, and other SaaS applications supplying planning data.'
+  }
+  fileShareSources = system 'File shares' {
+    description 'Slot for customer file shares supplying planning data.'
+  }
+  streamingSources = system 'Streaming data sources' {
+    description 'Slot for streaming sources such as social media, smart devices, and logs.'
+  }
+  thirdPartyProviders = system 'Third-party data providers' {
+    description 'Slot for subscribed data providers, with TransUnion, IMDb, and Reuters given as examples by AWS.'
+  }
+  o9 = system 'o9 demand planning SaaS' {
+    description 'Slot for the external o9 SaaS solution and enterprise knowledge graph; AWS documents native o9 APIs and SFTP for integration.'
+  }
+
+  sqlNoSqlSources -> aws.dms 'Database migration or replication'
+  businessApplicationSources -> aws.appFlow 'Application data transfer'
+  fileShareSources -> aws.dataSync 'File transfer'
+  streamingSources -> aws.kinesis 'Streaming feed ingestion'
+  streamingSources -> aws.msk 'Streaming feed ingestion'
+  streamingSources -> aws.iotCore 'Streaming feed ingestion'
+  thirdPartyProviders -> aws.dataExchange 'Subscribe to and use third-party data'
+  streamingSources -> o9 'Direct ingestion through native o9 APIs or SFTP'
+
+  aws.dms -> aws.s3.ingestedData 'Stores ingested data'
+  aws.appFlow -> aws.s3.ingestedData 'Stores ingested data'
+  aws.dataSync -> aws.s3.ingestedData 'Stores ingested data'
+  aws.kinesis -> aws.lambda 'Optional AWS SDK or Lambda path to Amazon S3'
+  aws.msk -> aws.s3.ingestedData 'Stores ingested data'
+  aws.iotCore -> aws.s3.ingestedData 'Stores ingested data'
+  aws.lambda -> aws.s3.ingestedData 'Stores streaming data'
+  aws.dataExchange -> aws.s3.ingestedData 'Makes subscribed data available in AWS'
+
+  aws.s3.ingestedData -> aws.glue 'Batch ingestion to o9 through the AWS SDK or AWS Lambda'
+  aws.glue -> o9 'Batch-ingests AWS customer account data'
+  aws.kinesis -> o9 'Streaming data via o9 REST APIs'
+  o9 -> aws.s3.analyticsData 'Outbound data via S3 APIs or optional AWS Lambda'
+  o9 -> aws.lambda 'Optional API-based data exchange'
+  aws.lambda -> o9 'Optional API-based data exchange'
+
+  aws.s3.analyticsData -> aws.forecast 'Complementary machine learning workloads'
+  aws.s3.analyticsData -> aws.sagemaker 'Complementary machine learning workloads'
+  aws.s3.analyticsData -> aws.emr 'Big data processing'
+  aws.s3.analyticsData -> aws.redshift 'Data warehousing'
+  aws.s3.analyticsData -> aws.glueCatalog 'Data lake catalog'
+  aws.glueCatalog -> aws.lakeFormation 'Data lake governance'
+  aws.iam -> aws.lakeFormation 'Access controls'
+}
