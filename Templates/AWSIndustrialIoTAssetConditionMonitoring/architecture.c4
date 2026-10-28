@@ -1,0 +1,137 @@
+// AWS Industrial IoT Asset Condition Monitoring, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/industrial-iot-asset-condition-monitoring/industrial-iot-asset-condition-monitoring.html
+// Systems and users are slots mapped onto the project's own when the template is applied.
+model {
+  operationsEngineer = user 'Operations Engineer' {
+    description 'Receives fault notifications and monitors equipment health.'
+  }
+  operationsManager = user 'Operations Manager' {
+    description 'Reviews analytics and insights from equipment telemetry.'
+  }
+
+  factory = zone 'Factory' {
+    metadata {
+      platform 'other'
+    }
+
+    greengrass = platform 'AWS IoT Greengrass' {
+      description 'Edge runtime and connector environment on the factory gateway.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+
+      edge = system 'Factory edge gateway' {
+        description 'Project system slot for the factory gateway and its edge integrations.'
+
+        sitewiseConnector = container 'AWS IoT SiteWise Connector' {
+          description 'Collects factory machine data using OPC-UA.'
+          metadata {
+            uses 'aws-iot-sitewise-connector'
+          }
+        }
+        localConnectors = container 'Greengrass connectors and local Lambda functions' {
+          description 'Interfaces with local Modbus, MQTT, or HTTP traffic.'
+          metadata {
+            uses 'aws-iot-greengrass-lambda-connector'
+          }
+        }
+      }
+    }
+
+    equipment = system 'Factory systems and data sources' {
+      description 'Project system slot for industrial control and data-source systems associated with factory machines; the reference depicts an OPC-UA server and on-premises historian but names no implementations.'
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    sitewise = platform 'AWS IoT SiteWise' {
+      metadata {
+        uses 'aws-iot-sitewise'
+      }
+      assetModels = database 'Asset models and equipment data' {
+        description 'Represents on-premises devices, equipment, and processes with their equipment data.'
+      }
+    }
+    sitewiseMonitor = platform 'AWS IoT SiteWise Monitor' {
+      metadata {
+        uses 'aws-iot-sitewise-monitor'
+      }
+    }
+    iotCore = platform 'AWS IoT Core' {
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    iotAnalytics = platform 'AWS IoT Analytics' {
+      metadata {
+        uses 'aws-iot-analytics'
+      }
+      telemetry = database 'Telemetry data store' {
+        description 'Stores device telemetry processed by an IoT Analytics channel and pipeline.'
+      }
+    }
+    iotEvents = platform 'AWS IoT Events' {
+      metadata {
+        uses 'aws-iot-events'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    sns = platform 'Amazon SNS' {
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      mitigation = system 'Mitigation function' {
+        description 'Project system slot for the function that sends mitigation commands through AWS IoT Core.'
+      }
+    }
+
+    monitoringPortal = system 'Equipment monitoring portal' {
+      description 'Project system slot for the SiteWise Monitor web portal.'
+    }
+    analyticsDashboard = system 'Equipment analytics dashboard' {
+      description 'Project system slot for dashboards backed by AWS IoT Analytics.'
+    }
+    faultNotifications = system 'Fault notifications' {
+      description 'Project system slot for notifications delivered to factory operators.'
+    }
+  }
+
+  factory.equipment -> factory.greengrass.edge 'Provides machine telemetry to'
+  factory.greengrass.edge.sitewiseConnector -> aws.sitewise.assetModels 'Publishes OPC-UA equipment data to'
+  factory.greengrass.edge.localConnectors -> aws.iotCore 'Publishes device messages to'
+  aws.iotCore -> aws.iotEvents 'Routes rule-triggered messages to'
+  aws.iotCore -> aws.iotAnalytics.telemetry 'Sends device telemetry to'
+  aws.sitewise.assetModels -> aws.sitewiseMonitor 'Provides equipment data to'
+  aws.sitewiseMonitor -> aws.monitoringPortal 'Provides the monitoring portal'
+  aws.iotAnalytics.telemetry -> aws.quickSight 'Provides processed telemetry to'
+  aws.quickSight -> aws.analyticsDashboard 'Provides analytics dashboards'
+  aws.iotEvents -> aws.sns 'Publishes fault events to'
+  aws.sns -> aws.faultNotifications 'Delivers event notifications through'
+  aws.faultNotifications -> operationsEngineer 'Notifies'
+  aws.monitoringPortal -> operationsEngineer 'Shows equipment health to'
+  aws.analyticsDashboard -> operationsManager 'Shows telemetry insights to'
+  aws.iotEvents -> aws.lambda.mitigation 'Triggers mitigation for'
+  aws.lambda.mitigation -> aws.iotCore 'Sends mitigation commands through'
+  aws.iotCore -> factory.greengrass.edge 'Forwards mitigation commands to'
+  factory.greengrass.edge -> factory.equipment 'Applies mitigation actions to'
+}
+
+views {
+  view index {
+    title 'AWS Industrial IoT Asset Condition Monitoring'
+    include *, factory.*, factory.greengrass.*, factory.greengrass.edge.*, aws.*, aws.sitewise.*, aws.iotAnalytics.*, aws.lambda.*
+  }
+}
