@@ -1,0 +1,89 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Isolated virtual networks for the Perforce servers, gateways and workstations in each AWS Region.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-transit-gateway
+    name: AWS Transit Gateway
+    description: Central hub for connections between VPCs and the corporate network.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Dedicated network connection between the corporate data center and AWS, shown through a Direct Connect Gateway.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-site-to-site-vpn
+    name: AWS Site-to-Site VPN
+    description: Encrypted alternative to Direct Connect for connecting the corporate data center to the AWS primary Region.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/site-to-site-vpn/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-client-vpn
+    name: AWS Client VPN
+    description: Remote-user VPN option for accessing Perforce in AWS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/client-vpn/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform for Perforce commit and edge servers and optional remote virtual workstations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-vpc-nat-gateway
+    name: Amazon VPC NAT Gateway
+    description: Allows instances in private subnets to connect to external services without accepting inbound connections from them.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ebs-gp3
+    name: Amazon EBS gp3
+    description: Block storage option for Perforce server state and depots smaller than 16 TB.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ebs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-efs
+    name: Amazon Elastic File System
+    description: Shared file storage option for Perforce depots larger than 16 TB; AWS recommends EFS Standard-Infrequent Access for cost optimization.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/efs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-backup
+    name: AWS Backup
+    description: Backup service for Perforce depots stored on Amazon EFS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/backup/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: perforce-helix-core
+    name: Perforce Helix Core
+    description: Third-party version-control service used for the commit, standby and edge server roles.
+    vendor: Perforce Software
+    url: https://www.perforce.com/products/helix-core
+    types: [library, third-party]

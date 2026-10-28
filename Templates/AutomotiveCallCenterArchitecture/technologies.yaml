@@ -1,0 +1,100 @@
+technologies:
+  - key: amazon-connect
+    name: Amazon Connect
+    description: Cloud contact center for call flows, agent queues, customer notifications, and CRM integration.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/connect/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-connect-contact-lens
+    name: Amazon Connect Contact Lens
+    description: Amazon Connect capability for conversation transcription, intelligent search, sentiment and issue analysis, contact categorization, and call summaries.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/connect/contact-lens/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-connect-voice-id
+    name: Amazon Connect Voice ID
+    description: Voice authentication capability used to authenticate real-time callers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/connect/voice-id/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: API service used to exchange vehicle sensor and location snapshots with the connected-vehicle backend.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Event-driven compute for assigning call case IDs, fulfilling Lex intents, and requesting connected-vehicle data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-lex
+    name: Amazon Lex
+    description: Conversational interface for automating eligible service and concierge calls.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lex/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Database integrated with Amazon Lex and AWS Lambda to formulate responses for identified intents.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Streams call metrics and insights for storage and analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service (Amazon S3)
+    description: Stores streamed call metrics, sentiment analysis, call matrix, and product feedback for analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Queries call sentiment, call metrics, and product feedback data stored in Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Visualizes analytics as dashboards for business metrics and key performance indicators.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
