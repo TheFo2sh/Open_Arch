@@ -1,0 +1,121 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-codecommit
+    name: AWS CodeCommit
+    description: Source control service whose repository activity produces CI/CD events.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codecommit/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-codebuild
+    name: AWS CodeBuild
+    description: Build service whose CloudWatch metrics are included in the dashboard data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codebuild/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-codedeploy
+    name: AWS CodeDeploy
+    description: Deployment service whose activity produces CI/CD events.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codedeploy/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-codepipeline
+    name: AWS CodePipeline
+    description: Pipeline service whose events can contribute to recovery-time metrics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codepipeline/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-eventbridge
+    name: Amazon EventBridge
+    description: Matches CI/CD and alarm events with rules and routes them to a Firehose delivery stream.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eventbridge/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudwatch-metric-streams
+    name: Amazon CloudWatch Metric Streams
+    description: Streams CodeBuild metrics to a Firehose delivery stream.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Provides alarms for canary or pipeline status; alarm state changes can be sent to EventBridge.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudwatch-synthetics
+    name: Amazon CloudWatch Synthetics
+    description: Optional canary whose status can be monitored by a CloudWatch alarm for recovery-time metrics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/synthetics/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: API endpoint that receives GitHub push events and forwards them to Firehose.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-data-firehose
+    name: Amazon Data Firehose
+    description: Delivery stream that receives events or metrics, invokes transformation, and delivers data to S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the Firehose data-transformation function.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores transformed CI/CD event and metric data for downstream queries.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Queries the data stored in S3 and returns query results to QuickSight.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Uses Athena query results to build dashboard visualizations for management teams.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: github
+    name: GitHub
+    description: Third-party source hosting service that sends repository push events to the solution's API endpoint.
+    vendor: GitHub
+    url: https://github.com/
+    types: [third-party]

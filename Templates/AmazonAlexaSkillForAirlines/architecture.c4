@@ -1,0 +1,171 @@
+// Amazon Alexa Skill for Airlines, based on AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/alexa-skill-airlines/alexa-skill-airlines.html
+// Travelers, airline software systems, and the selected PSS are slots to map when applying the template.
+model {
+  traveler = user 'Airline traveler' {
+    description 'Invokes the airline skill through Amazon Alexa and receives an authentication card in the Alexa app.'
+  }
+
+  passengerServiceSystem = system 'Airline Passenger Service System (PSS)' {
+    description 'The airline-selected PSS; AWS names Amadeus, Sabre, and Navitaire as examples but does not specify a provider or interface.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    cloudfront = platform 'Amazon CloudFront' {
+      description 'Provides network-latency optimization for the authentication experience.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Provides API entry points for authentication and the natural-language understanding integrations layer.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the airline skill functions and real-time analytics.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      skillBackend = system 'Airline Alexa Skill backend' {
+        description 'The airline skill workflow, integrations, and application-content update functions.'
+        functions = container 'Skill function workflow' {
+          description 'Coordinates the skill interaction and its airline integrations.'
+          authentication = component 'Authentication flow' {
+            description 'Retrieves authentication-provider information and participates in customer authentication.'
+          }
+          integrations = component 'Airline integrations' {
+            description 'Connects the skill workflow to the airline-selected Passenger Service System.'
+          }
+          contentUpdates = component 'Content and skill configuration updates' {
+            description 'Applies updates coordinated by the content-update workflow.'
+          }
+        }
+      }
+      analytics = system 'Real-time application analytics' {
+        description 'Processes real-time application analytics.'
+        analyticsFunction = container 'Analytics function' {
+          description 'Performs the real-time analytics work described by the reference architecture.'
+        }
+      }
+    }
+    cognito = platform 'Amazon Cognito' {
+      description 'Authenticates airline customers.'
+      metadata {
+        uses 'amazon-cognito'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores authentication-provider configuration and application objects used by the documented logging and content-update flows.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    ecs = platform 'Amazon Elastic Container Service' {
+      description 'Runs the natural-language understanding engine.'
+      metadata {
+        uses 'amazon-ecs'
+      }
+      nlu = system 'Natural-language understanding engine' {
+        description 'Processes natural-language input for the airline skill.'
+        engine = container 'NLU engine' {
+          description 'The NLU workload deployed on Amazon ECS; the implementation is not specified.'
+        }
+      }
+    }
+    loadBalancer = platform 'Application Load Balancer' {
+      description 'Balances NLU requests to the Amazon ECS workload.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Provides low-latency access to skill content and stores AI/ML inference results.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      skillData = database 'Skill content and inference results' {
+        description 'Low-latency skill content and the results of AI/ML inference.'
+      }
+    }
+    elasticache = platform 'Amazon ElastiCache' {
+      description 'Provides low-latency conversation-state access.'
+      metadata {
+        uses 'amazon-elasticache'
+      }
+      conversationState = database 'Conversation state' {
+        description 'Conversation state used by the NLU and skill experience.'
+      }
+    }
+    cloudwatch = platform 'Amazon CloudWatch Logs' {
+      description 'Captures application logs.'
+      metadata {
+        uses 'amazon-cloudwatch-logs'
+      }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      description 'Streams application logs to storage.'
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+    aurora = platform 'Amazon Aurora' {
+      description 'Stores real-time analytics results; the database engine is not specified.'
+      metadata {
+        uses 'amazon-aurora'
+      }
+      analyticsResults = database 'Real-time analytics results' {
+        description 'Results of real-time application analytics.'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Runs AI/ML models on conversation trends.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+      trendModels = system 'Conversation trend models' {
+        description 'AI/ML models applied to conversation trends; their input source and training workflow are not specified.'
+        models = container 'Conversation trend models' {
+          description 'The AI/ML model workload; model types and implementation are not specified.'
+        }
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Orchestrates updates to application content and Alexa skill configuration.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+  }
+
+  traveler -> aws.lambda.skillBackend 'Uses the airline skill through Amazon Alexa'
+  aws.cloudfront -> aws.apiGateway 'Provides latency optimization for authentication access'
+  aws.apiGateway -> aws.lambda.skillBackend 'Invokes skill and authentication functions'
+  aws.s3 -> aws.lambda.skillBackend 'Provides authentication-provider information to'
+  aws.lambda.skillBackend -> aws.cognito 'Authenticates customers with'
+  aws.apiGateway -> aws.loadBalancer 'Routes NLU requests through'
+  aws.loadBalancer -> aws.ecs.nlu 'Balances requests to'
+  aws.ecs.nlu -> aws.dynamodb.skillData 'Reads low-latency skill content from'
+  aws.ecs.nlu -> aws.elasticache.conversationState 'Accesses conversation state in'
+  aws.lambda.skillBackend.functions.integrations -> passengerServiceSystem 'Integrates with the airline-selected PSS; its protocol is unspecified'
+  aws.lambda.analytics -> aws.aurora.analyticsResults 'Stores real-time analytics results in'
+  aws.sagemaker.trendModels -> aws.dynamodb.skillData 'Stores AI/ML inference results in'
+  aws.lambda.skillBackend -> aws.cloudwatch 'Emits application logs to'
+  aws.ecs.nlu -> aws.cloudwatch 'Emits application logs to'
+  aws.cloudwatch -> aws.firehose 'Streams application logs through'
+  aws.firehose -> aws.s3 'Delivers application log objects to'
+  aws.s3 -> aws.stepFunctions 'Starts a workflow on object PUT'
+  aws.stepFunctions -> aws.lambda.skillBackend 'Orchestrates content and skill-configuration updates'
+}
+
+views {
+  view index {
+    title 'Amazon Alexa Skill for Airlines'
+    include *, aws.*, aws.lambda.*, aws.lambda.skillBackend.*, aws.lambda.analytics.*, aws.ecs.*, aws.ecs.nlu.*, aws.dynamodb.*, aws.elasticache.*, aws.aurora.*, aws.sagemaker.*, aws.sagemaker.trendModels.*
+  }
+}

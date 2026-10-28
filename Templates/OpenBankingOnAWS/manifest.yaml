@@ -1,0 +1,7 @@
+PackageId: OpenArch.OpenBankingOnAWS
+Name: Open Banking on AWS
+Description: Open Banking APIs on AWS for consent-based account information and payments, with secure connectivity to bank core systems, third-party access, and operational services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, banking, open-banking, financial-services, api]
