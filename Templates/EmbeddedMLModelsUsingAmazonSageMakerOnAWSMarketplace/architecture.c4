@@ -1,0 +1,138 @@
+// Embedded ML models using Amazon SageMaker AI on AWS Marketplace
+// Source: https://docs.aws.amazon.com/reference-architecture-diagrams/latest/embedded-ml-models-using-sagemaker-on-aws-marketplace/embedded-ml-models-using-sagemaker-on-aws-marketplace.html
+// Systems and users are M1Spec slots. The VPCs show the buyer and seller deployment boundaries.
+model {
+  seller = user 'Model seller' {
+    description 'Develops and packages the model code for listing on AWS Marketplace.'
+  }
+  buyer = user 'Model buyer' {
+    description 'Subscribes to the model and uses the buyer application.'
+  }
+
+  sellerDevelopment = system 'Seller model development' {
+    description 'The seller-authored model code and its packaged Docker image.'
+    modelImage = container 'Model image' {
+      metadata {
+        uses 'docker'
+      }
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    console = platform 'AWS Management Console' {
+      metadata {
+        uses 'aws-management-console'
+      }
+      subscription = system 'Marketplace subscription workflow' {
+        description 'The buyer uses the console to subscribe to the seller model listing.'
+      }
+    }
+
+    marketplace = platform 'AWS Marketplace' {
+      metadata {
+        uses 'aws-marketplace'
+      }
+    }
+    ecr = platform 'Amazon ECR' {
+      metadata {
+        uses 'amazon-ecr'
+      }
+    }
+    cloudformation = platform 'AWS CloudFormation' {
+      metadata {
+        uses 'aws-cloudformation'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      lambdaPackage = database 'Lambda deployment package' {
+        description 'The ZIP file from which the buyer deploys the Lambda functions.'
+      }
+      inferenceResults = database 'Inference responses' {
+        description 'Responses stored for the buyer application to use.'
+      }
+    }
+
+    buyerVpc = platform 'Buyer VPC' {
+      description 'The buyer-owned virtual private cloud; the SageMaker endpoint runs in network isolation mode.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      buyerApplication = system 'Buyer application' {
+        description 'The buyer application that sends data for processing and uses the stored response.'
+      }
+
+      sagemaker = platform 'Amazon SageMaker AI' {
+        metadata {
+          uses 'amazon-sagemaker-ai'
+        }
+        modelEndpoint = system 'Model invocation endpoint' {
+          description 'The network-isolated endpoint hosting the seller model container.'
+          modelContainer = container 'Seller model container' {
+            metadata {
+              uses 'docker'
+            }
+          }
+        }
+      }
+
+      buyerLambda = platform 'AWS Lambda' {
+        metadata {
+          uses 'aws-lambda'
+        }
+        buyerFunctions = system 'Buyer inference functions' {
+          description 'The buyer-side authorization and request proxy functions.'
+          authorizer = container 'Lambda authorizer'
+          proxy = container 'Lambda proxy'
+        }
+      }
+    }
+
+    sellerVpc = platform 'Seller/service provider VPC' {
+      description 'The seller-side VPC containing the subscription authenticator Lambda function.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+      sellerLambda = platform 'AWS Lambda' {
+        metadata {
+          uses 'aws-lambda'
+        }
+        sellerAuthenticator = system 'Subscription authenticator' {
+          description 'Seller-side Lambda function that returns an authorization token after subscription validation.'
+        }
+      }
+    }
+  }
+
+  seller -> sellerDevelopment 'Develops and packages the model in'
+  sellerDevelopment -> aws.ecr 'Pushes the model image to'
+  aws.ecr -> aws.marketplace 'Provides the packaged model for listing on'
+  buyer -> aws.console.subscription 'Subscribes to the listing using'
+  aws.console.subscription -> aws.marketplace 'Subscribes to the model listing on'
+  aws.marketplace -> aws.buyerVpc.sagemaker 'Provisions the subscribed model through'
+  aws.cloudformation -> aws.s3.lambdaPackage 'Reads the Lambda deployment package from'
+  aws.cloudformation -> aws.buyerVpc.buyerLambda.buyerFunctions 'Deploys the buyer-side functions in'
+  buyer -> aws.buyerVpc.buyerApplication 'Uses'
+  aws.buyerVpc.buyerApplication -> aws.buyerVpc.buyerLambda.buyerFunctions.authorizer 'Calls the initialization endpoint and /request'
+  aws.buyerVpc.buyerLambda.buyerFunctions.authorizer -> aws.sellerVpc.sellerLambda.sellerAuthenticator 'Requests subscription authorization'
+  aws.sellerVpc.sellerLambda.sellerAuthenticator -> aws.buyerVpc.buyerLambda.buyerFunctions.authorizer 'Returns a time-limited authorization token'
+  aws.buyerVpc.buyerLambda.buyerFunctions.authorizer -> aws.buyerVpc.buyerLambda.buyerFunctions.proxy 'Forwards requests with valid tokens'
+  aws.buyerVpc.buyerLambda.buyerFunctions.proxy -> aws.buyerVpc.sagemaker.modelEndpoint 'Invokes the endpoint with data to process'
+  aws.buyerVpc.sagemaker.modelEndpoint -> aws.buyerVpc.buyerLambda.buyerFunctions.proxy 'Returns the processed response'
+  aws.buyerVpc.buyerLambda.buyerFunctions.proxy -> aws.s3.inferenceResults 'Stores the inference response'
+  aws.buyerVpc.buyerApplication -> aws.s3.inferenceResults 'Uses the stored response'
+}
+
+views {
+  view index {
+    title 'Embedded ML models using Amazon SageMaker AI on AWS Marketplace'
+    include *, aws.*, aws.buyerVpc.*, aws.buyerVpc.sagemaker.*, aws.buyerVpc.buyerLambda.*, aws.buyerVpc.buyerLambda.buyerFunctions.*, aws.sellerVpc.*, aws.sellerVpc.sellerLambda.*
+  }
+}
