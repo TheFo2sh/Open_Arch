@@ -1,0 +1,73 @@
+technologies:
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Hosts the REST API used to upload screenshots and retrieve gallery metadata.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cognito
+    name: Amazon Cognito
+    description: Recommended authentication service for requests processed by API Gateway.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cognito/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the screenshot upload and processing function and the screenshot retrieval function.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-rekognition
+    name: Amazon Rekognition
+    description: Checks uploaded screenshots for inappropriate content using DetectModerationLabels.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rekognition/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: Can notify a user of the screenshot filtering result.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores processed screenshots and can optionally retain the raw uploads.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores in-game screenshot metadata and the associated S3 object key.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-dynamodb-accelerator
+    name: Amazon DynamoDB Accelerator
+    description: Optional in-memory cache for DynamoDB read requests.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/dax/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Content delivery network in front of the S3 bucket that serves processed screenshots.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []

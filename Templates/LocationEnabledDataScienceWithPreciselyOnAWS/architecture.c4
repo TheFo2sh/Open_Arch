@@ -1,0 +1,124 @@
+// Location-enabled data science with Precisely on AWS, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/location-enabled-data-science-with-precisely/location-enabled-data-science-with-precisely.html
+// Read together with the repository's specification.c4. Systems and users are slots.
+model {
+  dataScientists = user 'Data scientists' {
+    description 'Run location-aware experiments using Precisely data and geo-addressing capabilities.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    cloudWatch = platform 'Amazon CloudWatch' {
+      description 'Schedules the reference-data refresh workflow.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the function that starts compute for the refresh.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      refreshFunction = system 'Reference data refresh function' {
+        description 'Starts the compute instance used for the scheduled data refresh.'
+      }
+    }
+
+    ec2 = platform 'Amazon EC2' {
+      description 'Compute instance used by Precisely Automatic Data Downloader.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+      dataPreparation = system 'Reference data preparation' {
+        description 'Downloads updated Precisely data and makes the data and SDK available in customer S3.'
+        downloader = container 'Automatic Data Downloader' {
+          description 'Monitors Precisely Data Experience for updates and downloads reference datasets.'
+          metadata {
+            uses 'precisely-automatic-data-downloader'
+          }
+        }
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Customer object storage for Precisely datasets and SDK.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      locationData = database 'Location reference data and Geo Addressing SDK' {
+        description 'Customer S3 storage containing downloaded datasets and the SDK for data-science use.'
+      }
+    }
+
+    sageMaker = platform 'Amazon SageMaker AI' {
+      description 'One of the data-science environments shown in the reference architecture.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+      experiments = system 'Location-aware data science experiments' {
+        description 'Data-science work that uses the Precisely reference data and SDK.'
+        workload = container 'Geo-addressing workload' {
+          description 'Project-specific experiment code that uses the Precisely SDK.'
+          metadata {
+            uses 'precisely-geo-addressing-sdk'
+          }
+        }
+      }
+    }
+
+    emrStudio = platform 'Amazon EMR Studio' {
+      description 'An alternative data-science environment shown in the reference architecture.'
+      metadata {
+        uses 'amazon-emr-studio'
+      }
+      experiments = system 'Location-aware data science experiments' {
+        description 'Data-science work that uses the Precisely reference data and SDK.'
+        workload = container 'Geo-addressing workload' {
+          description 'Project-specific experiment code that uses the Precisely SDK.'
+          metadata {
+            uses 'precisely-geo-addressing-sdk'
+          }
+        }
+      }
+    }
+  }
+
+  precisely = zone 'Precisely services' {
+    metadata {
+      platform 'other'
+    }
+    dataExperience = platform 'Precisely Data Experience' {
+      description 'Precisely service that supplies updated datasets.'
+      metadata {
+        uses 'precisely-data-experience'
+      }
+    }
+    fulfillment = platform 'Precisely Fulfillment' {
+      description 'Precisely service that supplies the Geo Addressing SDK.'
+      metadata {
+        uses 'precisely-fulfillment'
+      }
+    }
+  }
+
+  dataScientists -> aws.sageMaker.experiments 'Runs experiments in'
+  dataScientists -> aws.emrStudio.experiments 'Runs experiments in'
+  aws.cloudWatch -> aws.lambda.refreshFunction 'Invokes on a schedule'
+  aws.lambda.refreshFunction -> aws.ec2.dataPreparation 'Starts compute for'
+  aws.ec2.dataPreparation.downloader -> precisely.dataExperience 'Checks for and downloads updated datasets from'
+  aws.ec2.dataPreparation.downloader -> aws.s3.locationData 'Stores downloaded datasets in'
+  precisely.fulfillment -> aws.s3.locationData 'Supplies the Geo Addressing SDK through'
+  aws.sageMaker.experiments.workload -> aws.s3.locationData 'Uses reference data and SDK from'
+  aws.emrStudio.experiments.workload -> aws.s3.locationData 'Uses reference data and SDK from'
+}
+
+views {
+  view index {
+    title 'Location-enabled Data Science with Precisely on AWS'
+    include *
+  }
+}
