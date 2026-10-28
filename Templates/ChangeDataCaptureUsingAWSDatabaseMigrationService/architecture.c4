@@ -1,0 +1,284 @@
+// Change Data Capture Using AWS Database Migration Service.
+// AWS's pages show alternative database endpoints, not a single required deployment.
+model {
+  external = zone 'External database endpoints' {
+    metadata {
+      platform 'other'
+    }
+
+    oracle = platform 'Oracle Database' {
+      metadata {
+        uses 'oracle-database'
+      }
+      oracleDb = database 'Oracle endpoint' {
+        description 'Optional Oracle source or target database.'
+      }
+    }
+    sqlServer = platform 'Microsoft SQL Server' {
+      metadata {
+        uses 'microsoft-sql-server'
+      }
+      sqlServerDb = database 'SQL Server endpoint' {
+        description 'Optional SQL Server source or target database.'
+      }
+    }
+    mysql = platform 'MySQL' {
+      metadata {
+        uses 'mysql'
+      }
+      mysqlDb = database 'MySQL endpoint' {
+        description 'Optional MySQL source or target database.'
+      }
+    }
+    postgres = platform 'PostgreSQL' {
+      metadata {
+        uses 'postgresql'
+      }
+      postgresDb = database 'PostgreSQL endpoint' {
+        description 'Optional PostgreSQL source or target database.'
+      }
+    }
+    mongo = platform 'MongoDB' {
+      metadata {
+        uses 'mongodb'
+      }
+      mongoDb = database 'MongoDB endpoint' {
+        description 'Optional MongoDB source or target database.'
+      }
+    }
+  }
+
+  migrationTools = system 'Database migration tooling' {
+    description 'A project-owned slot for migration tooling; AWS SCT is shown as a schema-conversion option.'
+    schemaConversion = container 'AWS Schema Conversion Tool' {
+      description 'Converts source schemas and most code objects for heterogeneous database migrations.'
+      metadata {
+        uses 'aws-schema-conversion-tool'
+      }
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    dms = platform 'AWS Database Migration Service' {
+      description 'Captures source changes and applies them transactionally to a target, or sends them to streaming services.'
+      metadata {
+        uses 'aws-dms'
+      }
+    }
+
+    aurora = platform 'Amazon Aurora' {
+      metadata {
+        uses 'amazon-aurora'
+      }
+      auroraDb = database 'Aurora endpoint' {
+        description 'Optional Amazon Aurora source or target database.'
+      }
+    }
+    documentdb = platform 'Amazon DocumentDB' {
+      metadata {
+        uses 'amazon-documentdb'
+      }
+      documentDb = database 'DocumentDB endpoint' {
+        description 'Optional Amazon DocumentDB source or target database.'
+      }
+    }
+    rds = platform 'Amazon RDS' {
+      metadata {
+        uses 'amazon-rds'
+      }
+      rdsDb = database 'RDS endpoint' {
+        description 'Optional Amazon RDS source or target database.'
+      }
+    }
+
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    msk = platform 'Amazon Managed Streaming for Apache Kafka' {
+      metadata {
+        uses 'amazon-msk'
+      }
+    }
+
+    glue = platform 'AWS Glue' {
+      description 'Runs the Spark streaming ETL workload shown in the reference diagram.'
+      metadata {
+        uses 'aws-glue'
+      }
+      glueJob = system 'Glue streaming ETL' {
+        description 'A project-owned streaming transformation workload hosted by AWS Glue.'
+        spark = container 'Spark streaming job' {
+          description 'Processes change streams with Apache Spark.'
+          metadata {
+            uses 'apache-spark'
+          }
+        }
+      }
+    }
+    emr = platform 'Amazon EMR' {
+      description 'Runs a Spark processing workload shown in the reference diagram.'
+      metadata {
+        uses 'amazon-emr'
+      }
+      emrJob = system 'EMR processing workload' {
+        description 'A project-owned data-processing workload hosted by Amazon EMR.'
+        spark = container 'Spark processing job' {
+          description 'Processes change streams with Apache Spark.'
+          metadata {
+            uses 'apache-spark'
+          }
+        }
+      }
+    }
+    flink = platform 'Amazon Kinesis Data Analytics for Apache Flink' {
+      description 'Runs a Flink application shown processing streaming data.'
+      metadata {
+        uses 'amazon-kinesis-data-analytics'
+      }
+      flinkJob = system 'Flink streaming workload' {
+        description 'A project-owned stream-processing workload hosted by Kinesis Data Analytics.'
+        app = container 'Flink application' {
+          description 'Processes continuous change events with Apache Flink.'
+          metadata {
+            uses 'apache-flink'
+          }
+        }
+      }
+    }
+    firehose = platform 'Amazon Kinesis Data Firehose' {
+      description 'Delivers streaming data to data targets.'
+      metadata {
+        uses 'amazon-kinesis-data-firehose'
+      }
+    }
+
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      dynamoDb = database 'DynamoDB target' {
+        description 'Optional NoSQL data target for processed change records.'
+      }
+    }
+    elasticsearch = platform 'Amazon Elasticsearch Service' {
+      metadata {
+        uses 'amazon-elasticsearch-service'
+      }
+      searchDb = database 'Elasticsearch target' {
+        description 'Optional search and analytics data target, using the name in the AWS diagram.'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      lake = database 'S3 data lake' {
+        description 'Optional object-storage target; represented as a database because it is the blueprint kind for persisted data.'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      metadata {
+        uses 'amazon-redshift'
+      }
+      warehouse = database 'Redshift warehouse' {
+        description 'Optional data warehouse target for change records.'
+      }
+    }
+
+    sagemaker = platform 'Amazon SageMaker Notebook' {
+      metadata {
+        uses 'amazon-sagemaker-notebook'
+      }
+    }
+    quicksight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    spectrum = platform 'Amazon Redshift Spectrum' {
+      description 'Redshift feature shown querying data lake data.'
+      metadata {
+        uses 'amazon-redshift-spectrum'
+      }
+    }
+  }
+
+  external.oracle.oracleDb -> aws.dms 'Supplies changes from'
+  external.sqlServer.sqlServerDb -> aws.dms 'Supplies changes from'
+  external.mysql.mysqlDb -> aws.dms 'Supplies changes from'
+  external.postgres.postgresDb -> aws.dms 'Supplies changes from'
+  external.mongo.mongoDb -> aws.dms 'Supplies changes from'
+  aws.aurora.auroraDb -> aws.dms 'Supplies changes from'
+  aws.documentdb.documentDb -> aws.dms 'Supplies changes from'
+  aws.rds.rdsDb -> aws.dms 'Supplies changes from'
+
+  external.oracle.oracleDb -> migrationTools.schemaConversion 'Schema may be converted with'
+  external.sqlServer.sqlServerDb -> migrationTools.schemaConversion 'Schema may be converted with'
+  external.mysql.mysqlDb -> migrationTools.schemaConversion 'Schema may be converted with'
+  external.postgres.postgresDb -> migrationTools.schemaConversion 'Schema may be converted with'
+  external.mongo.mongoDb -> migrationTools.schemaConversion 'Schema may be converted with'
+  aws.aurora.auroraDb -> migrationTools.schemaConversion 'Schema may be converted with'
+  aws.documentdb.documentDb -> migrationTools.schemaConversion 'Schema may be converted with'
+  aws.rds.rdsDb -> migrationTools.schemaConversion 'Schema may be converted with'
+
+  aws.dms -> external.oracle.oracleDb 'Replicates changes to'
+  aws.dms -> external.sqlServer.sqlServerDb 'Replicates changes to'
+  aws.dms -> external.mysql.mysqlDb 'Replicates changes to'
+  aws.dms -> external.postgres.postgresDb 'Replicates changes to'
+  aws.dms -> external.mongo.mongoDb 'Replicates changes to'
+  aws.dms -> aws.aurora.auroraDb 'Replicates changes to'
+  aws.dms -> aws.documentdb.documentDb 'Replicates changes to'
+  aws.dms -> aws.rds.rdsDb 'Replicates changes to'
+  aws.dms -> aws.s3.lake 'Migrates data to'
+
+  aws.dms -> aws.kinesis 'Streams change records to'
+  aws.dms -> aws.msk 'Streams change records to'
+  aws.kinesis -> aws.glue.glueJob 'Feeds'
+  aws.kinesis -> aws.emr.emrJob 'Feeds'
+  aws.kinesis -> aws.flink.flinkJob 'Feeds'
+  aws.msk -> aws.glue.glueJob 'Feeds'
+  aws.msk -> aws.emr.emrJob 'Feeds'
+  aws.msk -> aws.flink.flinkJob 'Feeds'
+
+  aws.glue.glueJob -> aws.dynamodb.dynamoDb 'Writes processed data to'
+  aws.emr.emrJob -> aws.dynamodb.dynamoDb 'Writes processed data to'
+  aws.glue.glueJob -> aws.elasticsearch.searchDb 'Writes processed data to'
+  aws.emr.emrJob -> aws.elasticsearch.searchDb 'Writes processed data to'
+  aws.glue.glueJob -> aws.s3.lake 'Writes processed data to'
+  aws.emr.emrJob -> aws.s3.lake 'Writes processed data to'
+  aws.glue.glueJob -> aws.rds.rdsDb 'Writes processed data to'
+  aws.emr.emrJob -> aws.rds.rdsDb 'Writes processed data to'
+  aws.flink.flinkJob -> aws.dynamodb.dynamoDb 'Writes processed data to'
+  aws.flink.flinkJob -> aws.elasticsearch.searchDb 'Writes processed data to'
+  aws.flink.flinkJob -> aws.s3.lake 'Writes processed data to'
+  aws.flink.flinkJob -> aws.rds.rdsDb 'Writes processed data to'
+  aws.kinesis -> aws.firehose 'Delivers records through'
+  aws.firehose -> aws.s3.lake 'Delivers records to'
+  aws.firehose -> aws.redshift.warehouse 'Delivers records to'
+
+  aws.sagemaker -> aws.s3.lake 'Consumes data from'
+  aws.sagemaker -> aws.redshift.warehouse 'Consumes data from'
+  aws.quicksight -> aws.redshift.warehouse 'Visualizes data from'
+  aws.quicksight -> aws.s3.lake 'Visualizes data from'
+  aws.athena -> aws.s3.lake 'Queries'
+  aws.spectrum -> aws.s3.lake 'Queries'
+  aws.spectrum -> aws.redshift.warehouse 'Runs with'
+}
+
+views {
+  view index {
+    title 'Change Data Capture Using AWS Database Migration Service'
+    include *
+  }
+}
