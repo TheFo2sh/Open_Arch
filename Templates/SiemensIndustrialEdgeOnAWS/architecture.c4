@@ -1,0 +1,174 @@
+// Siemens Industrial Edge on AWS, after the AWS reference architecture.
+// Systems are slots that map to the applying project's own systems.
+model {
+  shopfloor = zone 'Shopfloor' {
+    metadata {
+      platform 'other'
+    }
+
+    industrialEdge = platform 'Siemens Industrial Edge' {
+      metadata {
+        uses 'siemens-industrial-edge'
+      }
+
+      edgeDevice = system 'Industrial Edge device' {
+        description 'Project system slot for the physical or virtual Industrial Edge device and its applications.'
+
+        connectors = container 'Southbound connector applications' {
+          description 'Collects data from industrial assets using the connector choices shown in the AWS diagram.'
+          metadata {
+            uses 'opc-ua, modbus, simatic-s7, ethernet-ip, tcp'
+          }
+        }
+        edgeApplications = container 'Industrial Edge applications' {
+          description 'Applications created through the options named by AWS.'
+          metadata {
+            uses 'mendix, flow-creator, docker'
+          }
+        }
+        dataLayer = container 'Industrial information and data layer' {
+          metadata {
+            uses 'industrial-information-hub, industrial-edge-databus'
+          }
+        }
+        sitewiseEdge = container 'AWS IoT SiteWise Edge' {
+          description 'Collects and aggregates industrial data for delivery to AWS IoT SiteWise.'
+          metadata {
+            uses 'aws-iot-sitewise-edge'
+          }
+        }
+        edgeInference = container 'Edge AI inference and monitoring' {
+          metadata {
+            uses 'siemens-ai-inference-server, siemens-ai-model-monitor-agent'
+          }
+        }
+      }
+    }
+
+    assets = system 'Industrial assets and data sources' {
+      description 'Project system slot for the industrial assets and sources shown in the diagram, such as PLCs, machines, cameras, historians, or MES.'
+    }
+  }
+
+  enterprise = zone 'Enterprise and edge management' {
+    metadata {
+      platform 'other'
+    }
+
+    edgeManagement = system 'Industrial Edge management system' {
+      description 'Project system slot for centralized Industrial Edge device and application management; its hosting location is not specified.'
+
+      management = container 'Industrial Edge Management and Hub' {
+        metadata {
+          uses 'siemens-industrial-edge-management, siemens-industrial-edge-hub'
+        }
+      }
+      repository = container 'Global software and app repository' {
+        metadata {
+          uses 'siemens-global-software-app-repository'
+        }
+      }
+    }
+
+    edgeAiManagement = system 'Industrial Edge AI management device' {
+      description 'Project system slot for the edge-side model management device shown in the AWS diagram.'
+
+      modelManagement = container 'AI model management and monitoring' {
+        metadata {
+          uses 'siemens-ai-model-manager, siemens-ai-model-monitor'
+        }
+      }
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    sitewise = platform 'AWS IoT SiteWise' {
+      metadata {
+        uses 'aws-iot-sitewise'
+      }
+      industrialData = database 'Industrial asset models and data'
+    }
+    sitewiseMonitor = platform 'AWS IoT SiteWise Monitor' {
+      metadata {
+        uses 'aws-iot-sitewise-monitor'
+      }
+    }
+    twinmaker = platform 'AWS IoT TwinMaker' {
+      metadata {
+        uses 'aws-iot-twinmaker'
+      }
+    }
+    grafana = platform 'Amazon Managed Grafana' {
+      metadata {
+        uses 'amazon-managed-grafana'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      coldData = database 'Cold industrial IoT data'
+    }
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    studioLab = platform 'Amazon SageMaker Studio Lab' {
+      metadata {
+        uses 'amazon-sagemaker-studio-lab'
+      }
+      modelTraining = system 'Machine-learning model training' {
+        description 'Project system slot for model development using data from Amazon S3.'
+
+        modelPackaging = container 'AI model packaging with Siemens AI SDK' {
+          metadata {
+            uses 'siemens-ai-sdk'
+          }
+        }
+      }
+    }
+    visualizationApps = system 'Industrial visualization applications' {
+      appKit = container 'Custom IoT visualization applications' {
+        metadata {
+          uses 'aws-iot-app-kit'
+        }
+      }
+    }
+    mendixApps = system 'Industrial analytics applications' {
+      mendixAnalytics = container 'Mendix analytics apps' {
+        metadata {
+          uses 'mendix'
+        }
+      }
+    }
+  }
+
+  shopfloor.assets -> shopfloor.industrialEdge.edgeDevice.connectors 'Provides industrial data to'
+  shopfloor.industrialEdge.edgeDevice.connectors -> shopfloor.industrialEdge.edgeDevice.sitewiseEdge 'Feeds collected data to'
+  shopfloor.industrialEdge.edgeDevice.sitewiseEdge -> aws.sitewise.industrialData 'Sends aggregated data to'
+
+  enterprise.edgeManagement.management -> shopfloor.industrialEdge.edgeDevice 'Manages'
+  enterprise.edgeManagement.repository -> shopfloor.industrialEdge.edgeDevice.edgeApplications 'Distributes software and apps to'
+  aws.sitewise.industrialData -> aws.s3.coldData 'Delivers cold industrial data to'
+  aws.sitewise.industrialData -> aws.sitewiseMonitor 'Provides data for visualization'
+  aws.sitewise.industrialData -> aws.twinmaker 'Provides data for digital twins'
+  aws.sitewise.industrialData -> aws.grafana 'Provides data for visualization'
+  aws.sitewise.industrialData -> aws.visualizationApps 'Provides data to'
+  aws.s3.coldData -> aws.athena 'Provides cold data for queries'
+  aws.athena -> aws.grafana 'Provides query results to'
+  aws.athena -> aws.quickSight 'Provides query results to'
+  aws.athena -> aws.mendixApps 'Provides query results to'
+  aws.s3.coldData -> aws.studioLab.modelTraining 'Provides training data to'
+  aws.studioLab.modelTraining.modelPackaging -> enterprise.edgeAiManagement.modelManagement 'Delivers packaged models to'
+  enterprise.edgeAiManagement.modelManagement -> shopfloor.industrialEdge.edgeDevice.edgeInference 'Deploys and monitors models for'
+}
