@@ -1,0 +1,128 @@
+# The technologies used by the blueprint, by the key its metadata { uses } names.
+technologies:
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Receives renewable energy telemetry over MQTT and routes it with IoT rules.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Streams telemetry from AWS IoT Core to near-real-time processing and downstream data stores.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-managed-service-for-apache-flink
+    name: Amazon Managed Service for Apache Flink
+    description: Transforms and analyzes streaming telemetry near real time; the source diagram labels this Amazon Kinesis Data Analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/managed-service-apache-flink/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-timestream
+    name: Amazon Timestream
+    description: Stores time-series telemetry for near-real-time monitoring and analysis.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/timestream/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service (Amazon S3)
+    description: Stores raw and processed data lake datasets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-schema-conversion-tool
+    name: AWS Schema Conversion Tool (AWS SCT)
+    description: Discovers and converts schemas from the on-premises databases before migration.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dms/schema-conversion-tool/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-database-migration-service
+    name: AWS Database Migration Service (AWS DMS)
+    description: Moves data from on-premises databases to Amazon S3 and Amazon Redshift.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dms/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-glue
+    name: AWS Glue
+    description: Crawls S3 data to discover schemas, maintains the Data Catalog, and runs ETL jobs that process and enrich raw data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Loads data from Amazon S3 and AWS DMS for querying and business-logic transformations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-lake-formation
+    name: AWS Lake Formation
+    description: Provides centralized data lake governance with AWS Glue Data Catalog and IAM.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lake-formation/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iam
+    name: AWS Identity and Access Management (IAM)
+    description: Provides identity and access management for centralized data lake governance.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iam/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Queries data lake datasets for interactive analytics and reporting.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-quick
+    name: Amazon Quick
+    description: Visualizes data and provides dashboards and reporting; the source diagram labels this Amazon QuickSight.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quick/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-managed-grafana
+    name: Amazon Managed Grafana
+    description: Visualizes data and provides dashboards and reporting.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/grafana/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Trains and deploys machine learning models using raw data lake datasets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: mqtt
+    name: MQTT
+    description: Messaging protocol used by renewable energy telemetry devices to send data to AWS IoT Core.
+    vendor: OASIS Open
+    url: https://mqtt.org/
+    types: [third-party]
