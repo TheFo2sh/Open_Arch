@@ -1,0 +1,96 @@
+# Technologies named in the AWS reference page and its architecture diagram.
+technologies:
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Private network connection from the telco data center to AWS Transit Gateway.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-transit-gateway
+    name: AWS Transit Gateway
+    description: Connects the Direct Connect path to the VPC hosting the Totogi charging engine.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: VPC that hosts the tenant Totogi charging engine and its access and charging tiers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2-auto-scaling
+    name: Amazon EC2 Auto Scaling
+    description: EC2 Auto Scaling groups run the Diameter adapter access layer and the charging-engine decision tier.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/autoscaling/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: elastic-load-balancing-network-load-balancer
+    name: Elastic Load Balancing (Network Load Balancer)
+    description: Network Load Balancer routes 5G REST requests to the charging decision engines.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/network-load-balancer/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores subscriber balances and rating rules, partitioned by tenant ID and subscriber ID.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-cognito
+    name: Amazon Cognito
+    description: Supplies the access token from which the tenant ID is obtained.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cognito/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-vpc-endpoints
+    name: AWS PrivateLink and VPC endpoints
+    description: A VPC endpoint is shown in the diagram; its endpoint service and role are not specified.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/privatelink/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-eventbridge
+    name: Amazon EventBridge
+    description: Used with Amazon S3 buckets for customizable handling of notifications and event detail records.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eventbridge/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: S3 buckets are used with EventBridge for customizable handling of notifications and event detail records.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-organizations
+    name: AWS Organizations
+    description: Shown in the architecture diagram; AWS does not describe its role in this charging flow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/organizations/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: totogi-charging-as-a-service
+    name: Totogi Charging-as-a-Service
+    description: Totogi's AWS-native, multi-tenant 4G/5G charging engine and plan-design tool.
+    vendor: Totogi
+    url: https://docs.aws.amazon.com/reference-architecture-diagrams/latest/totogi-charging-as-a-service/totogi-charging-as-a-service.html
+    types: [third-party]
