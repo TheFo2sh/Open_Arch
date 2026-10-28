@@ -1,0 +1,7 @@
+PackageId: OpenArch.PersonalizationAndPredictiveConsumerEngagementForCPG
+Name: Personalization and Predictive Consumer Engagement for CPG
+Description: Personalizes CPG recommendations and consumer notifications using batch product and customer data, real-time clickstream events, Amazon Personalize, and Amazon Pinpoint.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, cpg, personalization, machine-learning, consumer-engagement]
