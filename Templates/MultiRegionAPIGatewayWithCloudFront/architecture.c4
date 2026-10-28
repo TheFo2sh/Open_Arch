@@ -1,0 +1,126 @@
+// Multi-region API Gateway with CloudFront, after AWS's reference architecture.
+// The source page describes the design; its linked PNG and editable diagram are
+// listed in README.md. Systems are slots mapped onto the project's own systems.
+model {
+  apiClient = system 'API client' {
+    description 'Calls the API through its single CloudFront endpoint.'
+  }
+
+  edgeServices = zone 'AWS global services' {
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      description 'Resolves the API domain and provides latency-based regional endpoint selection.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    certificateManager = platform 'AWS Certificate Manager' {
+      description 'Manages the SSL/TLS certificate attached to the CloudFront distribution.'
+      metadata {
+        uses 'aws-certificate-manager'
+      }
+    }
+    cloudfront = platform 'Amazon CloudFront' {
+      description 'Provides the single API endpoint at edge locations and forwards requests to the selected regional API.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    lambdaEdge = platform 'AWS Lambda@Edge' {
+      description 'Runs edge request logic to select a regional API endpoint and abstract regional authorization.'
+      metadata {
+        uses 'aws-lambda-edge'
+      }
+      endpointSelector = system 'Regional endpoint selector' {
+        description 'Queries Route 53 for the lowest-latency regional API endpoint and provides a consistent client authorization experience.'
+      }
+    }
+  }
+
+  primaryRegion = zone 'Primary AWS Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    primaryApiGateway = platform 'Amazon API Gateway' {
+      description 'Regional API endpoint in the primary Region.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    primaryLambda = platform 'AWS Lambda' {
+      description 'Runs the API request handler in the primary Region.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      primaryApi = system 'Regional API backend' {
+        description 'Handles API requests received by the primary Region endpoint.'
+      }
+    }
+    primaryAurora = platform 'Amazon Aurora Global Database' {
+      description 'Primary regional cluster of the global database.'
+      metadata {
+        uses 'amazon-aurora-global-database'
+      }
+      primaryDatabase = database 'Primary Aurora cluster' {
+        description 'Primary cluster that accepts writes for the global database.'
+      }
+    }
+  }
+
+  secondaryRegion = zone 'Secondary AWS Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    secondaryApiGateway = platform 'Amazon API Gateway' {
+      description 'Regional API endpoint in a secondary Region.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    secondaryLambda = platform 'AWS Lambda' {
+      description 'Runs the API request handler in the secondary Region.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      secondaryApi = system 'Regional API backend' {
+        description 'Handles API requests received by the secondary Region endpoint.'
+      }
+    }
+    secondaryAurora = platform 'Amazon Aurora Global Database' {
+      description 'Secondary regional cluster of the same global database.'
+      metadata {
+        uses 'amazon-aurora-global-database'
+      }
+      secondaryDatabase = database 'Secondary Aurora cluster' {
+        description 'Secondary cluster kept in sync through Aurora Global Database replication.'
+      }
+    }
+  }
+
+  apiClient -> edgeServices.cloudfront 'Calls the API through'
+  edgeServices.certificateManager -> edgeServices.cloudfront 'Provides the TLS certificate for'
+  edgeServices.cloudfront -> edgeServices.lambdaEdge.endpointSelector 'Invokes edge logic to select a regional endpoint'
+  edgeServices.lambdaEdge.endpointSelector -> edgeServices.route53 'Looks up the latency-based regional endpoint in'
+  edgeServices.lambdaEdge.endpointSelector -> primaryRegion.primaryApiGateway 'Selects when this is the lowest-latency Region'
+  edgeServices.lambdaEdge.endpointSelector -> secondaryRegion.secondaryApiGateway 'Selects when this is the lowest-latency Region'
+  edgeServices.route53 -> primaryRegion.primaryApiGateway 'Includes in latency-based routing'
+  edgeServices.route53 -> secondaryRegion.secondaryApiGateway 'Includes in latency-based routing'
+  primaryRegion.primaryApiGateway -> primaryRegion.primaryLambda.primaryApi 'Forwards API requests to'
+  secondaryRegion.secondaryApiGateway -> secondaryRegion.secondaryLambda.secondaryApi 'Forwards API requests to'
+  primaryRegion.primaryLambda.primaryApi -> primaryRegion.primaryAurora.primaryDatabase 'Reads from and writes to'
+  secondaryRegion.secondaryLambda.secondaryApi -> secondaryRegion.secondaryAurora.secondaryDatabase 'Reads from'
+  secondaryRegion.secondaryLambda.secondaryApi -> primaryRegion.primaryAurora.primaryDatabase 'Routes writes to the global primary'
+  primaryRegion.primaryAurora.primaryDatabase -> secondaryRegion.secondaryAurora.secondaryDatabase 'Replicates changes to'
+}
+
+views {
+  view index {
+    title 'Multi-region API Gateway with CloudFront'
+    include *
+  }
+}
