@@ -144,8 +144,8 @@ model {
   region.transitGateway -> externalManagement 'Provides connectivity to'
   region.directConnect -> region.vpc 'Connects on-premises data centers to'
   region.controlPlane -> customerSite.outposts.vpcExtension.localEks.dataPlane 'Coordinates control and user-plane functions'
-  region.controlPlane -> region.appMesh 'Uses'
-  region.controlPlane -> region.xray 'Sends traces to'
+  customerSite.outposts.vpcExtension.localEks.dataPlane -> region.appMesh 'Uses'
+  customerSite.outposts.vpcExtension.localEks.dataPlane -> region.xray 'Sends traces to'
   region.ossBss -> region.directConnect 'Connects to on-premises data centers through'
 }
 
