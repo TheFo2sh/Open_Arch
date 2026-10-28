@@ -1,0 +1,7 @@
+PackageId: OpenArch.BotMitigationForTravelAndHospitality
+Name: Bot Mitigation for Travel and Hospitality
+Description: A serverless edge architecture that detects and mitigates bots for travel and hospitality websites using CloudFront, AWS WAF, Lambda@Edge, and either requester fingerprints or an APN partner.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, bot-mitigation, travel, hospitality, security]
