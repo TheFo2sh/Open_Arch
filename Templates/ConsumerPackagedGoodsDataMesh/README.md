@@ -13,7 +13,7 @@ A consumer packaged goods organization where business domains own and publish da
 3. **Manage metadata.** AWS Glue catalogs datasets, Amazon Neptune stores lineage, and Amazon DynamoDB stores data contracts.
 4. **Discover data.** Consumers search for data using contract properties.
 5. **Govern and prepare.** AWS Lake Formation centrally manages fine-grained permissions and supports automatic schema discovery and conversion to a required format.
-6. **Analyze.** The source names Amazon Athena, Amazon OpenSearch Service, and Amazon SageMaker AI for analytics and machine learning. The diagram also shows AWS Glue DataBrew beside “ML Transforms,” but does not explain its role or data flow.
+6. **Analyze.** The source names Amazon Athena, Amazon OpenSearch Service, and Amazon SageMaker AI for analytics and machine learning. The diagram shows Athena in producer and consumer domains. It also shows crawlers in both domain types and AWS Glue DataBrew beside “ML Transforms,” but does not explain DataBrew's role or data flow.
 
 The diagram shows Amazon S3 in producer domains, consumer domains, and the central analytics area. It also labels a generic “AI Services” element in the analytics area. AWS does not identify a provider, product, or integration for that label; it is represented only as a placeholder system, not as a required third-party dependency.
 
