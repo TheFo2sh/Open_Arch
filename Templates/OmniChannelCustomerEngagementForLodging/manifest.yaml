@@ -1,0 +1,7 @@
+PackageId: OpenArch.OmniChannelCustomerEngagementForLodging
+Name: Omni-channel Customer Engagement for Lodging
+Description: A serverless AWS architecture for personalized guest engagement across lodging customer-service channels.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, hospitality, lodging, customer-engagement, serverless]

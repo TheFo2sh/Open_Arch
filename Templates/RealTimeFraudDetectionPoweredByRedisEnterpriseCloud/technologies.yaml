@@ -1,0 +1,109 @@
+# Technology catalog for AWS's real-time fraud detection reference architecture.
+technologies:
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage for historical transaction data and optional prediction-result exports.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Managed notebook and inference endpoints used to train and serve the anomaly-detection and fraud-classification models.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: random-cut-forest
+    name: Random Cut Forest
+    description: SageMaker built-in algorithm used by the anomaly-detection inference endpoint.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/sagemaker/latest/dg/randomcutforest.html
+    types: [library]
+  - key: xgboost
+    name: XGBoost
+    description: SageMaker-supported gradient-boosted tree algorithm used by the fraud-classification inference endpoint.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/sagemaker/latest/dg/xgboost.html
+    types: [library]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Serverless functions that process historical transactions and score real-time stream events.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: REST API that accepts signed prediction requests from web and mobile clients.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Captures real-time transaction events for asynchronous processing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: redis-enterprise-cloud
+    name: Redis Enterprise Cloud
+    description: Redis-managed database on AWS used as the transaction store and online feature store, with optional time-series prediction storage.
+    vendor: Redis
+    url: https://redis.io/cloud/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: redis-json
+    name: RedisJSON
+    description: Redis module shown for persisting transaction data in the Redis Enterprise Cloud database.
+    vendor: Redis
+    url: https://redis.io/docs/latest/develop/data-types/json/
+    types: [library]
+  - key: redis-search
+    name: RediSearch
+    description: Redis module shown for the online feature store in the reference architecture.
+    vendor: Redis
+    url: https://redis.io/docs/latest/develop/ai/search-and-query/
+    types: [library]
+  - key: redis-timeseries
+    name: RedisTimeSeries
+    description: Redis module shown for the optional time-series store used for visualizations.
+    vendor: Redis
+    url: https://redis.io/docs/latest/develop/data-types/timeseries/
+    types: [library]
+  - key: amazon-data-firehose
+    name: Amazon Data Firehose
+    description: Optionally delivers prediction results to Amazon S3 for downstream analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firehose/
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Optionally reads exported prediction results for visualization and analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-managed-grafana
+    name: Amazon Managed Service for Grafana
+    description: Optionally visualizes transaction and prediction metrics stored in Redis TimeSeries.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/grafana/
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: terraform, name: hashicorp/aws}]

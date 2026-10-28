@@ -1,0 +1,7 @@
+PackageId: OpenArch.DataLakeArchitectureForRenewableEnergy
+Name: Data Lake Architecture for Renewable Energy
+Description: A renewable energy data lake for streaming telemetry and business data, with near-real-time analytics, governance, dashboards, and machine learning on AWS.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, data-lake, renewable-energy, analytics, machine-learning]

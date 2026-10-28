@@ -1,0 +1,7 @@
+PackageId: OpenArch.RealTimeFraudDetectionPoweredByRedisEnterpriseCloud
+Name: Real-Time Fraud Detection Powered by Redis Enterprise Cloud
+Description: Real-time transaction fraud scoring on AWS using Redis Enterprise Cloud as a primary database and online feature store with Amazon SageMaker inference.
+Version: 1.0.0
+Icon: logos:redis
+Publisher: Open_Arch
+Tags: [aws, fraud-detection, machine-learning, redis, real-time]

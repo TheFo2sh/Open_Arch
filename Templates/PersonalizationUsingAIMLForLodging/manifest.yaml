@@ -1,0 +1,7 @@
+PackageId: OpenArch.PersonalizationUsingAIMLForLodging
+Name: Personalization Using AI/ML for Lodging
+Description: Personalize lodging guest communications and offers with a data lake, customer profiles, Amazon Personalize, Amazon Pinpoint, and custom SageMaker AI models.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, lodging, hospitality, personalization, ai-ml, data-platform]
