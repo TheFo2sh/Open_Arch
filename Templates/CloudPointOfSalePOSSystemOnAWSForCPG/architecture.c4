@@ -1,0 +1,249 @@
+// Cloud Point-of-Sale (POS) System on AWS for CPG, based on AWS's October 2021 reference.
+// Read together with the repository's specification.c4. Systems and users are slots.
+model {
+  customer = user 'Customer' {
+    description 'Uses the mobile PWA for direct-to-consumer POS interactions.'
+  }
+  storeUser = user 'Store user' {
+    description 'Uses store POS devices; the source does not specify a more precise role.'
+  }
+  businessUser = user 'Business user' {
+    description 'Uses corporate systems for day-to-day activities.'
+  }
+
+  store = zone 'Store network' {
+    metadata {
+      platform 'other'
+    }
+
+    mobilePwa = system 'PWA on mobile' {
+      description 'Mobile client shown in the store network.'
+    }
+    posDevices = system 'Store devices' {
+      description 'Store POS devices shown in the reference diagram.'
+    }
+    outposts = platform 'AWS Outposts' {
+      description 'Optional AWS compute and storage capability at stores.'
+      metadata {
+        uses 'aws-outposts'
+      }
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    cloudfront = platform 'Amazon CloudFront' {
+      description 'AWS edge service for improved user experience and content delivery.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    lambdaEdge = platform 'AWS Lambda@Edge' {
+      description 'Edge compute used with CloudFront for external provider integrations.'
+      metadata {
+        uses 'aws-lambda-edge'
+      }
+    }
+
+    directConnect = platform 'AWS Direct Connect' {
+      description 'One of the diagram’s two alternatives for connecting networks to AWS.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    siteToSiteVpn = platform 'AWS Site-to-Site VPN' {
+      description 'One of the diagram’s two alternatives for secure connectivity to AWS.'
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    eventBridge = platform 'Amazon EventBridge' {
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    appSync = platform 'AWS AppSync' {
+      metadata {
+        uses 'aws-appsync'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    fargate = platform 'AWS Fargate' {
+      metadata {
+        uses 'aws-fargate'
+      }
+    }
+
+    pos = system 'Cloud POS application' {
+      description 'The serverless application layer implements checkout, order capture, product management, and back office.'
+
+      checkout = container 'Checkout' {
+        description 'POS feature; the source does not assign it to a specific runtime.'
+      }
+      orderCapture = container 'Order capture' {
+        description 'POS feature; the source does not assign it to a specific runtime.'
+      }
+      productManagement = container 'Product management' {
+        description 'POS feature; the source does not assign it to a specific runtime.'
+      }
+      backOffice = container 'Back office' {
+        description 'POS feature; the source does not assign it to a specific runtime.'
+      }
+    }
+
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      keyValueData = database 'Key-value data'
+    }
+    aurora = platform 'Amazon Aurora' {
+      metadata {
+        uses 'amazon-aurora'
+      }
+      relationalData = database 'Relational data'
+    }
+    elasticache = platform 'Amazon ElastiCache' {
+      metadata {
+        uses 'amazon-elasticache'
+      }
+      cachedData = database 'Cached data'
+    }
+    s3 = platform 'Amazon Simple Storage Service (Amazon S3)' {
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    elasticsearch = platform 'Amazon Elasticsearch Service' {
+      description 'The 2021 diagram shows this service in the management and analytics layer without specifying its use.'
+      metadata {
+        uses 'amazon-elasticsearch-service'
+      }
+    }
+
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    iam = platform 'AWS Identity and Access Management (IAM)' {
+      metadata {
+        uses 'aws-iam'
+      }
+    }
+    personalize = platform 'Amazon Personalize' {
+      metadata {
+        uses 'amazon-personalize'
+      }
+    }
+    fraudDetector = platform 'Amazon Fraud Detector' {
+      metadata {
+        uses 'amazon-fraud-detector'
+      }
+    }
+    cloudwatch = platform 'Amazon CloudWatch' {
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    kms = platform 'AWS Key Management Service (AWS KMS)' {
+      metadata {
+        uses 'aws-kms'
+      }
+    }
+  }
+
+  corporate = zone 'Corporate network' {
+    metadata {
+      platform 'other'
+    }
+
+    workspace = system 'Business user workspace' {
+      description 'User PC shown in the corporate network.'
+    }
+    biTools = system 'Business intelligence tools' {
+      description 'Corporate BI tools used for day-to-day activities.'
+    }
+    enterpriseApps = system 'Enterprise applications and databases' {
+      description 'Corporate CRM, ERP, and other existing applications and databases.'
+    }
+    thirdPartyApps = system 'Corporate third-party applications' {
+      description 'Existing third-party applications on the corporate network.'
+    }
+  }
+
+  external = zone 'External service providers' {
+    metadata {
+      platform 'other'
+    }
+
+    paymentGateway = system 'Payment gateway' {
+      description 'Required external provider; AWS does not name a vendor or protocol.'
+    }
+    taxCalculator = system 'Tax calculator' {
+      description 'Required external provider; AWS does not name a vendor or protocol.'
+    }
+  }
+
+  customer -> store.mobilePwa 'Uses'
+  storeUser -> store.posDevices 'Uses'
+  businessUser -> corporate.workspace 'Uses'
+  corporate.workspace -> corporate.biTools 'Accesses'
+
+  store.mobilePwa -> aws.cloudfront 'Uses edge content delivery'
+  store.posDevices -> store.outposts 'Can connect to optional store compute'
+  store.posDevices -> aws.directConnect 'Connects to AWS over this option'
+  store.posDevices -> aws.siteToSiteVpn 'Connects to AWS over this option'
+  corporate.enterpriseApps -> aws.directConnect 'Connects to AWS over this option'
+  corporate.enterpriseApps -> aws.siteToSiteVpn 'Connects to AWS over this option'
+  corporate.thirdPartyApps -> aws.directConnect 'Connects to AWS over this option'
+  corporate.thirdPartyApps -> aws.siteToSiteVpn 'Connects to AWS over this option'
+
+  aws.cloudfront -> aws.lambdaEdge 'Uses edge compute'
+  aws.lambdaEdge -> external.paymentGateway 'Integrates with'
+  aws.lambdaEdge -> external.taxCalculator 'Integrates with'
+
+  aws.directConnect -> aws.apiGateway 'Provides network connectivity to'
+  aws.siteToSiteVpn -> aws.apiGateway 'Provides network connectivity to'
+  aws.apiGateway -> aws.pos 'Handles incoming POS requests for'
+  aws.eventBridge -> aws.pos 'Integrates requests and backend services with'
+  aws.appSync -> aws.pos 'Integrates APIs with'
+  aws.pos -> aws.lambda 'Uses serverless application compute'
+  aws.pos -> aws.stepFunctions 'Uses serverless workflow orchestration'
+  aws.pos -> aws.fargate 'Uses serverless application compute'
+
+  aws.pos -> aws.dynamodb.keyValueData 'Accesses key-value data in'
+  aws.pos -> aws.aurora.relationalData 'Accesses relational data in'
+  aws.pos -> aws.elasticache.cachedData 'Uses caching from'
+  aws.pos -> aws.s3 'Stores and accesses objects in'
+  aws.cloudwatch -> aws.pos 'Provides monitoring for'
+  aws.iam -> aws.pos 'Provides identity and access management for'
+  corporate.enterpriseApps -> aws.pos 'Integrates with corporate systems over the selected connection'
+  corporate.thirdPartyApps -> aws.pos 'Integrates with existing applications over the selected connection'
+}
+
+views {
+  view index {
+    title 'Cloud Point-of-Sale (POS) System on AWS for CPG'
+    include *
+  }
+}

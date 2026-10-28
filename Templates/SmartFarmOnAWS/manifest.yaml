@@ -1,0 +1,7 @@
+PackageId: OpenArch.SmartFarmOnAWS
+Name: Smart Farm on Amazon Web Services
+Description: A connected-farm architecture for sensor ingestion, real-time video, analytics, data-lake querying, edge inference, and centralized security response on AWS.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, agriculture, iot, computer-vision, edge-inference]
