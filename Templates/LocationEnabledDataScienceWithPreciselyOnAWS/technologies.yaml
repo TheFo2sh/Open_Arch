@@ -1,0 +1,77 @@
+technologies:
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Schedules the reference-data refresh workflow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the scheduled function that starts the reference-data refresh compute.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Provides the compute instance used by Precisely's Automatic Data Downloader.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service (Amazon S3)
+    description: Customer object storage for downloaded Precisely datasets and the Geo Addressing SDK.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: One of the data-science environments where location-aware experiments can use the reference data and SDK.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: amazon-emr-studio
+    name: Amazon EMR Studio
+    description: An alternative data-science environment where location-aware experiments can use the reference data and SDK.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-studio.html
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: precisely-data-experience
+    name: Precisely Data Experience
+    description: Precisely source for updated datasets downloaded by the Automatic Data Downloader.
+    vendor: Precisely
+    url: https://www.precisely.com/solution/geocoding-and-data-enrichment-solutions/
+    types: [managed-service, third-party]
+    platform: other
+    hosts: []
+  - key: precisely-fulfillment
+    name: Precisely Fulfillment
+    description: Precisely source from which the Geo Addressing SDK is obtained through Amazon S3.
+    vendor: Precisely
+    url: https://www.precisely.com/solution/geocoding-and-data-enrichment-solutions/
+    types: [managed-service, third-party]
+    platform: other
+    hosts: []
+  - key: precisely-automatic-data-downloader
+    name: Precisely Automatic Data Downloader
+    description: Monitors Precisely Data Experience for updates and downloads datasets into Amazon S3.
+    vendor: Precisely
+    url: https://www.precisely.com/solution/geocoding-and-data-enrichment-solutions/
+    types: [library, third-party]
+  - key: precisely-geo-addressing-sdk
+    name: Precisely Geo Addressing SDK
+    description: SDK used to add geo-addressing capabilities to data-science experiments.
+    vendor: Precisely
+    url: https://www.precisely.com/solution/geocoding-and-data-enrichment-solutions/
+    types: [library, third-party]

@@ -1,0 +1,146 @@
+# The AWS services named by the blueprint, by the key its metadata { uses } names them by.
+technologies:
+  - key: aws-amplify
+    name: AWS Amplify
+    description: Front-end service shown in the content-ingestion stage.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/amplify/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: API service shown in the content-ingestion stage.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Content delivery service shown in the content-ingestion stage.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-kinesis-video-streams
+    name: Amazon Kinesis Video Streams
+    description: Video streaming service shown in the content-ingestion stage.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/video-streams/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores image, audio, video, text, and document content in the staging stage.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Workflow service shown in the moderation integration stage.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-eventbridge
+    name: Amazon EventBridge
+    description: Event service shown in the moderation integration stage.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eventbridge/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sqs
+    name: Amazon SQS
+    description: Queue service shown in the moderation integration stage.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sqs/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Serverless compute shown in the moderation integration stage, where custom code processes workflows.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-transcribe
+    name: Amazon Transcribe
+    description: Processes audio from video and audio streams and converts audio to text.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transcribe/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-translate
+    name: Amazon Translate
+    description: Translation service shown in the image and video, audio, and text or document moderation paths.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/translate/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-comprehend
+    name: Amazon Comprehend
+    description: Provides natural language processing for the image and video, audio, and text or document moderation paths.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/comprehend/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-rekognition
+    name: Amazon Rekognition
+    description: Image and video analysis service shown in the image and video moderation path.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rekognition/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-textract
+    name: Amazon Textract
+    description: Extracts content from documents in the text and document moderation path.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/textract/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sagemaker-ground-truth
+    name: Amazon SageMaker Ground Truth
+    description: Integrates human workforces to customize model vocabularies and image labels.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/groundtruth/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-augmented-ai
+    name: Amazon Augmented AI (Amazon A2I)
+    description: Brings humans into the loop for scenarios that are not fully automatable.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/augmented-ai/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]

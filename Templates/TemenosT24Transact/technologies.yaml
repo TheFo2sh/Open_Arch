@@ -1,0 +1,121 @@
+technologies:
+  - key: aws-waf
+    name: AWS WAF
+    description: Web application firewall shown at the architecture perimeter.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/waf/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-shield
+    name: AWS Shield
+    description: DDoS protection service shown at the architecture perimeter.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/shield/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Content delivery service in front of the T24 API access path.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: DNS service included in the AWS diagram; the source does not detail its routing configuration.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Controls and monitors access to T24 and directs traffic to application and query processing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Load balancing in front of the Amazon ECS application containers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ecs
+    name: Amazon Elastic Container Service
+    description: Runs the containerized T24 OLTP application processes.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecs/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ecr
+    name: Amazon Elastic Container Registry
+    description: Container registry shown alongside the application services; the source does not specify image flows.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecr/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-secrets-manager
+    name: AWS Secrets Manager
+    description: Secrets service shown in the architecture; the source does not specify its consumers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/secrets-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Monitoring service shown in the architecture; the source does not detail monitored resources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-mq
+    name: Amazon MQ
+    description: Message broker between the two ECS application-container groups in the service diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/amazon-mq/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the read-only query and Kinesis event-ingestion processing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Query-optimized storage for read-only queries and ingested stream events.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Supplies selected event topics for Lambda-based ingestion into DynamoDB.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-aurora
+    name: Amazon Aurora
+    description: One documented relational database option; the AWS diagram leaves the engine choice open.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
