@@ -1,0 +1,100 @@
+// Geofencing with Amazon Location Service and AWS IoT, after AWS's reference architecture.
+// Systems and users are slots; this blueprint does not describe a deployable infrastructure.
+model {
+  endUser = user 'End user' {
+    description 'Receives notifications when tracked assets enter or leave a geofence.'
+  }
+
+  external = zone 'Assets and notification endpoint' {
+    metadata {
+      platform 'other'
+    }
+
+    trackedAsset = system 'Tracked asset' {
+      description 'Publishes position coordinates; the source example uses BLE tags indoors and allows GPS outdoors.'
+    }
+    greengrass = platform 'AWS IoT Greengrass (optional)' {
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+      edgePublisher = system 'Edge location publisher' {
+        description 'Optional edge path for publishing asset locations to AWS IoT Core.'
+      }
+    }
+    notificationEndpoint = system 'Notification endpoint' {
+      description 'Unspecified endpoint through which the end user receives an SNS notification.'
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      description 'Receives asset position messages; thing models can manage asset metadata and an IoT rule invokes a Lambda function.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Functions update the Location Tracker and process geofence events.'
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+    location = platform 'Amazon Location Service' {
+      description 'A Location Tracker maintains device position history and evaluates positions against its associated Geofence Collection.'
+      metadata {
+        uses 'amazon-location-service'
+      }
+    }
+    eventBridge = platform 'Amazon EventBridge' {
+      description 'The associated Geofence Collection publishes enter and exit events to the default event bus.'
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    iotEvents = platform 'AWS IoT Events (optional)' {
+      description 'Optional complex event detection from raw geofence events.'
+      metadata {
+        uses 'aws-iot-events'
+      }
+    }
+    timestream = platform 'Amazon Timestream (optional)' {
+      description 'Optional time-series storage for event history when AWS IoT Events is used.'
+      metadata {
+        uses 'amazon-timestream'
+      }
+      eventHistory = database 'Event history'
+    }
+    sns = platform 'Amazon SNS' {
+      description 'Publishes notifications to an SNS topic for the end user.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+  }
+
+  trackedAsset -> aws.iotCore 'Publishes positions directly'
+  trackedAsset -> external.greengrass.edgePublisher 'May publish through this optional edge path'
+  external.greengrass.edgePublisher -> aws.iotCore 'Publishes positions through Greengrass'
+  aws.iotCore -> aws.lambda 'IoT rule invokes a function'
+  aws.lambda -> aws.location 'Updates the tracker with DeviceID, x, and y'
+  aws.location -> aws.eventBridge 'Publishes geofence enter and exit events'
+  aws.eventBridge -> aws.lambda 'Rule invokes a function for geofence events'
+  aws.eventBridge -> aws.lambda 'Optional rule invokes a function for raw events'
+  aws.lambda -> aws.iotEvents 'Optionally forwards events for complex detection'
+  aws.iotEvents -> aws.timestream.eventHistory 'Stores event history as a time series'
+  aws.eventBridge -> aws.sns 'Can publish geofence notifications directly'
+  aws.iotEvents -> aws.sns 'Publishes detected complex events'
+  aws.sns -> external.notificationEndpoint 'Notifies through an unspecified subscription'
+  endUser -> external.notificationEndpoint 'Receives notifications'
+}
+
+views {
+  view index {
+    title 'Geofencing with Amazon Location Service and AWS IoT'
+    include *, external.*, external.greengrass.*, aws.*
+  }
+}
