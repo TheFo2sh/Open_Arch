@@ -1,0 +1,142 @@
+// Building a Unified Catalog with Amazon DataZone, based on AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/unified-catalog-datazone/unified-catalog-datazone.html
+// Systems and users are project slots; ingestion and storage entries are choices, not a deployment prescription.
+model {
+  dataProducers = user 'Data producers'
+  dataConsumers = user 'Data consumers'
+  sourceSystems = system 'Source systems' {
+    description 'Project slot for source databases, streaming data, media, files, logs, and SaaS applications.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    catalogWorkflows = system 'Data catalog workflows' {
+      description 'Project slot for data discovery, publishing, and governance workflows using the DataZone portal.'
+    }
+
+    datazone = platform 'Amazon DataZone' {
+      description 'Central catalog domain and self-service portal for discovering, cataloging, sharing, and governing data assets.'
+      metadata {
+        uses 'amazon-datazone'
+      }
+    }
+
+    appflow = platform 'Amazon AppFlow' {
+      metadata {
+        uses 'amazon-appflow'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Data integration and extraction option.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis' {
+      metadata {
+        uses 'amazon-kinesis'
+      }
+    }
+    msk = platform 'Amazon Managed Streaming for Apache Kafka' {
+      metadata {
+        uses 'amazon-msk'
+      }
+    }
+    dms = platform 'AWS Database Migration Service' {
+      metadata {
+        uses 'aws-dms'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      structuredLake = database 'Structured and semi-structured data lake' {
+        description 'Data lake assets stored in Amazon S3.'
+      }
+      unstructuredLake = database 'Unstructured data lake assets' {
+        description 'Unstructured data assets, including the diagram examples of dashboards and ML models.'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      metadata {
+        uses 'amazon-redshift'
+      }
+      warehouse = database 'Amazon Redshift data warehouse' {
+        description 'Data warehouse tables and views; technical metadata can be imported into DataZone.'
+      }
+    }
+    aurora = platform 'Amazon Aurora' {
+      metadata {
+        uses 'amazon-aurora'
+      }
+      relationalDb = database 'Amazon Aurora database' {
+        description 'Purpose-built relational database option.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      nosqlDb = database 'Amazon DynamoDB database' {
+        description 'Purpose-built NoSQL database option.'
+      }
+    }
+
+    glueCrawler = platform 'AWS Glue Crawler' {
+      metadata {
+        uses 'aws-glue-crawler'
+      }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      metadataCatalog = database 'AWS Glue Data Catalog metadata' {
+        description 'Metadata for discovered data assets and tables.'
+      }
+    }
+    glueDataQuality = platform 'AWS Glue Data Quality' {
+      metadata {
+        uses 'aws-glue-data-quality'
+      }
+    }
+  }
+
+  dataProducers -> aws.catalogWorkflows 'Publish and enrich data assets through'
+  dataConsumers -> aws.catalogWorkflows 'Discover and request data through'
+  aws.catalogWorkflows -> aws.datazone 'Uses the domain and data portal'
+
+  sourceSystems -> aws.appflow 'Ingests selected data'
+  sourceSystems -> aws.glue 'Extracts and prepares selected data'
+  sourceSystems -> aws.kinesis 'Ingests selected streaming data'
+  sourceSystems -> aws.msk 'Ingests selected streaming data'
+  sourceSystems -> aws.dms 'Extracts selected database data'
+
+  aws.appflow -> aws.s3.structuredLake 'Can store selected data in'
+  aws.glue -> aws.s3.structuredLake 'Can prepare data for'
+  aws.kinesis -> aws.s3.structuredLake 'Feeds selected streaming data to'
+  aws.msk -> aws.s3.structuredLake 'Feeds selected streaming data to'
+  aws.dms -> aws.redshift.warehouse 'Can migrate data to'
+  aws.dms -> aws.aurora.relationalDb 'Can migrate data to'
+  aws.dms -> aws.dynamodb.nosqlDb 'Can migrate data to'
+
+  aws.s3.structuredLake -> aws.glueCrawler 'Crawls structured and semi-structured data from'
+  sourceSystems -> aws.glueCrawler 'Can crawl eligible JDBC data sources'
+  aws.glueCrawler -> aws.glueCatalog.metadataCatalog 'Writes discovered metadata to'
+  aws.glueCatalog.metadataCatalog -> aws.glueDataQuality 'Checks catalog tables with'
+  aws.glueCatalog.metadataCatalog -> aws.datazone 'Onboards data assets into'
+  aws.redshift.warehouse -> aws.datazone 'Imports technical table and view metadata into'
+  aws.s3.unstructuredLake -> aws.datazone 'Publishes selected data as custom assets to'
+}
+
+views {
+  view index {
+    title 'Building a Unified Catalog with Amazon DataZone'
+    include *, aws.*, aws.s3.*, aws.redshift.*, aws.aurora.*, aws.dynamodb.*, aws.glueCatalog.*
+  }
+}

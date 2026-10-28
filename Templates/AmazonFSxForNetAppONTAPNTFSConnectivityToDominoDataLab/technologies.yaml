@@ -1,0 +1,131 @@
+# Technologies used by the blueprint, keyed by architecture.c4 metadata { uses }.
+technologies:
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Virtual network boundary for the Domino, FSx for ONTAP, and directory-service resources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Routes browser traffic to available Domino nodes in the Amazon EKS cluster.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-eks
+    name: Amazon Elastic Kubernetes Service
+    description: Kubernetes platform running Domino Data Lab.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eks/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-fsx-for-netapp-ontap
+    name: Amazon FSx for NetApp ONTAP
+    description: Managed ONTAP file storage for Domino volumes with NFS access from Domino and direct SMB access for users.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fsx/netapp-ontap/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-directory-service
+    name: AWS Directory Service
+    description: Directory integration used to join the FSx storage virtual machine to Microsoft Active Directory and authenticate direct SMB users.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directoryservice/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-secrets-manager
+    name: AWS Secrets Manager
+    description: Service Domino Data Lab uses to help manage and secure its resources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/secrets-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ecr
+    name: Amazon Elastic Container Registry
+    description: Container registry Domino Data Lab uses to help deploy its resources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecr/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: DNS service Domino Data Lab uses to help manage and deploy its resources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: domino-data-lab
+    name: Domino Data Lab
+    description: Third-party data science platform deployed on Amazon EKS.
+    vendor: Domino Data Lab
+    url: https://www.dominodatalab.com/
+    types: [library, third-party]
+  - key: netapp-trident
+    name: NetApp Trident
+    description: Kubernetes storage orchestrator that provides Domino with Trident-managed FSx for ONTAP volumes over NFS.
+    vendor: NetApp
+    url: https://docs.netapp.com/us-en/trident/
+    types: [library, third-party]
+  - key: vpc-peering
+    name: VPC Peering
+    description: Optional connection for integrating data sources in another VPC.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-transit-gateway
+    name: AWS Transit Gateway
+    description: Optional connection for integrating external data sources through a transit gateway.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: internet-gateway
+    name: Internet Gateway
+    description: Optional internet connection path for integrating external data sources.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-site-to-site-vpn
+    name: AWS Site-to-Site VPN
+    description: Optional VPN connection for integrating external data sources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/site-to-site-vpn/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Optional dedicated connection for integrating external data sources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]

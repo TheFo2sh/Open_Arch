@@ -1,0 +1,192 @@
+// AI/ML Based Intelligent Email Responder, after the AWS reference architecture
+// (https://docs.aws.amazon.com/reference-architecture-diagrams/latest/ai-ml-intelligent-email-responder/ai-ml-intelligent-email-responder.html).
+// Read together with the repository's specification.c4. Systems and users are slots:
+// applying the template maps them onto the project's own.
+model {
+  customer = user 'Email customer' {
+    description 'Sends inquiries and receives automated or agent responses.'
+  }
+  agent = user 'Customer service representative' {
+    description 'Reviews messages escalated from the responder workflow.'
+  }
+  corporateEmail = system 'Corporate email exchange' {
+    description 'The existing corporate email system; AWS does not specify a product.'
+  }
+  marketplaceEmail = system 'Optional AWS Marketplace email platform' {
+    description 'An alternative outbound email provider; AWS does not name a product.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    ses = platform 'Amazon Simple Email Service' {
+      metadata {
+        uses 'amazon-ses'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      rawEmail = database 'Raw email payloads' {
+        description 'Stores raw messages received by Amazon SES.'
+      }
+      dataLake = database 'Data lake repository' {
+        description 'Stores structured and unstructured enterprise data and collected workflow data.'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      responder = system 'Email responder' {
+        description 'The workflow and event handlers that analyze, enrich, and route email.'
+
+        workflow = container 'Email responder workflow' {
+          description 'Processes incoming messages, evaluates model output, and sends or escalates responses.'
+
+          analysis = component 'Language and sentiment analysis' {
+            description 'Extracts language, sentiment, and keywords for message understanding.'
+          }
+          enrichment = component 'Message enrichment' {
+            description 'Looks up enterprise data and customer context for a message.'
+          }
+          decision = component 'Response and routing decision' {
+            description 'Uses confidence and completeness to choose an automated response or agent queue.'
+          }
+          feedback = component 'Model feedback collection' {
+            description 'Feeds collected message and outcome data into continuous model improvement.'
+          }
+        }
+      }
+    }
+    comprehend = platform 'Amazon Comprehend' {
+      metadata {
+        uses 'amazon-comprehend'
+      }
+    }
+    translate = platform 'Amazon Translate' {
+      metadata {
+        uses 'amazon-translate'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+      intentModel = system 'Intent extraction model endpoint' {
+        description 'A customer model endpoint used to infer email intent.'
+      }
+      actionModel = system 'Next-best-action model endpoint' {
+        description 'A customer model endpoint used to recommend the next action.'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      workflowData = database 'Transactional workflow data' {
+        description 'Stores workflow data accessed for message enrichment.'
+      }
+    }
+    firehose = platform 'Amazon Kinesis Data Firehose' {
+      metadata {
+        uses 'amazon-kinesis-data-firehose'
+      }
+    }
+    queues = platform 'Amazon Simple Queue Service' {
+      description 'High- and normal-priority queues for messages requiring manual intervention.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    elasticache = platform 'Amazon ElastiCache' {
+      metadata {
+        uses 'amazon-elasticache'
+      }
+      preferences = database 'Customer preferences and topic models' {
+        description 'Provides customer preference and topic-modeling data for message enrichment.'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      metadata {
+        uses 'amazon-redshift'
+      }
+      warehouse = database 'Enterprise data warehouse' {
+        description 'Provides enterprise warehouse data to the responder workflow.'
+      }
+    }
+    groundTruth = platform 'Amazon SageMaker Ground Truth' {
+      metadata {
+        uses 'amazon-sagemaker-ground-truth'
+      }
+    }
+    pinpoint = platform 'Amazon Pinpoint' {
+      metadata {
+        uses 'amazon-pinpoint'
+      }
+      campaigns = system 'Personalized email campaigns' {
+        description 'Optional customer campaigns using collected data.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+  }
+
+  customer -> corporateEmail 'Sends an inquiry to'
+  corporateEmail -> aws.ses 'Receives and sends corporate email through'
+  aws.ses -> aws.s3.rawEmail 'Stores raw incoming email in'
+  aws.ses -> aws.sns 'Publishes an incoming-email notification to'
+  aws.sns -> aws.lambda.responder.workflow 'Triggers'
+  aws.s3.rawEmail -> aws.lambda.responder.workflow 'Provides the raw message to'
+  aws.lambda.responder.workflow.analysis -> aws.comprehend 'Extracts language, sentiment, and keywords with'
+  aws.lambda.responder.workflow.analysis -> aws.translate 'Translates message text with'
+  aws.lambda.responder.workflow.decision -> aws.sagemaker.intentModel 'Uses'
+  aws.lambda.responder.workflow.decision -> aws.sagemaker.actionModel 'Requests a next-best action from'
+  aws.lambda.responder.workflow.enrichment -> aws.apiGateway 'Requests enterprise data lookups through'
+  aws.apiGateway -> aws.dynamodb.workflowData 'Accesses transactional data in'
+  aws.lambda.responder.workflow.enrichment -> aws.s3.dataLake 'Looks up enterprise data in'
+  aws.lambda.responder.workflow.enrichment -> aws.elasticache.preferences 'Reads customer preferences and topic models from'
+  aws.lambda.responder.workflow.enrichment -> aws.redshift.warehouse 'Looks up enterprise data in'
+  aws.lambda.responder.workflow.feedback -> aws.firehose 'Sends collected data through'
+  aws.firehose -> aws.s3.dataLake 'Delivers collected data to'
+  aws.s3.dataLake -> aws.groundTruth 'Provides collected data for labeling with'
+  aws.groundTruth -> aws.sagemaker 'Supports continuous model improvement with'
+  aws.lambda.responder.workflow.decision -> aws.queues 'Routes uncertain or incomplete messages to'
+  aws.queues -> aws.lambda.responder 'Triggers agent-response handling in'
+  aws.lambda.responder.workflow.decision -> aws.ses 'Sends automated responses through'
+  aws.lambda.responder.workflow.decision -> marketplaceEmail 'May send responses through'
+  agent -> aws.lambda.responder 'Reviews and responds to escalated messages through'
+  aws.s3.dataLake -> aws.athena 'Supports optional data lake analytics with'
+  aws.redshift.warehouse -> aws.athena 'Supports optional warehouse analytics with'
+  aws.athena -> aws.quickSight 'Provides data for optional reports in'
+  customer -> aws.pinpoint.campaigns 'May receive optional personalized campaigns from'
+  aws.pinpoint.campaigns -> corporateEmail 'Delivers campaigns through'
+}
+
+views {
+  view index {
+    title 'AI/ML Based Intelligent Email Responder'
+    include *, aws.*, aws.lambda.*, aws.lambda.responder.*, aws.lambda.responder.workflow.*, aws.s3.*, aws.dynamodb.*, aws.elasticache.*, aws.redshift.*, aws.sagemaker.*, aws.pinpoint.*
+  }
+}
