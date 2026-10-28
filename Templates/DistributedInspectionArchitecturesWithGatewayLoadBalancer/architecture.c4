@@ -1,0 +1,146 @@
+// Distributed Inspection Architectures with Gateway Load Balancer, after AWS's reference architecture.
+// (https://docs.aws.amazon.com/reference-architecture-diagrams/latest/distributed-inspection-gwlb/).
+// Systems are slots that applying the template maps onto the project's own systems.
+model {
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    internetGatewayVpc1 = platform 'AWS Internet Gateway (VPC 1)' {
+      metadata {
+        uses 'aws-internet-gateway'
+      }
+    }
+    internetGatewayVpc2 = platform 'AWS Internet Gateway (VPC 2)' {
+      metadata {
+        uses 'aws-internet-gateway'
+      }
+    }
+
+    endpointVpc1 = platform 'AWS PrivateLink endpoint (VPC 1)' {
+      description 'Gateway Load Balancer endpoint in the first workload VPC.'
+      metadata {
+        uses 'aws-privatelink'
+      }
+    }
+    endpointVpc2 = platform 'AWS PrivateLink endpoint (VPC 2)' {
+      description 'Gateway Load Balancer endpoint in the second workload VPC.'
+      metadata {
+        uses 'aws-privatelink'
+      }
+    }
+    gwlb = platform 'AWS Gateway Load Balancer' {
+      description 'Shared load balancer for security appliances in the centralized appliances VPC.'
+      metadata {
+        uses 'aws-gateway-load-balancer'
+      }
+    }
+    transitGateway = platform 'AWS Transit Gateway' {
+      description 'Routes east-west traffic between workload VPCs; appliance mode is used on the inspection VPC attachment for flow symmetry.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+
+    albVpc1 = platform 'AWS Application Load Balancer (VPC 1)' {
+      metadata {
+        uses 'aws-application-load-balancer'
+      }
+    }
+    albVpc2 = platform 'AWS Application Load Balancer (VPC 2)' {
+      metadata {
+        uses 'aws-application-load-balancer'
+      }
+    }
+    natVpc1 = platform 'AWS NAT Gateway (VPC 1)' {
+      metadata {
+        uses 'aws-nat-gateway'
+      }
+    }
+    natVpc2 = platform 'AWS NAT Gateway (VPC 2)' {
+      metadata {
+        uses 'aws-nat-gateway'
+      }
+    }
+
+    applianceFleet = platform 'Amazon EC2 Auto Scaling (appliances VPC)' {
+      metadata {
+        uses 'amazon-ec2-auto-scaling'
+      }
+      applianceCompute = platform 'Amazon EC2' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        securityAppliances = system 'Third-party security appliance fleet' {
+          description 'The centralized inspection appliances. AWS does not identify a vendor, product, or appliance configuration.'
+        }
+      }
+    }
+
+    workloadFleetVpc1 = platform 'Amazon EC2 Auto Scaling (VPC 1)' {
+      metadata {
+        uses 'amazon-ec2-auto-scaling'
+      }
+      workloadComputeVpc1 = platform 'Amazon EC2' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        workloadVpc1 = system 'Workload in VPC 1' {
+          description 'Application instances receiving inspected inbound traffic and originating internet-bound or inter-VPC traffic.'
+        }
+      }
+    }
+
+    workloadFleetVpc2 = platform 'Amazon EC2 Auto Scaling (VPC 2)' {
+      metadata {
+        uses 'amazon-ec2-auto-scaling'
+      }
+      workloadComputeVpc2 = platform 'Amazon EC2' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        workloadVpc2 = system 'Workload in VPC 2' {
+          description 'Application instances receiving inspected inbound traffic and inter-VPC traffic.'
+        }
+      }
+    }
+  }
+
+  aws.internetGatewayVpc1 -> aws.endpointVpc1 'Ingress routes public traffic through'
+  aws.internetGatewayVpc2 -> aws.endpointVpc2 'Ingress routes public traffic through'
+  aws.endpointVpc1 -> aws.gwlb 'Forwards traffic to the appliance endpoint service through AWS PrivateLink'
+  aws.endpointVpc2 -> aws.gwlb 'Forwards traffic to the appliance endpoint service through AWS PrivateLink'
+  aws.gwlb -> aws.securityAppliances 'Sends GENEVE-encapsulated traffic to for inspection'
+  aws.securityAppliances -> aws.gwlb 'Returns inspected traffic to'
+  aws.gwlb -> aws.endpointVpc1 'Returns inspected traffic to the VPC 1 endpoint'
+  aws.gwlb -> aws.endpointVpc2 'Returns inspected traffic to the VPC 2 endpoint'
+
+  aws.endpointVpc1 -> aws.albVpc1 'Routes inspected inbound traffic to'
+  aws.endpointVpc2 -> aws.albVpc2 'Routes inspected inbound traffic to'
+  aws.albVpc1 -> aws.workloadVpc1 'Forwards requests to healthy EC2 instances in'
+  aws.albVpc2 -> aws.workloadVpc2 'Forwards requests to healthy EC2 instances in'
+
+  aws.workloadVpc1 -> aws.natVpc1 'Sends internet-bound traffic through'
+  aws.workloadVpc2 -> aws.natVpc2 'Sends internet-bound traffic through'
+  aws.natVpc1 -> aws.endpointVpc1 'Routes translated packets to'
+  aws.natVpc2 -> aws.endpointVpc2 'Routes translated packets to'
+  aws.endpointVpc1 -> aws.internetGatewayVpc1 'Forwards inspected outbound traffic toward'
+  aws.endpointVpc2 -> aws.internetGatewayVpc2 'Forwards inspected outbound traffic toward'
+
+  aws.workloadVpc1 -> aws.endpointVpc1 'Forwards east-west traffic to the local endpoint'
+  aws.workloadVpc2 -> aws.endpointVpc2 'Forwards east-west traffic to the local endpoint'
+  aws.endpointVpc1 -> aws.transitGateway 'Routes inspected traffic through'
+  aws.endpointVpc2 -> aws.transitGateway 'Routes inspected traffic through'
+  aws.transitGateway -> aws.endpointVpc2 'Routes traffic toward the destination VPC endpoint'
+  aws.transitGateway -> aws.endpointVpc1 'Routes reverse-direction traffic toward the destination VPC endpoint'
+  aws.endpointVpc2 -> aws.workloadVpc2 'Forwards re-inspected traffic to'
+  aws.endpointVpc1 -> aws.workloadVpc1 'Forwards re-inspected traffic to'
+}
+
+views {
+  view index {
+    title 'Distributed Inspection Architectures with Gateway Load Balancer'
+    include *, aws.*
+  }
+}

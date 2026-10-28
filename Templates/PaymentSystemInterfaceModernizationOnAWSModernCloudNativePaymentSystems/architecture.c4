@@ -1,0 +1,208 @@
+// Payment System Interface Modernization on AWS, after AWS's reference architecture.
+// The linked AWS diagram image could not be retrieved here; this model follows the
+// source page's numbered descriptions. Systems and users are mapping slots.
+model {
+  paymentUser = user 'Payment user' {
+    description 'Initiates a transaction through a payment-integrated or bank-provided mobile app.'
+  }
+
+  integratedApp = system 'Payment-integrated mobile app' {
+    description 'Mobile app integrated with the payment interface; provider and implementation are unspecified by AWS.'
+  }
+  bankApp = system 'Bank-provided mobile app' {
+    description 'Bank-provided app that submits requests to the bank data center; implementation is unspecified by AWS.'
+  }
+  bankRequestReceiver = system 'Bank data-center request receiver' {
+    description 'Receives requests at the bank data center and routes them to AWS over Direct Connect.'
+  }
+  merchantClient = system 'Merchant or other internet client' {
+    description 'External client that sends a payment request directly from the internet.'
+  }
+  bankHsm = system 'Bank hardware security module' {
+    description 'Bank-hosted HSM reached by payment interface services over Direct Connect; vendor and interface are unspecified by AWS.'
+  }
+  coreBanking = system 'Bank core banking systems' {
+    description 'Bank-hosted core systems reached by payment interface services over Direct Connect; product and interface are unspecified by AWS.'
+  }
+  otherBankSystems = system 'Other bank data-center systems' {
+    description 'Consumes near-real-time payment transaction data from the RDS replica over Direct Connect.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Connects the bank data center to the payment interface in AWS.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    waf = platform 'AWS WAF' {
+      description 'Filters internet requests before they reach API Gateway.'
+      metadata {
+        uses 'aws-waf'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Receives internet requests and routes them through a VPC endpoint and Network Load Balancer.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    vpcEndpoint = platform 'Amazon VPC endpoint' {
+      description 'Private endpoint on the route from API Gateway to the Network Load Balancer.'
+      metadata {
+        uses 'amazon-vpc-endpoint'
+      }
+    }
+    nlb = platform 'Network Load Balancer' {
+      description 'Load-balances API Gateway requests toward the EKS ingress path.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+    alb = platform 'Application Load Balancer' {
+      description 'Application load balancer associated with the EKS ALB ingress controller.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+
+    eks = platform 'Amazon Elastic Kubernetes Service' {
+      description 'Runs the payment interface microservices and their ALB ingress controller.'
+      metadata {
+        uses 'amazon-eks'
+      }
+
+      paymentInterface = system 'Payment interface' {
+        description 'Payment interface system composed of the microservices shown in AWS’s examples.'
+
+        ingress = container 'ALB ingress controller' {
+          description 'Ingress controller in the EKS cluster; AWS does not specify its implementation or configuration.'
+        }
+        payment = container 'Payment microservice' {
+          description 'Payment microservice; AWS does not specify its implementation or transaction semantics.'
+        }
+        balance = container 'Balance microservice' {
+          description 'Balance microservice; behavior beyond its purpose is unspecified by AWS.'
+        }
+        vpa = container 'VPA microservice' {
+          description 'Virtual payment address microservice; behavior beyond its purpose is unspecified by AWS.'
+        }
+        merchant = container 'Merchant microservice' {
+          description 'Merchant microservice; behavior beyond its purpose is unspecified by AWS.'
+        }
+        account = container 'Account microservice' {
+          description 'Account microservice; behavior beyond its purpose is unspecified by AWS.'
+        }
+      }
+    }
+
+    rds = platform 'Amazon Relational Database Service' {
+      description 'Hosts the unified payment interface (UPI) database and its replica.'
+      metadata {
+        uses 'amazon-rds'
+      }
+      upiDatabase = database 'UPI database' {
+        description 'Unified payment interface database used by services for CRUD operations; engine and schema are unspecified by AWS.'
+      }
+      upiReplica = database 'UPI database replica' {
+        description 'RDS replica from which other bank data-center systems consume near-real-time transaction data.'
+      }
+    }
+    elasticache = platform 'Amazon ElastiCache (Redis OSS)' {
+      description 'Stores payment interface sessions.'
+      metadata {
+        uses 'amazon-elasticache-redis-oss'
+      }
+      sessions = database 'Payment sessions' {
+        description 'Redis OSS session data for payment interface services.'
+      }
+    }
+    msk = platform 'Amazon Managed Streaming for Apache Kafka' {
+      description 'Kafka topics carry events between payment interface microservices.'
+      metadata {
+        uses 'amazon-msk'
+      }
+    }
+    opensearch = platform 'Amazon OpenSearch Service' {
+      description 'Supports observability for payment interface microservices.'
+      metadata {
+        uses 'amazon-opensearch-service'
+      }
+    }
+    cloudwatch = platform 'Amazon CloudWatch' {
+      description 'Supports observability for payment interface microservices.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    iam = platform 'AWS Identity and Access Management' {
+      description 'Provides the roles-based access referenced by AWS.'
+      metadata {
+        uses 'aws-iam'
+      }
+    }
+    kms = platform 'AWS Key Management Service' {
+      description 'Supports securing credentials and data; specific keys and policies are unspecified by AWS.'
+      metadata {
+        uses 'aws-kms'
+      }
+    }
+    secretsManager = platform 'AWS Secrets Manager' {
+      description 'Supports secure credential management; secret contents and rotation are unspecified by AWS.'
+      metadata {
+        uses 'aws-secrets-manager'
+      }
+    }
+    ecr = platform 'Amazon Elastic Container Registry' {
+      description 'Maintains payment interface microservice container images.'
+      metadata {
+        uses 'amazon-ecr'
+      }
+    }
+  }
+
+  paymentUser -> integratedApp 'Initiates a payment through'
+  paymentUser -> bankApp 'May initiate a payment through'
+  integratedApp -> bankRequestReceiver 'Submits a request through the bank data-center path'
+  bankApp -> bankRequestReceiver 'Submits a request to'
+  bankRequestReceiver -> aws.directConnect 'Routes requests to AWS over'
+  aws.directConnect -> aws.eks.paymentInterface 'Carries bank requests to'
+  merchantClient -> aws.waf 'Sends an internet request through'
+  aws.waf -> aws.apiGateway 'Filters requests for'
+  aws.apiGateway -> aws.vpcEndpoint 'Routes requests through'
+  aws.vpcEndpoint -> aws.nlb 'Forwards requests to'
+  aws.nlb -> aws.alb 'Load-balances requests to'
+  aws.alb -> aws.eks.paymentInterface.ingress 'Delivers requests to the EKS ingress path'
+  aws.eks.paymentInterface.ingress -> aws.eks.paymentInterface.payment 'Routes requests to'
+  aws.eks.paymentInterface.ingress -> aws.eks.paymentInterface.balance 'Routes requests to'
+  aws.eks.paymentInterface.ingress -> aws.eks.paymentInterface.vpa 'Routes requests to'
+  aws.eks.paymentInterface.ingress -> aws.eks.paymentInterface.merchant 'Routes requests to'
+  aws.eks.paymentInterface.ingress -> aws.eks.paymentInterface.account 'Routes requests to'
+
+  aws.eks.paymentInterface -> aws.directConnect 'Reaches bank-hosted dependencies over'
+  aws.directConnect -> bankHsm 'Connects to'
+  aws.directConnect -> coreBanking 'Connects to'
+  aws.eks.paymentInterface -> aws.rds.upiDatabase 'Performs CRUD operations in'
+  aws.rds.upiDatabase -> aws.rds.upiReplica 'Has a near-real-time read replica'
+  aws.rds.upiReplica -> aws.directConnect 'Provides transaction data over'
+  aws.directConnect -> otherBankSystems 'Delivers replica data to'
+  aws.eks.paymentInterface -> aws.elasticache.sessions 'Maintains sessions in'
+  aws.eks.paymentInterface -> aws.msk 'Communicates between microservices using event topics in'
+  aws.eks.paymentInterface -> aws.opensearch 'Uses for observability'
+  aws.eks.paymentInterface -> aws.cloudwatch 'Uses for observability'
+  aws.iam -> aws.eks.paymentInterface 'Provides roles-based access for'
+  aws.kms -> aws.eks.paymentInterface 'Supports securing credentials and data for'
+  aws.secretsManager -> aws.eks.paymentInterface 'Provides managed credential storage for'
+  aws.ecr -> aws.eks.paymentInterface 'Maintains container images for'
+}
+
+views {
+  view index {
+    title 'Payment System Interface Modernization on AWS'
+    include *
+  }
+}

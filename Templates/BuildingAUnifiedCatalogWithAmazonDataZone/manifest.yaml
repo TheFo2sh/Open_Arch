@@ -1,0 +1,7 @@
+PackageId: OpenArch.BuildingAUnifiedCatalogWithAmazonDataZone
+Name: Building a Unified Catalog with Amazon DataZone
+Description: A unified data catalog that brings together data assets from multiple sources and AWS storage services for discovery, sharing, and governance.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, data-catalog, data-governance, analytics]
