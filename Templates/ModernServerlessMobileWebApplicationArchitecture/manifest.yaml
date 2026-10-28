@@ -1,0 +1,7 @@
+PackageId: OpenArch.ModernServerlessMobileWebApplicationArchitecture
+Name: Modern Serverless Mobile/Web Application Architecture
+Description: AWS reference architecture for a serverless mobile and web client, containerized services, continuous delivery, and analytics.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, serverless, mobile, web, reference-architecture]

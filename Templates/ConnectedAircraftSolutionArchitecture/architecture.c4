@@ -1,0 +1,130 @@
+// Connected Aircraft Solution Architecture from AWS Reference Architecture Diagrams.
+// Read together with the repository's specification.c4. Systems and users are slots.
+model {
+  flightOperations = user 'Flight Operations Team' {
+    description 'Analyzes flight data for fuel-burn optimization, fault analysis, and related uses.'
+  }
+  engineHealth = user 'Engine Health Management Team' {
+    description 'Performs fleet-wide analytics and uses engine-health results.'
+  }
+  appDevelopers = user 'App developers' {
+    description 'Build digital solutions for the connected-aircraft ecosystem.'
+  }
+  thirdPartyDevelopers = user 'Third-party developers' {
+    description 'Subscribe to anonymized aircraft data offered through AWS Data Exchange.'
+  }
+
+  aircraft = zone 'Aircraft' {
+    metadata {
+      platform 'other'
+    }
+
+    greengrass = platform 'AWS IoT Greengrass' {
+      description 'Greengrass runs on the flight-data acquisition unit on board the aircraft.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+      dataCollection = system 'Onboard flight-data collection' {
+        description 'Slot for the flight-data acquisition system that collects avionics and telemetry data.'
+      }
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      flightDataLake = database 'Flight data lake' {
+        description 'Stores flight data offloaded at the gate and aggregated anonymized flight and fault data.'
+      }
+    }
+
+    flink = platform 'Amazon Managed Service for Apache Flink' {
+      description 'Processes and analyzes engine flight data for engine-health maintenance.'
+      metadata {
+        uses 'amazon-managed-service-for-apache-flink'
+      }
+      engineProcessing = system 'Engine flight-data processing' {
+        description 'Slot for the managed stream-processing workload; the source does not specify processing thresholds.'
+      }
+    }
+
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Named in the source introduction for the predictive-maintenance architecture.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      connectedApplications = system 'Connected ecosystem applications' {
+        description 'Slot for digital solutions built with API Gateway, Lambda, and Athena; application behavior is not specified.'
+      }
+    }
+
+    dataExchange = platform 'AWS Data Exchange' {
+      metadata {
+        uses 'aws-data-exchange'
+      }
+    }
+
+    quick = platform 'Amazon Quick' {
+      metadata {
+        uses 'amazon-quick'
+      }
+    }
+
+    flightOperationsAnalysis = system 'Flight Operations analysis' {
+      description 'Slot for the team’s analysis workflow; the source does not name a particular application.'
+    }
+    fleetAnalytics = system 'Fleet-wide analytics' {
+      description 'Slot for Engine Health Management analytics using Amazon Quick and Athena.'
+    }
+    subscriberIntegration = system 'Third-party data subscription' {
+      description 'Slot for a subscriber integration; the source does not specify its implementation.'
+    }
+  }
+
+  flightOperations -> aws.flightOperationsAnalysis 'Analyzes offloaded flight data'
+  engineHealth -> aws.fleetAnalytics 'Performs fleet-wide analytics'
+  appDevelopers -> aws.lambda.connectedApplications 'Builds'
+  thirdPartyDevelopers -> aws.subscriberIntegration 'Subscribes to anonymized data'
+
+  aircraft.greengrass.dataCollection -> aws.s3.flightDataLake 'Offloads flight data when the aircraft is at the gate'
+  aircraft.greengrass.dataCollection -> aws.flightOperationsAnalysis 'Sends anonymized near-real-time events to'
+  aws.flink.engineProcessing -> aws.flightOperationsAnalysis 'Notifies the team of engine anomalies'
+
+  aws.athena -> aws.s3.flightDataLake 'Aggregates anonymized flight and fault data into'
+  aws.s3.flightDataLake -> aws.sagemaker 'Provides aggregated data for model training'
+  aws.sagemaker -> aircraft.greengrass 'Deploys predictive-maintenance models to'
+
+  aws.lambda.connectedApplications -> aws.apiGateway 'Exposes APIs through'
+  aws.lambda.connectedApplications -> aws.athena 'Queries data with'
+
+  aws.fleetAnalytics -> aws.quick 'Uses for fleet-wide analytics'
+  aws.fleetAnalytics -> aws.athena 'Queries processed flight data with'
+  aws.fleetAnalytics -> aws.s3.flightDataLake 'Queries processed flight data in'
+  aws.flightOperationsAnalysis -> aws.s3.flightDataLake 'Analyzes offloaded flight data in'
+  aws.subscriberIntegration -> aws.dataExchange 'Uses for data subscriptions'
+  aws.dataExchange -> aws.s3.flightDataLake 'Offers anonymized data from'
+}

@@ -1,0 +1,89 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-transfer-family
+    name: AWS Transfer Family
+    description: Managed SFTP endpoint for exchanging data between on-premises environments and the cluster.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/aws-transfer-family/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Routes virtual desktop sessions to Windows and Linux VDI.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform for the virtual desktop instances and HPC cluster head node.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ec2-auto-scaling
+    name: Amazon EC2 Auto Scaling
+    description: Scales the HPC compute nodes that the cluster head node starts and stops.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/autoscaling/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-directory-service
+    name: AWS Directory Service
+    description: Centralized directory service for domain-joining the head node, virtual desktops, and HPC compute nodes.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directoryservice/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2-image-builder
+    name: EC2 Image Builder
+    description: Builds the specialized Linux and Windows machine images used by the VDI and HPC environment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/image-builder/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-efs
+    name: Amazon Elastic File System
+    description: File system shown in the cluster filesystem group; the source does not specify its data or access pattern.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/efs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-fsx-for-lustre
+    name: Amazon FSx for Lustre
+    description: High-performance file system used by HPC nodes during computations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fsx/lustre/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-fsx-for-netapp-ontap
+    name: Amazon FSx for NetApp ONTAP
+    description: Shared storage for user data accessible from Windows and Linux VDI and for sharing data with on-premises.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fsx/netapp-ontap/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-opensearch-service
+    name: Amazon OpenSearch Service
+    description: Stores HPC job and host information.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/opensearch-service/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: nice-dcv
+    name: NICE DCV
+    description: Remote display software used to access Windows and Linux virtual desktop sessions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/hpc/dcv/
+    types: [library]
