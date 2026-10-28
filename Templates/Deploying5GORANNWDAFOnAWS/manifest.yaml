@@ -1,0 +1,7 @@
+PackageId: OpenArch.Deploying5GORANNWDAFOnAWS
+Name: Deploying 5G O-RAN NWDAF on AWS
+Description: O-RAN and 5G network-function telemetry flows to an AWS-hosted NWDAF for model-based service-experience analytics and network optimization.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, telecommunications, 5g, oran, nwdaf, analytics]
