@@ -1,0 +1,128 @@
+// AWS reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/invoking-async-external-apis/invoking-async-external-apis.html
+model {
+  requester = system 'Requesting application' {
+    description 'A consumer-provided system that starts work; AWS does not specify the initiating application or interface.'
+  }
+
+  provider = system 'Third-party asynchronous service' {
+    description 'The unspecified external provider API and results service. Map this slot to the actual provider or leave it out.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Runs the task-token request workflow, express dispatch workflow, and result-processing workflow.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    requestQueue = platform 'Amazon SQS request queue' {
+      description 'Carries the request payload and waiting workflow task token to the dispatcher.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    requestDlq = platform 'Amazon SQS request dead-letter queue' {
+      description 'Holds requests that fail during external API invocation.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    callbackQueue = platform 'Amazon SQS callback queue' {
+      description 'Buffers transformed callback payloads for asynchronous processing.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    callbackDlq = platform 'Amazon SQS callback dead-letter queue' {
+      description 'Holds callback messages that fail during processing.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the request poller and callback processor.'
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+    outboundApi = platform 'Amazon API Gateway HTTP proxy API' {
+      description 'Applies a rate limit to outbound requests to the external API.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    callbackApi = platform 'Amazon API Gateway callback endpoint' {
+      description 'Receives callbacks, transforms them with mapping templates, and responds immediately.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    appConfig = platform 'AWS AppConfig' {
+      description 'Controls the dynamic delay used by the Lambda request poller.'
+      metadata {
+        uses 'aws-appconfig'
+      }
+    }
+    cloudWatch = platform 'Amazon CloudWatch' {
+      description 'Monitors the request queue length.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    dynamoDb = platform 'Amazon DynamoDB' {
+      description 'Stores the association between a callback job ID and its waiting workflow token.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      jobTokens = database 'Workflow task tokens and job IDs'
+    }
+
+    integration = system 'Asynchronous API integration' {
+      description 'Consumer system that coordinates requests, callbacks, and processing of external results.'
+
+      requestWorkflow = container 'Long-running request workflow' {
+        description 'Waits for a callback using a task token and continues when the callback processor supplies it.'
+      }
+      requestPoller = container 'Request queue poller' {
+        description 'Lambda poller that reads queued requests, applies the configured delay, and starts express dispatch.'
+      }
+      dispatchWorkflow = container 'Express API dispatch workflow' {
+        description 'Sends the queued payload through the rate-limited proxy and records the returned job ID with the task token.'
+      }
+      callbackProcessor = container 'Callback queue processor' {
+        description 'Lambda poller that finds the task token for a callback job ID and resumes the waiting workflow.'
+      }
+      resultProcessor = container 'Result processor' {
+        description 'Processes the external service results fetched by job ID after the callback resumes the workflow.'
+      }
+    }
+  }
+
+  requester -> aws.stepFunctions 'Starts a request workflow'
+  aws.requestWorkflow -> aws.requestQueue 'Enqueues the payload and task token'
+  aws.requestPoller -> aws.requestQueue 'Polls'
+  aws.requestPoller -> aws.lambda 'Runs on'
+  aws.requestPoller -> aws.appConfig 'Reads the dynamic delay from'
+  aws.requestPoller -> aws.dispatchWorkflow 'Starts an express workflow'
+  aws.dispatchWorkflow -> aws.stepFunctions 'Runs as an express workflow on'
+  aws.dispatchWorkflow -> aws.outboundApi 'Invokes'
+  aws.outboundApi -> provider 'Submits the asynchronous job and receives its job ID'
+  aws.dispatchWorkflow -> aws.dynamoDb.jobTokens 'Stores the job ID with its task token'
+  aws.dispatchWorkflow -> aws.requestDlq 'Sends failed requests to'
+  aws.cloudWatch -> aws.requestQueue 'Monitors queue length'
+  provider -> aws.callbackApi 'Posts the completed job ID and callback payload to'
+  aws.callbackApi -> aws.callbackQueue 'Transforms and enqueues callback messages'
+  aws.callbackProcessor -> aws.callbackQueue 'Polls'
+  aws.callbackProcessor -> aws.lambda 'Runs on'
+  aws.callbackProcessor -> aws.dynamoDb.jobTokens 'Looks up the task token for the job ID in'
+  aws.callbackProcessor -> aws.stepFunctions 'Resumes the waiting workflow with its task token'
+  aws.requestWorkflow -> aws.resultProcessor 'Continues to'
+  aws.resultProcessor -> aws.stepFunctions 'Runs as a result-processing step on'
+  aws.resultProcessor -> provider 'Fetches results by job ID from the external results service'
+  aws.callbackProcessor -> aws.callbackDlq 'Sends failed callback messages to'
+}
