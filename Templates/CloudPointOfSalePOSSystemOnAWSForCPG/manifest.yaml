@@ -1,0 +1,7 @@
+PackageId: OpenArch.CloudPointOfSalePOSSystemOnAWSForCPG
+Name: Cloud Point-of-Sale (POS) System on AWS for CPG
+Description: A cloud-based consumer packaged goods POS architecture with store edge, serverless application, purpose-built data, and management and analytics layers.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, retail, cpg, point-of-sale, pos]

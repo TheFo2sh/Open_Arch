@@ -1,0 +1,151 @@
+// Aircraft turn tracking passive data collection, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/aircraft-turn-tracking/aircraft-turn-tracking.html
+// Systems and users are slots, mapped onto the project's own when the template is applied.
+model {
+  operationsStaff = user 'Airline and airport operations staff' {
+    description 'Use mobile applications and dashboards to monitor aircraft turn events and analytics.'
+  }
+
+  mobileClients = system 'Mobile applications and dashboards' {
+    description 'Client applications for real-time turn tracking, notifications and analytics; their implementation is not specified by AWS.'
+  }
+
+  edge = zone 'Airport edge' {
+    metadata {
+      platform 'other'
+    }
+
+    greengrass = platform 'AWS IoT Greengrass' {
+      description 'Runs edge inference close to the cameras and supports edge device management.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+
+      cameraSystem = system 'Aircraft turn camera system' {
+        description 'Three gate cameras observe tarmac turn events, two jet bridge cameras observe boarding, and one gate counter camera observes crew and agent arrival.'
+      }
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      description 'Connects the camera devices and carries device data into cloud processing.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    deviceManagement = platform 'AWS IoT Device Management' {
+      description 'Manages the camera devices.'
+      metadata {
+        uses 'aws-iot-device-management'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs serverless turn-event processing.'
+      metadata {
+        uses 'aws-lambda'
+      }
+
+      eventService = system 'Turn event processing service' {
+        description 'Processes turn events and supports real-time tracking and notifications.'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis' {
+      description 'Streams event data for real-time processing and delivery.'
+      metadata {
+        uses 'amazon-kinesis'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Exposes APIs used by mobile applications and dashboards.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    appSync = platform 'AWS AppSync' {
+      description 'Delivers real-time notifications and events to mobile applications and dashboards.'
+      metadata {
+        uses 'aws-appsync'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Purpose-built database for operational turn tracking data.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      turnData = database 'Turn tracking data'
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Data lake for recorded video and analytics data.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Recorded video and data lake'
+    }
+    redshift = platform 'Amazon Redshift' {
+      description 'Analytics data warehouse.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+      warehouse = database 'Turn analytics warehouse'
+    }
+    groundTruth = platform 'Amazon SageMaker Ground Truth' {
+      description 'Labels recorded video with turn events for model training.'
+      metadata {
+        uses 'amazon-sagemaker-ground-truth'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Runs ad hoc analysis over data lake content.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Provides analytics and dashboards.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Supports AI/ML model training and turn optimization.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+
+      modelService = system 'Turn model training and optimization' {
+        description 'Uses labeled turn-event data to train AI/ML models for turn optimization.'
+      }
+    }
+  }
+
+  operationsStaff -> mobileClients 'Monitors turn tracking through'
+  mobileClients -> aws.apiGateway 'Requests turn data through'
+  mobileClients -> aws.appSync 'Receives real-time notifications through'
+  aws.apiGateway -> aws.lambda.eventService 'Invokes'
+  aws.appSync -> aws.lambda.eventService 'Delivers events to'
+  edge.greengrass.cameraSystem -> aws.iotCore 'Publishes camera data and edge inference results to'
+  aws.iotCore -> aws.lambda.eventService 'Forwards IoT events to'
+  aws.deviceManagement -> edge.greengrass.cameraSystem 'Manages'
+  aws.lambda.eventService -> aws.kinesis 'Streams turn events through'
+  aws.lambda.eventService -> aws.dynamodb.turnData 'Reads and writes operational data in'
+  edge.greengrass.cameraSystem -> aws.s3.dataLake 'Records video and data lake inputs in'
+  aws.s3.dataLake -> aws.groundTruth 'Provides video for event labeling in'
+  aws.groundTruth -> aws.sagemaker.modelService 'Supplies labeled data to'
+  aws.s3.dataLake -> aws.sagemaker.modelService 'Provides training data to'
+  aws.sagemaker.modelService -> edge.greengrass.cameraSystem 'Provides trained inference models to'
+  aws.s3.dataLake -> aws.redshift.warehouse 'Supplies data to'
+  aws.athena -> aws.s3.dataLake 'Queries'
+  aws.quickSight -> aws.redshift.warehouse 'Visualizes analytics from'
+}
+
+views {
+  view index {
+    title 'Aircraft Turn Tracking Passive Data Collection'
+    include *, edge.*, edge.greengrass.*, aws.*, aws.lambda.*, aws.lambda.eventService.*
+  }
+}
