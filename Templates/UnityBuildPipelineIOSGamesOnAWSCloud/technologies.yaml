@@ -1,0 +1,106 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Third-party tools are listed here but not attached with metadata { uses }: the
+# schema only permits libraries in system, container, and component metadata.
+technologies:
+  - key: amazon-vpc
+    name: Amazon VPC
+    description: Network boundary for the private build infrastructure; subnet and security details are left to the implementation.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute for the Jenkins controller, optional Unity license server, and the EC2 Mac build agent on a dedicated host.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2-auto-scaling
+    name: Amazon EC2 Auto Scaling
+    description: Manages Linux build workers that use EC2 Spot capacity.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/autoscaling/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-vpc-nat-gateway
+    name: Amazon VPC NAT Gateway
+    description: Outbound internet connectivity for private resources; the number and placement of gateways are implementation choices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/features/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Optional artifact destination; the Jenkins reference recommends S3, but does not specify an artifact upload flow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-secrets-manager
+    name: AWS Secrets Manager
+    description: Stores signing certificates, private-key material, passwords, and provisioning profiles for the macOS signing stage.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/secrets-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: jenkins
+    name: Jenkins
+    description: Third-party CI/CD server that orchestrates build stages and worker agents.
+    vendor: Jenkins project
+    url: https://www.jenkins.io/
+    types: [third-party]
+  - key: jenkins-ec2-fleet-plugin
+    name: Jenkins EC2 Fleet plugin
+    description: Jenkins plugin used to provision and manage Linux build agents on EC2 capacity.
+    vendor: Jenkins project
+    url: https://plugins.jenkins.io/ec2-fleet/
+    types: [third-party]
+  - key: jenkins-docker-pipeline-plugin
+    name: Jenkins Docker Pipeline plugin
+    description: Jenkins plugin used to run pipeline stages in Docker containers.
+    vendor: Jenkins project
+    url: https://plugins.jenkins.io/docker-workflow/
+    types: [third-party]
+  - key: docker
+    name: Docker
+    description: Container engine used to run the Linux Unity build environment.
+    vendor: Docker
+    url: https://www.docker.com/
+    types: [third-party]
+  - key: unity-editor
+    name: Unity Editor
+    description: Game engine used in the Linux preparation stage to generate the Xcode project.
+    vendor: Unity Technologies
+    url: https://unity.com/products/unity-engine
+    types: [third-party]
+  - key: unity-build-server
+    name: Unity Build Server
+    description: Optional Unity license service for build-server licensing; the reference does not require this licensing model.
+    vendor: Unity Technologies
+    url: https://unity.com/products/unity-build-server
+    types: [third-party]
+  - key: xcode
+    name: Xcode
+    description: Apple's macOS toolchain used for the final iOS build and signing stage.
+    vendor: Apple
+    url: https://developer.apple.com/xcode/
+    types: [third-party]
+  - key: apple-developer-program
+    name: Apple Developer Program
+    description: Apple account and signing assets needed when distributing signed iOS builds.
+    vendor: Apple
+    url: https://developer.apple.com/programs/
+    types: [third-party]
