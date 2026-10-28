@@ -1,0 +1,7 @@
+PackageId: OpenArch.AWSIndustrialPdMMLModelWithModbusCommunication
+Name: AWS Industrial PdM ML Model with Modbus Communication
+Description: Predictive maintenance analytics for factory data collected over OPC-UA and Modbus with AWS IoT services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, industrial-iot, predictive-maintenance, machine-learning, modbus]

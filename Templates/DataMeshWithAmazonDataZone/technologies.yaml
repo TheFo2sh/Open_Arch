@@ -1,0 +1,156 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-datazone
+    name: Amazon DataZone
+    description: Data management service for publishing, discovering, governing, and subscribing to data assets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/datazone/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [system, database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-iam
+    name: AWS Identity and Access Management
+    description: AWS identity service through which users can authenticate to the DataZone portal with IAM credentials.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iam/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-iam-identity-center
+    name: AWS IAM Identity Center
+    description: AWS single sign-on option for users accessing the Amazon DataZone portal.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iam/identity-center/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-appflow
+    name: Amazon AppFlow
+    description: Managed service for ingesting data from supported SaaS applications.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/appflow/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-dms
+    name: AWS Database Migration Service
+    description: Managed service for ingesting or replicating data from databases.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dms/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-kinesis
+    name: Amazon Kinesis
+    description: Managed streaming service for ingesting streaming data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Managed service for ingesting data from connected devices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-msk
+    name: Amazon Managed Streaming for Apache Kafka
+    description: Managed Apache Kafka service for ingesting streaming data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/msk/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-glue
+    name: AWS Glue
+    description: Serverless data integration service used to transform raw producer data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-glue-data-catalog
+    name: AWS Glue Data Catalog
+    description: Metadata catalog for producer data, including technical metadata used by data source jobs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-glue-data-quality
+    name: AWS Glue Data Quality
+    description: AWS Glue capability used to measure the quality of producer data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/features/data-quality/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage that can hold producer data assets registered in Amazon DataZone.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Data warehouse service that can hold producer data assets and support consumer analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-rds
+    name: Amazon RDS
+    description: Managed relational database service that can hold producer data assets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: AWS service used for AI and machine learning model development with subscribed data assets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/ai/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Serverless query service used for analytics on subscribed data assets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Business intelligence service used for reporting on subscribed data assets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
