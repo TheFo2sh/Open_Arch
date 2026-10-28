@@ -1,0 +1,137 @@
+// Routing Scenarios with AWS Direct Connect SiteLink, after AWS's reference architecture
+// (https://docs.aws.amazon.com/reference-architecture-diagrams/latest/routing-scenarios-with-aws-direct-connect-sitelink/routing-scenarios-with-aws-direct-connect-sitelink.html).
+// Read together with the repository's specification.c4. Systems are slots that map to
+// the project's own systems; the scenarios in this blueprint are alternatives.
+model {
+  customer = zone 'Customer-managed networks' {
+    metadata {
+      platform 'other'
+    }
+
+    siteA = system 'Corporate data center A' {
+      description 'Customer gateway and on-premises network at site A. The router and its manufacturer are not specified by AWS.'
+    }
+    siteB = system 'Corporate data center B' {
+      description 'Customer gateway and on-premises network at site B. The router and its manufacturer are not specified by AWS.'
+    }
+    siteC = system 'Corporate data center C' {
+      description 'An additional customer gateway and on-premises network in the extension scenario; its router and manufacturer are not specified by AWS.'
+    }
+  }
+
+  awsGlobal = zone 'AWS global networking' {
+    metadata {
+      platform 'aws'
+    }
+
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Direct Connect connections and private or transit virtual interfaces (VIFs) link the customer gateways to AWS.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    siteLink = platform 'AWS Direct Connect SiteLink' {
+      description 'Enabled on eligible VIFs associated with a common Direct Connect gateway to exchange site routes.'
+      metadata {
+        uses 'aws-direct-connect-sitelink'
+      }
+    }
+    globalNetwork = platform 'AWS global network' {
+      description 'Carries SiteLink traffic between Direct Connect locations without traversing an AWS Region.'
+      metadata {
+        uses 'aws-global-network'
+      }
+    }
+    sharedGateway = platform 'AWS Direct Connect gateway' {
+      description 'Common gateway for the SiteLink-enabled VIFs in the inter-site scenarios.'
+      metadata {
+        uses 'aws-direct-connect-gateway'
+      }
+    }
+    globalTransitGateway = platform 'Direct Connect gateway (global transit, ASN 65001)' {
+      description 'Global-transit gateway in the segmentation scenario; the source uses ASN 65001 for global connectivity.'
+      metadata {
+        uses 'aws-direct-connect-gateway'
+      }
+    }
+    regionalGateway = platform 'Direct Connect gateway (regional, ASN 65002)' {
+      description 'Regional gateway in the segmentation scenario; the source uses ASN 65002 for regional connectivity.'
+      metadata {
+        uses 'aws-direct-connect-gateway'
+      }
+    }
+    otherRegionalGateway = platform 'Additional regional gateway (ASN 65003)' {
+      description 'Represents the additional regional ASN named by AWS; the source does not specify its site or gateway association.'
+      metadata {
+        uses 'aws-direct-connect-gateway'
+      }
+    }
+  }
+
+  awsRegion1 = zone 'AWS Region 1' {
+    metadata {
+      platform 'aws'
+    }
+
+    transitGateway = platform 'AWS Transit Gateway' {
+      description 'Regional transit gateway for AWS resources associated with the global Direct Connect gateway.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    vpc = platform 'Amazon VPC' {
+      description 'AWS resources in Region 1; the source does not specify VPC workloads or CIDRs.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+  }
+
+  awsRegion2 = zone 'AWS Region 2' {
+    metadata {
+      platform 'aws'
+    }
+
+    transitGateway = platform 'AWS Transit Gateway' {
+      description 'Regional transit gateway routing to the corresponding VPC using its associated route table.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    vpc = platform 'Amazon VPC' {
+      description 'AWS resources in Region 2; the source does not specify VPC workloads or CIDRs.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+  }
+
+  customer.siteA -> awsGlobal.directConnect 'Advertises 10.0.1.0/24 over a private or transit VIF'
+  customer.siteB -> awsGlobal.directConnect 'Advertises 10.0.2.0/24 over a SiteLink-enabled VIF'
+  customer.siteC -> awsGlobal.directConnect 'Connects over a SiteLink-enabled VIF in the extension scenario'
+  awsGlobal.directConnect -> awsGlobal.sharedGateway 'Associates VIFs with a common gateway'
+  awsGlobal.directConnect -> awsGlobal.siteLink 'Enables SiteLink on private or transit VIFs'
+  awsGlobal.siteLink -> awsGlobal.sharedGateway 'Shares routes between associated SiteLink-enabled VIFs'
+  awsGlobal.siteLink -> awsGlobal.globalNetwork 'Carries inter-site traffic over the AWS backbone'
+  awsGlobal.sharedGateway -> customer.siteA 'Announces the other SiteLink-enabled locations’ prefixes'
+  awsGlobal.sharedGateway -> customer.siteB 'Announces the other SiteLink-enabled locations’ prefixes'
+  awsGlobal.sharedGateway -> customer.siteC 'Propagates reachable prefixes in the extension scenario'
+  customer.siteA -> customer.siteB 'Routes directly over SiteLink without traversing an AWS Region'
+  customer.siteA -> customer.siteB 'Uses an existing private network such as MPLS as the preferred path; SiteLink is backup'
+  customer.siteB -> customer.siteC 'Passes site A’s learned route toward site C in the extension scenario'
+  customer.siteA -> awsGlobal.globalTransitGateway 'Exchanges AWS and inter-site routes over a transit VIF'
+  awsGlobal.globalTransitGateway -> awsRegion1.transitGateway 'Associates with the corresponding regional Transit Gateway'
+  awsGlobal.globalTransitGateway -> awsRegion2.transitGateway 'Associates with the corresponding regional Transit Gateway'
+  awsRegion1.transitGateway -> awsRegion1.vpc 'Routes according to its associated route table'
+  awsRegion2.transitGateway -> awsRegion2.vpc 'Routes according to its associated route table'
+  customer.siteA -> awsGlobal.regionalGateway 'Uses a private VIF for regional connectivity'
+  customer.siteB -> awsGlobal.regionalGateway 'Uses a SiteLink-enabled private VIF for regional connectivity'
+  awsGlobal.siteLink -> awsGlobal.regionalGateway 'Segments regional traffic on private VIFs'
+}
+
+views {
+  view index {
+    title 'Routing Scenarios with AWS Direct Connect SiteLink'
+    include *
+  }
+}
