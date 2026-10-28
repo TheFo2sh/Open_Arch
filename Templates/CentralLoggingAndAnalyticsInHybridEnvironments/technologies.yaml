@@ -1,0 +1,136 @@
+# Technologies named by metadata { uses } in the blueprint.
+technologies:
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Collects hybrid-environment metrics and logs and provides alarms and statistics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-cloudwatch-agent
+    name: Amazon CloudWatch agent
+    description: Installed on virtual machines to send their metrics and logs to Amazon CloudWatch.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html
+    types: [library]
+  - key: aws-transit-gateway
+    name: AWS Transit Gateway
+    description: Routes CloudWatch metrics and logs from hybrid environments to the customer-owned VPC.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Provides the private network connection between the customer data center and AWS shown in the reference diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Provides the customer VPC and central analytics VPC boundaries shown in the reference diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2-elastic-network-interface
+    name: Amazon EC2 Elastic Network Interface
+    description: Provides the network interface used to send VMware Cloud on AWS CloudWatch data to the customer VPC endpoint.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-eni.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: vmware-vsphere
+    name: VMware vSphere
+    description: Virtualization platform for the on-premises virtual machines that run the CloudWatch agent.
+    vendor: VMware
+    url: https://www.vmware.com/products/cloud-infrastructure/vsphere
+    types: [compute-platform]
+    platform: other
+    hosts: [system]
+  - key: vmware-cloud-on-aws
+    name: VMware Cloud on AWS
+    description: VMware environment in AWS containing the SDDC and virtual machines shown in the reference diagram.
+    vendor: VMware
+    url: https://aws.amazon.com/vmware/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ec2-bare-metal
+    name: Amazon EC2 bare metal instances
+    description: Bare metal compute layer depicted beneath the VMware Cloud on AWS SDDC.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/instance-types/bare-metal/
+    types: [compute-platform]
+    platform: aws
+    hosts: []
+  - key: vmware-cloud-sddc
+    name: VMware Cloud SDDC
+    description: Software-defined data center shown running VMware virtual machines on AWS bare metal instances.
+    vendor: VMware
+    url: https://aws.amazon.com/vmware/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-kinesis-data-firehose
+    name: Amazon Data Firehose
+    description: Continuously delivers subscribed CloudWatch log data to Amazon S3 and Amazon OpenSearch Service.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores log data delivered by Amazon Data Firehose for later analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-opensearch-service
+    name: Amazon OpenSearch Service
+    description: Search and analytics destination for logs streamed by Amazon Data Firehose; the 2020 diagram calls it Amazon Elasticsearch Service.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/opensearch-service/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-glue
+    name: AWS Glue
+    description: Builds the Data Catalog and runs ETL jobs for processing log data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Uses the AWS Glue Data Catalog to discover and query log data in Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Reads and loads data files stored in Amazon S3 for analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Builds visualizations and dashboards from Amazon Athena and Amazon Redshift.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []

@@ -1,0 +1,129 @@
+// Demand forecasting for Amazon.com first-party vendors, after AWS's reference architecture.
+// (https://docs.aws.amazon.com/reference-architecture-diagrams/latest/demand-forecasting-retail/demand-forecasting-retail.html)
+// Read together with the repository's specification.c4. Systems are slots:
+// applying the template maps them onto the project's own.
+model {
+  vendor = user 'Amazon.com first-party vendor' {
+    description 'Uses Vendor Central and its authorized vendor account to access performance data.'
+  }
+
+  partnerApi = system 'Amazon Vendor Central and Selling Partner API' {
+    description 'External Amazon integration. The Vendor Central account and its attached IAM role authorize access to selected vendor codes.'
+  }
+  consumers = system 'Demand data consumers' {
+    description 'Consuming applications and business users of the syndicated demand data.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    eventBridge = platform 'Amazon EventBridge' {
+      description 'Initiates scheduled tasks that keep vendor data fresh and starts recurring forecasting.'
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    iam = platform 'AWS Identity and Access Management' {
+      description 'IAM role attached to the Amazon Vendor Central account authorizes access to vendor codes.'
+      metadata {
+        uses 'aws-iam'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the API ingestion and queue-processing functions.'
+      metadata {
+        uses 'aws-lambda'
+      }
+
+      pipeline = system 'Demand forecasting data pipeline' {
+        description 'Serverless functions that source and process vendor performance data.'
+
+        ingestion = container 'Vendor data ingestion' {
+          description 'Calls the Selling Partner API and queues some of its responses.'
+        }
+        processor = container 'Queue message processor' {
+          description 'Consumes queued messages, transforms and persists data, and creates notifications.'
+        }
+      }
+    }
+    sqs = platform 'Amazon Simple Queue Service' {
+      description 'Decouples API response handling from downstream processing.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      description 'Receives notifications for data conditions such as product catalog changes.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Intermediate store for CRUD operations and data integrity.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      intermediateData = database 'Intermediate vendor data' {
+        description 'Records processed by the pipeline before publication to the data lake.'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Scheduled job publishes data to the long-term serverless data lake.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Durable data lake persistence for time-series data at any scale.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Demand history data lake' {
+        description 'Long-term time-series vendor performance data used for forecasts and syndicated to consumers.'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Manages the workflow that sources demand history and generates future predictions.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    forecast = platform 'Amazon Forecast' {
+      description 'Runs the recurring routine to generate future demand predictions.'
+      metadata {
+        uses 'amazon-forecast'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Provides business intelligence capabilities for syndicated Amazon S3 data.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Provides SQL query capabilities for syndicated Amazon S3 data.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+  }
+
+  vendor -> partnerApi 'Uses the Vendor Central account for'
+  iam -> partnerApi 'Authorizes access to selected vendor codes for'
+  eventBridge -> lambda.pipeline.ingestion 'Schedules vendor data refreshes'
+  lambda.pipeline.ingestion -> partnerApi 'Authenticates and retrieves vendor performance data from'
+  lambda.pipeline.ingestion -> sqs 'Queues some API responses in'
+  sqs -> lambda.pipeline.processor 'Delivers queued messages to'
+  lambda.pipeline.processor -> dynamodb.intermediateData 'Creates, reads, updates, and deletes intermediate records in'
+  lambda.pipeline.processor -> sns 'Publishes data-condition notifications to'
+  glue -> s3.dataLake 'Publishes scheduled data lake updates to'
+  eventBridge -> stepFunctions 'Triggers a recurring forecast workflow with'
+  stepFunctions -> forecast 'Sources demand history and orchestrates predictions with'
+  s3 -> forecast 'Provides demand history to'
+  s3 -> quickSight 'Syndicates data for business intelligence with'
+  s3 -> athena 'Syndicates data for SQL queries with'
+  quickSight -> consumers 'Provides business intelligence to'
+  athena -> consumers 'Provides SQL access to'
+}

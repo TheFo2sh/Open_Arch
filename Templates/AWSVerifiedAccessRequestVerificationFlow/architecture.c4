@@ -1,0 +1,103 @@
+// AWS Verified Access request verification flow, after the AWS reference diagrams.
+// Systems and users are slots mapped to the applying project's own systems and users.
+model {
+  user = user 'User' {
+    description 'Requests access to an application protected by AWS Verified Access.'
+  }
+
+  device = system 'User device' {
+    description 'Client device running a browser and, only when device trust is enabled, its extension and local posture agent.'
+
+    browser = container 'Browser with device trust extension' {
+      description 'Follows identity redirects and sends requests with identity and, when configured, device information cookies.'
+      metadata {
+        uses 'device-trust-browser-extension'
+      }
+    }
+    agent = container 'Local device posture agent' {
+      description 'Continuously gathers device posture information for the browser extension.'
+      metadata {
+        uses 'device-posture-agent'
+      }
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    verifiedAccess = platform 'AWS Verified Access' {
+      description 'Evaluates each request against application policy using identity and, when configured, device posture.'
+      metadata {
+        uses 'aws-verified-access'
+      }
+    }
+    identityCenter = platform 'AWS IAM Identity Center' {
+      description 'Authenticates the user during the initial request when no identity cookie is present.'
+      metadata {
+        uses 'aws-iam-identity-center'
+      }
+    }
+    vpc = platform 'Amazon VPC' {
+      description 'Customer VPC containing the application endpoints.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+      application = system 'Protected application' {
+        description 'Application endpoints reached only after AWS Verified Access validates a request.'
+      }
+    }
+    alb = platform 'Application Load Balancer' {
+      description 'Optional target type for a Verified Access endpoint; choose the target type appropriate to the application.'
+      metadata {
+        uses 'application-load-balancer'
+      }
+    }
+    nlb = platform 'Network Load Balancer' {
+      description 'Optional target type for a Verified Access endpoint; choose the target type appropriate to the application.'
+      metadata {
+        uses 'network-load-balancer'
+      }
+    }
+    eni = platform 'Elastic network interface' {
+      description 'Optional target type for a Verified Access endpoint; choose the target type appropriate to the application.'
+      metadata {
+        uses 'elastic-network-interface'
+      }
+    }
+  }
+
+  external = zone 'External device trust service' {
+    metadata {
+      platform 'other'
+    }
+    deviceTrust = platform 'Device trust provider' {
+      description 'Third-party provider used only when device trust is configured; AWS does not specify its vendor or integration details.'
+      metadata {
+        uses 'device-trust-provider'
+      }
+    }
+  }
+
+  user -> device 'Uses'
+  browser -> verifiedAccess 'Sends initial requests, identity tokens, and subsequent requests with cookies'
+  verifiedAccess -> browser 'Redirects for identity or device validation when needed, then returns the browser to the original URI with an identity cookie'
+  browser -> identityCenter 'Follows the authentication redirect'
+  identityCenter -> browser 'Redirects the authenticated browser to the application endpoint with an identity token'
+  agent -> browser 'Provides current device posture to the extension'
+  deviceTrust -> verifiedAccess 'Provides device trust context when device posture is part of policy evaluation'
+  verifiedAccess -> alb 'Proxies validated requests to this configured target type, if selected'
+  verifiedAccess -> nlb 'Proxies validated requests to this configured target type, if selected'
+  verifiedAccess -> eni 'Proxies validated requests to this configured target type, if selected'
+  alb -> aws.vpc.application 'Forwards requests to'
+  nlb -> aws.vpc.application 'Forwards requests to'
+  eni -> aws.vpc.application 'Connects to'
+}
+
+views {
+  view index {
+    title 'AWS Verified Access Request Verification Flow'
+    include *, aws.*, aws.vpc.*, device.*, external.*
+  }
+}
