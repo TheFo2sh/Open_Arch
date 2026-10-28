@@ -1,0 +1,52 @@
+# The technologies used by the blueprint, named by the keys in metadata { uses }.
+technologies:
+  - key: amazon-eks
+    name: Amazon Elastic Kubernetes Service
+    description: Managed Kubernetes service configured by TiDB Operator to run the cluster and mount restored volumes.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eks/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ec2
+    name: Amazon Elastic Compute Cloud
+    description: EC2 instances that run the TiDB cluster nodes shown in the reference diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ebs
+    name: Amazon Elastic Block Store
+    description: Block volumes containing TiKV data and EBS snapshots used for backup and restore.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ebs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores and serves the metadata associated with EBS snapshots.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: tidb-operator
+    name: TiDB Operator
+    description: PingCAP Kubernetes operator that orchestrates TiDB backup and restore jobs and configures the cluster.
+    vendor: PingCAP
+    url: https://github.com/pingcap/tidb-operator
+    types: [library, third-party]
+  - key: tidb
+    name: TiDB
+    description: Open-source MySQL-compatible HTAP database deployed as a cluster on AWS.
+    vendor: PingCAP
+    url: https://www.pingcap.com/tidb/
+    types: [library, third-party]
+  - key: tikv
+    name: TiKV
+    description: Distributed key-value storage component whose data is persisted on Amazon EBS volumes.
+    vendor: PingCAP
+    url: https://tikv.org/
+    types: [library, third-party]
