@@ -112,7 +112,6 @@ model {
   aws.lambda.recommendations -> aws.dynamodb.guestData 'Reads and writes guest and workload data'
   aws.lambda.search -> aws.opensearch.productIndex 'Searches for available products in'
   aws.lambda.recommendations -> aws.personalize 'Uses personalization service'
-  aws.s3 -> aws.personalize 'Stores datasets shown with the AI/ML workload'
   aws.lambda.recommendations -> aws.pinpoint 'Schedules guest recommendations through'
   aws.pinpoint -> notificationChannels 'Sends recommendations to'
 }
