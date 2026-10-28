@@ -1,0 +1,67 @@
+# The technologies used by the blueprint, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-cloudformation
+    name: AWS CloudFormation
+    description: Provisions the remote desktop stack in a selected VPC, subnet, and Availability Zone.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudformation/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-marketplace
+    name: AWS Marketplace
+    description: Source for the FPGA Developer AMI subscription; the source does not specify the listing version or seller.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/marketplace
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: The selected VPC contains the workstation subnet and its security group.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform for the remote desktop instance.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-dcv
+    name: Amazon DCV
+    description: Remote display software used to access the workstation from a client or web browser.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/dcv/latest/adminguide/
+    types: [library]
+  - key: xilinx-vivado
+    name: Xilinx Vivado Design Suite
+    description: FPGA design suite pre-installed in the FPGA Developer AMI.
+    vendor: AMD Xilinx
+    url: https://www.amd.com/en/products/software/adaptive-socs-and-fpgas/vivado.html
+    types: [library]
+  - key: fpga-developer-ami
+    name: FPGA Developer AMI
+    description: AWS Marketplace machine image that the source says includes Vivado pre-installed; listing seller, version, and identifier are not specified.
+    types: [third-party]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Optional object storage for design data accessed by the workstation.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2-elastic-ip
+    name: Amazon EC2 Elastic IP address
+    description: Optional persistent public IP address for the remote desktop.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/elastic-ip-addresses-eip.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
