@@ -1,0 +1,89 @@
+technologies:
+  - key: aws-outposts
+    name: AWS Outposts
+    description: AWS-managed Outposts racks installed at customer sites and connected to a home AWS Region.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/outposts/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute instances deployed on Outposts to run ADMS application workloads and, if selected, a vendor-supported database.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system, database]
+  - key: aws-outposts-local-gateway
+    name: AWS Outposts local gateway
+    description: Local network connectivity between workloads on an Outpost and the on-premises network.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/outposts/latest/userguide/what-is-outposts.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Virtual network used for Outposts and regional resources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Optional dedicated connectivity to the home AWS Region; an existing internet connection is an alternative.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Regional object storage shown for the data lake and analytics use case.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Regional analytics service shown for querying data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Regional analytics and visualization service shown in the reference diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Regional machine learning service shown in the reference diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: adms-vendor-software
+    name: ADMS application software (vendor unspecified)
+    description: The third-party ADMS product; AWS does not identify a vendor or product.
+    types: [third-party]
+  - key: vendor-supported-database
+    name: Vendor-supported database (engine unspecified)
+    description: One database option described by AWS; the vendor and database engine are not specified.
+    types: [third-party]
+  - key: pi-server
+    name: PI server (product and vendor unspecified)
+    description: The PI server depicted in the customer data center; AWS does not identify its product or vendor.
+    types: [third-party]
+  - key: derms-application
+    name: Distributed Energy Resource Management System (vendor unspecified)
+    description: Example regional application that can connect securely to the Outposts ADMS.
+    types: [third-party]
