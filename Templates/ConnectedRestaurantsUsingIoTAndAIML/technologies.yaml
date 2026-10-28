@@ -1,0 +1,125 @@
+# Technologies named by the AWS reference architecture, keyed as architecture.c4 metadata uses them.
+technologies:
+  - key: aws-iot-greengrass
+    name: AWS IoT Greengrass
+    description: Edge runtime used by Greengrass Core to connect, publish, and subscribe to data from IoT devices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/greengrass/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Connects and manages IoT devices, maintains device shadows, and supports over-the-air updates and device security.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Purpose-built database for events and the operational data store.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-appsync
+    name: AWS AppSync
+    description: Supports the near-real-time operational dashboard with microservices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/appsync/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-pinpoint
+    name: Amazon Pinpoint
+    description: Delivers alerts through multiple channels.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/pinpoint/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores raw data and curated datasets in the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-glue
+    name: AWS Glue
+    description: Crawls and catalogs data and runs jobs to transform or enrich datasets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-emr
+    name: Amazon EMR
+    description: Processes, transforms, and enriches data for the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/emr/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-lake-formation
+    name: AWS Lake Formation
+    description: Discovers and governs data in the Amazon S3 data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lake-formation/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-macie
+    name: Amazon Macie
+    description: Detects sensitive data in the Amazon S3 data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/macie/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Analytics warehouse with optional data marts for frequently used analysis; Redshift Spectrum can query the data lake directly.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Runs one-time queries and analytics directly against data in the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service, data-platform]
+    platform: aws
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Provides analytics using Amazon Redshift and Amazon Athena.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Builds, trains, and deploys inference models; edge deployment to Greengrass is optional.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/ai/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-eventbridge
+    name: Amazon EventBridge
+    description: Integrates the architecture with third-party providers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eventbridge/
+    types: [managed-service]
+    platform: aws
+  - key: freertos
+    name: FreeRTOS
+    description: One of the operating systems used by the IoT devices; the reference also allows other operating systems.
+    vendor: The FreeRTOS Project
+    url: https://www.freertos.org/
+    types: [library]
+  - key: mqtt
+    name: MQTT
+    description: Messaging protocol used by Greengrass Core to communicate with IoT devices.
+    vendor: OASIS
+    url: https://mqtt.org/
+    types: [library]
