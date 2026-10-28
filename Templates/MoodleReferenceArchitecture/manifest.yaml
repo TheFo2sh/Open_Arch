@@ -1,0 +1,7 @@
+PackageId: OpenArch.MoodleReferenceArchitecture
+Name: Moodle Reference Architecture
+Description: A scalable Moodle learning management system on AWS with a web application tier, shared content and managed data services, and an automated delivery pipeline.
+Version: 1.0.0
+Icon: logos:moodle
+Publisher: Open_Arch
+Tags: [aws, education, e-learning, learning-management-system, moodle]
