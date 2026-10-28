@@ -1,0 +1,7 @@
+PackageId: OpenArch.CameraAsAService
+Name: Camera as a Service
+Description: Near-real-time live video and machine-learning inference from IoT-enabled cameras using AWS managed services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, video, iot, machine-learning]
