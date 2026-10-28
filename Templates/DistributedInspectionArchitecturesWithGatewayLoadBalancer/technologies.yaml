@@ -1,0 +1,79 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-gateway-load-balancer
+    name: AWS Gateway Load Balancer
+    description: Distributes GENEVE-encapsulated traffic across security appliances in the centralized appliances VPC.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/elasticloadbalancing/latest/gateway/introduction.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-privatelink
+    name: AWS PrivateLink (Gateway Load Balancer endpoint)
+    description: Provides workload VPC endpoints that privately connect traffic to the Gateway Load Balancer endpoint service.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/privatelink/what-is-privatelink.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-application-load-balancer
+    name: AWS Application Load Balancer
+    description: Distributes inspected inbound requests to healthy Amazon EC2 instances in a workload VPC.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/elasticloadbalancing/latest/application/introduction.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-internet-gateway
+    name: AWS Internet Gateway
+    description: Connects a workload VPC to the internet after inbound or outbound traffic is routed through inspection.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-nat-gateway
+    name: AWS NAT Gateway
+    description: Translates source addresses for internet-bound traffic from private workload subnets before inspection.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-transit-gateway
+    name: AWS Transit Gateway
+    description: Routes traffic between workload VPCs for east-west inspection; appliance mode helps preserve flow symmetry.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/tgw/what-is-transit-gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2-auto-scaling
+    name: Amazon EC2 Auto Scaling
+    description: Manages the EC2 instance groups shown for workloads and the centralized security appliance fleet.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform for workload instances and the third-party security appliance instances.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: third-party-network-security-appliance
+    name: Third-party network security appliance
+    description: Generic placeholder for the security appliance in the AWS diagram; AWS does not specify a vendor or product.
+    types: [third-party]

@@ -1,0 +1,7 @@
+PackageId: OpenArch.HostingAdobeExperienceManagerOnAWS
+Name: Hosting Adobe Experience Manager on AWS
+Description: Adobe Experience Manager author and publish tiers on AWS, with Route 53, WAF, CloudFront, load balancing, Lambda automation, and shared Amazon S3 binary storage.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, content-management, adobe-experience-manager, web-hosting]

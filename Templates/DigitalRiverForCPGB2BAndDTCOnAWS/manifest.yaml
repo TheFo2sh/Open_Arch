@@ -1,0 +1,7 @@
+PackageId: OpenArch.DigitalRiverForCPGB2BAndDTCOnAWS
+Name: Digital River for CPG, B2B, and DTC on AWS
+Description: A multi-channel commerce architecture integrating B2B and DTC storefronts, shared headless services, Digital River SaaS, fulfillment partners, and corporate systems.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, retail, e-commerce, digital-commerce]
