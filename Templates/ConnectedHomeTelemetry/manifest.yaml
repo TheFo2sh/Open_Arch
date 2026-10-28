@@ -1,0 +1,7 @@
+PackageId: OpenArch.ConnectedHomeTelemetry
+Name: Connected Home Telemetry on AWS
+Description: Collects telemetry from connected home devices with AWS IoT services, stores selected data, detects events, and makes data available to client applications and visualizations.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, iot, telemetry, connected-home]
