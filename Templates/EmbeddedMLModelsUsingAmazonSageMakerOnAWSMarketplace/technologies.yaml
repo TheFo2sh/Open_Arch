@@ -1,0 +1,73 @@
+# Technologies named by metadata { uses } in the blueprint.
+technologies:
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: The buyer and seller/service provider virtual private cloud boundaries shown in the reference architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: aws-management-console
+    name: AWS Management Console
+    description: The buyer uses the AWS Management Console to subscribe to the seller's AWS Marketplace model listing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/console/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-marketplace
+    name: AWS Marketplace
+    description: The seller lists the packaged machine learning model and the buyer subscribes to it.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/marketplace/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ecr
+    name: Amazon Elastic Container Registry
+    description: The seller pushes the Docker image containing the model code to this container registry.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecr/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Provisions the buyer's model container and invocation endpoint in network isolation mode.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/ai/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the buyer-side authorizer and proxy functions and the seller-side subscription authenticator.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores the buyer's Lambda deployment package and inference responses for the buyer application.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-cloudformation
+    name: AWS CloudFormation
+    description: The buyer runs a template that deploys the Lambda functions from a package in Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudformation/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: docker
+    name: Docker
+    description: The seller packages the model code as a Docker image for Amazon ECR and Amazon SageMaker AI.
+    vendor: Docker
+    url: https://www.docker.com/
+    types: [library]
+    packages: [{manager: docker, name: docker}]
