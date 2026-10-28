@@ -1,0 +1,255 @@
+// AWS Modern Serverless Mobile/Web Application Architecture
+// (https://docs.aws.amazon.com/reference-architecture-diagrams/latest/modern-serverless-mobile-web/modern-serverless-mobile-web.html).
+// Systems and users are slots. The AWS source dates from 2021; its Elasticsearch Service name is retained.
+model {
+  appUser = user 'Mobile and web app user' {
+    description 'Authenticates and uses the mobile or web application.'
+  }
+  developer = user 'Developer' {
+    description 'Changes application code and commits it to the source repository.'
+  }
+  analyst = user 'Business user' {
+    description 'Uses published business intelligence dashboards.'
+  }
+
+  client = system 'Mobile/web application' {
+    description 'The application front end; AWS lists iOS, Android, web, and React Native clients without selecting a specific implementation.'
+    frontend = container 'Client application' {
+      description 'Uses AWS Amplify frameworks to communicate with backend services.'
+      metadata {
+        uses 'aws-amplify'
+      }
+    }
+  }
+  identityProvider = system 'SAML 2.0 identity provider (unspecified)' {
+    description 'An organization-selected provider; AWS does not identify a third-party product.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    cognito = platform 'Amazon Cognito' {
+      description 'Authenticates users and issues JWTs and credentials for service access.'
+      metadata {
+        uses 'amazon-cognito'
+      }
+    }
+    appsync = platform 'AWS AppSync' {
+      description 'GraphQL API for client queries, mutations, and subscriptions.'
+      metadata {
+        uses 'aws-appsync'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      resolvers = system 'AppSync Lambda resolvers' {
+        description 'Resolver functions receive the authenticated user JWT and use assumed IAM roles.'
+      }
+      searchIndexer = system 'DynamoDB search indexer' {
+        description 'Indexes DynamoDB change events in the search domain.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      appData = database 'Application data tables' {
+        description 'Serverless application tables used by GraphQL data sources.'
+      }
+    }
+    search = platform 'Amazon Elasticsearch Service' {
+      description 'The source diagram uses the service name current at its 2021 publication.'
+      metadata {
+        uses 'amazon-elasticsearch-service'
+      }
+      searchIndex = database 'Search index' {
+        description 'Index populated from DynamoDB change events by Lambda.'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Receives protected HTTP resolver requests and forwards them to private services.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    privateLink = platform 'AWS PrivateLink' {
+      description 'Private integrations connect API Gateway to the VPC service load balancer; an interface endpoint provides private ECR API access.'
+      metadata {
+        uses 'aws-privatelink'
+      }
+    }
+    iam = platform 'AWS Identity and Access Management' {
+      description 'Assumed IAM roles provide temporary credentials for protected integrations.'
+      metadata {
+        uses 'aws-identity-and-access-management'
+      }
+    }
+
+    vpc = platform 'Amazon Virtual Private Cloud' {
+      description 'Contains the private application and database subnets shown in the reference diagram.'
+      metadata {
+        uses 'aws-vpc'
+      }
+      nlb = platform 'Network Load Balancer' {
+        description 'Private integrations use a port assigned to each ECS service.'
+        metadata {
+          uses 'elastic-load-balancing-network-load-balancer'
+        }
+      }
+      fargate = platform 'Amazon ECS on AWS Fargate' {
+        description 'Container services run across multiple Availability Zones.'
+        metadata {
+          uses 'amazon-ecs-fargate'
+        }
+        services = system 'Application services' {
+          description 'The containerized backend workload; application frameworks and service boundaries are not specified by AWS.'
+          workload = container 'Application workload' {
+            description 'Runs the application services and accesses DynamoDB data through DAX.'
+          }
+        }
+      }
+      dax = platform 'Amazon DynamoDB Accelerator (DAX)' {
+        metadata {
+          uses 'amazon-dax'
+        }
+        cache = database 'In-memory cache' {
+          description 'Caches frequently accessed DynamoDB data for the ECS workload.'
+        }
+      }
+      redshift = platform 'Amazon Redshift' {
+        metadata {
+          uses 'amazon-redshift'
+        }
+        warehouse = database 'Analytics data warehouse' {
+          description 'Receives DynamoDB data for complex analytical queries.'
+        }
+      }
+    }
+
+    ecr = platform 'Amazon Elastic Container Registry' {
+      metadata {
+        uses 'amazon-ecr'
+      }
+    }
+    codeCommit = platform 'AWS CodeCommit' {
+      metadata {
+        uses 'aws-codecommit'
+      }
+      source = system 'Application source repository' {
+        description 'Stores application code changes.'
+      }
+    }
+    codeBuild = platform 'AWS CodeBuild' {
+      metadata {
+        uses 'aws-codebuild'
+      }
+    }
+    codeDeploy = platform 'AWS CodeDeploy' {
+      metadata {
+        uses 'aws-codedeploy'
+      }
+    }
+    codePipeline = platform 'AWS CodePipeline' {
+      metadata {
+        uses 'aws-codepipeline'
+      }
+      delivery = system 'Application delivery pipeline' {
+        description 'Orchestrates source retrieval, build and test, and deployment.'
+      }
+    }
+
+    firehose = platform 'Amazon Kinesis Data Firehose' {
+      metadata {
+        uses 'amazon-kinesis-data-firehose'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      lake = database 'Analytics data lake' {
+        description 'Stores unstructured application data delivered by Kinesis Data Firehose.'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    catalog = platform 'AWS Glue Data Catalog' {
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      metadataStore = database 'Table and column metadata' {
+        description 'Metadata used by Athena to query data in S3.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+      dashboards = system 'Business intelligence dashboards' {
+        description 'Published interactive dashboards; AWS describes SAML 2.0 federation support for both editions.'
+      }
+    }
+    pinpoint = platform 'Amazon Pinpoint' {
+      metadata {
+        uses 'amazon-pinpoint'
+      }
+      campaigns = system 'Customer engagement campaigns' {
+        description 'Segments audiences and personalizes push, SMS, email, and voice messages.'
+      }
+    }
+  }
+
+  appUser -> client 'Uses'
+  client -> aws.cognito 'Authenticates and obtains credentials from'
+  client -> aws.appsync 'Sends GraphQL operations to'
+  aws.appsync -> aws.lambda.resolvers 'Invokes Lambda resolvers'
+  aws.appsync -> aws.dynamodb 'Uses DynamoDB data sources'
+  aws.appsync -> aws.apiGateway 'Uses protected HTTP resolver endpoints'
+  aws.lambda.resolvers -> aws.iam 'Assumes roles for temporary credentials'
+  aws.dynamodb -> aws.lambda.searchIndexer 'Notifies on table changes'
+  aws.lambda.searchIndexer -> aws.search.searchIndex 'Indexes changed data in'
+  aws.apiGateway -> aws.privateLink 'Uses private integrations through'
+  aws.privateLink -> aws.vpc.nlb 'Connects to'
+  aws.vpc.nlb -> aws.vpc.fargate.services 'Routes service traffic to'
+  aws.vpc.fargate.services -> aws.dax.cache 'Reads frequently accessed data from'
+  aws.vpc.fargate.services -> aws.dynamodb.appData 'Reads and writes application data'
+  aws.vpc.fargate.services -> aws.privateLink 'Uses private ECR API access through'
+  aws.privateLink -> aws.ecr 'Provides an interface endpoint for'
+  developer -> aws.codeCommit.source 'Commits code to'
+  aws.codeCommit -> aws.codePipeline 'Supplies source to'
+  aws.codePipeline -> aws.codeBuild 'Builds and tests with'
+  aws.codeBuild -> aws.ecr 'Publishes images to'
+  aws.codePipeline -> aws.codeDeploy 'Deploys with'
+  aws.codeDeploy -> aws.vpc.fargate.services 'Deploys application services to'
+  aws.ecr -> aws.vpc.fargate.services 'Supplies container images to'
+  aws.dynamodb -> aws.vpc.redshift.warehouse 'Copies data to'
+  aws.vpc.fargate.services -> aws.firehose 'Streams unstructured data to'
+  aws.firehose -> aws.s3.lake 'Delivers data to'
+  aws.glue -> aws.s3.lake 'Runs ETL against'
+  aws.glue -> aws.catalog.metadataStore 'Registers table metadata in'
+  aws.athena -> aws.catalog.metadataStore 'Uses table metadata from'
+  aws.athena -> aws.s3.lake 'Queries data in'
+  aws.quickSight -> aws.athena 'Uses as a data source'
+  analyst -> aws.quickSight.dashboards 'Views'
+  identityProvider -> aws.quickSight.dashboards 'Federates sign-in using SAML 2.0'
+  appUser -> aws.pinpoint.campaigns 'Receives personalized messages from'
+}
+
+views {
+  view index {
+    title 'Modern Serverless Mobile/Web Application Architecture'
+    include *, aws.*
+  }
+}

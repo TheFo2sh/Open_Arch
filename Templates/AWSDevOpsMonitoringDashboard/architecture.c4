@@ -1,0 +1,135 @@
+// AWS DevOps Monitoring Dashboard, after AWS's reference architecture
+// (https://docs.aws.amazon.com/reference-architecture-diagrams/latest/aws-devops-monitoring-dashboard/aws-devops-monitoring-dashboard.html).
+// Read together with the repository's specification.c4. Systems and users are slots.
+model {
+  developer = user 'Developer' {
+    description 'Initiates source, build, and deployment activity whose events and metrics are monitored.'
+  }
+
+  delivery = system 'Development and delivery workflow' {
+    description 'Slot for the project workflow that uses source, build, deployment, and pipeline services.'
+  }
+
+  github = system 'GitHub' {
+    description 'External third-party source hosting; repository push events are posted to the AWS API endpoint.'
+    technology 'GitHub'
+  }
+
+  aws = zone 'AWS monitoring account' {
+    metadata {
+      platform 'aws'
+    }
+
+    codecommit = platform 'AWS CodeCommit' {
+      metadata {
+        uses 'aws-codecommit'
+      }
+    }
+    codebuild = platform 'AWS CodeBuild' {
+      metadata {
+        uses 'aws-codebuild'
+      }
+    }
+    codedeploy = platform 'AWS CodeDeploy' {
+      metadata {
+        uses 'aws-codedeploy'
+      }
+    }
+    codepipeline = platform 'AWS CodePipeline' {
+      metadata {
+        uses 'aws-codepipeline'
+      }
+    }
+    eventbridge = platform 'Amazon EventBridge' {
+      description 'Rules match events from their sources and route them to the delivery stream.'
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    metricStreams = platform 'Amazon CloudWatch Metric Streams' {
+      metadata {
+        uses 'amazon-cloudwatch-metric-streams'
+      }
+    }
+    cloudwatch = platform 'Amazon CloudWatch' {
+      description 'Alarms can monitor an optional Synthetics canary or CodePipeline for recovery-time metrics.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    synthetics = platform 'Amazon CloudWatch Synthetics' {
+      description 'Optional canary monitored by a CloudWatch alarm.'
+      metadata {
+        uses 'amazon-cloudwatch-synthetics'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'API endpoint for GitHub push events.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      transformer = system 'Metric transformation function' {
+        description 'Lambda function extracts relevant fields for each metric from Firehose records.'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      metrics = database 'Metrics bucket' {
+        description 'Stores transformed event and metric data for downstream processing.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+      catalog = database 'Athena database' {
+        description 'Query catalog for the data stored in the S3 metrics bucket.'
+      }
+    }
+    quicksight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+  }
+
+  developer -> delivery 'Initiates CI/CD activity in'
+  delivery -> aws.codecommit 'Uses for source control'
+  delivery -> aws.codebuild 'Uses to build and test'
+  delivery -> aws.codedeploy 'Uses to deploy applications'
+  delivery -> aws.codepipeline 'Uses to orchestrate delivery'
+  aws.codecommit -> aws.eventbridge 'Emits repository events to'
+  aws.codedeploy -> aws.eventbridge 'Emits deployment events to'
+  aws.codepipeline -> aws.eventbridge 'Emits pipeline events to'
+  aws.codebuild -> aws.metricStreams 'Publishes build metrics to'
+  aws.metricStreams -> aws.firehose 'Streams metrics to'
+  github -> aws.apiGateway 'Posts push events to'
+  aws.apiGateway -> aws.firehose 'Delivers GitHub events to'
+  aws.synthetics -> aws.cloudwatch 'Canary status is monitored by'
+  aws.codepipeline -> aws.cloudwatch 'Pipeline status can be monitored by'
+  aws.cloudwatch -> aws.eventbridge 'Publishes alarm state changes to'
+  aws.eventbridge -> aws.firehose 'Routes matched events to'
+  aws.firehose -> aws.lambda.transformer 'Invokes for data transformation'
+  aws.lambda.transformer -> aws.s3.metrics 'Writes transformed data to'
+  aws.athena.catalog -> aws.s3.metrics 'Queries data in'
+  aws.athena -> aws.quicksight 'Returns query results to'
+}
+
+views {
+  view index {
+    title 'AWS DevOps Monitoring Dashboard'
+    include *, aws.*
+  }
+}
