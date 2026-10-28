@@ -1,0 +1,52 @@
+technologies:
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform for the Windows video-editing workstation.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-directory-service
+    name: AWS Directory Service
+    description: Directory service used to authenticate editors for the workstation.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directoryservice/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-fsx-windows-file-server
+    name: Amazon FSx for Windows File Server
+    description: Managed Windows file system for the shared media assets accessed by the editing workstation.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fsx/windows/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: windows-server-2019
+    name: Windows Server 2019
+    description: Windows Server operating system for the editing workstation.
+    vendor: Microsoft
+    url: https://learn.microsoft.com/en-us/lifecycle/products/windows-server-2019
+    types: [library]
+  - key: nvidia-t4-gpu-drivers
+    name: NVIDIA T4 GPU drivers
+    description: GPU drivers for the workstation's NVIDIA T4 graphics capability.
+    vendor: NVIDIA
+    url: https://www.nvidia.com/en-us/drivers/
+    types: [library]
+  - key: nice-dcv
+    name: NICE DCV
+    description: AWS remote display software and client option for accessing the editing workstation.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/hpc/dcv/
+    types: [library]
+  - key: teradici-cloud-access-software
+    name: Teradici Cloud Access Software
+    description: Third-party remote display software; the Windows Graphics Agent and PCoIP client are an alternative to NICE DCV.
+    vendor: Teradici
+    url: https://www.teradici.com/products/CAS-cloud-access-software
+    types: [library, third-party]
