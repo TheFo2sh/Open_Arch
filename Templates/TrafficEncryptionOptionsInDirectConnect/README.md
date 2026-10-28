@@ -17,9 +17,10 @@ Use this template when documenting private connectivity that requires traffic en
 
 ## Assumptions and source boundaries
 
-- The source presents dedicated and hosted Direct Connect connection choices for VPN patterns. MACsec requires a supported 10 Gbps or 100 Gbps dedicated connection, a MACsec-capable customer-side device, and a MACsec-capable Direct Connect location.
+- The source presents dedicated and hosted Direct Connect connection choices for VPN patterns. The public VIF patterns establish a BGP peer and use the AWS public IP ranges advertised over that VIF. MACsec requires a supported 10 Gbps or 100 Gbps dedicated connection and MACsec-capable devices and Direct Connect location; AWS requires a compatible CKN/CAK pair associated with the connection.
+- For private IP VPN, AWS specifies the Transit Gateway CIDR as an allowed prefix on the Direct Connect gateway attachment and requires it not to overlap VPC or on-premises CIDR ranges.
 - AWS's diagrams show customer gateways and, for MACsec, a customer or partner device at the Direct Connect location. They do not name a hardware vendor, colocation provider, carrier, or third-party service. These are represented as customer-mapped system slots; the template does not invent providers or devices.
-- AWS specifies the IPsec or MACsec mechanism, but not customer-specific crypto suites, key values, routing policy, addressing plan, or device configuration. The template does not supply these.
+- AWS specifies the IPsec or MACsec mechanism, but not customer-specific crypto suites, key values, complete routing policy, addressing plan, or device configuration. The template does not supply these.
 - In the MACsec pattern, the customer-to-location segment is protected only when the Layer 2 circuit is extended end-to-end. If the circuit terminates at a customer or partner device at the Direct Connect location, protection of the remaining segment is the customer's or partner's responsibility.
 - The AWS reference examples use an EC2 instance as the traffic destination; application behavior, VPC sizing, availability, and deployment settings are outside the documented scope.
 - User and system elements are M1Spec slots. Map the corporate user, client, customer gateway, MACsec device, and workload slots to the project's own elements when applying the template.

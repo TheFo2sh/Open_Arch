@@ -15,6 +15,9 @@ model {
       uses 'ipsec'
     }
   }
+  customerGatewayMacsec = system 'Customer gateway (MACsec pattern)' {
+    description 'Customer-managed gateway that routes traffic to the Direct Connect location; AWS does not specify a device or vendor.'
+  }
   macsecDevice = system 'Customer or partner MACsec device' {
     description 'Customer or partner device at the Direct Connect location; the device and provider are not specified.'
     metadata {
@@ -195,10 +198,13 @@ model {
   customerGateway -> aws.transitVifPrivate 'Carries private IP VPN traffic over'
   customerGateway -> aws.vpnPrivate 'Establishes a private IP IPsec tunnel to'
   aws.vpnPrivate -> aws.directConnectGatewayPrivate 'Uses as underlying transport'
+  aws.transitVifPrivate -> aws.directConnectGatewayPrivate 'Connects through'
   aws.directConnectGatewayPrivate -> aws.transitGatewayPrivate 'Associates with'
+  aws.vpnPrivate -> aws.transitGatewayPrivate 'Terminates at'
   aws.transitGatewayPrivate -> aws.vpcPrivate 'Routes traffic to'
 
-  customerGateway -> macsecDevice 'Reaches the Direct Connect location over the customer or partner circuit'
+  corporateClient -> customerGatewayMacsec 'Routes traffic through'
+  customerGatewayMacsec -> macsecDevice 'Reaches the Direct Connect location over the customer or partner circuit'
   macsecDevice -> aws.directConnectMacsec 'Uses the MACsec-protected link'
   macsecDevice -> aws.transitVifMacsec 'Sends traffic over'
   aws.transitVifMacsec -> aws.directConnectGatewayMacsec 'Uses'
