@@ -1,0 +1,7 @@
+PackageId: OpenArch.AWSDevOpsMonitoringDashboard
+Name: AWS DevOps Monitoring Dashboard
+Description: Ingests CI/CD events and metrics, transforms and queries them, and visualizes DevOps metrics with Amazon QuickSight.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, devops, monitoring, ci-cd, observability]

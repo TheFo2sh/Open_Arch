@@ -1,0 +1,7 @@
+PackageId: OpenArch.DescribeForMeWebApp
+Name: DescribeForMe Web App
+Description: A mobile-friendly image-description web app that uses AWS AI/ML services to return spoken captions in multiple languages and dialects.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, accessibility, ai-ml, computer-vision]

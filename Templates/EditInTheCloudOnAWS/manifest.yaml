@@ -1,0 +1,7 @@
+PackageId: OpenArch.EditInTheCloudOnAWS
+Name: Edit in the Cloud on AWS
+Description: A virtual video-editing workstation on AWS, with directory authentication, shared media storage, and a choice of remote display software.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, media-entertainment, video-editing, remote-workstation]

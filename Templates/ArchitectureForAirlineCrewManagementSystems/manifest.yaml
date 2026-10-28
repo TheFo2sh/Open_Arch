@@ -1,0 +1,7 @@
+PackageId: OpenArch.ArchitectureForAirlineCrewManagementSystems
+Name: Architecture for Airline Crew Management Systems
+Description: A highly available AWS architecture for airline crew applications, operational data, and crew planning analytics.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, airline, travel, crew-management]
