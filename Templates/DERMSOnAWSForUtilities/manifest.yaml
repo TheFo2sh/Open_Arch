@@ -1,0 +1,7 @@
+PackageId: OpenArch.DERMSOnAWSForUtilities
+Name: DERMS on AWS for Utilities
+Description: A utility distributed energy resource management architecture using AWS ingestion, application integration, data lake, analytics, and machine learning services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, utilities, energy, der, analytics, machine-learning]

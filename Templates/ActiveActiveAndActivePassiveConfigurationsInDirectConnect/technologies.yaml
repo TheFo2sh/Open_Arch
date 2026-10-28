@@ -1,0 +1,40 @@
+technologies:
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Dedicated network connections between customer or partner routers and AWS Direct Connect locations, with Private, Transit, or Public virtual interfaces.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect-gateway
+    name: AWS Direct Connect gateway
+    description: Globally available gateway associated with Transit Gateways for Private or Transit VIF connectivity.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/directconnect/latest/UserGuide/direct-connect-gateways-intro.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-transit-gateway
+    name: AWS Transit Gateway
+    description: AWS network transit service associated with the Direct Connect gateway in the Private/Transit VIF patterns.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: AWS virtual network attached to the Transit Gateway; the source does not identify its workloads.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: customer-partner-router
+    name: Customer or partner router
+    description: Vendor-neutral routing devices shown at Direct Connect locations and customer data centers; AWS does not specify their make, model, or operator.
+    vendor: Customer or connectivity partner
+    types: [data-platform, third-party]
+    platform: other
+    hosts: []
