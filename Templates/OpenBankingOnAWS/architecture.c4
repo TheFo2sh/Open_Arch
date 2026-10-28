@@ -104,11 +104,8 @@ model {
       accountCache = database 'Customer account information cache'
     }
     s3 = platform 'Amazon S3' {
+      description 'Stores public client certificates as a trust store and collects logs from services.'
       metadata { uses 'amazon-s3' }
-      trustStore = database 'Client certificate trust store' {
-        description 'Public client certificates used to validate requests.'
-      }
-      serviceLogs = database 'Service logs'
     }
     openSearch = platform 'Amazon OpenSearch Service' {
       metadata { uses 'amazon-opensearch-service' }
@@ -198,8 +195,7 @@ model {
   aws.apiGateway -> aws.privateIntegrationVpc.privateLink 'Privately integrates through'
   aws.privateIntegrationVpc.privateLink -> aws.privateIntegrationVpc.nlb 'Connects to'
   aws.privateIntegrationVpc.nlb -> aws.apiRuntime.openBankingApis 'Routes to'
-  aws.apiGateway -> aws.s3.trustStore 'Validates client certificates against'
-  aws.cloudfront -> aws.developerSandbox.mockApis 'Delivers static sandbox data for'
+  aws.apiGateway -> aws.s3 'Validates client certificates against the trust store in'
 
   aws.apiRuntime.openBankingApis.accountInformation -> aws.rds.bankDataCopy 'Reads account data from'
   aws.apiRuntime.openBankingApis.accountInformation -> aws.dynamodb.consentData 'Reads consent and aggregated data from'
@@ -212,9 +208,9 @@ model {
 
   aws.developerSandbox -> thirdParty 'Provides a test environment for'
   aws.guardDuty -> aws.securityHub 'Sends security findings to'
-  aws.cloudTrail -> aws.s3.serviceLogs 'Delivers activity logs to'
-  aws.cloudWatch -> aws.s3.serviceLogs 'Exports service logs to'
-  aws.s3.serviceLogs -> aws.openSearch.logAnalysis 'Feeds log analysis in'
+  aws.cloudTrail -> aws.s3 'Delivers activity logs to'
+  aws.cloudWatch -> aws.s3 'Exports service logs to'
+  aws.s3 -> aws.openSearch.logAnalysis 'Feeds logs to'
 
   aws.systemsManager -> aws.apiRuntime.openBankingApis 'Manages configuration for'
   aws.cloudFormation -> aws.apiRuntime.openBankingApis 'Deploys environments for'
