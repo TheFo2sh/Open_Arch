@@ -1,0 +1,139 @@
+// Consumer Packaged Goods Data Mesh, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/cpg-data-mesh/cpg-data-mesh.html
+// AWS describes the flow in six steps and links a PNG diagram. Domain systems and users are slots.
+model {
+  producer = user 'Data producer' {
+    description 'A member of a business domain that owns and publishes domain data.'
+  }
+  consumer = user 'Data consumer' {
+    description 'A member of a business domain that discovers and analyzes governed data.'
+  }
+  sources = system 'Business and external data sources' {
+    description 'The diagram illustrates transactions, ERP, web logs and cookies, connected devices, social media, GPS location, and mobile sources.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    producerDomain = system 'Producer domain' {
+      description 'A business domain that owns its data sources and publishes domain data products.'
+    }
+    consumerDomain = system 'Consumer domain' {
+      description 'A business domain that discovers data by its contract properties and uses it for analytics.'
+    }
+    aiServices = system 'AI services (diagram label only)' {
+      description 'A generic label in the diagram; no provider, product, or integration is specified.'
+    }
+
+    cloudFormation = platform 'AWS CloudFormation' {
+      description 'Shown in producer and consumer domains as part of organization-level blueprints.'
+      metadata {
+        uses 'aws-cloudformation'
+      }
+    }
+    lakeFormation = platform 'AWS Lake Formation' {
+      description 'Central governance for fine-grained permissions, schema discovery, and conversion.'
+      metadata {
+        uses 'aws-lake-formation'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Provides cataloging and the crawlers shown in producer and consumer domains.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    dataCatalog = platform 'AWS Glue Data Catalog' {
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      catalog = database 'Mesh metadata catalog' {
+        description 'Dataset metadata cataloged for discovery and governance.'
+      }
+    }
+    dataBrew = platform 'AWS Glue DataBrew' {
+      description 'Shown beside ML transforms; the source does not specify its precise function or data flow.'
+      metadata {
+        uses 'aws-glue-databrew'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      producerData = database 'Producer domain data' {
+        description 'Domain-owned data stored in S3, as shown in the diagram.'
+      }
+      sharedData = database 'Shared governed data' {
+        description 'Data exposed for governed consumer discovery and analytics.'
+      }
+      consumerData = database 'Consumer domain data' {
+        description 'Consumer-domain S3 data shown in the diagram; its contents and use are not specified.'
+      }
+    }
+    neptune = platform 'Amazon Neptune' {
+      metadata {
+        uses 'amazon-neptune'
+      }
+      lineage = database 'Data lineage' {
+        description 'Lineage metadata for the mesh.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      contracts = database 'Data contracts' {
+        description 'Contracts whose properties consumers use to search for data.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    opensearch = platform 'Amazon OpenSearch Service' {
+      metadata {
+        uses 'amazon-opensearch-service'
+      }
+      analyticsIndex = database 'Analytics index' {
+        description 'OpenSearch data for analysis; the source does not specify its schema or population flow.'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+  }
+
+  producer -> aws.producerDomain 'Owns data through'
+  consumer -> aws.consumerDomain 'Discovers and analyzes data through'
+  sources -> aws.producerDomain 'Supplies data through batch, streaming, or SFTP paths'
+  aws.producerDomain -> aws.cloudFormation 'Uses organization-level blueprints through'
+  aws.consumerDomain -> aws.cloudFormation 'Uses organization-level blueprints through'
+  aws.producerDomain -> aws.s3.producerData 'Publishes domain data to'
+  aws.producerDomain -> aws.glue 'Catalogs datasets with'
+  aws.glue -> aws.dataCatalog.catalog 'Registers dataset metadata in'
+  aws.producerDomain -> aws.neptune.lineage 'Stores lineage metadata in'
+  aws.producerDomain -> aws.dynamodb.contracts 'Stores data contracts in'
+  aws.consumerDomain -> aws.dynamodb.contracts 'Searches data by contract properties in'
+  aws.lakeFormation -> aws.s3.producerData 'Governs fine-grained access to'
+  aws.lakeFormation -> aws.s3.sharedData 'Governs fine-grained access to'
+  aws.lakeFormation -> aws.dataCatalog.catalog 'Supports schema discovery and conversion using'
+  aws.lakeFormation -> aws.consumerDomain 'Provides governed data access to'
+  aws.consumerDomain -> aws.s3.consumerData 'Uses domain data stored in'
+  aws.consumerDomain -> aws.athena 'Analyzes data with'
+  aws.athena -> aws.s3.sharedData 'Queries'
+  aws.consumerDomain -> aws.opensearch.analyticsIndex 'Analyzes data with'
+  aws.consumerDomain -> aws.sagemaker 'Performs machine learning and analytics with'
+}
+
+views {
+  view index {
+    title 'Consumer Packaged Goods Data Mesh'
+    include *, aws.*
+  }
+}
