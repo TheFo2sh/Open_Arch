@@ -1,0 +1,67 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# The third-party entries are generic: AWS does not name a provider or its results store.
+technologies:
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Orchestrates long-running request workflows and express workflows for dispatch and result processing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sqs
+    name: Amazon Simple Queue Service
+    description: Queues API requests and callbacks, with dead-letter queues for failed messages.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sqs/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Polls request and callback queues and starts or resumes workflows.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Rate-limits outbound HTTP proxy requests and receives transformed callback webhooks.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-appconfig
+    name: AWS AppConfig
+    description: Supplies the dynamic delay used by the Lambda request poller.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/systems-manager/appconfig/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Monitors the request queue length.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores each workflow task token with the job ID returned by the external service.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: third-party-async-api
+    name: Third-party asynchronous API
+    description: Generic external API that accepts a job request, returns a job ID, and sends a completion callback; AWS does not specify a provider.
+    types: [third-party]
+  - key: third-party-results-store
+    name: Third-party results store
+    description: Generic external results service queried by job ID; AWS does not specify its provider or interface.
+    types: [third-party]

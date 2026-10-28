@@ -1,0 +1,197 @@
+// 42Q Cloud MES on AWS, based on AWS's manufacturing reference architecture.
+// The source describes choices at several stages; the blueprint does not imply
+// that every listed service is deployed together.
+model {
+  operator = user 'Factory user' {
+    description 'Uses the cloud-based MES; AWS does not specify user roles.'
+  }
+  equipment = system 'Industrial equipment' {
+    description 'Equipment data sources using industrial protocols; device models are not specified.'
+  }
+  partners = system 'AWS Partner solutions' {
+    description 'Partner solutions connect additional data sources and provide context; AWS does not name specific partners.'
+  }
+  erpCrm = system 'ERP and CRM systems' {
+    description 'External business systems connected to 42Q through SOAP-based APIs.'
+  }
+  printers = system 'Legacy printers' {
+    description 'On-premises printers supported through AWS IoT Greengrass; printer models are not specified.'
+  }
+  mes = system '42Q Cloud MES' {
+    description 'Third-party cloud manufacturing execution system for digital factory integration.'
+  }
+  xchange = system '42Q Xchange' {
+    description 'Third-party SOAP-based APIs for ERP and CRM integration with 42Q.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    greengrass = platform 'AWS IoT Greengrass' {
+      description 'Provides industrial equipment connectors and supports legacy printers at the factory.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+      gateway = system 'Factory edge gateway' {
+        description 'Runs the Greengrass connectors that provide industrial protocol connectivity.'
+        connectors = container 'Industrial protocol connectors' {
+          description 'Connect over OPC-UA, Modbus-TCP, Modbus-RTU, and IoT Ethernet IP.'
+        }
+      }
+    }
+    iotCore = platform 'AWS IoT Core' {
+      description 'One of the source-listed options for ingesting data into AWS.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    dataSync = platform 'AWS DataSync' {
+      description 'One of the source-listed options for ingesting data into AWS.'
+      metadata {
+        uses 'aws-datasync'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis' {
+      description 'One of the source-listed options for ingesting data into AWS.'
+      metadata {
+        uses 'amazon-kinesis'
+      }
+    }
+    msk = platform 'Amazon Managed Streaming for Apache Kafka' {
+      description 'One of the source-listed options for ingesting data into AWS.'
+      metadata {
+        uses 'amazon-msk'
+      }
+    }
+    transferFamily = platform 'AWS Transfer Family' {
+      description 'One of the source-listed options for ingesting data into AWS.'
+      metadata {
+        uses 'aws-transfer-family'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Object storage option; AWS also names S3 as a possible source for data sent to the MES API.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Manufacturing data store' {
+        description 'S3-backed data store; schema, retention, and dataset contents are not specified.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      dynamoData = database 'DynamoDB data store' {
+        description 'Workload-specific data store; data model and contents are not specified.'
+      }
+    }
+    neptune = platform 'Amazon Neptune' {
+      metadata {
+        uses 'amazon-neptune'
+      }
+      graphData = database 'Neptune data store' {
+        description 'Workload-specific data store; data model and contents are not specified.'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      metadata {
+        uses 'amazon-redshift'
+      }
+      warehouse = database 'Redshift data store' {
+        description 'Workload-specific data store; data model and contents are not specified.'
+      }
+    }
+    timestream = platform 'Amazon Timestream' {
+      metadata {
+        uses 'amazon-timestream'
+      }
+      timeSeries = database 'Timestream data store' {
+        description 'Workload-specific time-series data store; schema and retention are not specified.'
+      }
+    }
+    sitewise = platform 'AWS IoT SiteWise' {
+      metadata {
+        uses 'aws-iot-sitewise'
+      }
+      sitewiseData = database 'SiteWise data store' {
+        description 'Workload-specific industrial data store; model and contents are not specified.'
+      }
+    }
+    opensearch = platform 'Amazon OpenSearch Service' {
+      metadata {
+        uses 'amazon-opensearch-service'
+      }
+      searchData = database 'OpenSearch data store' {
+        description 'Workload-specific data store; indexes and query use are not specified.'
+      }
+    }
+
+    forecast = platform 'Amazon Forecast' {
+      description 'An AI and machine learning service AWS lists for building, training, and deploying models.'
+      metadata {
+        uses 'amazon-forecast'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'An AI and machine learning service AWS lists for building, training, and deploying models.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+    emr = platform 'Amazon EMR' {
+      description 'An analytics service AWS lists for manufacturing data workloads.'
+      metadata {
+        uses 'amazon-emr'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'An analytics service AWS lists for manufacturing data workloads.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'An analytics service AWS lists for manufacturing data workloads.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      description 'A data delivery and analytics service AWS lists for manufacturing data workloads.'
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      description 'Sends data from Amazon S3 or another data store to the 42Q MES API.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      apiForwarder = system 'MES data forwarding' {
+        description 'Lambda-based data forwarding to the 42Q MES API; payload and invocation details are not specified.'
+      }
+    }
+  }
+
+  operator -> mes 'Uses'
+  equipment -> aws.greengrass.gateway.connectors 'Connects through'
+  aws.greengrass.gateway.connectors -> aws.iotCore 'Can ingest through'
+  partners -> aws.iotCore 'Can provide contextualized data through'
+  erpCrm -> xchange 'Connects through SOAP'
+  xchange -> mes 'Integrates with'
+  mes -> aws.greengrass 'Supports on-premises label printing through'
+  aws.greengrass -> printers 'Connects to'
+  aws.s3.dataLake -> aws.lambda.apiForwarder 'Can supply data to'
+  aws.dynamodb.dynamoData -> aws.lambda.apiForwarder 'Can supply data to'
+  aws.neptune.graphData -> aws.lambda.apiForwarder 'Can supply data to'
+  aws.redshift.warehouse -> aws.lambda.apiForwarder 'Can supply data to'
+  aws.timestream.timeSeries -> aws.lambda.apiForwarder 'Can supply data to'
+  aws.sitewise.sitewiseData -> aws.lambda.apiForwarder 'Can supply data to'
+  aws.opensearch.searchData -> aws.lambda.apiForwarder 'Can supply data to'
+  aws.lambda.apiForwarder -> mes 'Writes data to the MES API'
+}
