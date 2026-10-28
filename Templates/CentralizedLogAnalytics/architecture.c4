@@ -1,0 +1,109 @@
+// Centralized Log Analytics, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/centralized-log-analytics/centralized-log-analytics.html
+model {
+  analyst = user 'Log analyst' {
+    description 'Signs in to OpenSearch Dashboards to explore logs and monitor dashboards.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    cloudTrail = platform 'AWS CloudTrail' {
+      description 'AWS log producer shown writing log lines to Amazon S3.'
+      metadata {
+        uses 'amazon-cloudtrail'
+      }
+    }
+
+    ec2 = platform 'Amazon EC2' {
+      description 'Compute-based machine-log producer shown in the source diagram.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+
+      workloads = system 'EC2 log-producing workloads' {
+        description 'Slot for workloads that produce machine logs; the source does not identify an application.'
+
+        fluentBit = container 'Fluent Bit collector option' {
+          description 'One of the alternative collectors listed by AWS; it is not required alongside the other options.'
+          metadata {
+            uses 'fluent-bit'
+          }
+        }
+        kinesisAgent = container 'Amazon Kinesis Agent collector option' {
+          description 'One of the alternative collectors listed by AWS; it is not required alongside the other options.'
+          metadata {
+            uses 'amazon-kinesis-agent'
+          }
+        }
+        cloudWatchAgent = container 'Amazon CloudWatch Agent collector option' {
+          description 'One of the alternative collectors listed by AWS; it is not required alongside the other options.'
+          metadata {
+            uses 'amazon-cloudwatch-agent'
+          }
+        }
+      }
+    }
+
+    flowLogs = platform 'Amazon VPC Flow Logs' {
+      description 'Flow-log producer labeled “flow logs” in the source diagram.'
+      metadata {
+        uses 'amazon-vpc-flow-logs'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      rawLogs = database 'Collected log objects' {
+        description 'Log lines stored in S3 before transformation.'
+      }
+    }
+
+    sqs = platform 'Amazon SQS' {
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      transform = system 'Log transformation function' {
+        description 'Transforms log lines from strings to structured JSON when necessary.'
+      }
+    }
+
+    openSearch = platform 'Amazon OpenSearch Service' {
+      metadata {
+        uses 'amazon-opensearch-service'
+      }
+      logIndex = database 'Searchable log data' {
+        description 'JSON-formatted log lines delivered through the OpenSearch bulk API.'
+      }
+      dashboards = system 'OpenSearch Dashboards' {
+        description 'Dashboard interface provided with OpenSearch Service; a slot for the project’s log analytics system.'
+        ui = container 'Log analytics interface' {
+          metadata {
+            uses 'opensearch-dashboards'
+          }
+        }
+      }
+    }
+  }
+
+  cloudTrail -> aws.s3.rawLogs 'Stores CloudTrail logs in'
+  ec2.workloads.fluentBit -> aws.s3.rawLogs 'Collects machine logs to'
+  ec2.workloads.kinesisAgent -> aws.s3.rawLogs 'Collects machine logs to'
+  ec2.workloads.cloudWatchAgent -> aws.s3.rawLogs 'Collects machine logs to'
+  flowLogs -> aws.s3.rawLogs 'Stores flow logs in'
+  aws.s3 -> aws.sqs 'Sends an object-create event to'
+  aws.sqs -> aws.lambda.transform 'Invokes'
+  aws.lambda.transform -> aws.openSearch 'Uses the bulk API to deliver structured logs to'
+  analyst -> aws.openSearch.dashboards 'Uses'
+  aws.openSearch.dashboards.ui -> aws.openSearch.logIndex 'Queries and visualizes'
+}
