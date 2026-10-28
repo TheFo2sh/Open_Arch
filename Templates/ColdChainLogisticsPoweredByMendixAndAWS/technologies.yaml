@@ -1,0 +1,103 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: mendix-cloud
+    name: Mendix Cloud
+    description: Mendix's application platform as a service that hosts the cold-chain logistics application.
+    vendor: Mendix
+    url: https://www.mendix.com/platform/cloud/
+    types: [managed-service, compute-platform, third-party]
+    platform: other
+    hosts: [system]
+  - key: aws-sdk
+    name: AWS SDKs
+    description: Standard AWS SDKs used by Mendix's native connectors to access AWS services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/developer/tools/
+    types: [library]
+  - key: jdbc-driver
+    name: JDBC
+    description: Java Database Connectivity used by Mendix's database connector to query supported databases.
+    vendor: Oracle
+    url: https://docs.oracle.com/javase/8/docs/technotes/guides/jdbc/
+    types: [library]
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Connects IoT devices, receives telemetry, and processes messages with custom rules.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: REST endpoints through which Mendix can access AWS backend services using Signature Version 4.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-rekognition
+    name: Amazon Rekognition
+    description: Analyzes images submitted by the Mendix application through connector microflows.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rekognition/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Object storage used as a data lake and for files, backups, and long-term storage.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: Messaging service used by Mendix's SNS connector to explore topics and publish attributed messages.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Runs SQL queries to retrieve and analyze content in the S3 data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-timestream
+    name: Amazon Timestream
+    description: Time-series database for sensor data, queried from Mendix with the database connector.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/timestream/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Backend database option for systems that need high-performance data processing at scale.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-aurora
+    name: Amazon Aurora
+    description: External database option that Mendix can access with the database connector and a JDBC driver.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-rds
+    name: Amazon RDS
+    description: External database option that Mendix can access with the database connector and a JDBC driver.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
