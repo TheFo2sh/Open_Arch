@@ -1,0 +1,7 @@
+PackageId: OpenArch.ServerlessInGameScreenshotProcessorPipelineForGameStudios
+Name: Serverless In-Game Screenshot Processor Pipeline for Game Studios
+Description: A serverless AWS pipeline that moderates, transforms, stores, and serves in-game screenshots with their player metadata.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, games, serverless, image-processing]

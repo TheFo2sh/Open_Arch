@@ -1,0 +1,102 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+technologies:
+  - key: aws-amplify
+    name: AWS Amplify
+    description: Distributes the DescribeForMe web app to mobile devices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/amplify/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: amazon-cognito
+    name: Amazon Cognito
+    description: Its identity pool grants temporary access to the S3 bucket.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cognito/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores user-uploaded images and workflow-generated MP3 audio.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Receives the S3 object key, starts the Step Functions workflow, and returns a pre-signed audio URL.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Runs the state machine that orchestrates the AI/ML workflow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the functions Step Functions uses to orchestrate the AI/ML services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-rekognition
+    name: Amazon Rekognition
+    description: An AI/ML service named in the workflow; the source does not specify its exact task.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rekognition/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: An AI/ML service named in the workflow; the source does not specify its model or exact task.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-textract
+    name: Amazon Textract
+    description: An AI/ML service named in the workflow; the source does not specify its exact task.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/textract/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-translate
+    name: Amazon Translate
+    description: An AI/ML service named in the workflow; the source does not specify its exact task or supported languages.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/translate/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-polly
+    name: Amazon Polly
+    description: Produces the spoken audio output; the source does not specify voice or synthesis settings.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/polly/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-sdk
+    name: AWS SDK
+    description: Used by the web app to upload an image to S3; the source does not specify an SDK version or package.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/developer/tools/
+    types: [library]
+  - key: html-javascript-css
+    name: HTML, JavaScript, and CSS
+    description: The web app's browser-side technologies, as identified by the source.
+    vendor: Web standards
+    url: https://developer.mozilla.org/en-US/docs/Web
+    types: [library]
