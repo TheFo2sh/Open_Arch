@@ -1,0 +1,228 @@
+// Smart Farm on Amazon Web Services, after the AWS reference architecture.
+// The AWS page's linked diagram asset was unavailable while preparing this model;
+// relationships below follow its numbered text descriptions.
+model {
+  farmOperator = user 'Farm user' {
+    description 'Receives notifications and accesses farm insights.'
+  }
+
+  farm = zone 'Farm and edge devices' {
+    metadata {
+      platform 'other'
+    }
+
+    freertos = platform 'FreeRTOS' {
+      description 'Runs on the farm sensors and cameras.'
+      metadata {
+        uses 'freertos'
+      }
+
+      devices = system 'Farm sensors and cameras' {
+        description 'Sensors and cameras running FreeRTOS.'
+      }
+    }
+
+    thirdPartyDevices = system 'Third-party sensors and drones' {
+      description 'External devices that do not use FreeRTOS; the AWS source does not name their vendors or protocols.'
+    }
+
+    greengrass = platform 'AWS IoT Greengrass' {
+      description 'Edge runtime that protects against intermittent connectivity and streams device data.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+
+      edgeStreams = system 'Greengrass edge stream workload' {
+        description 'Streams data from edge devices to AWS Kinesis Data Streams.'
+      }
+    }
+
+    ownedRecords = system 'Farm-owned records and finances' {
+      description 'Farm data such as planting records and farm finances.'
+    }
+  }
+
+  partner = zone 'Sensor ecosystem hosted on AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    sensorEcosystem = system 'Third-party sensor ecosystem' {
+      description 'AWS-hosted external sensor ecosystem; its provider and interface are not specified.'
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the device protocol-conversion function and the Device Defender report importer.'
+      metadata {
+        uses 'aws-lambda'
+      }
+
+      protocolConversion = system 'Protocol conversion function' {
+        description 'Converts data from third-party sensors and drones that do not use FreeRTOS.'
+      }
+      reportImporter = system 'Device Defender report importer' {
+        description 'Imports AWS IoT Device Defender reports into AWS Security Hub CSPM.'
+      }
+    }
+
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Ingests data streamed from AWS IoT Greengrass.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    video = platform 'Amazon Kinesis Video Streams' {
+      description 'Supports real-time video streaming and replay.'
+      metadata {
+        uses 'amazon-kinesis-video-streams'
+      }
+    }
+    flink = platform 'Amazon Managed Service for Apache Flink' {
+      description 'Derives real-time insights from streams.'
+      metadata {
+        uses 'amazon-managed-service-for-apache-flink'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      description 'Notifies users about real-time insights.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    notifications = system 'Farm notifications' {
+      description 'User-facing destination for farm insight notifications.'
+    }
+
+    opensearch = platform 'Amazon OpenSearch Service' {
+      description 'Provides analytics capabilities; the AWS page does not specify its data-ingestion path.'
+      metadata {
+        uses 'amazon-opensearch-service'
+      }
+      analytics = database 'Farm analytics index' {
+        description 'Analytics data in OpenSearch; index contents are not specified by AWS.'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Object storage used for the farm data lake.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Farm data lake' {
+        description 'Stores farm data; AWS gives planting records and farm finances as examples.'
+      }
+    }
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Transfers farm-owned data securely into the data lake.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    privateLink = platform 'AWS PrivateLink' {
+      description 'Securely connects consumers to a sensor ecosystem hosted on AWS.'
+      metadata {
+        uses 'aws-privatelink'
+      }
+    }
+
+    glue = platform 'AWS Glue' {
+      description 'A crawler infers schemas for new S3 objects and registers them in the Glue Data Catalog.'
+      metadata {
+        uses 'aws-glue'
+      }
+      catalog = database 'AWS Glue Data Catalog' {
+        description 'Stores schemas inferred by the AWS Glue crawler.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Runs on-demand queries against the data lake using the Glue Data Catalog.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Builds and deploys machine-learning models for edge inference.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+    groundTruth = platform 'Amazon SageMaker Ground Truth' {
+      description 'Manages the machine-learning data-labeling workflow.'
+      metadata {
+        uses 'amazon-sagemaker-ground-truth'
+      }
+    }
+
+    deviceDefender = platform 'AWS IoT Device Defender' {
+      description 'Provides reports that are imported for centralized incident response.'
+      metadata {
+        uses 'aws-iot-device-defender'
+      }
+    }
+    securityHub = platform 'AWS Security Hub CSPM' {
+      description 'Centralizes incident response findings.'
+      metadata {
+        uses 'aws-security-hub-cspm'
+      }
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Delivers farm insights to users through an API.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    insightsApi = system 'Farm insights API' {
+      description 'User-facing farm insights API.'
+    }
+    quick = platform 'Amazon Quick' {
+      description 'Provides visualizations of farm insights.'
+      metadata {
+        uses 'amazon-quick'
+      }
+    }
+    visualizations = system 'Farm insight visualizations' {
+      description 'User-facing visualizations of farm insights.'
+    }
+  }
+
+  farm.devices -> farm.greengrass.edgeStreams 'Sends edge-device data to'
+  farm.greengrass.edgeStreams -> aws.kinesis 'Streams edge data into'
+  farm.devices -> aws.video 'Streams real-time video for'
+  farm.thirdPartyDevices -> aws.lambda.protocolConversion 'Sends data through for protocol conversion'
+
+  aws.kinesis -> aws.flink 'Feeds streaming data to'
+  aws.flink -> aws.sns 'Sends real-time insight notifications through'
+  aws.sns -> aws.notifications 'Delivers notifications to'
+  farmOperator -> aws.notifications 'Receives'
+
+  farm.ownedRecords -> aws.directConnect 'Transfers owned data through'
+  aws.directConnect -> aws.s3.dataLake 'Transfers data securely into'
+  aws.s3.dataLake -> aws.glue 'New objects trigger schema discovery by'
+  aws.athena -> aws.glue.catalog 'Uses schemas from'
+  aws.athena -> aws.s3.dataLake 'Queries'
+  aws.privateLink -> partner.sensorEcosystem 'Provides private access to'
+
+  aws.groundTruth -> aws.sagemaker 'Supports the data-labeling workflow for'
+  aws.deviceDefender -> aws.lambda.reportImporter 'Provides reports to'
+  aws.lambda.reportImporter -> aws.securityHub 'Imports reports into'
+
+  aws.apiGateway -> aws.insightsApi 'Delivers insights through'
+  aws.quick -> aws.visualizations 'Presents insights through'
+  farmOperator -> aws.insightsApi 'Accesses'
+  farmOperator -> aws.visualizations 'Views'
+}
+
+views {
+  view index {
+    title 'Smart Farm on Amazon Web Services'
+    include *, farm.*, farm.freertos.*, farm.greengrass.*, partner.*, aws.*, aws.s3.*, aws.glue.*
+  }
+}
