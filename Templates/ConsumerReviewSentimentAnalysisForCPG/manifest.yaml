@@ -1,0 +1,7 @@
+PackageId: OpenArch.ConsumerReviewSentimentAnalysisForCPG
+Name: Consumer Review Sentiment Analysis for CPG
+Description: Ingests consumer reviews, analyzes sentiment, key phrases and entities, and exposes the results for analytics and dashboards.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, retail, cpg, sentiment-analysis, analytics]
