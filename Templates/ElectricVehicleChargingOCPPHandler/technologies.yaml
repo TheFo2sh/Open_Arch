@@ -1,0 +1,58 @@
+# The AWS services the blueprint uses, by the key its metadata { uses } names them by.
+technologies:
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: Returns the DNS record used by a charge point to find the OCPP endpoint.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Network Load Balancer that receives OCPP connections and routes them to the handler.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-fargate
+    name: AWS Fargate
+    description: Serverless compute platform that runs the containerized OCPP Handler.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fargate/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: MQTT broker and rules engine used to route charge-point messages.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs functions that handle selected MQTT messages, such as Heartbeat auto-responses.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-sqs
+    name: Amazon Simple Queue Service
+    description: Queues incoming OCPP message payloads forwarded by an AWS IoT rule.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sqs/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Orchestrates interpretation of queued OCPP payloads and execution of business logic.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: []

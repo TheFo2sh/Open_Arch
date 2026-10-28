@@ -1,0 +1,7 @@
+PackageId: OpenArch.ImproveDemandForecastingToBoostSalesOnAmazonCom
+Name: Improve Demand Forecasting to Boost Sales on Amazon.com
+Description: Source Amazon.com vendor performance data, build a durable demand history, and orchestrate forecasts and analytics.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, retail, demand-forecasting, machine-learning]

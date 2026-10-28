@@ -1,0 +1,222 @@
+// AWS Data Platform for Ports and Inland Logistics Facilities.
+// Based on the linked AWS reference architecture diagram and description.
+model {
+  operationsTeam = user 'Port and logistics operations teams' {
+    description 'Use port and facility systems and receive operational notifications.'
+  }
+  dashboardUsers = user 'Dashboard users' {
+    description 'Review port and logistics analytics through dashboards.'
+  }
+
+  erpSystems = system 'Enterprise Resource Planning systems' {
+    description 'External ERP systems that contribute data to the platform.'
+  }
+  portSystems = system 'Port and logistics operational systems' {
+    description 'Terminal operating, yard management, cargo, and other facility systems.'
+  }
+  connectedAssets = system 'IoT-enabled assets and devices' {
+    description 'Connected equipment, sensors, and CCTV at ports and inland facilities.'
+  }
+  thirdPartyProviders = system 'Third-party data providers' {
+    description 'Providers of external data such as weather, local traffic, and ship geolocation.'
+  }
+  partnerClients = system 'Partner API clients' {
+    description 'External systems that consume shared key metrics.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    directConnect = platform 'AWS Direct Connect' {
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    greengrass = platform 'AWS IoT Greengrass' {
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+    }
+    iotCore = platform 'AWS IoT Core' {
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    kinesisVideo = platform 'Amazon Kinesis Video Streams' {
+      metadata {
+        uses 'amazon-kinesis-video-streams'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      operationalNoSql = database 'Operational data store' {
+        description 'NoSQL store for operational and financial data.'
+      }
+    }
+    aurora = platform 'Amazon Aurora' {
+      metadata {
+        uses 'amazon-aurora'
+      }
+      operationalRelational = database 'Operational relational store' {
+        description 'Relational store for operational and financial data; the database engine is not specified.'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service (Amazon S3)' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Data lake' {
+        description 'Object storage data lake for data from ports, devices, and external providers.'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      metadata {
+        uses 'amazon-redshift'
+      }
+      warehouse = database 'Analytics data warehouse' {
+        description 'Warehouse used to turn data into actionable knowledge and key metrics.'
+      }
+    }
+    dataExchange = platform 'AWS Data Exchange' {
+      metadata {
+        uses 'aws-data-exchange'
+      }
+    }
+    transferFamily = platform 'AWS Transfer Family' {
+      metadata {
+        uses 'aws-transfer-family'
+      }
+    }
+    appFlow = platform 'Amazon AppFlow' {
+      metadata {
+        uses 'amazon-appflow'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    emr = platform 'Amazon EMR' {
+      metadata {
+        uses 'amazon-emr'
+      }
+      batchProcessing = system 'Data processing jobs' {
+        description 'Data processing workloads shown with Amazon EMR.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    rekognition = platform 'Amazon Rekognition' {
+      metadata {
+        uses 'amazon-rekognition'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      eventProcessing = system 'Event processing services' {
+        description 'Serverless event processing workloads shown in the architecture.'
+      }
+    }
+    fargate = platform 'AWS Fargate' {
+      metadata {
+        uses 'aws-fargate'
+      }
+      microservices = system 'Operational microservices' {
+        description 'Microservices supporting port operations and workflow automation.'
+      }
+    }
+    pinpoint = platform 'Amazon Pinpoint' {
+      metadata {
+        uses 'amazon-pinpoint'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+      partnerMetricsApi = system 'Partner metrics API' {
+        description 'API through which partners can access key metrics.'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+      dashboards = system 'Port and logistics dashboards' {
+        description 'Dashboards presenting operational and financial analytics.'
+      }
+    }
+  }
+
+  erpSystems -> aws.directConnect 'Connect through'
+  portSystems -> aws.directConnect 'Connect through'
+  thirdPartyProviders -> aws.dataExchange 'Provide data through'
+  thirdPartyProviders -> aws.transferFamily 'Deliver files through'
+  erpSystems -> aws.appFlow 'Ingest business application data through'
+
+  aws.greengrass -> connectedAssets 'Runs edge software on'
+  aws.greengrass -> aws.iotCore 'Connect devices to'
+  aws.iotCore -> aws.kinesis 'Publish operational events to'
+  connectedAssets -> aws.kinesisVideo 'Stream CCTV recordings to'
+  aws.kinesisVideo -> aws.rekognition 'Analyze video with'
+  aws.kinesis -> aws.lambda.eventProcessing 'Process event streams with'
+
+  aws.directConnect -> aws.dynamodb.operationalNoSql 'Provide operational data to'
+  aws.directConnect -> aws.aurora.operationalRelational 'Provide operational data to'
+  aws.dataExchange -> aws.s3.dataLake 'Ingest third-party data into'
+  aws.transferFamily -> aws.s3.dataLake 'Ingest provider files into'
+  aws.appFlow -> aws.s3.dataLake 'Ingest application data into'
+  aws.lambda.eventProcessing -> aws.s3.dataLake 'Write processed events to'
+  aws.rekognition -> aws.s3.dataLake 'Provide video analysis data to'
+
+  aws.s3.dataLake -> aws.glue 'Transform and catalog data with'
+  aws.s3.dataLake -> aws.emr.batchProcessing 'Process data with'
+  aws.s3.dataLake -> aws.athena 'Query data with'
+  aws.glue -> aws.redshift.warehouse 'Load transformed data into'
+  aws.emr.batchProcessing -> aws.redshift.warehouse 'Load processed data into'
+  aws.s3.dataLake -> aws.sagemaker 'Use data for predictive analytics with'
+  aws.redshift.warehouse -> aws.quickSight.dashboards 'Present analytics through'
+
+  aws.stepFunctions -> aws.fargate.microservices 'Orchestrate operational workflows with'
+  aws.stepFunctions -> aws.lambda.eventProcessing 'Automate event workflows with'
+  aws.fargate.microservices -> aws.dynamodb.operationalNoSql 'Read and write operational data in'
+  aws.fargate.microservices -> aws.aurora.operationalRelational 'Read and write operational data in'
+  aws.fargate.microservices -> aws.pinpoint 'Send email, SMS, and push notifications with'
+  aws.apiGateway.partnerMetricsApi -> aws.redshift.warehouse 'Share key metrics from'
+  partnerClients -> aws.apiGateway.partnerMetricsApi 'Access partner metrics through'
+
+  operationsTeam -> aws.fargate.microservices 'Use operational workflows'
+  dashboardUsers -> aws.quickSight.dashboards 'Review port and logistics dashboards'
+}
+
+views {
+  view index {
+    title 'Data Platform for Ports and Inland Logistics Facilities'
+    include *, aws.*
+  }
+}

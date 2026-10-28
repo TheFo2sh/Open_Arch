@@ -1,0 +1,7 @@
+PackageId: OpenArch.CentralLoggingAndAnalyticsInHybridEnvironments
+Name: Central Logging and Analytics in Hybrid Environments
+Description: Centralize hybrid-environment logs and metrics with Amazon CloudWatch, then stream and analyze them across AWS analytics services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, logging, analytics, hybrid, observability]
