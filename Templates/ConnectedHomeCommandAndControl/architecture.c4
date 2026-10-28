@@ -1,0 +1,111 @@
+// Connected Home Command and Control, based on AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/connected-home-command-control/connected-home-command-control.html
+// Alexa, the user, and the connected device fleet are slots to map when applying the template.
+model {
+  resident = user 'Connected home user' {
+    description 'Invokes the Alexa skill to control enrolled home devices.'
+  }
+
+  alexaVoiceService = system 'Alexa Voice Service' {
+    description 'Third-party Alexa service that receives skill invocations and proactive notifications.'
+  }
+
+  connectedHome = zone 'Connected home devices' {
+    metadata {
+      platform 'other'
+    }
+
+    devices = system 'Connected devices' {
+      description 'The household devices that receive commands and publish local state updates.'
+
+      deviceClient = container 'Device client' {
+        description 'Connects device software to AWS IoT Core using the AWS IoT Device SDK option.'
+        metadata {
+          uses 'aws-iot-device-sdk'
+        }
+      }
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Validates skill request authorization and access control before routing requests.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the Alexa skill, authorization, stream processing, and proactive notification functions.'
+      metadata {
+        uses 'aws-lambda'
+      }
+
+      skillBackend = system 'Connected home Alexa skill backend' {
+        description 'The skill logic that handles commands and connected-device updates.'
+
+        functions = container 'Skill functions' {
+          authentication = component 'Authorization handler' {
+            description 'Checks user, skill, and device authorization data.'
+          }
+          commandHandler = component 'Command handler' {
+            description 'Translates accepted Alexa requests into connected-device commands.'
+          }
+          dataProcessor = component 'Device data processor' {
+            description 'Processes real-time device data delivered from Kinesis Data Streams.'
+          }
+          notifications = component 'Proactive notification handler' {
+            description 'Invokes the Alexa Voice Service proactive notifications interface.'
+          }
+        }
+      }
+    }
+
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Stores authorization data used to associate users with their skill and devices.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+
+      authorizationData = database 'User authorization data' {
+        description 'Associations between users, the Alexa skill, and connected devices.'
+      }
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      description 'Connects cloud services and devices; IoT rules route messages, topics carry updates, and device shadows synchronize desired settings.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Receives device-update messages from AWS IoT Core rules for real-time processing.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+  }
+
+  resident -> alexaVoiceService 'Invokes the skill through'
+  alexaVoiceService -> aws.apiGateway 'Forwards the Alexa skill invocation to'
+  aws.apiGateway -> aws.lambda.skillBackend 'Validates authorization and routes the request to'
+  aws.lambda.skillBackend.functions.authentication -> aws.dynamodb.authorizationData 'Checks authorization against'
+  aws.lambda.skillBackend.functions.commandHandler -> aws.iotCore 'Publishes accepted commands to'
+  aws.iotCore -> connectedHome.devices 'Delivers shadow setting updates to'
+  connectedHome.devices -> aws.iotCore 'Publishes local device updates to'
+  aws.iotCore -> aws.kinesis 'Routes device updates through an IoT rule to'
+  aws.kinesis -> aws.lambda.skillBackend.functions.dataProcessor 'Delivers real-time data to'
+  aws.lambda.skillBackend.functions.notifications -> alexaVoiceService 'Invokes the proactive notifications interface on'
+}
+
+views {
+  view index {
+    title 'Connected Home Command and Control on AWS'
+    include *, aws.*, aws.lambda.*, aws.lambda.skillBackend.*, aws.lambda.skillBackend.functions.*, aws.dynamodb.*
+  }
+}
