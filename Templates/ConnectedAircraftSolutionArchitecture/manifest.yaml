@@ -1,0 +1,7 @@
+PackageId: OpenArch.ConnectedAircraftSolutionArchitecture
+Name: Connected Aircraft Solution Architecture
+Description: Connected-aircraft data collection, fleet analytics, engine-health processing, and predictive maintenance using AWS services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, aviation, connected-aircraft, iot, analytics, predictive-maintenance]

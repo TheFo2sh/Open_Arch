@@ -1,0 +1,7 @@
+PackageId: OpenArch.BuildYourOwnAnomalyDetectionMLPipeline
+Name: Build your own Anomaly Detection ML Pipeline
+Description: An AWS machine-learning pipeline for preparing data, training an anomaly detection model, scoring observations and publishing alerts.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, machine-learning, anomaly-detection]
