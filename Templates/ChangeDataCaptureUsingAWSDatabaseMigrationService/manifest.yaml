@@ -1,0 +1,7 @@
+PackageId: OpenArch.ChangeDataCaptureUsingAWSDatabaseMigrationService
+Name: Change Data Capture Using AWS Database Migration Service
+Description: Database migration and ongoing change capture with AWS DMS, plus optional streaming and analytics consumers.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, database-migration, change-data-capture, data-streaming]

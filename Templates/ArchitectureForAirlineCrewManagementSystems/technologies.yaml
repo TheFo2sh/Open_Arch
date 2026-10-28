@@ -1,0 +1,154 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Primary dedicated connection from the corporate data center to AWS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+  - key: aws-site-to-site-vpn
+    name: AWS Site-to-Site VPN
+    description: Secondary VPN connection from the corporate data center to AWS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/site-to-site-vpn/
+    types: [managed-service]
+    platform: aws
+  - key: aws-transit-gateway
+    name: AWS Transit Gateway
+    description: Hub connecting the corporate network connections with the AWS environment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-global-accelerator
+    name: AWS Global Accelerator
+    description: AWS network service shown between the corporate connectivity hub and the application tier.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/global-accelerator/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: Public hosted zone used by crew applications to resolve service domain names.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+  - key: aws-waf
+    name: AWS WAF
+    description: Web application firewall protecting the public web and API resources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/waf/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Content delivery network serving static pages and assets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-cognito
+    name: Amazon Cognito
+    description: Authentication and access control for crew applications.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cognito/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Managed API entry point to the crew application tier.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage for website assets and the crew management data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-eks
+    name: Amazon Elastic Kubernetes Service
+    description: Kubernetes service orchestrating the crew management microservices across two Availability Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eks/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Private Application Load Balancer routing requests to crew management microservices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-aurora-postgresql
+    name: Amazon Aurora PostgreSQL-Compatible Edition
+    description: Highly available crew data store with Aurora Replicas across multiple Availability Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/postgresql/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-kms
+    name: AWS Key Management Service
+    description: AWS cloud security service used as part of the encryption approach.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kms/
+    types: [managed-service]
+    platform: aws
+  - key: aws-secrets-manager
+    name: AWS Secrets Manager
+    description: Protects credentials and private keys used by the architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/secrets-manager/
+    types: [managed-service]
+    platform: aws
+  - key: aws-certificate-manager
+    name: AWS Certificate Manager
+    description: AWS certificate service shown with the architecture's security services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/certificate-manager/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Monitoring used to optimize operational health.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+  - key: aws-cloudtrail
+    name: AWS CloudTrail
+    description: AWS logging service shown in the logging and monitoring group.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudtrail/
+    types: [managed-service]
+    platform: aws
+  - key: aws-personal-health-dashboard
+    name: AWS Personal Health Dashboard
+    description: AWS service shown in the architecture's logging and monitoring group.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/premiumsupport/technology/personal-health-dashboard/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-s3-glacier
+    name: Amazon S3 Glacier
+    description: Archive storage used as part of the crew management data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/storage-classes/glacier/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Business intelligence for crew planning, training statistics, and crew utilization.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
