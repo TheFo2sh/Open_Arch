@@ -1,0 +1,122 @@
+# The AWS services used by the blueprint, by the key its metadata { uses } names them by.
+technologies:
+  - key: aws-backup
+    name: AWS Backup
+    description: Central backup service for backup plans, jobs, vaults, recovery points, cross-account copies, and audit integrations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/backup/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-cloudformation
+    name: AWS CloudFormation
+    description: Infrastructure-as-code service used to create AWS Backup resources; StackSets deploy resources across accounts.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudformation/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iam
+    name: AWS Identity and Access Management
+    description: AWS access management for users, roles, managed policies, and vault access policies.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iam/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-kms
+    name: AWS Key Management Service
+    description: Key management and encryption for backup vaults, protected resources, and cross-account backup copies.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kms/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-cloudtrail
+    name: AWS CloudTrail
+    description: Records AWS Backup actions and organizational changes for audit and monitoring.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudtrail/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Monitors AWS Backup service metrics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-eventbridge
+    name: Amazon EventBridge
+    description: Matches AWS Backup events for monitoring and forwards them to a central event bus.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eventbridge/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-backup-audit-manager
+    name: AWS Backup Audit Manager
+    description: Continuously monitors backup compliance and generates audit reports.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/backup/features/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-organizations
+    name: AWS Organizations
+    description: Manages accounts, organizational units, backup policies, and service control policies.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/organizations/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-control-tower
+    name: AWS Control Tower
+    description: Landing-zone service customized to integrate AWS Backup across an organization.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/controltower/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-service-catalog
+    name: AWS Service Catalog
+    description: Provides a predefined catalog for self-service backup configuration.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/servicecatalog/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores centralized AWS Backup CloudTrail events and AWS Config logs in the Log Archive account.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-config
+    name: AWS Config
+    description: Records configuration information and contributes audit logs to the centralized Log Archive account.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/config/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: Sends email notifications for centrally monitored AWS Backup events.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-security-token-service
+    name: AWS Security Token Service
+    description: Issues temporary credentials to authenticated federated users.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iam/features/manage-roles/
+    types: [managed-service]
+    platform: aws
+    hosts: []
