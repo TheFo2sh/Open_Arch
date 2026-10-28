@@ -1,0 +1,268 @@
+// Siemens NX on Amazon WorkSpaces Applications, after the three options in AWS's reference architecture.
+// Each zone represents an alternative documented deployment, not one combined deployment.
+// Systems and users are slots, mapped onto the project's own when the template is applied.
+model {
+  engineer = user 'Siemens NX user' {
+    description 'Connects to a Siemens NX streaming session.'
+  }
+
+  ebsOption = zone 'AWS - EBS shared folders' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Amazon VPC' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      internetGateway = platform 'Amazon VPC internet gateway' {
+        metadata {
+          uses 'amazon-internet-gateway'
+        }
+      }
+      natGateway = platform 'Amazon VPC NAT gateway' {
+        metadata {
+          uses 'amazon-nat-gateway'
+        }
+      }
+      workspaces = platform 'Amazon WorkSpaces Applications' {
+        description 'Fleet and image builders in private subnets across two Availability Zones.'
+        metadata {
+          uses 'amazon-workspaces-applications'
+        }
+
+        nxSessions = system 'Siemens NX streaming sessions' {
+          description 'The application sessions users reach through a browser or the WorkSpaces Applications Windows client.'
+
+          nx = container 'Siemens NX' {
+            metadata {
+              uses 'siemens-nx'
+            }
+          }
+        }
+      }
+      fileServerCompute = platform 'Amazon EC2 - shared-folder server' {
+        description 'EC2 instance in a private subnet.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+
+        fileServer = system 'SMB shared-folder server' {
+          description 'Serves its attached Amazon EBS volume as a shared folder for WorkSpaces Applications users.'
+
+          smbShare = container 'SMB shared folder' {
+            metadata {
+              uses 'microsoft-smb'
+            }
+          }
+        }
+      }
+      jumpServerCompute = platform 'Amazon EC2 - Windows RDP instance' {
+        description 'Windows RDP jump server in a public subnet.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+
+        jumpServer = system 'Windows RDP jump server' {
+          rdp = container 'Remote desktop access' {
+            metadata {
+              uses 'microsoft-rdp'
+            }
+          }
+        }
+      }
+      ebsVolume = platform 'Amazon EBS shared volume' {
+        metadata {
+          uses 'amazon-ebs'
+        }
+      }
+    }
+
+    s3 = platform 'Amazon S3 user home folders' {
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+  }
+
+  teamcenterOption = zone 'AWS - Teamcenter with FSx' {
+    metadata {
+      platform 'aws'
+    }
+
+    workspacesVpc = platform 'Amazon VPC - WorkSpaces Applications' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      directory = platform 'AWS Directory Service for Microsoft Active Directory' {
+        metadata {
+          uses 'aws-directory-service'
+        }
+      }
+      workspaces = platform 'Amazon WorkSpaces Applications' {
+        metadata {
+          uses 'amazon-workspaces-applications'
+        }
+
+        nxSessions = system 'Siemens NX streaming sessions' {
+          nx = container 'Siemens NX' {
+            metadata {
+              uses 'siemens-nx'
+            }
+          }
+        }
+      }
+      fsx = platform 'Amazon FSx' {
+        description 'File storage replicated across multiple Availability Zones; folders can be configured through Active Directory Group Policy.'
+        metadata {
+          uses 'amazon-fsx'
+        }
+      }
+    }
+
+    vpcPeering = platform 'Amazon VPC Peering connection' {
+      metadata {
+        uses 'amazon-vpc-peering'
+      }
+    }
+    auth0 = system 'Auth0 identity provider' {
+      description 'Third-party identity service federated with Active Directory using SAML 2.0 for single sign-on.'
+    }
+  }
+
+  teamcenterVpc = zone 'Connected Siemens Teamcenter VPC' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Amazon VPC' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+    teamcenter = system 'Siemens Teamcenter' {
+      description 'Runs in the separate VPC; the source does not specify its compute or hosting details.'
+
+      plm = container 'Teamcenter PLM application' {
+        metadata {
+          uses 'siemens-teamcenter'
+        }
+      }
+    }
+  }
+
+  regionA = zone 'AWS Region A - multi-Region option' {
+    metadata {
+      platform 'aws'
+    }
+
+    workspaces = platform 'Amazon WorkSpaces Applications' {
+      description 'Image builders are shared across Regions; each image is configured to use the closest directory and file storage.'
+      metadata {
+        uses 'amazon-workspaces-applications'
+      }
+
+      nxSessions = system 'Siemens NX streaming sessions' {
+        nx = container 'Siemens NX' {
+          metadata {
+            uses 'siemens-nx'
+          }
+        }
+      }
+    }
+    ec2 = platform 'Amazon EC2 - Active Directory instances' {
+      description 'Two Active Directory instances run in separate Availability Zones and replicate across Availability Zones and Regions through Active Directory sites.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+
+      activeDirectory = system 'Microsoft Active Directory instances' {
+        directory = container 'Active Directory' {
+          metadata {
+            uses 'microsoft-active-directory'
+          }
+        }
+      }
+    }
+    fsx = platform 'Amazon FSx - Region A' {
+      description 'Two single-Availability-Zone file systems in this Region.'
+      metadata {
+        uses 'amazon-fsx'
+      }
+    }
+  }
+
+  regionB = zone 'AWS Region B - multi-Region option' {
+    metadata {
+      platform 'aws'
+    }
+
+    workspaces = platform 'Amazon WorkSpaces Applications' {
+      description 'Image builders are shared across Regions; each image is configured to use the closest directory and file storage.'
+      metadata {
+        uses 'amazon-workspaces-applications'
+      }
+
+      nxSessions = system 'Siemens NX streaming sessions' {
+        nx = container 'Siemens NX' {
+          metadata {
+            uses 'siemens-nx'
+          }
+        }
+      }
+    }
+    ec2 = platform 'Amazon EC2 - Active Directory instances' {
+      description 'Two Active Directory instances run in separate Availability Zones and replicate across Availability Zones and Regions through Active Directory sites.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+
+      activeDirectory = system 'Microsoft Active Directory instances' {
+        directory = container 'Active Directory' {
+          metadata {
+            uses 'microsoft-active-directory'
+          }
+        }
+      }
+    }
+    fsx = platform 'Amazon FSx - Region B' {
+      description 'Two single-Availability-Zone file systems in this Region.'
+      metadata {
+        uses 'amazon-fsx'
+      }
+    }
+  }
+
+  engineer -> ebsOption.vpc.workspaces.nxSessions 'Connects through a browser or the Windows client'
+  ebsOption.vpc.workspaces.nxSessions.nx -> ebsOption.vpc.fileServerCompute.fileServer.smbShare 'Uses the shared folder'
+  ebsOption.vpc.fileServerCompute.fileServer -> ebsOption.vpc.ebsVolume 'Serves the attached volume as an SMB share'
+  ebsOption.vpc.jumpServerCompute.jumpServer.rdp -> ebsOption.vpc.fileServerCompute.fileServer 'Provides RDP access to the private-subnet instance'
+  ebsOption.vpc.workspaces.nxSessions -> ebsOption.s3 'Uses the selected S3 folder for user home data'
+
+  teamcenterOption.workspacesVpc.directory -> teamcenterOption.workspacesVpc.workspaces 'Authorizes domain-joined streaming sessions'
+  teamcenterOption.workspacesVpc.directory -> teamcenterOption.workspacesVpc.fsx 'Manages directory and access integration'
+  teamcenterOption.workspacesVpc.workspaces.nxSessions -> teamcenterOption.workspacesVpc.fsx 'Accesses configured user and shared folders'
+  teamcenterOption.workspacesVpc.directory -> teamcenterOption.auth0 'Federates Active Directory sign-in through SAML 2.0'
+  teamcenterOption.auth0 -> teamcenterOption.workspacesVpc.workspaces.nxSessions 'Provides single sign-on for authorized users'
+  teamcenterOption.vpcPeering -> teamcenterOption.workspacesVpc 'Connects the WorkSpaces Applications VPC'
+  teamcenterOption.vpcPeering -> teamcenterVpc.vpc 'Connects the separate Teamcenter VPC'
+  teamcenterOption.workspacesVpc.workspaces.nxSessions.nx -> teamcenterVpc.teamcenter 'Communicates with Siemens Teamcenter through VPC peering'
+
+  engineer -> regionA.workspaces.nxSessions 'Connects to a regional streaming session'
+  engineer -> regionB.workspaces.nxSessions 'Connects to a regional streaming session'
+  regionA.workspaces.nxSessions -> regionA.ec2.activeDirectory 'Uses the closest Microsoft Active Directory'
+  regionB.workspaces.nxSessions -> regionB.ec2.activeDirectory 'Uses the closest Microsoft Active Directory'
+  regionA.workspaces.nxSessions -> regionA.fsx 'Accesses regional file storage'
+  regionB.workspaces.nxSessions -> regionB.fsx 'Accesses regional file storage'
+  regionA.ec2.activeDirectory -> regionB.ec2.activeDirectory 'Replicates across Regions through Active Directory sites'
+  regionA.fsx -> regionB.fsx 'Replicates data bidirectionally using Microsoft DFS Replication'
+}
+
+views {
+  view index {
+    title 'Siemens NX on Amazon WorkSpaces Applications'
+    include *, ebsOption.*, ebsOption.vpc.*, ebsOption.vpc.workspaces.*, teamcenterOption.*, teamcenterOption.workspacesVpc.*, teamcenterVpc.*, regionA.*, regionB.*
+  }
+}
