@@ -1,0 +1,157 @@
+// Deploying 5G Core on AWS, based on AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/deploying-5g-core/deploying-5g-core.html
+// Systems and users are slots mapped onto a project's own architecture.
+model {
+  subscriber = user 'Mobile subscriber' {
+    description 'Uses mobile services delivered by the 5G network.'
+  }
+
+  ran = system 'Radio Access Network (RAN)' {
+    description 'Radio sites that originate and receive subscriber traffic.'
+  }
+  externalManagement = system '5G management and control VPCs' {
+    description 'Other VPCs that provide 5G management and control services.'
+  }
+
+  region = zone 'AWS Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Amazon VPC' {
+      description 'Regional VPC for the control plane, OSS/BSS, and service endpoints.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      regionalEks = platform 'Amazon EKS' {
+        description 'Runs the regional 5G control-plane and OSS/BSS workloads.'
+        metadata {
+          uses 'amazon-eks'
+        }
+
+        controlPlane = system '5G Core control plane' {
+          description 'Regional control-plane network functions.'
+
+          networkFunctions = container '5G control-plane network functions' {
+            description 'Containerized control-plane functions shown in the reference diagram.'
+            functions = component 'Control-plane functions' {
+              description 'Includes UDM, AUSF, NRF, NSSF, AMF, SMF, and PCF; other functions are not named in the source.'
+            }
+          }
+        }
+
+        ossBss = system 'Operations and business support systems' {
+          description 'OSS and BSS workloads with connectivity to on-premises data centers.'
+          oss = container 'Operations support system (OSS)' {
+            description 'Operations support workload; its product and implementation are not specified.'
+          }
+          bss = container 'Business support system (BSS)' {
+            description 'Business support workload; its product and implementation are not specified.'
+          }
+        }
+      }
+    }
+
+    transitGateway = platform 'AWS Transit Gateway' {
+      description 'Provides connectivity to other VPCs used for 5G management and control.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    directConnect = platform 'AWS Direct Connect' {
+      description 'High-throughput connection from on-premises data centers to the regional VPC.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Example regional service reached through an AWS service endpoint.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    appMesh = platform 'AWS App Mesh' {
+      description 'Service mesh shown in the reference diagram.'
+      metadata {
+        uses 'aws-app-mesh'
+      }
+    }
+    xray = platform 'AWS X-Ray' {
+      description 'Tracing service shown in the reference diagram.'
+      metadata {
+        uses 'aws-x-ray'
+      }
+    }
+  }
+
+  customerSite = zone 'Customer data center' {
+    metadata {
+      platform 'other'
+    }
+
+    outposts = platform 'AWS Outposts' {
+      description 'Runs the local user-plane workload at the customer site.'
+      metadata {
+        uses 'aws-outposts'
+      }
+
+      vpcExtension = platform 'Outposts VPC extension' {
+        description 'Outposts ingress and egress subnets, with routes to service endpoints and the Transit Gateway.'
+        metadata {
+          uses 'amazon-vpc'
+        }
+
+        localEks = platform 'Amazon EKS' {
+          description 'Runs the UPF as a container with multiple network interfaces.'
+          metadata {
+            uses 'amazon-eks'
+          }
+
+          dataPlane = system '5G Core user plane' {
+            description 'Local user-plane workload that handles subscriber traffic.'
+
+            upf = container 'User Plane Function (UPF)' {
+              description 'UPF instances run as EKS containers and use Multus for multiple network interfaces.'
+              metadata {
+                uses 'multus'
+              }
+            }
+            telemetry = container 'Telemetry and logging' {
+              description 'Prometheus, Grafana, and Fluentd are shown alongside the Outposts workload.'
+              metadata {
+                uses 'prometheus, grafana, fluentd'
+              }
+            }
+          }
+        }
+      }
+      localGateway = platform 'AWS Outposts Local Gateway' {
+        description 'Connects Outposts traffic to the local network.'
+        metadata {
+          uses 'aws-outposts-local-gateway'
+        }
+      }
+    }
+  }
+
+  subscriber -> ran 'Uses'
+  ran -> customerSite.outposts.localGateway 'Delivers subscriber traffic through'
+  customerSite.outposts.localGateway -> customerSite.outposts.vpcExtension.localEks.dataPlane.upf 'Routes traffic to'
+  customerSite.outposts.vpcExtension.localEks.dataPlane.upf -> customerSite.outposts.localGateway 'Returns subscriber traffic through'
+  customerSite.outposts.vpcExtension -> region.s3 'Reaches regional services through an endpoint'
+  region.transitGateway -> region.vpc 'Connects to'
+  region.transitGateway -> externalManagement 'Provides connectivity to'
+  region.directConnect -> region.vpc 'Connects on-premises data centers to'
+  region.controlPlane -> customerSite.outposts.vpcExtension.localEks.dataPlane 'Coordinates control and user-plane functions'
+  region.controlPlane -> region.appMesh 'Uses'
+  region.controlPlane -> region.xray 'Sends traces to'
+  region.ossBss -> region.directConnect 'Connects to on-premises data centers through'
+}
+
+views {
+  view index {
+    title 'Deploying 5G Core on AWS'
+    include *, region.*, region.vpc.*, region.vpc.regionalEks.*, region.vpc.regionalEks.controlPlane.*, region.vpc.regionalEks.ossBss.*, customerSite.*, customerSite.outposts.*, customerSite.outposts.vpcExtension.*, customerSite.outposts.vpcExtension.localEks.*, customerSite.outposts.vpcExtension.localEks.dataPlane.*
+  }
+}
