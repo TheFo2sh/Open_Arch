@@ -1,0 +1,163 @@
+// Connected Restaurants using IoT and AI/ML, after AWS's reference architecture.
+// Systems and users are slots; the named third-party provider is intentionally unspecified by AWS.
+model {
+  restaurantOperator = user 'Restaurant operator' {
+    description 'Assumed dashboard user; AWS does not specify the operator persona.'
+  }
+
+  edge = zone 'Restaurant edge' {
+    metadata {
+      platform 'other'
+    }
+
+    greengrass = platform 'AWS IoT Greengrass Core' {
+      description 'Connects, publishes, and subscribes to data at the restaurant edge.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+
+      edgeApplications = system 'Restaurant edge applications' {
+        description 'Edge applications; optional inference models may be deployed here.'
+      }
+    }
+
+    devices = system 'Restaurant IoT device fleet' {
+      description 'IoT devices monitor restaurant conditions; the source does not specify device models or operating systems beyond FreeRTOS and other operating systems.'
+      deviceSoftware = container 'IoT device software' {
+        description 'Communicates with Greengrass Core over MQTT.'
+        metadata {
+          uses 'freertos, mqtt'
+        }
+      }
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      description 'Maintains device shadows, connects and manages devices, supports OTA updates, and secures devices.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+
+    operations = system 'Restaurant operations' {
+      description 'Slot for the unspecified serverless microservices and near-real-time operational dashboard.'
+    }
+
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      operationalStore = database 'Operational data store' {
+        description 'Stores events and operational data.'
+      }
+    }
+
+    appSync = platform 'AWS AppSync' {
+      metadata {
+        uses 'aws-appsync'
+      }
+    }
+
+    pinpoint = platform 'Amazon Pinpoint' {
+      metadata {
+        uses 'amazon-pinpoint'
+      }
+    }
+
+    eventBridge = platform 'Amazon EventBridge' {
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+
+    s3 = platform 'Amazon Simple Storage Service' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Restaurant data lake' {
+        description 'Stores raw data and curated datasets.'
+      }
+    }
+
+    glue = platform 'AWS Glue' {
+      description 'Includes crawlers, the Data Catalog, and jobs for discovering, governing, transforming, and enriching data.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+
+    emr = platform 'Amazon EMR' {
+      metadata {
+        uses 'amazon-emr'
+      }
+    }
+
+    lakeFormation = platform 'AWS Lake Formation' {
+      metadata {
+        uses 'aws-lake-formation'
+      }
+    }
+
+    macie = platform 'Amazon Macie' {
+      metadata {
+        uses 'amazon-macie'
+      }
+    }
+
+    redshift = platform 'Amazon Redshift' {
+      metadata {
+        uses 'amazon-redshift'
+      }
+      dataMart = database 'Analytics data mart (optional)' {
+        description 'Optional data mart for frequently used analytics.'
+      }
+    }
+
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+
+    quickSight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+
+    sagemaker = platform 'Amazon SageMaker AI' {
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+  }
+
+  thirdPartyProvider = system 'Third-party provider' {
+    description 'Provider integrated through EventBridge; AWS does not name the provider or its service.'
+  }
+
+  devices.deviceSoftware -> greengrass.edgeApplications 'Communicates with over MQTT'
+  greengrass.edgeApplications -> aws.iotCore 'Connects edge data to AWS IoT Core'
+  aws.iotCore -> aws.operations 'Delivers device events to'
+  aws.operations -> aws.dynamodb.operationalStore 'Stores events and operational data in'
+  aws.operations -> aws.appSync 'Builds the near-real-time dashboard with'
+  restaurantOperator -> aws.operations 'Uses the operational dashboard'
+  aws.operations -> aws.pinpoint 'Delivers alerts through'
+  aws.operations -> aws.eventBridge 'Integrates with third-party providers through'
+  aws.eventBridge -> thirdPartyProvider 'Integrates with'
+  aws.iotCore -> aws.s3.dataLake 'Feeds raw IoT data to'
+  aws.glue -> aws.s3.dataLake 'Discovers, catalogs, transforms, and enriches data in'
+  aws.emr -> aws.s3.dataLake 'Processes and enriches data in'
+  aws.lakeFormation -> aws.s3.dataLake 'Governs data in'
+  aws.macie -> aws.s3.dataLake 'Detects sensitive data in'
+  aws.athena -> aws.s3.dataLake 'Queries data in'
+  aws.s3.dataLake -> aws.redshift.dataMart 'Optionally populates'
+  aws.quickSight -> aws.redshift.dataMart 'Analyzes data in'
+  aws.quickSight -> aws.athena 'Uses for direct data-lake analysis'
+  aws.sagemaker -> edge.greengrass.edgeApplications 'Optionally deploys inference models to'
+}
