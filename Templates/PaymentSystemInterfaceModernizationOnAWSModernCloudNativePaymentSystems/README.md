@@ -10,7 +10,7 @@ The pattern modernizes a bank payment interface with container-based microservic
 
 ## How it works
 
-1. A payment user can initiate a request through a payment-integrated mobile app or a bank-provided app. The bank app's request reaches a receiver in the bank data center and is routed into AWS over **AWS Direct Connect**. An internet client such as a merchant reaches **AWS WAF**, then **Amazon API Gateway**.
+1. A payment user can initiate a request through a payment-integrated mobile app or a bank-provided app. Both app channels are shown reaching the bank data-center request receiver before **AWS Direct Connect** routes requests into AWS; AWS does not specify app-specific network paths. An internet client such as a merchant reaches **AWS WAF**, then **Amazon API Gateway**.
 2. API Gateway routes internet requests through a **VPC endpoint** and **Network Load Balancer**. An **Application Load Balancer** and the EKS cluster's ALB ingress controller deliver requests to the payment, balance, VPA, merchant, or account microservice.
 3. The **Amazon EKS** microservices perform CRUD operations in an **Amazon RDS** unified payment interface database and maintain sessions in **Amazon ElastiCache (Redis OSS)**. They communicate through topics in **Amazon MSK**.
 4. **Amazon OpenSearch Service** and **Amazon CloudWatch** provide observability. **AWS IAM**, **AWS KMS**, and **AWS Secrets Manager** support roles-based access and protection of credentials and data. **Amazon ECR** maintains the microservice container images.
@@ -18,7 +18,7 @@ The pattern modernizes a bank payment interface with container-based microservic
 
 ## External dependencies and assumptions
 
-AWS names the bank request receiver, bank HSM, core banking systems, other bank data-center consumers, mobile apps, and merchant/other internet clients, but does not identify their vendors or interfaces. They are represented as generic external system slots, not AWS deployments or catalog products. The architecture does not specify the RDS engine or schema, API contracts, payment protocols, Kafka topic contents, microservice implementations, exact security policies, or replication configuration; those details are intentionally left open. The named microservice examples are modeled as containers without invented implementation technologies.
+AWS names the bank request receiver, bank HSM, core banking systems, other bank data-center consumers, mobile apps, and merchant/other internet clients, but does not identify their vendors or interfaces. They are represented as generic external system slots, not AWS deployments or catalog products. The app-to-receiver relationship follows the page's numbered flow; app-specific network paths are not stated. The architecture does not specify the RDS engine or schema, API contracts, payment protocols, Kafka topic contents, microservice implementations, exact security policies, or replication configuration; those details are intentionally left open. The named microservice examples are modeled as containers without invented implementation technologies.
 
 This is an architecture template, not deployable infrastructure or a deployment plan.
 

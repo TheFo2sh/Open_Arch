@@ -167,7 +167,7 @@ model {
 
   paymentUser -> integratedApp 'Initiates a payment through'
   paymentUser -> bankApp 'May initiate a payment through'
-  integratedApp -> aws.waf 'Sends an internet request through'
+  integratedApp -> bankRequestReceiver 'Submits a request through the bank data-center path'
   bankApp -> bankRequestReceiver 'Submits a request to'
   bankRequestReceiver -> aws.directConnect 'Routes requests to AWS over'
   aws.directConnect -> aws.eks.paymentInterface 'Carries bank requests to'
