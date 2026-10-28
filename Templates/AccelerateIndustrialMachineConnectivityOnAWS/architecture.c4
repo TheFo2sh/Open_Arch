@@ -1,0 +1,103 @@
+// Industrial machine connectivity, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/industrial-machine-connectivity-eot/industrial-machine-connectivity-eot.html
+// AWS's systems and applications are represented as M1Spec slots.
+model {
+  industrialSite = zone 'Industrial site' {
+    metadata {
+      platform 'other'
+    }
+
+    historians = system 'Industrial historians and SCADA' {
+      description 'OSIsoft PI, legacy historians, and CygNet SCADA collect real-time data from industrial devices and sensors.'
+    }
+    twinTalk = system 'EOT Twin Talk Express' {
+      description 'Embassy of Things data-sharing platform on an AWS Certified industrial PC; ingests sensor data and asset models from supported historians.'
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Stores incoming enriched asset-model files and the industrial data lake.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      incomingModels = database 'Incoming asset-model files' {
+        description 'Enriched asset-model files uploaded by Twin Talk; an upload triggers normalization.'
+      }
+      dataLake = database 'Industrial data lake' {
+        description 'Processed asset-property data for reporting, analytics, and model training.'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the asset-model normalization and SiteWise asset update functions.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      converter = system 'Asset Model Converter' {
+        description 'Normalizes incoming files to a SiteWise-compatible format and creates or updates SiteWise assets.'
+      }
+    }
+
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Stores normalized asset models and definitions; DynamoDB Streams triggers asset updates.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      assetDefinitions = database 'Asset-model definitions' {
+        description 'Normalized asset models and definitions used to create and update SiteWise assets.'
+      }
+    }
+
+    sitewise = platform 'AWS IoT SiteWise' {
+      description 'Ingests, filters, transforms, and processes real-time industrial sensor data.'
+      metadata {
+        uses 'aws-iot-sitewise'
+      }
+      assets = database 'Industrial assets and property data' {
+        description 'SiteWise asset models and their processed property data.'
+      }
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      description 'Receives MQTT messages for SiteWise asset-property updates; an IoT rule forwards them.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+
+    firehose = platform 'Amazon Data Firehose' {
+      description 'Captures and transforms data from the IoT Core rule before delivering it to S3.'
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+  }
+
+  consumers = system 'Analytics and ML consumers' {
+    description 'Downstream applications that consume the data lake for reporting, analytics, and model training; AWS does not specify particular applications.'
+  }
+
+  industrialSite.historians -> industrialSite.twinTalk 'Provides supported historian data to'
+  industrialSite.twinTalk -> aws.s3.incomingModels 'Uploads enriched asset models to'
+  aws.s3.incomingModels -> aws.lambda.converter 'Triggers normalization in'
+  aws.lambda.converter -> aws.dynamodb.assetDefinitions 'Stores normalized asset models in'
+  aws.dynamodb.assetDefinitions -> aws.lambda.converter 'DynamoDB Streams triggers asset updates in'
+  aws.lambda.converter -> aws.sitewise.assets 'Creates and updates assets in'
+  industrialSite.twinTalk -> aws.sitewise.assets 'Sends real-time sensor data to'
+  aws.sitewise.assets -> aws.iotCore 'Publishes MQTT property updates to'
+  aws.iotCore -> aws.firehose 'An IoT rule forwards property updates to'
+  aws.firehose -> aws.s3.dataLake 'Transforms and delivers data to'
+  aws.s3.dataLake -> consumers 'Makes data available to'
+}
+
+views {
+  view index {
+    title 'Accelerate Industrial Machine Connectivity on AWS'
+    include *, industrialSite.*, aws.*, aws.s3.*, aws.lambda.*, aws.dynamodb.*, aws.sitewise.*
+  }
+}
