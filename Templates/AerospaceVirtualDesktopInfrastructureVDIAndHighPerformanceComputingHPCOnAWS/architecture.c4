@@ -1,0 +1,137 @@
+// Aerospace VDI and HPC on AWS, based on AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/aws-aerospace-vdi-reference-architecture/aws-aerospace-vdi-reference-architecture.html
+// Read together with the repository's specification.c4. Systems and users are slots.
+model {
+  aerospaceEngineer = user 'Aerospace engineer' {
+    description 'Accesses virtual desktops, submits and monitors HPC jobs, and exchanges data.'
+  }
+
+  onPremises = system 'On-premises engineering environment' {
+    description 'External environment with browser, NICE DCV, SSH, and SFTP clients; its identity and data sources are not specified.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    transfer = platform 'AWS Transfer Family' {
+      description 'SFTP endpoint for data exchange between on-premises and the cluster.'
+      metadata {
+        uses 'aws-transfer-family'
+      }
+    }
+    loadBalancer = platform 'Elastic Load Balancing' {
+      description 'Routes NICE DCV sessions to Windows and Linux virtual desktops.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+    directory = platform 'AWS Directory Service' {
+      description 'Provides centralized user management and the Active Directory domain.'
+      metadata {
+        uses 'aws-directory-service'
+      }
+    }
+    imageBuilder = platform 'EC2 Image Builder' {
+      description 'Builds specialized Linux and Windows AMIs for the environment.'
+      metadata {
+        uses 'amazon-ec2-image-builder'
+      }
+    }
+
+    ec2 = platform 'Amazon EC2' {
+      description 'Runs the VDI instances and the HPC cluster head node.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+
+      vdi = system 'Virtual desktop environment' {
+        description 'Windows and Linux virtual desktops accessed using NICE DCV.'
+
+        windows = container 'Windows VDI' {
+          description 'Windows virtual desktop session; the operating system version and installed applications are not specified.'
+          metadata {
+            uses 'nice-dcv'
+          }
+        }
+        linux = container 'Linux VDI' {
+          description 'Linux virtual desktop session; the distribution and installed applications are not specified.'
+          metadata {
+            uses 'nice-dcv'
+          }
+        }
+      }
+      headNode = system 'HPC cluster head node' {
+        description 'Cluster head node that starts and stops HPC compute nodes and supports job submission and monitoring.'
+      }
+    }
+
+    autoScaling = platform 'Amazon EC2 Auto Scaling' {
+      description 'Scales the HPC compute nodes started and stopped by the cluster head node.'
+      metadata {
+        uses 'amazon-ec2-auto-scaling'
+      }
+
+      computeNodes = system 'HPC compute nodes' {
+        description 'Amazon EC2 compute nodes used for HPC computations.'
+      }
+    }
+
+    efs = platform 'Amazon Elastic File System' {
+      description 'Shown as part of the cluster filesystems; AWS does not specify its role in the accompanying text.'
+      metadata {
+        uses 'amazon-efs'
+      }
+    }
+    lustre = platform 'Amazon FSx for Lustre' {
+      metadata {
+        uses 'amazon-fsx-for-lustre'
+      }
+      scratch = database 'HPC computation filesystem' {
+        description 'Filesystem used by HPC nodes during computations.'
+      }
+    }
+    ontap = platform 'Amazon FSx for NetApp ONTAP' {
+      metadata {
+        uses 'amazon-fsx-for-netapp-ontap'
+      }
+      sharedData = database 'Shared user data' {
+        description 'User data accessible from Windows and Linux VDI and shared with on-premises.'
+      }
+    }
+    opensearch = platform 'Amazon OpenSearch Service' {
+      metadata {
+        uses 'amazon-opensearch-service'
+      }
+      jobHostData = database 'HPC job and host information' {
+        description 'Stores HPC job and host information.'
+      }
+    }
+  }
+
+  aerospaceEngineer -> onPremises 'Uses engineering access clients in'
+  onPremises -> aws.loadBalancer 'Starts NICE DCV sessions through'
+  aws.loadBalancer -> aws.ec2.vdi 'Routes sessions to'
+  onPremises -> aws.ec2.headNode 'Submits and monitors HPC jobs through web/API or SSH'
+  onPremises -> aws.transfer 'Exchanges data over SFTP'
+  aws.transfer -> aws.autoScaling.computeNodes 'Shares data with the cluster'
+  aws.ec2.headNode -> aws.autoScaling.computeNodes 'Starts and stops'
+  aws.ec2.vdi -> aws.directory 'Joins the Active Directory domain'
+  aws.ec2.headNode -> aws.directory 'Joins the Active Directory domain'
+  aws.autoScaling.computeNodes -> aws.directory 'Joins the Active Directory domain'
+  aws.ec2.vdi -> aws.ontap.sharedData 'Accesses shared user data'
+  onPremises -> aws.ontap.sharedData 'Shares data with'
+  aws.autoScaling.computeNodes -> aws.lustre.scratch 'Uses during computations'
+  aws.ec2.headNode -> aws.opensearch.jobHostData 'Stores job and host information in'
+  aws.imageBuilder -> aws.ec2.vdi 'Builds specialized AMIs for'
+  aws.imageBuilder -> aws.ec2.headNode 'Builds specialized AMIs for'
+  aws.imageBuilder -> aws.autoScaling.computeNodes 'Builds specialized AMIs for'
+}
+
+views {
+  view index {
+    title 'Aerospace VDI and HPC on AWS'
+    include *, aws.*
+  }
+}
