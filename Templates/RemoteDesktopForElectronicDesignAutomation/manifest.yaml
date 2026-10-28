@@ -1,0 +1,7 @@
+PackageId: OpenArch.RemoteDesktopForElectronicDesignAutomation
+Name: Remote Desktop for Electronic Design Automation
+Description: A single-AZ AWS remote desktop for FPGA design using Amazon DCV and the Xilinx Vivado Design Suite.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, eda, electronics, fpga, remote-desktop]
