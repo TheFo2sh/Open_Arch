@@ -1,0 +1,7 @@
+PackageId: OpenArch.CentralizingVPCEndpointsWithAWSTransitGateway
+Name: Centralizing Amazon VPC Endpoint Access with AWS Transit Gateway
+Description: Centralizes Amazon S3 and Kinesis interface endpoints in a shared services VPC, with spoke VPCs reaching them through AWS Transit Gateway and private hosted zones.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, networking, transit-gateway, vpc-endpoints, shared-services]
