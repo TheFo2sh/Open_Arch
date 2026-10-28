@@ -1,0 +1,100 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+technologies:
+  - key: amazon-data-firehose
+    name: Amazon Data Firehose
+    description: Receives the connected-device stream and delivers successfully transformed data to Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firehose/
+    types: [managed-service]
+    platform: aws
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Applies data-format transformations to the Firehose stream.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: Receives notifications when stream transformation fails and invokes a re-processing API.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Object storage for successfully transformed patient-health data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-ec2
+    name: Amazon Elastic Compute Cloud
+    description: Compute platform on which IBM Security QRadar XDR runs in the reference architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: AWS networking service whose flow logs are collected for security monitoring.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+  - key: aws-cloudtrail
+    name: AWS CloudTrail
+    description: Records AWS activity; CloudTrail logs are collected for security monitoring.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudtrail/
+    types: [managed-service]
+    platform: aws
+  - key: ibm-cloud-pak-for-data
+    name: IBM Cloud Pak for Data
+    description: Data and AI platform whose connection services access Amazon S3 and on-premises data.
+    vendor: IBM
+    url: https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x
+    types: [data-platform, third-party]
+    platform: other
+  - key: ibm-watson-knowledge-catalog
+    name: IBM Watson Knowledge Catalog
+    description: Provides data governance, enrichment, and data-protection rules including access controls and masking.
+    vendor: IBM
+    url: https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=services-watson-knowledge-catalog
+    types: [data-platform, third-party]
+    platform: IBM Cloud Pak for Data
+  - key: ibm-datastage
+    name: IBM DataStage
+    description: Creates and runs data-transformation jobs that generate enriched and tailored information.
+    vendor: IBM
+    url: https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=services-datastage
+    types: [data-platform, third-party]
+    platform: IBM Cloud Pak for Data
+  - key: ibm-watson-studio
+    name: IBM Watson Studio
+    description: Supports data analysis and building and training machine-learning models.
+    vendor: IBM
+    url: https://www.ibm.com/cloud/watson-studio
+    types: [data-platform, third-party]
+    platform: IBM Cloud Pak for Data
+  - key: ibm-watson-machine-learning
+    name: IBM Watson Machine Learning
+    description: Hosts trained models and exposes model endpoints to the healthcare application.
+    vendor: IBM
+    url: https://www.ibm.com/docs/en/cloud-paks/cp-data/4.6.x?topic=services-watson-machine-learning
+    types: [data-platform, third-party]
+    platform: IBM Cloud Pak for Data
+  - key: ibm-security-qradar-xdr
+    name: IBM Security QRadar XDR
+    description: Collects and aggregates AWS VPC flow logs, CloudTrail logs, and IBM Cloud Pak for Data logs for security monitoring.
+    vendor: IBM
+    url: https://www.ibm.com/qradar
+    types: [data-platform, third-party]
+    platform: aws
+  - key: on-premises-data-source
+    name: On-premises data source
+    description: Abstract representation of the on-premises data accessed by Cloud Pak for Data; its storage technology is not specified.
+    types: [data-platform]
+    platform: other
+    hosts: [database]
