@@ -1,0 +1,7 @@
+PackageId: OpenArch.AccelerateIndustrialMachineConnectivityOnAWS
+Name: Accelerate Industrial Machine Connectivity on AWS
+Description: Ingest industrial historian data and asset models into AWS IoT SiteWise, then deliver property updates to an S3 data lake.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, industrial-iot, manufacturing, connectivity]

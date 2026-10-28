@@ -1,0 +1,7 @@
+PackageId: OpenArch.ConnectedLodgingPropertiesUsingIoTAndAIML
+Name: Connected Lodging Properties Using IoT and AI/ML
+Description: A connected lodging architecture for touchless room personalization, property operations, IoT monitoring, and AI/ML analytics.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, hospitality, lodging, iot, ai-ml]

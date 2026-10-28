@@ -1,0 +1,296 @@
+// Alfresco Digital Business Platform on AWS, based on AWS's reference architecture.
+// Systems and users are slots; applying the template maps them onto the project's own.
+model {
+  knowledgeWorker = user 'Knowledge worker' {
+    description 'Uses Alfresco applications in a web browser on a workstation or mobile device.'
+  }
+
+  corporateContentStore = system 'Corporate content store' {
+    description 'Existing corporate documents and content that Alfresco can connect to.'
+  }
+  microsoft365 = system 'Microsoft 365' {
+    description 'External Microsoft Teams, Outlook, and Office applications connected through Alfresco.'
+  }
+  googleDocs = system 'Google Docs' {
+    description 'External document application connected through Alfresco business connectors.'
+  }
+  salesforce = system 'Salesforce' {
+    description 'External CRM application connected through Alfresco business connectors.'
+  }
+  sap = system 'SAP' {
+    description 'External SAP application connected through Alfresco business connectors.'
+  }
+  sapCloud = system 'SAP Cloud' {
+    description 'External SAP Cloud application connected through Alfresco business connectors.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Extended content store accessed by Alfresco Content Connector.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      contentStore = database 'Extended content store'
+    }
+    glacier = platform 'Amazon S3 Glacier' {
+      description 'Optional archival content store accessed by Alfresco Content Connector.'
+      metadata {
+        uses 'amazon-s3-glacier'
+      }
+      archiveStore = database 'Archived content'
+    }
+    textract = platform 'Amazon Textract' {
+      metadata {
+        uses 'amazon-textract'
+      }
+    }
+    rekognition = platform 'Amazon Rekognition' {
+      metadata {
+        uses 'amazon-rekognition'
+      }
+    }
+    comprehend = platform 'Amazon Comprehend' {
+      metadata {
+        uses 'amazon-comprehend'
+      }
+    }
+    kendra = platform 'Amazon Kendra' {
+      description 'Provides intelligent enterprise search through the Alfresco data source connector.'
+      metadata {
+        uses 'amazon-kendra'
+      }
+      kendraIndex = database 'Enterprise search index'
+    }
+
+    vpc = platform 'Amazon Virtual Private Cloud' {
+      description 'Network boundary with public and private subnets across two Availability Zones.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      internetGateway = platform 'Internet Gateway' {
+        metadata {
+          uses 'aws-internet-gateway'
+        }
+      }
+      natGateway = platform 'NAT Gateway' {
+        description 'NAT gateways are shown in the public subnets.'
+        metadata {
+          uses 'amazon-nat-gateway'
+        }
+      }
+      loadBalancer = platform 'Application Load Balancers' {
+        description 'Load balancers distribute requests to Alfresco application tiers.'
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+      efs = platform 'Amazon Elastic File System' {
+        description 'Shared file storage; Intelligent-Tiering is shown as an option.'
+        metadata {
+          uses 'amazon-efs'
+        }
+      }
+      mq = platform 'Amazon MQ' {
+        description 'Active and standby message brokers are shown across the Availability Zones.'
+        metadata {
+          uses 'amazon-mq'
+        }
+      }
+      rds = platform 'Amazon RDS' {
+        description 'Active and standby relational database option for Alfresco Process Services.'
+        metadata {
+          uses 'amazon-rds'
+        }
+        rdsProcessDatabase = database 'Process services database'
+      }
+      aurora = platform 'Amazon Aurora' {
+        description 'Alternative relational database option supported by Alfresco Process Services.'
+        metadata {
+          uses 'amazon-aurora'
+        }
+        auroraProcessDatabase = database 'Process services database'
+      }
+      ec2AutoScaling = platform 'Amazon EC2 Auto Scaling' {
+        description 'Auto Scaling groups keep Alfresco application services highly available across two Availability Zones.'
+        metadata {
+          uses 'amazon-ec2-auto-scaling'
+        }
+        ec2 = platform 'Amazon EC2' {
+          description 'EC2 compute shown for the Alfresco application and Solr search deployment.'
+          metadata {
+            uses 'amazon-ec2'
+          }
+          alfresco = system 'Alfresco Digital Business Platform' {
+            description 'Enterprise content management, business process management, search, governance, and integrations.'
+
+            contentCenter = container 'Alfresco Content Center (Admin)' {
+              description 'Administrative content application shown in both Availability Zones.'
+              metadata {
+                uses 'alfresco-content-center'
+              }
+            }
+            digitalWorkspace = container 'Alfresco Digital Workspace' {
+              description 'Browser-based workspace for knowledge workers.'
+              metadata {
+                uses 'alfresco-digital-workspace'
+              }
+            }
+            identityServices = container 'Alfresco Identity Services' {
+              description 'Identity services shown in the application tier.'
+              metadata {
+                uses 'alfresco-identity-services'
+              }
+            }
+            microsoft365Connector = container 'Microsoft 365 Connector' {
+              description 'Connector for Microsoft Teams, Outlook, and Office.'
+              metadata {
+                uses 'alfresco-microsoft-365-connector'
+              }
+            }
+            contentServices = container 'Alfresco Content Services' {
+              description 'Enterprise content management with information governance.'
+              metadata {
+                uses 'alfresco-content-services'
+              }
+            }
+            contentConnector = container 'Alfresco Content Connector' {
+              description 'Connects Alfresco content to Amazon S3, Amazon S3 Glacier, or optionally Amazon EFS.'
+              metadata {
+                uses 'alfresco-content-connector'
+              }
+            }
+            governanceServices = container 'Alfresco Governance Services' {
+              description 'Adds information governance capabilities to Alfresco Content Services.'
+              metadata {
+                uses 'alfresco-governance-services'
+              }
+            }
+            intelligenceServices = container 'Alfresco Intelligence Services' {
+              description 'Adds machine-learning metadata extraction and image and text analysis to the Transform engine.'
+              metadata {
+                uses 'alfresco-intelligence-services'
+              }
+            }
+            transformEngine = container 'Alfresco Transform Engine' {
+              description 'Transformation engine extended by Alfresco Intelligence Services.'
+              metadata {
+                uses 'alfresco-transformation-engine'
+              }
+            }
+            businessConnectors = container 'Alfresco Business Connectors' {
+              description 'Integrations with Google Docs, Salesforce, SAP, SAP Cloud, and Microsoft 365 applications.'
+              metadata {
+                uses 'alfresco-business-connectors'
+              }
+            }
+            processServices = container 'Alfresco Process Services' {
+              description 'Business process management for creating, publishing, and using business operations.'
+              metadata {
+                uses 'alfresco-process-services'
+              }
+            }
+            kendraConnector = container 'Alfresco Amazon Kendra data source connector' {
+              description 'Connects Alfresco content to Amazon Kendra for intelligent enterprise searches.'
+              metadata {
+                uses 'alfresco-kendra-connector'
+              }
+            }
+            searchInsight = container 'Alfresco Search and Insight Engine' {
+              description 'Solr-based full-text search deployed on EC2 with EBS; indexes metadata stored in a database.'
+              metadata {
+                uses 'alfresco-search-and-insight-engine, apache-solr'
+              }
+            }
+            searchEnterprise = container 'Alfresco Search Enterprise' {
+              description 'Alternative to Search and Insight Engine that uses Amazon OpenSearch Service.'
+              metadata {
+                uses 'alfresco-search-enterprise'
+              }
+            }
+          }
+        }
+      }
+      eks = platform 'Amazon Elastic Kubernetes Service' {
+        description 'Alternative deployment model shown in the diagram legend; AWS does not select it over EC2.'
+        metadata {
+          uses 'amazon-eks'
+        }
+      }
+      ebs = platform 'Amazon Elastic Block Store' {
+        description 'Block storage shown for the EC2-hosted Solr search deployment.'
+        metadata {
+          uses 'amazon-ebs'
+        }
+      }
+      openSearch = platform 'Amazon OpenSearch Service' {
+        description 'Alternative search backend used by Alfresco Search Enterprise.'
+        metadata {
+          uses 'amazon-opensearch-service'
+        }
+        openSearchIndex = database 'Enterprise search index'
+      }
+    }
+
+    awsIam = platform 'AWS Identity and Access Management (IAM)' {
+      metadata {
+        uses 'aws-iam'
+      }
+    }
+    kms = platform 'AWS Key Management Service (KMS)' {
+      metadata {
+        uses 'aws-kms'
+      }
+    }
+    acm = platform 'AWS Certificate Manager (ACM)' {
+      metadata {
+        uses 'aws-certificate-manager'
+      }
+    }
+    cloudWatch = platform 'Amazon CloudWatch' {
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    cloudTrail = platform 'AWS CloudTrail' {
+      metadata {
+        uses 'aws-cloudtrail'
+      }
+    }
+    cloudFormation = platform 'AWS CloudFormation' {
+      metadata {
+        uses 'aws-cloudformation'
+      }
+    }
+    directoryService = platform 'AWS Directory Service' {
+      metadata {
+        uses 'aws-directory-service'
+      }
+    }
+  }
+
+  knowledgeWorker -> aws.vpc.ec2AutoScaling.ec2.alfresco 'Uses the browser-based Alfresco applications'
+  corporateContentStore -> aws.vpc.ec2AutoScaling.ec2.alfresco.contentConnector 'Provides existing documents to'
+  aws.vpc.ec2AutoScaling.ec2.alfresco.contentConnector -> aws.s3.contentStore 'Stores extended content in'
+  aws.vpc.ec2AutoScaling.ec2.alfresco.contentConnector -> aws.glacier.archiveStore 'Can archive extended content in'
+  aws.vpc.ec2AutoScaling.ec2.alfresco.contentConnector -> aws.vpc.efs 'Can use shared file storage on'
+  aws.vpc.ec2AutoScaling.ec2.alfresco.intelligenceServices -> aws.textract 'Uses for document text and data extraction'
+  aws.vpc.ec2AutoScaling.ec2.alfresco.intelligenceServices -> aws.rekognition 'Uses for image analysis'
+  aws.vpc.ec2AutoScaling.ec2.alfresco.intelligenceServices -> aws.comprehend 'Uses for text analysis'
+  aws.vpc.ec2AutoScaling.ec2.alfresco.businessConnectors -> microsoft365 'Integrates with'
+  aws.vpc.ec2AutoScaling.ec2.alfresco.businessConnectors -> googleDocs 'Integrates with'
+  aws.vpc.ec2AutoScaling.ec2.alfresco.businessConnectors -> salesforce 'Integrates with'
+  aws.vpc.ec2AutoScaling.ec2.alfresco.businessConnectors -> sap 'Integrates with'
+  aws.vpc.ec2AutoScaling.ec2.alfresco.businessConnectors -> sapCloud 'Integrates with'
+  aws.vpc.ec2AutoScaling.ec2.alfresco.processServices -> aws.vpc.rds.rdsProcessDatabase 'Uses a supported relational database such as'
+  aws.vpc.ec2AutoScaling.ec2.alfresco.processServices -> aws.vpc.aurora.auroraProcessDatabase 'Can use Amazon Aurora instead'
+  aws.vpc.ec2AutoScaling.ec2.alfresco.searchInsight -> aws.vpc.ebs 'Uses block storage on'
+  aws.vpc.ec2AutoScaling.ec2.alfresco.searchEnterprise -> aws.vpc.openSearch.openSearchIndex 'Uses as an alternative search index'
+  aws.vpc.ec2AutoScaling.ec2.alfresco.kendraConnector -> aws.kendra 'Connects to for intelligent enterprise search'
+  aws.vpc.internetGateway -> aws.vpc.loadBalancer 'Routes public traffic to'
+  aws.vpc.loadBalancer -> aws.vpc.ec2AutoScaling.ec2.alfresco 'Distributes requests to'
+}
