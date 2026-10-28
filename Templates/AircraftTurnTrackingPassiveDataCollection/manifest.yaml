@@ -1,0 +1,7 @@
+PackageId: OpenArch.AircraftTurnTrackingPassiveDataCollection
+Name: Aircraft Turn Tracking Passive Data Collection
+Description: Passively collects aircraft turn events with camera-based edge inference and provides real-time tracking and analytics for turn optimization.
+Version: 1.0.0
+Icon: mdi:airplane
+Publisher: Open_Arch
+Tags: [aws, aviation, travel, iot, data-collection, analytics]

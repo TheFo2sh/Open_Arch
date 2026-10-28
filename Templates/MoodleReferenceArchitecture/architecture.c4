@@ -1,0 +1,135 @@
+// Moodle Reference Architecture, based on AWS's Moodle learning management
+// system on AWS (https://docs.aws.amazon.com/reference-architecture-diagrams/latest/moodle-learning-management-system-on-aws/moodle-learning-management-system-on-aws.html).
+// Systems and users are slots, mapped onto the project's own when applied.
+model {
+  learner = user 'Learner' {
+    description 'Accesses Moodle learning content and activities.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    cloudfront = platform 'Amazon CloudFront' {
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    certificateManager = platform 'AWS Certificate Manager' {
+      metadata {
+        uses 'aws-certificate-manager'
+      }
+    }
+    alb = platform 'Application Load Balancer' {
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+    autoscaling = platform 'Amazon EC2 Auto Scaling' {
+      description 'Scales application servers across multiple Availability Zones.'
+      metadata {
+        uses 'amazon-ec2-auto-scaling'
+      }
+
+      ec2 = platform 'Amazon EC2' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+
+        moodle = system 'Moodle LMS' {
+          metadata {
+            uses 'aws-systems-manager-agent'
+          }
+
+          application = container 'Moodle application' {
+            description 'Moodle running on PHP and serving the learning management system.'
+            technology 'Moodle, PHP'
+            metadata {
+              uses 'moodle, php'
+            }
+          }
+        }
+      }
+    }
+    efs = platform 'Amazon Elastic File System' {
+      description 'Optional shared storage for moodledata and other content.'
+      metadata {
+        uses 'amazon-efs'
+      }
+    }
+    elasticache = platform 'Amazon ElastiCache' {
+      description 'Choose Redis or Memcached for Moodle sessions and application caches.'
+      metadata {
+        uses 'amazon-elasticache'
+      }
+      cache = database 'Session and application cache'
+    }
+    aurora = platform 'Amazon Aurora' {
+      description 'Choose a MySQL- or PostgreSQL-compatible engine for Moodle data.'
+      metadata {
+        uses 'amazon-aurora'
+      }
+      moodleDatabase = database 'Moodle database'
+    }
+
+    codeCommit = platform 'AWS CodeCommit' {
+      metadata {
+        uses 'aws-codecommit'
+      }
+    }
+    codeBuild = platform 'AWS CodeBuild' {
+      metadata {
+        uses 'aws-codebuild'
+      }
+    }
+    codeDeploy = platform 'AWS CodeDeploy' {
+      metadata {
+        uses 'aws-codedeploy'
+      }
+    }
+    codePipeline = platform 'AWS CodePipeline' {
+      metadata {
+        uses 'aws-codepipeline'
+      }
+    }
+    secretsManager = platform 'AWS Secrets Manager' {
+      metadata {
+        uses 'aws-secrets-manager'
+      }
+    }
+    parameterStore = platform 'AWS Systems Manager Parameter Store' {
+      metadata {
+        uses 'aws-systems-manager-parameter-store'
+      }
+    }
+  }
+
+  learner -> aws.autoscaling.ec2.moodle 'Uses'
+  aws.route53 -> aws.cloudfront 'Directs learners to'
+  aws.cloudfront -> aws.alb 'Forwards Moodle requests to'
+  aws.certificateManager -> aws.cloudfront 'Provides certificates for'
+  aws.certificateManager -> aws.alb 'Provides certificates for'
+  aws.alb -> aws.autoscaling.ec2.moodle 'Distributes requests to'
+  aws.autoscaling.ec2.moodle.application -> aws.efs 'Reads and writes Moodle content on'
+  aws.autoscaling.ec2.moodle.application -> aws.elasticache.cache 'Stores sessions and application caches in'
+  aws.autoscaling.ec2.moodle.application -> aws.aurora.moodleDatabase 'Reads and writes Moodle data in'
+  aws.autoscaling.ec2.moodle.application -> aws.secretsManager 'Gets application secrets from'
+  aws.autoscaling.ec2.moodle.application -> aws.parameterStore 'Gets configuration from'
+  aws.codePipeline -> aws.codeCommit 'Gets source from'
+  aws.codePipeline -> aws.codeBuild 'Builds and tests with'
+  aws.codePipeline -> aws.codeDeploy 'Deploys with'
+  aws.codeDeploy -> aws.autoscaling.ec2.moodle.application 'Deploys application updates to'
+}
+
+views {
+  view index {
+    title 'Moodle Reference Architecture'
+    include *, aws.*, aws.autoscaling.*, aws.autoscaling.ec2.*, aws.autoscaling.ec2.moodle.*
+  }
+}
