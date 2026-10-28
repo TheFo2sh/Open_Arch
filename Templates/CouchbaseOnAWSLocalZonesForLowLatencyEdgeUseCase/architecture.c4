@@ -1,0 +1,192 @@
+// Couchbase on AWS Local Zones, after the AWS reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/couchbase-local-zones/couchbase-local-zones.html
+// Systems are slots that map to systems in the applying project.
+model {
+  clients = system 'Couchbase Lite clients' {
+    description 'Mobile, desktop, and embedded client applications that synchronize with an edge cluster.'
+    lite = container 'Embedded NoSQL database' {
+      description 'Couchbase Lite database embedded in each client application.'
+      technology 'Couchbase Lite'
+      metadata {
+        uses 'couchbase-lite'
+      }
+    }
+  }
+  externalNetwork = system 'External network' {
+    description 'External network from which a bastion host can be accessed; operator identity is not specified.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      description 'Uses geolocation-based routing to direct clients to the nearest Local Zone or parent Region.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    cloudwatch = platform 'Amazon CloudWatch' {
+      description 'Receives Couchbase metrics and logs for centralized management and alerts.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores Couchbase Server backups.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      backups = database 'Couchbase backup bucket' {
+        description 'S3 bucket for Couchbase Server backups; backup policies are not specified.'
+      }
+    }
+
+    vpc = platform 'Amazon VPC' {
+      description 'VPC extends from the parent Region into multiple AWS Local Zones.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      endpoints = platform 'Amazon VPC endpoints' {
+        description 'Enable private connections from the VPC to AWS services; the endpoint services are not specified.'
+        metadata {
+          uses 'amazon-vpc-endpoints'
+        }
+      }
+      regionalInternetGateway = platform 'Parent Region internet gateway' {
+        metadata {
+          uses 'amazon-internet-gateway'
+        }
+      }
+      natGateway = platform 'Parent Region NAT Gateway' {
+        description 'Provides internet access to Couchbase Server in the parent Region private subnet.'
+        metadata {
+          uses 'amazon-nat-gateway'
+        }
+      }
+      loadBalancer = platform 'Application Load Balancer' {
+        description 'Provides high availability and automatic failover for the parent Region Sync Gateway deployment across Availability Zones.'
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+
+      parentRegion = platform 'Parent Region Amazon EC2 Auto Scaling' {
+        description 'Runs the parent Region Couchbase Server, Sync Gateway, and bastion host deployments across multiple Availability Zones.'
+        metadata {
+          uses 'amazon-ec2-auto-scaling'
+        }
+        couchbaseServer = platform 'Parent Region Couchbase Server' {
+          description 'Couchbase Server deployment in private subnets across Availability Zones, with high availability and automatic failover.'
+          metadata {
+            uses 'couchbase-server'
+          }
+          cluster = database 'Parent Region Couchbase cluster' {
+            description 'Couchbase Server cluster in the parent Region.'
+          }
+        }
+        bastion = system 'Bastion host' {
+          description 'Host in a public subnet that provides external network access to Couchbase Server.'
+        }
+        parentSyncGateway = platform 'Parent Region Couchbase Sync Gateway' {
+          description 'Sync Gateway deployment across Availability Zones, behind an Application Load Balancer, with high availability and automatic failover.'
+          metadata {
+            uses 'couchbase-sync-gateway'
+          }
+          endpoint = system 'Parent Region Sync Gateway endpoint' {
+            description 'Sync Gateway service in the parent Region.'
+          }
+        }
+      }
+
+      localZoneOne = platform 'AWS Local Zone 1 (us-east-1-bos-1a)' {
+        description 'Edge cluster deployment in the first Local Zone.'
+        metadata {
+          uses 'aws-local-zones'
+        }
+        compute = platform 'Amazon EC2' {
+          metadata {
+            uses 'amazon-ec2'
+          }
+          couchbaseServer = platform 'Local Zone 1 Couchbase Server' {
+            metadata {
+              uses 'couchbase-server'
+            }
+            cluster = database 'Local Zone 1 Couchbase cluster' {
+              description 'Couchbase Server database in the first Local Zone edge cluster.'
+            }
+          }
+          syncGateway = platform 'Local Zone 1 Couchbase Sync Gateway' {
+            metadata {
+              uses 'couchbase-sync-gateway'
+            }
+            endpoint = system 'Local Zone 1 Sync Gateway endpoint' {
+              description 'Sync Gateway service in the first Local Zone edge cluster.'
+            }
+          }
+        }
+        internetGateway = platform 'Local Zone 1 internet gateway' {
+          metadata {
+            uses 'amazon-internet-gateway'
+          }
+        }
+      }
+
+      localZoneTwo = platform 'AWS Local Zone 2 (us-east-1-mia-1a)' {
+        description 'Edge cluster deployment in the second Local Zone.'
+        metadata {
+          uses 'aws-local-zones'
+        }
+        compute = platform 'Amazon EC2' {
+          metadata {
+            uses 'amazon-ec2'
+          }
+          couchbaseServer = platform 'Local Zone 2 Couchbase Server' {
+            metadata {
+              uses 'couchbase-server'
+            }
+            cluster = database 'Local Zone 2 Couchbase cluster' {
+              description 'Couchbase Server database in the second Local Zone edge cluster.'
+            }
+          }
+          syncGateway = platform 'Local Zone 2 Couchbase Sync Gateway' {
+            metadata {
+              uses 'couchbase-sync-gateway'
+            }
+            endpoint = system 'Local Zone 2 Sync Gateway endpoint' {
+              description 'Sync Gateway service in the second Local Zone edge cluster.'
+            }
+          }
+        }
+        internetGateway = platform 'Local Zone 2 internet gateway' {
+          metadata {
+            uses 'amazon-internet-gateway'
+          }
+        }
+      }
+    }
+  }
+
+  clients -> aws.route53 'Uses geolocation-based routing to find the nearest cluster'
+  aws.route53 -> aws.vpc.localZoneOne.compute.syncGateway.endpoint 'Routes clients to the nearest Local Zone'
+  aws.route53 -> aws.vpc.localZoneTwo.compute.syncGateway.endpoint 'Routes clients to the nearest Local Zone'
+  aws.route53 -> aws.vpc.parentRegion.parentSyncGateway.endpoint 'Can route clients to the parent Region'
+  clients.lite -> aws.vpc.localZoneOne.compute.syncGateway.endpoint 'Synchronizes with over the internet'
+  clients.lite -> aws.vpc.localZoneTwo.compute.syncGateway.endpoint 'Synchronizes with over the internet'
+  externalNetwork -> aws.vpc.parentRegion.bastion 'Accesses Couchbase Server through'
+  aws.vpc.loadBalancer -> aws.vpc.parentRegion.parentSyncGateway.endpoint 'Balances requests across Availability Zones'
+  aws.vpc.parentRegion.parentSyncGateway.endpoint -> aws.vpc.localZoneOne.compute.syncGateway.endpoint 'Replicates with using private IP addresses within the VPC'
+  aws.vpc.parentRegion.parentSyncGateway.endpoint -> aws.vpc.localZoneTwo.compute.syncGateway.endpoint 'Replicates with using private IP addresses within the VPC'
+  aws.vpc.parentRegion.couchbaseServer.cluster -> aws.vpc.natGateway 'Uses for internet connectivity from its private subnet'
+  aws.vpc.parentRegion.couchbaseServer.cluster -> aws.s3.backups 'Stores backups in'
+  aws.vpc.localZoneOne.compute.couchbaseServer.cluster -> aws.s3.backups 'Stores backups in'
+  aws.vpc.localZoneTwo.compute.couchbaseServer.cluster -> aws.s3.backups 'Stores backups in'
+  aws.vpc.parentRegion.couchbaseServer.cluster -> aws.cloudwatch 'Sends metrics and logs to'
+  aws.vpc.parentRegion.parentSyncGateway.endpoint -> aws.cloudwatch 'Sends metrics and logs to'
+  aws.vpc.localZoneOne.compute.couchbaseServer.cluster -> aws.cloudwatch 'Sends metrics and logs to'
+  aws.vpc.localZoneOne.compute.syncGateway.endpoint -> aws.cloudwatch 'Sends metrics and logs to'
+  aws.vpc.localZoneTwo.compute.couchbaseServer.cluster -> aws.cloudwatch 'Sends metrics and logs to'
+  aws.vpc.localZoneTwo.compute.syncGateway.endpoint -> aws.cloudwatch 'Sends metrics and logs to'
+}

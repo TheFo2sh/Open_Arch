@@ -1,0 +1,155 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: Resolves crew application domains to the nearest Region.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Distribution used by crew apps; the architecture serves static pages from Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores the static pages served by Amazon CloudFront.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-waf
+    name: AWS WAF
+    description: Web application firewall shown protecting the application entry path.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/waf/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Regional APIs provide crew trip reads; private APIs provide scheduler read and update access.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Network Load Balancers route traffic to the Amazon EKS services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-eks
+    name: Amazon Elastic Kubernetes Service
+    description: Fully managed Kubernetes clusters host the trip update and retrieve services in multiple Regions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eks/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-aurora
+    name: Amazon Aurora
+    description: Aurora Global Database with regional replicas and write forwarding.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-direct-connect-gateway
+    name: AWS Direct Connect Gateway
+    description: Gateway shown between the corporate connection and regional private APIs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Connects corporate users and systems to the AWS environment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Monitoring service used with monitoring tools to optimize operational health.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-cloudtrail
+    name: AWS CloudTrail
+    description: Logging and monitoring service shown in the architecture diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudtrail/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-health-dashboard
+    name: AWS Health Dashboard
+    description: AWS public health dashboard shown in the monitoring and logging group.
+    vendor: Amazon Web Services
+    url: https://health.aws.amazon.com/health/status
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-kms
+    name: AWS Key Management Service
+    description: AWS security service shown as part of the at-rest and end-to-end encryption approach.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kms/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-certificate-manager
+    name: AWS Certificate Manager
+    description: Certificate service shown in the architecture security group.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/certificate-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-secrets-manager
+    name: AWS Secrets Manager
+    description: Secrets service shown in the architecture security group.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/secrets-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cognito
+    name: Amazon Cognito
+    description: Identity service shown in the architecture security group.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cognito/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-identity-and-access-management
+    name: AWS Identity and Access Management
+    description: Identity and access management service shown in the architecture security group.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iam/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-cloudformation
+    name: AWS CloudFormation
+    description: Provides the single-click deployment approach described for the multi-Region application.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudformation/
+    types: [managed-service]
+    platform: aws
+    hosts: []

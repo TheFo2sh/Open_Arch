@@ -1,0 +1,7 @@
+PackageId: OpenArch.CentralizedAlarmsAndNotifications
+Name: Centralized Alarms and Notifications
+Description: A serverless AWS pattern that routes centralized CloudWatch alarms to workload-specific notification handlers.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, monitoring, alarms, notifications, serverless]

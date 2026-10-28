@@ -1,0 +1,119 @@
+// Algorithmic Trading on AWS, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/algorithmic-trading-on-aws/algorithmic-trading-on-aws.html
+// The external APIs and systems are slots because AWS does not specify their providers.
+model {
+  marketDataApi = system 'Market Data API' {
+    description 'External market data API used by the Market Data Adapter; AWS does not identify its provider.'
+  }
+  historicalDataSource = system 'External market data sources' {
+    description 'Alternative sources of historical price data; AWS does not identify their providers.'
+  }
+  brokerApi = system 'Broker API' {
+    description 'External broker API used by the Broker Adapter; AWS does not identify its provider.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    dataExchange = platform 'AWS Data Exchange' {
+      metadata {
+        uses 'aws-data-exchange'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      historicalPrices = database 'Historical price data' {
+        description 'Historical price data stored for cataloging and querying.'
+      }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+
+    sagemaker = platform 'Amazon SageMaker AI' {
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+      modelTraining = system 'ML model training' {
+        description 'Slot for the machine-learning model training workload.'
+      }
+    }
+
+    ecs = platform 'Amazon ECS' {
+      metadata {
+        uses 'amazon-ecs'
+      }
+    }
+    fargate = platform 'AWS Fargate' {
+      metadata {
+        uses 'aws-fargate'
+      }
+      tradingWorkloads = system 'Algorithmic trading workloads' {
+        description 'Containerized backtesting and trading services.'
+
+        backtest = container 'Backtest strategy' {
+          description 'Runs a trading strategy backtest as an ECS task on Fargate.'
+        }
+        marketDataAdapter = container 'Market Data Adapter' {
+          description 'Runs as an ECS service on Fargate and feeds market data into DynamoDB.'
+        }
+        brokerAdapter = container 'Broker Adapter' {
+          description 'Runs as an ECS service on Fargate and uses DynamoDB as its transaction store.'
+        }
+        tradingStrategy = container 'Trading Strategy' {
+          description 'Runs the algorithmic trading strategy as an ECS service on Fargate.'
+        }
+      }
+    }
+
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      transactions = database 'Transaction store' {
+        description 'Transactional data store used by the Broker Adapter.'
+      }
+    }
+
+    eventBridge = platform 'Amazon EventBridge' {
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      scheduledJobs = system 'Scheduled jobs' {
+        description 'Slot for AWS Lambda functions invoked by EventBridge.'
+      }
+    }
+    cloudWatch = platform 'Amazon CloudWatch' {
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+  }
+
+  aws.dataExchange -> aws.s3.historicalPrices 'Provides historical price data to'
+  historicalDataSource -> aws.s3.historicalPrices 'Provides historical price data to'
+  aws.athena -> aws.glueCatalog 'Uses the data catalog'
+  aws.athena -> aws.s3.historicalPrices 'Queries historical price data from'
+  aws.ecs -> aws.fargate 'Runs container workloads using'
+  marketDataApi -> aws.fargate.tradingWorkloads.marketDataAdapter 'Provides market data to'
+  aws.fargate.tradingWorkloads.marketDataAdapter -> aws.dynamodb.transactions 'Feeds market data into'
+  aws.fargate.tradingWorkloads.brokerAdapter -> brokerApi 'Integrates with'
+  aws.fargate.tradingWorkloads.brokerAdapter -> aws.dynamodb.transactions 'Uses as its transaction store'
+  aws.eventBridge -> aws.lambda.scheduledJobs 'Schedules jobs with'
+}

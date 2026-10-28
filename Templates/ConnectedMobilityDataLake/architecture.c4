@@ -1,0 +1,162 @@
+// Connected Mobility Data Lake, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/connected-mobility-data-lake/connected-mobility-data-lake.html
+// The diagram is linked from that page as a PDF. Systems and users are slots.
+model {
+  callCenterClient = user 'Call center client'
+  oemPartner = user 'OEM / partner'
+  customer = user 'B2B / B2C customer'
+
+  vehicleSource = system 'Vehicle data source' {
+    description 'External connected vehicles; the connectivity protocol and provider are not specified.'
+  }
+  networkProvider = system 'Vehicle network provider' {
+    description 'Third-party connectivity provider; no vendor is named in the reference.'
+  }
+  factorySource = system 'Factory data source'
+  crmSource = system 'CRM source database'
+
+  callCenter = system 'Call center application' {
+    description 'A consumer application that can access data from sources in different accounts.'
+  }
+  oemAnalytics = system 'OEM / partner data consumers' {
+    description 'OEM departments or their partners discover data and query it for use cases.'
+  }
+  endUserApplications = system 'End-user applications and businesses' {
+    description 'Consumers of APIs exposed by an OEM.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      vehicleStatus = database 'Vehicle attributes and status'
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      rawData = database 'Raw mobility data'
+      crmData = database 'Synchronized CRM data'
+      dataProducts = database 'Prepared data products'
+    }
+    directConnect = platform 'AWS Direct Connect' {
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    dataSync = platform 'AWS DataSync' {
+      metadata {
+        uses 'aws-datasync'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Producer-account crawlers discover datasets and create catalog entities.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    catalog = platform 'AWS Glue Data Catalog' {
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      producerCatalog = database 'Producer data catalog'
+      centralCatalog = database 'Central governance catalog'
+    }
+    lakeFormation = platform 'AWS Lake Formation' {
+      metadata {
+        uses 'aws-lake-formation'
+      }
+    }
+    fargate = platform 'AWS Fargate' {
+      metadata {
+        uses 'aws-fargate'
+      }
+      preparationJob = system 'Data preparation batch job'
+    }
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    dataWrangler = platform 'Amazon SageMaker AI Data Wrangler' {
+      metadata {
+        uses 'amazon-sagemaker-ai-data-wrangler'
+      }
+    }
+    redshiftSpectrum = platform 'Amazon Redshift Spectrum' {
+      metadata {
+        uses 'amazon-redshift-spectrum'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+  }
+
+  callCenterClient -> callCenter 'Uses'
+  oemPartner -> oemAnalytics 'Discovers and requests access to data for'
+  customer -> endUserApplications 'Consumes APIs through'
+  vehicleSource -> networkProvider 'Sends telemetry through'
+  networkProvider -> aws.iotCore 'Delivers vehicle messages to'
+  aws.iotCore -> aws.lambda 'Routes messages to'
+  aws.lambda -> aws.dynamodb.vehicleStatus 'Stores vehicle attributes and status in'
+  aws.lambda -> aws.s3.rawData 'Stores raw messages in'
+
+  factorySource -> aws.directConnect 'Sends factory data over'
+  aws.directConnect -> aws.kinesis 'Connects to'
+  aws.kinesis -> aws.s3.rawData 'Ingests factory data into'
+  crmSource -> aws.dataSync 'Synchronizes through'
+  aws.dataSync -> aws.s3.crmData 'Copies CRM data to'
+
+  aws.s3.rawData -> aws.lambda 'S3 events trigger processing in'
+  aws.s3.crmData -> aws.lambda 'S3 events trigger processing in'
+  aws.lambda -> aws.fargate.preparationJob 'Starts a batch preparation job on'
+  aws.fargate.preparationJob -> aws.s3.dataProducts 'Publishes prepared datasets to'
+  aws.s3.dataProducts -> aws.glue 'Is discovered by a crawler in'
+  aws.s3.crmData -> aws.glue 'Is discovered by a crawler in'
+  aws.glue -> aws.catalog.producerCatalog 'Creates producer catalog entities in'
+  aws.catalog.producerCatalog -> aws.catalog.centralCatalog 'Replicates metadata to'
+  aws.catalog.centralCatalog -> aws.lakeFormation 'Is governed through'
+  aws.lakeFormation -> callCenter 'Grants requested cross-account access to'
+  aws.lakeFormation -> oemAnalytics 'Grants approved cross-account access to'
+  aws.lakeFormation -> endUserApplications 'Grants approved cross-account access to'
+
+  callCenter -> aws.athena 'Queries data with'
+  callCenter -> aws.apiGateway 'Uses consumer APIs through'
+  oemAnalytics -> aws.athena 'Queries data with'
+  oemAnalytics -> aws.dataWrangler 'Explores and prepares data with'
+  oemAnalytics -> aws.redshiftSpectrum 'Queries S3 data with'
+  aws.athena -> aws.catalog.centralCatalog 'Discovers governed datasets in'
+  aws.dataWrangler -> aws.catalog.centralCatalog 'Discovers datasets in'
+  aws.redshiftSpectrum -> aws.s3.dataProducts 'Queries'
+  aws.apiGateway -> endUserApplications 'Exposes monetized APIs to'
+}
+
+views {
+  view index {
+    title 'Connected Mobility Data Lake'
+    include *, aws.*
+  }
+}

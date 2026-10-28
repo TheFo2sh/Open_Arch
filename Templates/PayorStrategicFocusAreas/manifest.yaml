@@ -1,0 +1,7 @@
+PackageId: OpenArch.PayorStrategicFocusAreas
+Name: Payor Strategic Focus Areas
+Description: AWS reference architectures for modernizing payor data, enabling healthcare analytics, and improving customer experiences.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, healthcare, payor, analytics]

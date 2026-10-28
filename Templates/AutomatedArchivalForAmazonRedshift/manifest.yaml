@@ -1,0 +1,7 @@
+PackageId: OpenArch.AutomatedArchivalForAmazonRedshift
+Name: Automated Archival for Amazon Redshift
+Description: Automates periodic Amazon Redshift data archival to Amazon S3, transitions cold data to S3 Glacier, and prepares inventory manifests for restore.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, data-analytics, data-archival, amazon-redshift]

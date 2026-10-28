@@ -1,0 +1,116 @@
+# The AWS services named by the blueprint, by the key its metadata { uses } names them by.
+technologies:
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Receives review submissions from the API-based ingestion path shown in the architecture diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the diagram's ingestion and the event-driven review analysis functions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-kinesis-data-firehose
+    name: Amazon Kinesis Data Firehose
+    description: Delivers review data to S3 and, as shown in the diagram, writes analysis outputs to S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores raw review data and the sentiment, key-phrase, and entity analysis datasets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-appflow
+    name: Amazon AppFlow
+    description: Securely ingests data from SaaS applications into Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/appflow/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-translate
+    name: Amazon Translate
+    description: Translates review text as part of the Lambda analysis workflow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/translate/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-comprehend
+    name: Amazon Comprehend
+    description: Analyzes reviews for sentiment, key phrases, and entities.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/comprehend/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-glue-data-catalog
+    name: AWS Glue Data Catalog
+    description: Holds the logical database and table definitions for the review data in S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/features/#Data_Catalog
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Queries review data in S3 using table definitions from the Glue Data Catalog.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Presents the queried consumer-review insights in a dashboard.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: salesforce
+    name: Salesforce
+    description: Optional SaaS source example named by AWS; the architecture does not require this specific provider.
+    vendor: Salesforce
+    url: https://www.salesforce.com/
+    types: [third-party]
+  - key: adobe-marketo-engage
+    name: Adobe Marketo Engage
+    description: Optional SaaS source example named by AWS; the architecture does not require this specific provider.
+    vendor: Adobe
+    url: https://business.adobe.com/products/marketo.html
+    types: [third-party]
+  - key: slack
+    name: Slack
+    description: Optional SaaS source example named by AWS; the architecture does not require this specific provider.
+    vendor: Salesforce
+    url: https://slack.com/
+    types: [third-party]
+  - key: servicenow
+    name: ServiceNow
+    description: Optional SaaS source example named by AWS; the architecture does not require this specific provider.
+    vendor: ServiceNow
+    url: https://www.servicenow.com/
+    types: [third-party]
