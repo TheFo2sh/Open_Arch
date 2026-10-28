@@ -1,0 +1,167 @@
+// Data Lake Architecture for Renewable Energy, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/data-lake-architecture-for-renewable-energy/data-lake-architecture-for-renewable-energy.html
+// Read together with the repository's specification.c4. Source systems are slots
+// mapped onto the project's own systems when the template is applied.
+model {
+  telemetrySources = system 'Renewable energy telemetry sources' {
+    description 'Wind farms, turbine sensors, solar farms, and hydrogen plants that produce telemetry.'
+  }
+  assetManagement = system 'Asset management system' {
+    description 'On-premises business application shown as a source of database data.'
+  }
+  erp = system 'Enterprise resource planning system' {
+    description 'On-premises business application shown as a source of database data.'
+  }
+  hr = system 'HR system' {
+    description 'On-premises business application shown as a source of database data.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      description 'Receives telemetry over MQTT and routes it using IoT rules.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Streams telemetry to near-real-time processing and data stores.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    flink = platform 'Amazon Managed Service for Apache Flink' {
+      description 'Transforms and analyzes streaming telemetry near real time.'
+      metadata {
+        uses 'amazon-managed-service-for-apache-flink'
+      }
+    }
+    timestream = platform 'Amazon Timestream' {
+      description 'Stores time-series telemetry for monitoring and analysis.'
+      metadata {
+        uses 'amazon-timestream'
+      }
+      timeSeriesData = database 'Telemetry time-series data' {
+        description 'Time-series telemetry used for near-real-time monitoring and analysis.'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service (Amazon S3)' {
+      description 'Stores raw and processed data lake datasets.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      rawData = database 'Raw data bucket' {
+        description 'Raw telemetry and migrated business data before ETL processing.'
+      }
+      processedData = database 'Processed data bucket' {
+        description 'Data processed, transformed, and enriched by AWS Glue ETL jobs.'
+      }
+    }
+    sct = platform 'AWS Schema Conversion Tool (AWS SCT)' {
+      description 'Discovers and converts schemas from the on-premises databases.'
+      metadata {
+        uses 'aws-schema-conversion-tool'
+      }
+    }
+    dms = platform 'AWS Database Migration Service (AWS DMS)' {
+      description 'Moves on-premises database data to Amazon S3 and Amazon Redshift.'
+      metadata {
+        uses 'aws-database-migration-service'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Crawls S3 data, catalogs discovered schemas, and runs ETL jobs.'
+      metadata {
+        uses 'aws-glue'
+      }
+      dataCatalog = database 'AWS Glue Data Catalog' {
+        description 'Metadata catalog populated with schemas discovered by AWS Glue crawlers.'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      description 'Loads data from S3 and DMS for querying and business-logic transformations.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+      warehouse = database 'Redshift tables' {
+        description 'Tables loaded with the COPY command and transformed by stored procedures.'
+      }
+    }
+    lakeFormation = platform 'AWS Lake Formation' {
+      description 'Provides centralized data lake security and governance with the Glue Data Catalog and IAM.'
+      metadata {
+        uses 'aws-lake-formation'
+      }
+    }
+    iam = platform 'AWS Identity and Access Management (IAM)' {
+      description 'Provides identity and access management for centralized data lake governance.'
+      metadata {
+        uses 'aws-iam'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Queries data lake datasets for interactive analytics and reporting.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quick = platform 'Amazon Quick' {
+      description 'Visualizes data and provides dashboards and reporting.'
+      metadata {
+        uses 'amazon-quick'
+      }
+    }
+    grafana = platform 'Amazon Managed Grafana' {
+      description 'Visualizes data and provides dashboards and reporting.'
+      metadata {
+        uses 'amazon-managed-grafana'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Trains and deploys machine learning models using raw datasets.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+  }
+
+  telemetrySources -> aws.iotCore 'Sends telemetry over MQTT'
+  aws.iotCore -> aws.kinesis 'Routes telemetry through'
+  aws.kinesis -> aws.flink 'Streams telemetry for near-real-time processing'
+  aws.kinesis -> aws.s3.rawData 'Routes telemetry to'
+  aws.kinesis -> aws.timestream.timeSeriesData 'Routes telemetry to'
+  aws.flink -> aws.s3.rawData 'Writes processed streaming data to'
+
+  assetManagement -> aws.sct 'Provides database schemas to'
+  erp -> aws.sct 'Provides database schemas to'
+  hr -> aws.sct 'Provides database schemas to'
+  aws.sct -> aws.dms 'Prepares schemas for migration by'
+  aws.dms -> aws.s3.rawData 'Migrates data to'
+  aws.dms -> aws.redshift.warehouse 'Migrates data to'
+
+  aws.s3.rawData -> aws.glue 'Provides raw data for crawler and ETL jobs in'
+  aws.s3.rawData -> aws.glue.dataCatalog 'Crawler discovers schemas and registers them in'
+  aws.glue -> aws.s3.processedData 'Writes transformed and enriched data to'
+  aws.s3.processedData -> aws.redshift.warehouse 'Loads data into tables with COPY'
+
+  aws.lakeFormation -> aws.glue.dataCatalog 'Governs cataloged data in'
+  aws.lakeFormation -> aws.s3 'Governs access to'
+  aws.iam -> aws.lakeFormation 'Provides identity and access management for'
+  aws.iam -> aws.s3 'Controls access to'
+
+  aws.s3.processedData -> aws.athena 'Provides data for queries'
+  aws.redshift.warehouse -> aws.athena 'Provides data for queries'
+  aws.athena -> aws.quick 'Provides query results for dashboards in'
+  aws.athena -> aws.grafana 'Provides query results for dashboards in'
+  aws.s3.rawData -> aws.sagemaker 'Provides raw datasets to'
+}
+
+views {
+  view index {
+    title 'Data Lake Architecture for Renewable Energy'
+    include *, aws.*
+  }
+}
