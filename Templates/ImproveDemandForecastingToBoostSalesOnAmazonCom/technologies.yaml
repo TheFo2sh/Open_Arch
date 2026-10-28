@@ -1,0 +1,105 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-eventbridge
+    name: Amazon EventBridge
+    description: Schedules data-refresh tasks and recurring demand-forecast workflows.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eventbridge/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs functions that retrieve Selling Partner API data, process queue messages, and transform and persist records.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-selling-partner-api
+    name: Amazon Selling Partner API
+    description: External API used to programmatically source Amazon.com vendor performance data.
+    vendor: Amazon
+    url: https://developer-docs.amazon.com/sp-api/
+    types: [third-party]
+  - key: amazon-sqs
+    name: Amazon Simple Queue Service
+    description: Decouples API response handling from downstream processing with a message queue.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sqs/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: Receives notifications for data conditions such as product catalog changes.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Intermediate database for create, read, update, and delete operations while maintaining data integrity.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-glue
+    name: AWS Glue
+    description: Runs scheduled jobs that publish data into the long-term serverless data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Persists time-series data for the serverless data lake and makes it available to consumers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-iam
+    name: AWS Identity and Access Management
+    description: Provides the IAM role that authorizes access to vendor codes through the Vendor Central account.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iam/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-forecast
+    name: Amazon Forecast
+    description: Uses demand history to generate future demand predictions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/forecast/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Manages the workflow that sources demand history and generates future predictions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Provides business intelligence over data syndicated from Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Provides SQL query capabilities over data syndicated from Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
