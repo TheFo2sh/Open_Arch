@@ -1,0 +1,146 @@
+// Guidance for AdTech PrivateLink Network on AWS.
+// Based on https://docs.aws.amazon.com/reference-architecture-diagrams/latest/adtech-privatelink/adtech-privatelink.html
+model {
+  reader = user 'Reader' {
+    description 'Accesses a webpage that contains an ad impression.'
+  }
+
+  publisher = system 'Publisher ad server' {
+    description 'Processes ad requests from readers and sends them to the SSP endpoint URL.'
+  }
+
+  externalAdTech = system 'SSP/DSP endpoints outside AWS' {
+    description 'External SSP or DSP endpoints reached over the internet when a private endpoint is not used.'
+  }
+
+  aws = zone 'AWS Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    sspVpc = platform 'SSP VPC' {
+      description 'Supply-side platform VPC with public and private subnets and security groups as shown in the AWS diagram.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      sspLoadBalancer = platform 'Elastic Load Balancing (SSP)' {
+        description 'Accepts the SSP endpoint URL and forwards ad requests to auction instances.'
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+
+      sspCompute = platform 'Amazon EC2 (SSP)' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        auction = system 'SSP auction system' {
+          description 'Selects DSPs for an auction and sends bid requests to their endpoint URLs.'
+        }
+      }
+
+      resolver = platform 'Amazon Route 53 Resolver (SSP VPC)' {
+        description 'Performs the VPC DNS lookup for DSP endpoint URLs.'
+        metadata {
+          uses 'amazon-route-53-resolver'
+        }
+      }
+
+      privateZone = platform 'Amazon Route 53 private hosted zone (SSP)' {
+        description 'Optional private hosted zone used to resolve a DSP endpoint URL to the interface endpoint.'
+        metadata {
+          uses 'amazon-route-53-private-hosted-zones'
+        }
+      }
+
+      interfaceEndpoint = platform 'AWS PrivateLink interface endpoint (SSP)' {
+        description 'Interface endpoint ENI in the SSP private subnet that forwards private bid requests to the DSP endpoint service.'
+        metadata {
+          uses 'aws-privatelink'
+        }
+      }
+    }
+
+    dspVpc = platform 'DSP VPC' {
+      description 'Demand-side platform VPC with private and public subnets and security groups as shown in the AWS diagram.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      endpointService = platform 'AWS PrivateLink endpoint service (DSP)' {
+        description 'Receives private bid requests from the SSP interface endpoint and routes them to the associated Network Load Balancer.'
+        metadata {
+          uses 'aws-privatelink'
+        }
+      }
+
+      nlb = platform 'Network Load Balancer (DSP)' {
+        description 'Associated with the DSP endpoint service and distributes requests to the bidder fleet.'
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+
+      dspCompute = platform 'Amazon EC2 (DSP)' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        bidders = system 'DSP bidder fleet' {
+          description 'Processes bid requests and returns bid responses to the SSP auction system.'
+        }
+      }
+
+      dspLoadBalancer = platform 'Elastic Load Balancing (DSP public subnet)' {
+        description 'An additional Elastic Load Balancing resource shown in the DSP public subnet; AWS does not describe its traffic role.'
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+    }
+
+    dspDns = platform 'Amazon Route 53 (DSP DNS)' {
+      description 'DNS service assumed by the reference when the DSP verifies its domain with a TXT record.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+
+    sspMetrics = platform 'Amazon CloudWatch (SSP)' {
+      description 'SSP dashboard for active connections and bytes processed per endpoint connection.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+
+    dspMetrics = platform 'Amazon CloudWatch (DSP)' {
+      description 'DSP dashboard for active connections and bytes processed per endpoint connection.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+  }
+
+  reader -> publisher 'Requests a webpage with an ad impression from'
+  publisher -> aws.sspVpc.sspLoadBalancer 'Sends the ad request to the SSP endpoint URL'
+  aws.sspVpc.sspLoadBalancer -> aws.sspVpc.sspCompute.auction 'Forwards the request to'
+  aws.sspVpc.sspCompute.auction -> aws.sspVpc.resolver 'Looks up selected DSP endpoint URLs through'
+  aws.sspVpc.resolver -> aws.sspVpc.privateZone 'Can resolve private hostnames using'
+  aws.sspVpc.privateZone -> aws.sspVpc.interfaceEndpoint 'Resolves the private endpoint hostname to'
+  aws.sspVpc.sspCompute.auction -> aws.sspVpc.interfaceEndpoint 'Routes private bid requests through'
+  aws.sspVpc.sspCompute.auction -> externalAdTech 'Sends bid requests over the internet when a DSP is not reached through PrivateLink'
+  aws.sspVpc.interfaceEndpoint -> aws.dspVpc.endpointService 'Forwards private bid requests to'
+  aws.dspVpc.endpointService -> aws.dspVpc.nlb 'Routes requests to the associated'
+  aws.dspVpc.nlb -> aws.dspVpc.dspCompute.bidders 'Distributes requests to'
+  aws.dspVpc.dspCompute.bidders -> aws.sspVpc.sspCompute.auction 'Returns bid responses over the AWS backbone network to'
+  aws.dspDns -> aws.dspVpc.endpointService 'Verifies the DSP domain for its private hostname with a TXT record'
+  aws.sspVpc.interfaceEndpoint -> aws.sspMetrics 'Provides endpoint connection metrics to'
+  aws.dspVpc.endpointService -> aws.dspMetrics 'Provides endpoint connection metrics to'
+}
+
+views {
+  view index {
+    title 'Guidance for AdTech PrivateLink Network on AWS'
+    include *
+  }
+}
