@@ -1,0 +1,56 @@
+// Centralized internet egress with a NAT Gateway, after the AWS reference architecture.
+// Systems and users are slots; this network-only pattern has none.
+model {
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    spokeVpc = platform 'Spoke VPC' {
+      description 'Workload VPC whose internet-bound traffic is sent to the central egress VPC.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+
+    transitGateway = platform 'AWS Transit Gateway' {
+      description 'Connects spoke VPC attachments to the egress VPC; routing prevents spoke-to-spoke communication.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+
+    egressVpc = platform 'Egress VPC' {
+      description 'Central VPC with private-subnet workloads routed through a NAT Gateway in a public subnet.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+
+    natGateway = platform 'AWS NAT Gateway' {
+      description 'Translates outbound traffic from the egress VPC private subnet.'
+      metadata {
+        uses 'aws-nat-gateway'
+      }
+    }
+
+    internetGateway = platform 'AWS Internet Gateway' {
+      description 'Provides the egress VPC path between the NAT Gateway and the public internet.'
+      metadata {
+        uses 'aws-internet-gateway'
+      }
+    }
+  }
+
+  aws.spokeVpc -> aws.transitGateway 'Routes internet-bound traffic through'
+  aws.transitGateway -> aws.egressVpc 'Forwards traffic to'
+  aws.egressVpc -> aws.natGateway 'Routes private-subnet egress to'
+  aws.natGateway -> aws.internetGateway 'Forwards translated traffic through'
+}
+
+views {
+  view index {
+    title 'Centralized Internet Egress with NAT Gateway'
+    include *
+  }
+}

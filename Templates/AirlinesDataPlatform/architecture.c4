@@ -1,0 +1,243 @@
+// Airlines Data Platform, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/airlines-data-platform/airlines-data-platform.html
+// Systems and users are slots mapped onto a project's own domain model.
+model {
+  apiClients = user 'API clients' {
+    description 'Mobile customer service apps, customer service dashboards, websites, and mobile apps.'
+  }
+  dashboardUsers = user 'Dashboard users' {
+    description 'Users who consume customer analytics.'
+  }
+
+  systemsOfRecord = system 'Airline systems of record' {
+    description 'Flight operations, passenger service (PSS), departure control (DCS), reservations (CRS), loyalty, baggage management, booking, and survey systems.'
+  }
+  externalDataSources = system 'External data sources' {
+    description 'External demographic and address data providers.'
+  }
+  customerEventSubscribers = system 'Customer event subscribers' {
+    description 'External consumers of published customer events.'
+  }
+  worldTracer = system 'WorldTracer' {
+    description 'External baggage-tracking destination shown in the reference diagram.'
+  }
+  netTracer = system 'NetTracer' {
+    description 'External baggage-tracking destination shown in the reference diagram.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Streams real-time events from airline systems.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    transferFamily = platform 'AWS Transfer Family' {
+      description 'Ingests batch data sets from airline systems.'
+      metadata {
+        uses 'aws-transfer-family'
+      }
+    }
+    dataExchange = platform 'AWS Data Exchange' {
+      description 'Provides external data sets for ingestion.'
+      metadata {
+        uses 'aws-data-exchange'
+      }
+    }
+    appFlow = platform 'Amazon AppFlow' {
+      description 'Ingests external data into the platform.'
+      metadata {
+        uses 'amazon-appflow'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Data lake with staging, parquet, and reportable data sets.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      realtimeStage = database 'Real-time staging data' {
+        description 'Staging area for real-time operational events.'
+      }
+      batchStage = database 'Batch staging data' {
+        description 'Staging area for batch and external data sets.'
+      }
+      parquetData = database 'Parquet data sets' {
+        description 'Data sets stored in parquet format.'
+      }
+      reportableData = database 'Reportable data sets' {
+        description 'Curated data sets available for reporting and analysis.'
+      }
+    }
+
+    emr = platform 'Amazon EMR' {
+      description 'Managed compute for data transformation workloads.'
+      metadata {
+        uses 'amazon-emr'
+      }
+      transformations = system 'Data transformation workloads' {
+        description 'Transforms raw and curated data for downstream consumers.'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Data discovery, cataloging, and transformation services.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      description 'Catalog of data lake assets available to query workloads.'
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      dataCatalog = database 'Data catalog' {
+        description 'Published metadata for data lake data sets.'
+      }
+    }
+
+    customerEventProcessing = platform 'AWS Step Functions - customer event processing' {
+      description 'Orchestrates customer event processing.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs event-processing functions.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      eventHandlers = system 'Customer event processing functions' {
+        description 'Functions that process customer events.'
+      }
+    }
+    fargate = platform 'AWS Fargate' {
+      description 'Runs containerized customer microservices.'
+      metadata {
+        uses 'aws-fargate'
+      }
+      customerMicroservices = system 'Customer microservices' {
+        description 'Containerized services used by customer event processing.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Stores customer 360 data.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      customer360 = database 'Customer 360 data' {
+        description 'Customer 360 data used by event processing and downstream analytics.'
+      }
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'API entry point for customer-facing clients.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+      customerApis = system 'Customer service APIs' {
+        description 'Customer-facing API surface for the mobile apps, website, and dashboard.'
+      }
+    }
+    microserviceWorkflows = platform 'AWS Step Functions - microservices' {
+      description 'Orchestrates customer service microservices.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    complexEventProcessing = platform 'AWS Step Functions - complex event processing' {
+      description 'Processes customer event streams and publishes resulting events.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+
+    redshift = platform 'Amazon Redshift' {
+      description 'Enterprise data warehouse and analytics data marts.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+      customerMarts = database 'Customer data marts' {
+        description 'Customer analytics data marts for common query patterns.'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Builds and runs customer analysis models.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+      customerModels = system 'Customer analysis models' {
+        description 'Customer segmentation and lifetime value models.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Queries the data lake directly for ad hoc analysis.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Provides customer analytics dashboards.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+      dashboards = system 'Customer analytics dashboards' {
+        description 'Dashboards for customer analytics.'
+      }
+    }
+  }
+
+  systemsOfRecord -> aws.kinesis 'Publishes operational events to'
+  systemsOfRecord -> aws.transferFamily 'Sends batch data sets through'
+  externalDataSources -> aws.dataExchange 'Supplies external data through'
+  externalDataSources -> aws.appFlow 'Supplies external data through'
+  aws.kinesis -> aws.s3.realtimeStage 'Stages real-time events in'
+  aws.transferFamily -> aws.s3.batchStage 'Stages batch data in'
+  aws.dataExchange -> aws.s3.batchStage 'Ingests external data into'
+  aws.appFlow -> aws.s3.batchStage 'Ingests external data into'
+
+  aws.s3.realtimeStage -> aws.emr.transformations 'Provides data for transformation'
+  aws.s3.batchStage -> aws.emr.transformations 'Provides data for transformation'
+  aws.emr.transformations -> aws.s3.parquetData 'Produces'
+  aws.emr.transformations -> aws.s3.reportableData 'Produces'
+  aws.s3.realtimeStage -> aws.glue 'Provides data for cataloging and transformation'
+  aws.s3.batchStage -> aws.glue 'Provides data for cataloging and transformation'
+  aws.glue -> aws.s3.parquetData 'Transforms data into'
+  aws.glue -> aws.s3.reportableData 'Produces'
+  aws.glue -> aws.glueCatalog.dataCatalog 'Publishes metadata to'
+
+  aws.kinesis -> aws.customerEventProcessing 'Routes customer events to'
+  aws.customerEventProcessing -> aws.lambda.eventHandlers 'Invokes'
+  aws.customerEventProcessing -> aws.fargate.customerMicroservices 'Orchestrates'
+  aws.lambda.eventHandlers -> aws.dynamodb.customer360 'Updates'
+  aws.fargate.customerMicroservices -> aws.dynamodb.customer360 'Updates'
+  aws.dynamodb.customer360 -> aws.complexEventProcessing 'Streams customer changes to'
+  aws.complexEventProcessing -> worldTracer 'Publishes baggage events to'
+  aws.complexEventProcessing -> netTracer 'Publishes baggage events to'
+  aws.complexEventProcessing -> customerEventSubscribers 'Publishes customer events to'
+
+  apiClients -> aws.apiGateway.customerApis 'Uses'
+  aws.apiGateway.customerApis -> aws.microserviceWorkflows 'Invokes'
+  aws.microserviceWorkflows -> aws.lambda.eventHandlers 'Invokes'
+  aws.microserviceWorkflows -> aws.fargate.customerMicroservices 'Orchestrates'
+
+  aws.s3.parquetData -> aws.redshift.customerMarts 'Feeds warehouse schemas and data marts'
+  aws.s3.reportableData -> aws.redshift.customerMarts 'Feeds analytics data marts'
+  aws.glueCatalog.dataCatalog -> aws.athena 'Publishes schemas for'
+  aws.s3.reportableData -> aws.athena 'Is queried directly by'
+  aws.s3.parquetData -> aws.athena 'Is queried directly by'
+  aws.s3.reportableData -> aws.sagemaker.customerModels 'Provides data lake input for'
+  aws.redshift.customerMarts -> aws.quickSight.dashboards 'Provides analytics to'
+  aws.athena -> aws.quickSight.dashboards 'Provides ad hoc analytics to'
+  dashboardUsers -> aws.quickSight.dashboards 'Uses'
+}
+
+views {
+  view index {
+    title 'Airlines Data Platform'
+    include *, aws.*
+  }
+}
