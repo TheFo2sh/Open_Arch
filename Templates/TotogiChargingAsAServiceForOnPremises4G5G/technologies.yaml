@@ -57,10 +57,10 @@ technologies:
     platform: aws
     hosts: []
   - key: aws-vpc-endpoints
-    name: AWS PrivateLink and VPC endpoints
+    name: Amazon VPC endpoints
     description: A VPC endpoint is shown in the diagram; its endpoint service and role are not specified.
     vendor: Amazon Web Services
-    url: https://aws.amazon.com/privatelink/
+    url: https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints.html
     types: [managed-service]
     platform: aws
     hosts: []

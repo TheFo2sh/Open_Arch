@@ -23,7 +23,8 @@ The architecture connects an on-premises 4G/5G network to Totogi's AWS-hosted, m
 6. A Network Load Balancer directs 5G REST requests to the charging decision engines. The tenant ID is obtained from an Amazon Cognito access token.
 7. The decision engine handles rating requests and looks up balances and rating rules in DynamoDB, partitioned by tenant ID and subscriber ID.
 8. EventBridge and S3 buckets are identified for customizable handling of notifications and event detail records (EDRs).
-9. The charging engine delivers quotas for the validated subscriber's session; subscribers can then use data and voice services according to their plan and available credit.
+9. The charging engine delivers quotas for the validated subscriber's session.
+10. Subscribers access data and voice services over the customer network through N6/SGI, based on the provisioned plan and available credit.
 
 ## What applying it brings
 

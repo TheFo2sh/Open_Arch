@@ -135,18 +135,21 @@ model {
   }
 
   subscriber -> ran 'Uses data and voice services through'
-  ran -> telco.core 'Connects subscriber traffic to'
+  ran -> telco.core 'Connects to for subscriber registration over N2 (5G) or S1 (4G)'
   telco.core -> aws.directConnect 'Connects the telco data center to AWS through'
+  telco.core -> aws.vpc.access.diameterAdapter 'Sends N40 (5G REST) and Gy (4G Diameter) charging requests through the AWS connection'
   aws.directConnect -> aws.transitGateway 'Connects to'
   aws.transitGateway -> aws.vpc 'Provides connectivity to'
   aws.transitGateway -> aws.vpc.access 'Routes charging traffic to'
   aws.vpc.access -> aws.vpc.networkLoadBalancer 'Forwards charging requests through'
+  aws.vpc.access.diameterAdapter -> aws.vpc.charging 'Transforms requests and responses between 5G REST and 4G Diameter'
   aws.vpc.networkLoadBalancer -> aws.vpc.charging 'Routes 5G REST requests to'
   aws.vpc.charging -> aws.cognito 'Gets the tenant ID from the access token'
   aws.vpc.charging -> aws.dynamodb.subscriberBalances 'Looks up balances and rating rules in'
   aws.vpc.charging -> aws.eventBridge 'Uses with S3 for customizable notification and EDR handling'
-  aws.eventBridge -> aws.s3.eventRecords 'Used together for customizable notification and EDR handling'
+  aws.vpc.charging -> aws.s3.eventRecords 'Uses buckets with EventBridge for customizable notification and EDR handling'
   aws.vpc.charging -> subscriber 'Delivers session quotas to'
+  telco.core -> subscriber 'Provides data and voice services over N6/SGI based on the plan and available credit'
 }
 
 views {
