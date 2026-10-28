@@ -1,0 +1,260 @@
+// Digital River for CPG, B2B, and DTC on AWS.
+// Source: https://docs.aws.amazon.com/reference-architecture-diagrams/latest/digital-river-cpg/digital-river-cpg.html
+// Systems and users are slots; applying this template maps them onto the project's own.
+model {
+  shopper = user 'Shopper and store user' {
+    description 'Uses the B2B or DTC storefront from a device or mobile app.'
+  }
+  businessUser = user 'Business user' {
+    description 'Uses existing corporate business systems for day-to-day activities.'
+  }
+  fulfillmentPartner = user 'Fulfillment partner' {
+    description 'Exchanges fulfillment requests, order status updates, and returns with the headless layer.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    cloudfront = platform 'Amazon CloudFront' {
+      description 'Delivers static content through AWS edge locations.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    lambdaAtEdge = platform 'AWS Lambda@Edge' {
+      description 'Provides edge computing for dynamic content.'
+      metadata {
+        uses 'aws-lambda-at-edge'
+      }
+    }
+    shield = platform 'AWS Shield' {
+      description 'Provides website security at the AWS edge.'
+      metadata {
+        uses 'aws-shield'
+      }
+    }
+    waf = platform 'AWS WAF' {
+      description 'Provides website security at the AWS edge.'
+      metadata {
+        uses 'aws-waf'
+      }
+    }
+    directConnect = platform 'AWS Direct Connect' {
+      description 'One option for securing data in transit between corporate networks and AWS.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    siteToSiteVpn = platform 'AWS Site-to-Site VPN' {
+      description 'Alternative to Direct Connect for securing data in transit.'
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    outposts = platform 'AWS Outposts' {
+      description 'Adds AWS compute and storage capability at stores in 1U and 2U form factors.'
+      metadata {
+        uses 'aws-outposts'
+      }
+    }
+
+    ec2AutoScaling = platform 'Amazon EC2 Auto Scaling' {
+      description 'Provides compute for the B2B and DTC website frontend.'
+      metadata {
+        uses 'amazon-ec2-auto-scaling'
+      }
+      storefront = system 'B2B and DTC storefront' {
+        description 'The commerce website frontend, including the end-user and management portals.'
+        frontend = container 'Storefront and management portal' {
+          description 'The website frontend; the diagram names React.js, Node.js, and GraphQL.'
+          metadata {
+            uses 'react, node-js, graphql'
+          }
+        }
+      }
+    }
+    amplify = platform 'AWS Amplify' {
+      description 'Shown with the storefront and headless application technologies.'
+      metadata {
+        uses 'aws-amplify'
+      }
+    }
+    appSync = platform 'AWS AppSync' {
+      description 'Managed API service shown in the headless application layer.'
+      metadata {
+        uses 'aws-appsync'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'API service shown in the headless application and data layer.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs application logic in the headless ecommerce layer.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      headless = system 'Headless ecommerce application' {
+        description 'Shared microservices layer that interacts with storefronts, fulfillment partners, and Digital River.'
+        application = container 'Headless application logic' {
+          description 'Application logic shown with Node.js and GraphQL.'
+          metadata {
+            uses 'node-js, graphql'
+          }
+        }
+      }
+    }
+    aurora = platform 'Amazon Aurora' {
+      description 'Relational database service shown in the headless application data layer.'
+      metadata {
+        uses 'amazon-aurora'
+      }
+      commerceRelationalData = database 'Headless application relational data' {
+        description 'Generic relational data store; AWS does not specify an engine or schema.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Database service shown in the headless application data layer.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      commerceNoSqlData = database 'Headless application database' {
+        description 'Database shown in the diagram; its data model and contents are not specified.'
+      }
+    }
+
+    digitalRiver = platform 'Digital River multi-tenant SaaS' {
+      description 'Third-party SaaS providing core commerce functionality for order-to-cash processes.'
+      metadata {
+        uses 'digital-river-commerce'
+      }
+    }
+    rds = platform 'Amazon Relational Database Service' {
+      description 'Database service named in the Digital River SaaS layer; no engine or data model is specified.'
+      metadata {
+        uses 'amazon-rds'
+      }
+      saasRelationalData = database 'SaaS relational database' {
+        description 'Generic relational data store; AWS does not specify its engine, schema, or ownership.'
+      }
+    }
+    ecs = platform 'Amazon Elastic Container Service' {
+      description 'Container service named in the Digital River SaaS layer.'
+      metadata {
+        uses 'amazon-ecs'
+      }
+    }
+    loadBalancing = platform 'Elastic Load Balancing' {
+      description 'Load balancing service named in the Digital River SaaS layer.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+    openSearch = platform 'Amazon OpenSearch Service' {
+      description 'Search service named in the Digital River SaaS layer.'
+      metadata {
+        uses 'amazon-opensearch-service'
+      }
+      saasSearchData = database 'SaaS search data' {
+        description 'Search data is shown on OpenSearch Service; AWS does not specify its contents.'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Streaming service shown in the Digital River SaaS layer.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    route53 = platform 'Amazon Route 53' {
+      description 'DNS service named in the Digital River SaaS layer.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+  }
+
+  corporate = zone 'Corporate network' {
+    metadata {
+      platform 'other'
+    }
+    businessSystems = system 'Existing business systems' {
+      description 'Existing internal and third-party applications, including SAP, BI, and ERP systems.'
+      applications = container 'BI, ERP, and enterprise applications' {
+        description 'Existing business applications; specific products and responsibilities are not defined.'
+      }
+    }
+    astra = platform 'Astra DB for Cassandra' {
+      description 'Third-party database named in the corporate network.'
+      metadata {
+        uses 'astra-db-cassandra'
+      }
+      astraData = database 'Astra DB data' {
+        description 'Database contents and its relationship to the commerce flows are not specified.'
+      }
+    }
+    relationalDatabases = platform 'Relational databases' {
+      description 'Unspecified relational databases shown in the corporate network.'
+      metadata {
+        uses 'corporate-relational-databases'
+      }
+      relationalData = database 'Corporate relational data' {
+        description 'A generic database; engine and contents are not specified.'
+      }
+    }
+    oracle = platform 'Oracle DB' {
+      description 'Oracle database technology named as an example in the corporate network.'
+      metadata {
+        uses 'oracle-database'
+      }
+      oracleData = database 'Oracle database' {
+        description 'Database contents and its relationship to the commerce flows are not specified.'
+      }
+    }
+    kafka = platform 'Apache Kafka' {
+      description 'Streaming platform named in the corporate network.'
+      metadata {
+        uses 'apache-kafka'
+      }
+    }
+    mesos = platform 'Apache Mesos on Marathon' {
+      description 'Compute platform named in the corporate network.'
+      metadata {
+        uses 'apache-mesos-marathon'
+      }
+    }
+    chaosSearch = platform 'ChaosSearch' {
+      description 'Third-party search technology named in the corporate network.'
+      metadata {
+        uses 'chaossearch'
+      }
+      searchData = database 'ChaosSearch data' {
+        description 'Data contents and its relationship to the commerce flows are not specified.'
+      }
+    }
+  }
+
+  shopper -> aws.ec2AutoScaling.storefront 'Uses'
+  businessUser -> aws.ec2AutoScaling.storefront 'Uses the management portal'
+  aws.waf -> aws.cloudfront 'Protects'
+  aws.shield -> aws.cloudfront 'Protects'
+  aws.lambdaAtEdge -> aws.cloudfront 'Provides dynamic edge computing for'
+  aws.cloudfront -> aws.ec2AutoScaling.storefront 'Delivers static content and forwards dynamic requests to'
+  aws.ec2AutoScaling.storefront -> aws.lambda 'Uses'
+  aws.amplify -> aws.ec2AutoScaling.storefront 'Supports'
+  aws.appSync -> aws.lambda.headless 'Provides API access to'
+  aws.apiGateway -> aws.lambda.headless 'Provides API access to'
+  aws.lambda.headless -> aws.aurora.commerceRelationalData 'Uses'
+  aws.lambda.headless -> aws.dynamodb.commerceNoSqlData 'Uses'
+  aws.ec2AutoScaling.storefront -> aws.lambda.headless 'Uses shared commerce services'
+  aws.lambda.headless -> aws.digitalRiver 'Integrates with'
+  fulfillmentPartner -> aws.lambda.headless 'Exchanges fulfillment requests, order status updates, and returns with'
+  businessUser -> corporate.businessSystems 'Uses'
+  corporate.businessSystems -> aws.lambda.headless 'Integrates with'
+  corporate.businessSystems -> aws.digitalRiver 'Integrates with'
+  corporate.businessSystems -> aws.directConnect 'Can use for secure connectivity to AWS'
+  corporate.businessSystems -> aws.siteToSiteVpn 'Alternative secure connectivity to AWS'
+}

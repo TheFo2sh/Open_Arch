@@ -1,0 +1,169 @@
+// Automotive Call Center Architecture, after AWS's reference architecture.
+// The AWS source page and its linked diagrams describe the two documented call flows.
+// Read together with the repository's specification.c4. Systems and users are slots.
+model {
+  driver = user 'Vehicle owner' {
+    description 'Initiates emergency, breakdown, service, or concierge calls from the vehicle.'
+  }
+  agent = user 'Call center agent' {
+    description 'Handles escalated calls and uses the case, vehicle, customer, and conversation context.'
+  }
+
+  vehicle = system 'Connected vehicle' {
+    description 'Triggers eCall or bCall for emergencies and breakdowns, and hCall or cCall for service and concierge requests.'
+  }
+  connectedVehicleBackend = system 'Connected vehicle backend' {
+    description 'Receives vehicle snapshots and serves current vehicle and location data; AWS gives Connected Mobility Solution as an example, not a required implementation.'
+  }
+  agentClient = system 'Call center agent client' {
+    description 'Retrieves vehicle and location data by case ID and presents customer profile, call insights, and summaries to the agent.'
+  }
+  crm = system 'Customer relationship management (CRM)' {
+    description 'External CRM integration that supplies a unified customer profile; the source does not identify a provider.'
+  }
+  productTeams = system 'OEM product and development processes' {
+    description 'Use customer and product feedback insights in development, production, and product-roadmap decisions.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    connect = platform 'Amazon Connect' {
+      description 'Handles contact flows, caller routing and queues, agent calls, and customer email and text reminders, vehicle issues, and recommendations.'
+      metadata {
+        uses 'amazon-connect'
+      }
+
+      contactCenter = system 'Automotive contact center' {
+        description 'Supports eCall and bCall safety cases, hCall and cCall service and concierge requests, and handoff to an agent.'
+      }
+      contactLens = platform 'Amazon Connect Contact Lens' {
+        description 'Analyzes live and completed conversations using transcription and intelligent search, detects sentiment and issues, categorizes contacts, and creates call summaries.'
+        metadata {
+          uses 'amazon-connect-contact-lens'
+        }
+      }
+      voiceId = platform 'Amazon Connect Voice ID' {
+        description 'Authenticates real-time callers by voice.'
+        metadata {
+          uses 'amazon-connect-voice-id'
+        }
+      }
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Provides the API path for vehicle snapshot and location data exchange with the connected-vehicle backend.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      description 'Runs event-triggered case-assignment and conversational intent functions.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      caseAndVehicleFunctions = system 'Case and vehicle data functions' {
+        description 'Assigns case IDs to calls and vehicle data, and requests connected-vehicle data when needed.'
+        assignCase = container 'Case assignment function' {
+          description 'Associates a case ID with call metadata and the vehicle data received by the contact center.'
+        }
+        vehicleLookup = container 'Vehicle data lookup function' {
+          description 'Retrieves connected-vehicle data to provide a response or context for a call.'
+        }
+      }
+      intentFunctions = system 'Conversational intent functions' {
+        description 'Formulates responses for recognized service and concierge intents.'
+        intentFulfillment = container 'Intent fulfillment function' {
+          description 'Uses identified intent data and, when needed, connected-vehicle data to formulate a reply.'
+        }
+      }
+    }
+
+    lex = platform 'Amazon Lex' {
+      description 'Provides the conversational self-service channel for service and concierge calls.'
+      metadata {
+        uses 'amazon-lex'
+      }
+      chatbot = system 'Service and concierge chatbot' {
+        description 'Identifies caller intent and automates conversations that do not need a human agent.'
+      }
+    }
+
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Stores data used by the Lex and Lambda intent-response integration.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      intentData = database 'Intent response data' {
+        description 'Data used to formulate replies for recognized caller intents; the source does not specify a schema.'
+      }
+    }
+
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Streams call metrics and insights to the analytics store.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Stores call and product feedback data for querying and visualization.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      analyticsData = database 'Call and product feedback data' {
+        description 'Call matrix, sentiment analysis, and product feedback data used by the analytics flow.'
+      }
+    }
+
+    athena = platform 'Amazon Athena' {
+      description 'Queries analytics data stored in Amazon S3.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Visualizes queried data in business metric and KPI dashboards.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+  }
+
+  driver -> vehicle 'Initiates a call using the vehicle interface'
+  vehicle -> aws.connect.contactCenter 'Places eCall, bCall, hCall, or cCall'
+  vehicle -> aws.apiGateway 'Sends sensor and location snapshot'
+  aws.apiGateway -> connectedVehicleBackend 'Delivers vehicle snapshot and case metadata'
+  aws.connect.contactCenter -> aws.lambda.caseAndVehicleFunctions.assignCase 'Triggers case ID assignment'
+  aws.lambda.caseAndVehicleFunctions.assignCase -> connectedVehicleBackend 'Associates case ID with vehicle data'
+  agentClient -> aws.apiGateway 'Requests current vehicle data by case ID'
+  aws.apiGateway -> connectedVehicleBackend 'Routes the call-center data request'
+  connectedVehicleBackend -> agentClient 'Returns current vehicle and location data for the case'
+  aws.connect.contactCenter -> agentClient 'Presents the call and customer context'
+  aws.connect.contactCenter -> crm 'Integrates customer profiles from multiple sources'
+  aws.connect.contactCenter -> aws.connect.voiceId 'Authenticates real-time callers'
+  aws.connect.contactCenter -> aws.connect.contactLens 'Analyzes conversations and produces agent insights'
+  aws.connect.contactLens -> agentClient 'Provides real-time insights and call summaries'
+  aws.connect.contactCenter -> aws.lex.chatbot 'Routes eligible hCall and cCall requests to self-service'
+  aws.lex.chatbot -> aws.lambda.intentFunctions.intentFulfillment 'Invokes intent response processing'
+  aws.lambda.intentFunctions.intentFulfillment -> aws.dynamodb.intentData 'Uses data to formulate an intent response'
+  aws.lambda.intentFunctions.intentFulfillment -> connectedVehicleBackend 'Requests vehicle data when needed'
+  aws.connect.contactCenter -> aws.kinesis 'Streams call metrics and insights'
+  aws.kinesis -> aws.s3.analyticsData 'Delivers analytics data'
+  aws.athena -> aws.s3.analyticsData 'Queries call and product feedback data'
+  aws.athena -> aws.quickSight 'Supplies query results for dashboards'
+  aws.quickSight -> productTeams 'Provides feedback and KPI insights'
+  aws.connect.contactCenter -> agentClient 'Queues calls for agent handling'
+  agent -> agentClient 'Uses the call context and client'
+}
+
+views {
+  view index {
+    title 'Automotive Call Center Architecture'
+    include *, aws.*, aws.connect.*, aws.lambda.*, aws.lex.*, aws.dynamodb.*, aws.s3.*
+  }
+}

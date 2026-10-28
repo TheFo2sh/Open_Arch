@@ -1,0 +1,196 @@
+// Central Logging and Analytics in Hybrid Environments, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/central-logging-analytics-hybrid/central-logging-analytics-hybrid.html
+model {
+  isv = system 'ISV integration' {
+    description 'Optional external log destination; AWS shows an ISV integration but does not name a product or vendor.'
+  }
+
+  datacenter = zone 'Customer data center' {
+    metadata {
+      platform 'other'
+    }
+
+    vsphere = platform 'VMware vSphere' {
+      description 'On-premises virtualization environment containing virtual machines with the CloudWatch agent.'
+      metadata {
+        uses 'vmware-vsphere'
+      }
+
+      onPremVms = system 'On-premises virtual machines' {
+        description 'Customer virtual machines that send metrics and logs to Amazon CloudWatch.'
+
+        agent = container 'CloudWatch agent' {
+          description 'Installed on the virtual machines to collect and send metrics and logs.'
+          metadata {
+            uses 'amazon-cloudwatch-agent'
+          }
+        }
+      }
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    customerVpc = platform 'Customer VPC' {
+      description 'Customer-owned VPC hosting the CloudWatch endpoint and network interface.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      eni = platform 'Elastic Network Interface' {
+        description 'Network interface used by VMware Cloud on AWS to reach the CloudWatch endpoint in this VPC.'
+        metadata {
+          uses 'amazon-ec2-elastic-network-interface'
+        }
+      }
+
+      cloudwatch = platform 'Amazon CloudWatch' {
+        description 'Central collection point for hybrid metrics and logs, with alarms and statistics.'
+        metadata {
+          uses 'amazon-cloudwatch'
+        }
+
+        logData = database 'CloudWatch log groups and metrics' {
+          description 'Logs and metrics received from on-premises and VMware Cloud on AWS virtual machines.'
+        }
+      }
+    }
+
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Private connectivity between the customer data center and AWS, as shown in the reference diagram.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+
+    transitGateway = platform 'AWS Transit Gateway' {
+      description 'Routes hybrid CloudWatch metrics and logs to the customer-owned VPC.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+
+    vmwareCloud = platform 'VMware Cloud on AWS' {
+      description 'VMware environment in AWS; the diagram shows its SDDC on Amazon bare metal instances.'
+      metadata {
+        uses 'vmware-cloud-on-aws'
+      }
+
+      bareMetal = platform 'Amazon EC2 bare metal instances' {
+        description 'Bare metal compute layer shown beneath the VMware Cloud on AWS SDDC.'
+        metadata {
+          uses 'amazon-ec2-bare-metal'
+        }
+
+        sddc = platform 'VMware Cloud SDDC' {
+          description 'Software-defined data center containing VMware virtual machines with the CloudWatch agent.'
+          metadata {
+            uses 'vmware-cloud-sddc'
+          }
+
+          vmwareVms = system 'VMware Cloud on AWS virtual machines' {
+            description 'VMware Cloud workloads that send CloudWatch data through an elastic network interface.'
+
+            agent = container 'CloudWatch agent' {
+              description 'Installed on the virtual machines to send metrics and logs to the customer VPC endpoint.'
+              metadata {
+                uses 'amazon-cloudwatch-agent'
+              }
+            }
+          }
+        }
+      }
+    }
+
+    centralVpc = platform 'Central analytics VPC' {
+      description 'VPC containing the central log storage, search, processing, query, and visualization services.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      firehose = platform 'Amazon Data Firehose' {
+        description 'Receives a subscription from a CloudWatch log group and continuously delivers log data.'
+        metadata {
+          uses 'amazon-kinesis-data-firehose'
+        }
+      }
+
+      s3 = platform 'Amazon S3' {
+        description 'Stores log data delivered by Amazon Data Firehose.'
+        metadata {
+          uses 'amazon-s3'
+        }
+
+        logArchive = database 'Log archive' {
+          description 'Log data files in Amazon S3 for cataloging, querying, and loading into Amazon Redshift.'
+        }
+      }
+
+      opensearch = platform 'Amazon OpenSearch Service' {
+        description 'Search and analytics destination for the log stream.'
+        metadata {
+          uses 'amazon-opensearch-service'
+        }
+
+        logIndex = database 'Searchable log data' {
+          description 'Logs streamed by Amazon Data Firehose for search and analytics.'
+        }
+      }
+
+      glue = platform 'AWS Glue' {
+        description 'Creates the Data Catalog and ETL jobs for processing log data.'
+        metadata {
+          uses 'aws-glue'
+        }
+
+        catalog = database 'AWS Glue Data Catalog' {
+          description 'Metadata used by Amazon Athena to discover and query data in Amazon S3.'
+        }
+      }
+
+      athena = platform 'Amazon Athena' {
+        description 'Queries data in Amazon S3 using the AWS Glue Data Catalog.'
+        metadata {
+          uses 'amazon-athena'
+        }
+      }
+
+      redshift = platform 'Amazon Redshift' {
+        description 'Reads and loads data files from Amazon S3 for analytics.'
+        metadata {
+          uses 'amazon-redshift'
+        }
+
+        analyticsWarehouse = database 'Analytics data' {
+          description 'Data loaded from Amazon S3 for Amazon Redshift analytics.'
+        }
+      }
+
+      quickSight = platform 'Amazon QuickSight' {
+        description 'Builds visualizations and dashboards using Amazon Athena and Amazon Redshift.'
+        metadata {
+          uses 'amazon-quicksight'
+        }
+      }
+    }
+  }
+
+  datacenter.vsphere.onPremVms.agent -> aws.directConnect 'Sends data over private connectivity'
+  aws.directConnect -> aws.transitGateway 'Connects the customer data center to AWS'
+  aws.transitGateway -> aws.customerVpc.cloudwatch 'Routes hybrid metrics and logs to'
+  aws.vmwareCloud.bareMetal.sddc.vmwareVms.agent -> aws.customerVpc.eni 'Sends CloudWatch data through'
+  aws.customerVpc.eni -> aws.customerVpc.cloudwatch 'Connects to the CloudWatch endpoint in'
+  aws.customerVpc.cloudwatch.logData -> isv 'Can export log data to'
+  aws.customerVpc.cloudwatch.logData -> aws.centralVpc.firehose 'Delivers subscribed log data to'
+  aws.centralVpc.firehose -> aws.centralVpc.s3.logArchive 'Delivers log data to'
+  aws.centralVpc.firehose -> aws.centralVpc.opensearch.logIndex 'Streams searchable log data to'
+  aws.centralVpc.s3.logArchive -> aws.centralVpc.glue 'Provides files for cataloging and ETL'
+  aws.centralVpc.glue.catalog -> aws.centralVpc.athena 'Provides the catalog for queries by'
+  aws.centralVpc.athena -> aws.centralVpc.s3.logArchive 'Queries data in'
+  aws.centralVpc.s3.logArchive -> aws.centralVpc.redshift 'Provides data files for loading into'
+  aws.centralVpc.athena -> aws.centralVpc.quickSight 'Provides query results for dashboards'
+  aws.centralVpc.redshift -> aws.centralVpc.quickSight 'Provides analytics for dashboards'
+}
