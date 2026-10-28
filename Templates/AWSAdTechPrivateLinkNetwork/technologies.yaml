@@ -1,0 +1,74 @@
+# Technologies named in the AWS reference page and its diagram.
+technologies:
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Isolated virtual networks for the supply-side and demand-side platform applications.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon Elastic Compute Cloud
+    description: Compute platform for the SSP auction instances and DSP bidder fleet.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Load balancing resources shown in the SSP and DSP VPCs, including the DSP Network Load Balancer associated with its endpoint service.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-privatelink
+    name: AWS PrivateLink
+    description: Private connectivity from the SSP interface endpoint to the DSP endpoint service in the same AWS Region.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/privatelink/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-route-53-resolver
+    name: Amazon Route 53 Resolver
+    description: VPC DNS resolver used to look up DSP endpoint URLs in the SSP VPC.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resolver.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-route-53-private-hosted-zones
+    name: Amazon Route 53 private hosted zones
+    description: Optional private DNS zone used by the SSP VPC to resolve a DSP endpoint URL to its interface endpoint.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-private.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: DNS service assumed by the reference for DSP domain verification using a TXT record.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Dashboards on both sides provide visibility into active connections and bytes processed per endpoint connection.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]

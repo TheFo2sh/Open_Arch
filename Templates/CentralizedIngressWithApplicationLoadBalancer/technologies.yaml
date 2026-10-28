@@ -1,0 +1,55 @@
+technologies:
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Virtual network boundary for the central ingress and application networks.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-vpc-internet-gateway
+    name: Internet Gateway
+    description: VPC gateway that provides the public ingress path shown in the central ingress network.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-transit-gateway
+    name: AWS Transit Gateway
+    description: Network transit hub that routes traffic between the central ingress VPC and application VPC.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Application Load Balancers and Network Load Balancers used by the centralized ingress patterns.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform hosting the application instances targeted directly or through load balancers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2-auto-scaling
+    name: Amazon EC2 Auto Scaling
+    description: Service that automatically registers EC2 instances in the Auto Scaling group target patterns.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/autoscaling/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]

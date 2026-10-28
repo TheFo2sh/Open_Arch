@@ -1,0 +1,177 @@
+// Datavant Switchboard with AWS Clean Rooms, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/datavant-switchboard-with-aws-clean-rooms/datavant-switchboard-with-aws-clean-rooms.html
+// Systems and users are slots. The deployment methods are alternatives; the source
+// does not say which one a collaborator selects.
+model {
+  creator = user 'Collaboration creator' {
+    description 'Creates the collaboration, invites members, and agrees analysis rules.'
+  }
+  member = user 'Collaborating member' {
+    description 'Provides tokenized data and may be configured to query or receive results.'
+  }
+
+  creatorAws = zone 'Collaboration creator AWS account' {
+    metadata {
+      platform 'aws'
+    }
+
+    creatorS3 = platform 'Amazon S3' {
+      description 'Stores source data, linked tokenized data, and exported query results.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      creatorSourceData = database 'Source data bucket' {
+        description 'Source data containing private patient information before de-identification and tokenization.'
+      }
+      creatorLinkedData = database 'Linked tokenized data bucket' {
+        description 'Linked tokenized data written by Datavant Switchboard and prepared for collaboration.'
+      }
+      queryResults = database 'Query results bucket' {
+        description 'Results exported from the collaboration for the member permitted to receive them.'
+      }
+    }
+
+    creatorWorkflow = system 'Creator data collaboration system' {
+      description 'Slot for the creator’s own system that processes data through Datavant Switchboard.'
+      switchboard = container 'Datavant Switchboard' {
+        description 'De-identifies and tokenizes source data, then links tokenized data with collaborators; AWS does not select a deployment method.'
+        technology 'Datavant Switchboard'
+        metadata {
+          uses 'datavant-switchboard'
+        }
+      }
+    }
+
+    creatorCrawler = platform 'AWS Glue crawler' {
+      description 'Crawls linked tokenized data in Amazon S3.'
+      metadata {
+        uses 'aws-glue-crawler'
+      }
+    }
+    creatorCatalog = platform 'AWS Glue Data Catalog' {
+      description 'Makes crawler-discovered tables available to the collaboration.'
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      creatorTables = database 'Creator catalog tables' {
+        description 'Metadata definitions for the creator’s configured linked-data tables.'
+      }
+    }
+    creatorCleanRooms = platform 'AWS Clean Rooms' {
+      description 'Collaboration created by the creator, with agreed analysis rules.'
+      metadata {
+        uses 'aws-clean-rooms'
+      }
+    }
+
+    redshift = platform 'Amazon Redshift' {
+      description 'Optional analytics service shown for deriving insights from query results.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Optional analytics service shown for deriving insights from query results.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    emr = platform 'Amazon EMR' {
+      description 'Optional analytics service shown for deriving insights from query results.'
+      metadata {
+        uses 'amazon-emr'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Optional analytics and machine-learning service shown for deriving insights from query results.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+  }
+
+  memberAws = zone 'Collaborating member AWS account' {
+    metadata {
+      platform 'aws'
+    }
+
+    memberS3 = platform 'Amazon S3' {
+      description 'Stores the member’s source data and linked tokenized data.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      memberSourceData = database 'Source data bucket' {
+        description 'Member source data containing private patient information before tokenization.'
+      }
+      memberLinkedData = database 'Linked tokenized data bucket' {
+        description 'The member’s linked tokenized data prepared for collaboration.'
+      }
+    }
+
+    memberWorkflow = system 'Member data collaboration system' {
+      description 'Slot for the member’s own system that processes data through Datavant Switchboard.'
+      switchboard = container 'Datavant Switchboard' {
+        description 'De-identifies and tokenizes the member’s source data, then links it with collaborators.'
+        technology 'Datavant Switchboard'
+        metadata {
+          uses 'datavant-switchboard'
+        }
+      }
+    }
+
+    memberCrawler = platform 'AWS Glue crawler' {
+      description 'Crawls the member’s linked tokenized data in Amazon S3.'
+      metadata {
+        uses 'aws-glue-crawler'
+      }
+    }
+    memberCatalog = platform 'AWS Glue Data Catalog' {
+      description 'Makes the member’s crawler-discovered tables available to the collaboration.'
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      memberTables = database 'Member catalog tables' {
+        description 'Metadata definitions for the member’s configured linked-data tables.'
+      }
+    }
+    memberCleanRooms = platform 'AWS Clean Rooms' {
+      description 'The member’s participation in the shared collaboration.'
+      metadata {
+        uses 'aws-clean-rooms'
+      }
+    }
+  }
+
+  creator -> creatorWorkflow 'Operates'
+  member -> memberWorkflow 'Operates'
+
+  creatorSourceData -> creatorWorkflow.switchboard 'Reads and tokenizes'
+  creatorWorkflow.switchboard -> creatorLinkedData 'Writes linked tokenized data to'
+  creatorWorkflow.switchboard -> memberWorkflow.switchboard 'Links tokenized data with'
+  creatorLinkedData -> creatorCrawler 'Is crawled by'
+  creatorCrawler -> creatorCatalog.creatorTables 'Registers discovered tables in'
+  creatorCatalog.creatorTables -> creatorCleanRooms 'Configured tables are associated with'
+  creatorCleanRooms -> creatorCatalog.creatorTables 'Service role accesses creator tables in'
+
+  memberSourceData -> memberWorkflow.switchboard 'Reads and tokenizes'
+  memberWorkflow.switchboard -> memberLinkedData 'Writes linked tokenized data to'
+  memberLinkedData -> memberCrawler 'Is crawled by'
+  memberCrawler -> memberCatalog.memberTables 'Registers discovered tables in'
+  memberCatalog.memberTables -> memberCleanRooms 'Configured tables are associated with'
+  memberCleanRooms -> memberCatalog.memberTables 'Service role accesses member tables in'
+
+  creatorCleanRooms -> memberCleanRooms 'Invites the member to the collaboration'
+  memberWorkflow -> memberCleanRooms 'Uses allowed AGGREGATE and LIST analysis functions in'
+  creatorCleanRooms -> queryResults 'Exports permitted query results to'
+  queryResults -> redshift 'Can be analyzed with'
+  queryResults -> athena 'Can be analyzed with'
+  queryResults -> emr 'Can be analyzed with'
+  queryResults -> sagemaker 'Can be analyzed with'
+}
+
+views {
+  view index {
+    title 'Datavant Switchboard with AWS Clean Rooms'
+    include *, creatorAws.*, memberAws.*
+  }
+}

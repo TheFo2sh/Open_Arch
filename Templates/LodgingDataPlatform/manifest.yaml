@@ -1,0 +1,7 @@
+PackageId: OpenArch.LodgingDataPlatform
+Name: Lodging Data Platform
+Description: An AWS data platform for lodging operations and analytics, combining operational microservices, an open data lake, analytics, and machine learning.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, lodging, hospitality, data-platform]

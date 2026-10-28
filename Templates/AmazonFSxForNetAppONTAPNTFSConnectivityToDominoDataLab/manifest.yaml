@@ -1,0 +1,7 @@
+PackageId: OpenArch.AmazonFSxForNetAppONTAPNTFSConnectivityToDominoDataLab
+Name: Amazon FSx for NetApp ONTAP NTFS connectivity to Domino Data Lab
+Description: Domino Data Lab on Amazon EKS accesses FSx for ONTAP volumes over NFS through NetApp Trident while users can access the same data directly over SMB.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, storage, kubernetes, netapp, domino, ntfs]

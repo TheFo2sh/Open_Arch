@@ -1,0 +1,431 @@
+// Siemens Teamcenter Product Lifecycle Management on AWS.
+// Source: https://docs.aws.amazon.com/reference-architecture-diagrams/latest/siemens-teamcenter-plm/siemens-teamcenter-plm.html
+// Systems and users are slots mapped onto the consuming project's systems and users.
+model {
+  testUsers = user 'Test environment users' {
+    description 'Connect to the Teamcenter test environment over HTTPS.'
+  }
+  productionUsers = user 'Production environment users' {
+    description 'Connect to the Teamcenter production environment over HTTPS.'
+  }
+  dataCenterUsers = user 'Data center users' {
+    description 'Access the AWS environments through Direct Connect, VPN, or HTTPS.'
+  }
+  supportTeam = user 'IT support team' {
+    description 'Access the managed plane through VPN for administration.'
+  }
+
+  customerServices = system 'Customer data-center services' {
+    description 'Customer-side systems shown in the reference diagram; map this slot to an existing project system.'
+
+    fmsCache = container 'FMS client cache' {
+      description 'Customer-side Teamcenter File Management System client cache.'
+      metadata {
+        uses 'siemens-teamcenter-fms'
+      }
+    }
+    cadLicense = container 'CAD license server' {
+      description 'Customer-side CAD license server; the source does not identify its product or vendor.'
+    }
+    thirdPartyLicense = container 'Third-party license server' {
+      description 'Customer-side third-party license server; its implementation is not specified by the source.'
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      description 'Resolves the separate test and production environment URLs.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Dedicated connection from the customer data center.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    siteToSiteVpn = platform 'AWS Site-to-Site VPN' {
+      description 'VPN connection from the customer data center.'
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    vpcPeering = platform 'Amazon VPC Peering' {
+      description 'Connects the application VPC to the separate managed-plane VPC.'
+      metadata {
+        uses 'aws-vpc-peering'
+      }
+    }
+
+    applicationVpc = platform 'Application VPC' {
+      description 'VPC containing the Teamcenter application and its data services.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      internetGateway = platform 'Internet gateway' {
+        description 'Provides the internet connectivity shown for the application VPC.'
+        metadata {
+          uses 'amazon-internet-gateway'
+        }
+      }
+      vpnGateway = platform 'Virtual private gateway' {
+        description 'VPC-side endpoint for the customer Direct Connect and Site-to-Site VPN connections.'
+        metadata {
+          uses 'aws-virtual-private-gateway'
+        }
+      }
+      testAlb = platform 'Test environment Application Load Balancer' {
+        description 'Routes test environment requests to the Teamcenter web tier.'
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+      productionAlb = platform 'Production environment Application Load Balancer' {
+        description 'Routes production environment requests to the Teamcenter web tier.'
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+
+      ec2 = platform 'Amazon EC2' {
+        description 'Compute platform for Teamcenter and its supporting servers.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+
+        teamcenter = system 'Teamcenter Product Lifecycle Management' {
+          description 'The Teamcenter application system, with separate test, production, and standby environments.'
+
+          test = container 'Test environment' {
+            description 'Test Teamcenter stack shown in the first availability zone.'
+            metadata {
+              uses 'siemens-teamcenter'
+            }
+            testWeb = component 'Teamcenter web tier' {
+              description 'Serves browser-based test environment requests.'
+              metadata {
+                uses 'siemens-teamcenter'
+              }
+            }
+            testEnterprise = component 'Teamcenter Enterprise tier' {
+              description 'Processes test environment requests and interacts with Teamcenter services and data.'
+              metadata {
+                uses 'siemens-teamcenter'
+              }
+            }
+            testFms = component 'Teamcenter File Management System' {
+              description 'Stores and retrieves test environment files.'
+              metadata {
+                uses 'siemens-teamcenter-fms'
+              }
+            }
+            testWorkspace = component 'Active Workspace' {
+              description 'Browser workspace for Teamcenter users.'
+              metadata {
+                uses 'siemens-active-workspace'
+              }
+            }
+            testSolr = component 'Apache Solr' {
+              description 'Search service in the Teamcenter stack.'
+              metadata {
+                uses 'apache-solr'
+              }
+            }
+            testDeployment = component 'Deployment Center' {
+              description 'Deployment service in the Teamcenter stack.'
+              metadata {
+                uses 'siemens-deployment-center'
+              }
+            }
+            testVisualization = component 'Visualization server' {
+              description 'Visualization server in the Teamcenter stack.'
+              metadata {
+                uses 'siemens-teamcenter-visualization'
+              }
+            }
+            testDispatcher = component 'Dispatcher' {
+              description 'Dispatcher service in the Teamcenter stack.'
+              metadata {
+                uses 'siemens-teamcenter-dispatcher'
+              }
+            }
+            testIntegration = component 'Application Integration' {
+              description 'Application Integration server in the Teamcenter stack.'
+              metadata {
+                uses 'siemens-application-integration'
+              }
+            }
+          }
+
+          production = container 'Production multi-AZ environment' {
+            description 'Production Teamcenter stack distributed across availability zones.'
+            metadata {
+              uses 'siemens-teamcenter'
+            }
+            productionWeb = component 'Teamcenter web tier' {
+              description 'Serves production browser requests.'
+              metadata {
+                uses 'siemens-teamcenter'
+              }
+            }
+            productionEnterprise = component 'Teamcenter Enterprise tier' {
+              description 'Processes production requests and interacts with Teamcenter services and data.'
+              metadata {
+                uses 'siemens-teamcenter'
+              }
+            }
+            productionFms = component 'Teamcenter File Management System' {
+              description 'Stores and retrieves production files.'
+              metadata {
+                uses 'siemens-teamcenter-fms'
+              }
+            }
+            productionWorkspace = component 'Active Workspace' {
+              description 'Browser workspace for production Teamcenter users.'
+              metadata {
+                uses 'siemens-active-workspace'
+              }
+            }
+            productionSolr = component 'Apache Solr' {
+              description 'Search service in the Teamcenter stack.'
+              metadata {
+                uses 'apache-solr'
+              }
+            }
+            productionDeployment = component 'Deployment Center' {
+              description 'Deployment service in the Teamcenter stack.'
+              metadata {
+                uses 'siemens-deployment-center'
+              }
+            }
+            productionVisualization = component 'Visualization server' {
+              description 'Visualization server in the Teamcenter stack.'
+              metadata {
+                uses 'siemens-teamcenter-visualization'
+              }
+            }
+            productionDispatcher = component 'Dispatcher' {
+              description 'Dispatcher service in the Teamcenter stack.'
+              metadata {
+                uses 'siemens-teamcenter-dispatcher'
+              }
+            }
+            productionIntegration = component 'Application Integration' {
+              description 'Application Integration server in the Teamcenter stack.'
+              metadata {
+                uses 'siemens-application-integration'
+              }
+            }
+          }
+
+          standby = container 'Production environment standby' {
+            description 'Standby production stack shown in a second availability zone.'
+            metadata {
+              uses 'siemens-teamcenter'
+            }
+            standbyWeb = component 'Teamcenter web tier' {
+              description 'Standby web tier for production.'
+              metadata {
+                uses 'siemens-teamcenter'
+              }
+            }
+            standbyEnterprise = component 'Teamcenter Enterprise tier' {
+              description 'Standby enterprise tier for production.'
+              metadata {
+                uses 'siemens-teamcenter'
+              }
+            }
+            standbyFms = component 'Teamcenter File Management System' {
+              description 'Standby file management tier for production.'
+              metadata {
+                uses 'siemens-teamcenter-fms'
+              }
+            }
+            standbyWorkspace = component 'Active Workspace' {
+              description 'Standby browser workspace for production.'
+              metadata {
+                uses 'siemens-active-workspace'
+              }
+            }
+            standbySolr = component 'Apache Solr' {
+              description 'Standby search service.'
+              metadata {
+                uses 'apache-solr'
+              }
+            }
+            standbyDeployment = component 'Deployment Center' {
+              description 'Standby deployment service.'
+              metadata {
+                uses 'siemens-deployment-center'
+              }
+            }
+            standbyVisualization = component 'Visualization server' {
+              description 'Standby visualization server.'
+              metadata {
+                uses 'siemens-teamcenter-visualization'
+              }
+            }
+            standbyDispatcher = component 'Dispatcher' {
+              description 'Standby dispatcher service.'
+              metadata {
+                uses 'siemens-teamcenter-dispatcher'
+              }
+            }
+            standbyIntegration = component 'Application Integration' {
+              description 'Standby Application Integration server.'
+              metadata {
+                uses 'siemens-application-integration'
+              }
+            }
+          }
+        }
+
+        licensing = system 'Siemens license service' {
+          description 'Teamcenter license server instances deployed for high availability.'
+          licenseServer = container 'Teamcenter license server' {
+            description 'The diagram shows active and standby license servers; the accompanying prose specifies three Availability Zones.'
+            metadata {
+              uses 'siemens-license-server'
+            }
+          }
+        }
+      }
+
+      rds = platform 'Amazon RDS' {
+        description 'Managed relational database for PLM data; the reference allows Oracle or Microsoft SQL Server.'
+        metadata {
+          uses 'amazon-rds'
+        }
+        testDb = database 'Test PLM database' {
+          description 'Structured PLM data for the test environment.'
+        }
+        productionDb = database 'Production PLM database' {
+          description 'Structured PLM data for the production environment.'
+        }
+        standbyDb = database 'Standby PLM database' {
+          description 'Database shown in the production standby environment.'
+        }
+      }
+
+      ebs = platform 'Amazon Elastic Block Store' {
+        description 'Block storage option, labeled non-HA in the diagram.'
+        metadata {
+          uses 'amazon-ebs'
+        }
+      }
+      efs = platform 'Amazon Elastic File System' {
+        description 'Shared file storage option for Teamcenter.'
+        metadata {
+          uses 'amazon-efs'
+        }
+      }
+      fsx = platform 'Amazon FSx for NetApp ONTAP' {
+        description 'Managed file storage option for Teamcenter.'
+        metadata {
+          uses 'amazon-fsx-netapp-ontap'
+        }
+      }
+    }
+
+    managedPlaneVpc = platform 'Managed-plane VPC' {
+      description 'Separate VPC containing management and monitoring servers.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      ec2 = platform 'Amazon EC2' {
+        description 'Compute platform for the management-plane servers.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        operations = system 'Operations management' {
+          description 'Management-plane systems used to administer and monitor the Teamcenter environments.'
+          jumpbox = container 'RDP server / jumpbox' {
+            description 'Jumpbox shown for administrator RDP access.'
+          }
+          monitoring = container 'Monitoring server' {
+            description 'Monitors systems, networks, and infrastructure.'
+          }
+        }
+      }
+
+      directory = platform 'AWS Directory Service' {
+        description 'AWS-hosted option for administrator authentication; the source also permits an on-premises directory.'
+        metadata {
+          uses 'aws-directory-service'
+        }
+      }
+      systemsManager = platform 'AWS Systems Manager' {
+        description 'Alternative access method for IT teams.'
+        metadata {
+          uses 'aws-systems-manager'
+        }
+      }
+      workspaces = platform 'Amazon WorkSpaces Applications' {
+        description 'Alternative application streaming access method for IT teams.'
+        metadata {
+          uses 'amazon-workspaces-applications'
+        }
+      }
+    }
+  }
+
+  testUsers -> aws.applicationVpc.ec2.teamcenter 'Connect to the test environment over HTTPS'
+  productionUsers -> aws.applicationVpc.ec2.teamcenter 'Connect to the production environment over HTTPS'
+  dataCenterUsers -> aws.applicationVpc.ec2.teamcenter 'Access the Teamcenter environments'
+  supportTeam -> aws.managedPlaneVpc.ec2.operations 'Administer through the managed plane'
+
+  aws.route53 -> aws.applicationVpc.testAlb 'Resolves the test environment URL to'
+  aws.route53 -> aws.applicationVpc.productionAlb 'Resolves the production environment URL to'
+  aws.applicationVpc.internetGateway -> aws.applicationVpc.testAlb 'Provides internet connectivity to'
+  aws.applicationVpc.internetGateway -> aws.applicationVpc.productionAlb 'Provides internet connectivity to'
+  aws.applicationVpc.testAlb -> aws.applicationVpc.ec2.teamcenter.test.testWeb 'Routes test requests to'
+  aws.applicationVpc.productionAlb -> aws.applicationVpc.ec2.teamcenter.production.productionWeb 'Routes production requests to'
+
+  aws.applicationVpc.ec2.teamcenter.test.testWeb -> aws.applicationVpc.ec2.teamcenter.test.testEnterprise 'Forwards requests to'
+  aws.applicationVpc.ec2.teamcenter.test.testEnterprise -> aws.applicationVpc.ec2.teamcenter.test.testFms 'Uses'
+  aws.applicationVpc.ec2.teamcenter.test.testEnterprise -> aws.applicationVpc.rds.testDb 'Reads and writes structured PLM data in'
+  aws.applicationVpc.ec2.teamcenter.test.testFms -> aws.applicationVpc.ebs 'Stores or retrieves files using'
+  aws.applicationVpc.ec2.teamcenter.test.testFms -> aws.applicationVpc.efs 'Stores or retrieves files using'
+  aws.applicationVpc.ec2.teamcenter.test.testFms -> aws.applicationVpc.fsx 'Stores or retrieves files using'
+  aws.applicationVpc.ec2.teamcenter.test.testWeb -> aws.applicationVpc.ec2.teamcenter.test.testWorkspace 'Serves'
+  aws.applicationVpc.ec2.teamcenter.test.testEnterprise -> aws.applicationVpc.ec2.teamcenter.test.testSolr 'Uses search from'
+
+  aws.applicationVpc.ec2.teamcenter.production.productionWeb -> aws.applicationVpc.ec2.teamcenter.production.productionEnterprise 'Forwards requests to'
+  aws.applicationVpc.ec2.teamcenter.production.productionEnterprise -> aws.applicationVpc.ec2.teamcenter.production.productionFms 'Uses'
+  aws.applicationVpc.ec2.teamcenter.production.productionEnterprise -> aws.applicationVpc.rds.productionDb 'Reads and writes structured PLM data in'
+  aws.applicationVpc.ec2.teamcenter.production.productionFms -> aws.applicationVpc.ebs 'Stores or retrieves files using'
+  aws.applicationVpc.ec2.teamcenter.production.productionFms -> aws.applicationVpc.efs 'Stores or retrieves files using'
+  aws.applicationVpc.ec2.teamcenter.production.productionFms -> aws.applicationVpc.fsx 'Stores or retrieves files using'
+  aws.applicationVpc.ec2.teamcenter.production.productionWeb -> aws.applicationVpc.ec2.teamcenter.production.productionWorkspace 'Serves'
+  aws.applicationVpc.ec2.teamcenter.production.productionEnterprise -> aws.applicationVpc.ec2.teamcenter.production.productionSolr 'Uses search from'
+
+  aws.applicationVpc.ec2.teamcenter.standby.standbyWeb -> aws.applicationVpc.ec2.teamcenter.standby.standbyEnterprise 'Forwards requests to'
+  aws.applicationVpc.ec2.teamcenter.standby.standbyEnterprise -> aws.applicationVpc.ec2.teamcenter.standby.standbyFms 'Uses'
+  aws.applicationVpc.ec2.teamcenter.standby.standbyEnterprise -> aws.applicationVpc.rds.standbyDb 'Reads and writes structured PLM data in'
+  aws.applicationVpc.ec2.teamcenter.standby.standbyFms -> aws.applicationVpc.ebs 'Stores or retrieves files using'
+  aws.applicationVpc.ec2.teamcenter.standby.standbyFms -> aws.applicationVpc.efs 'Stores or retrieves files using'
+  aws.applicationVpc.ec2.teamcenter.standby.standbyFms -> aws.applicationVpc.fsx 'Stores or retrieves files using'
+  aws.applicationVpc.ec2.teamcenter.standby.standbyWeb -> aws.applicationVpc.ec2.teamcenter.standby.standbyWorkspace 'Serves'
+  aws.applicationVpc.ec2.teamcenter.standby.standbyEnterprise -> aws.applicationVpc.ec2.teamcenter.standby.standbySolr 'Uses search from'
+
+  customerServices -> aws.directConnect 'Connects to AWS through'
+  customerServices -> aws.siteToSiteVpn 'Connects to AWS through'
+  aws.directConnect -> aws.applicationVpc.vpnGateway 'Connects through'
+  aws.siteToSiteVpn -> aws.applicationVpc.vpnGateway 'Connects through'
+  aws.applicationVpc.vpnGateway -> aws.applicationVpc.testAlb 'Routes customer network traffic to'
+  aws.applicationVpc.vpnGateway -> aws.applicationVpc.productionAlb 'Routes customer network traffic to'
+
+  aws.vpcPeering -> aws.applicationVpc 'Peers with'
+  aws.vpcPeering -> aws.managedPlaneVpc 'Peers with'
+  aws.managedPlaneVpc.directory -> aws.managedPlaneVpc.ec2.operations 'Provides administrator authentication for'
+  aws.managedPlaneVpc.ec2.operations -> aws.managedPlaneVpc.systemsManager 'Can be accessed using'
+  aws.managedPlaneVpc.ec2.operations -> aws.managedPlaneVpc.workspaces 'Can be accessed using'
+  aws.managedPlaneVpc.ec2.operations.monitoring -> aws.applicationVpc.ec2.teamcenter 'Monitors'
+}

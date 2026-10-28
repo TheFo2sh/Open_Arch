@@ -1,0 +1,7 @@
+PackageId: OpenArch.PTCCreoOnAmazonWorkSpacesApplicationsAmazonEC2FileShareForUsers
+Name: PTC Creo on Amazon WorkSpaces Applications – EC2-based File Share for Users
+Description: PTC Creo design sessions on Amazon WorkSpaces Applications with private S3 home folders, a shared EC2/EBS SMB file share, and Creo licensing.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, engineering, cad, ptc, workspaces-applications]

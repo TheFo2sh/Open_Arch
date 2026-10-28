@@ -1,0 +1,136 @@
+// Financial Advisor Chat Assistant, based on AWS's reference architecture.
+// The advisor, browser application, and external Salesforce org are slots to map when applying the template.
+model {
+  advisor = user 'Financial advisor' {
+    description 'Uses the chat assistant to find answers from financial-planning and product content.'
+  }
+
+  chatAssistant = system 'Financial Advisor Chat Assistant' {
+    description 'Browser-based chatbot; AWS does not specify the application framework or implementation.'
+    browserClient = container 'Browser web application' {
+      description 'Static HTML, CSS, and JavaScript client that authenticates and calls Amazon Lex.'
+      metadata {
+        uses 'html, css, javascript'
+      }
+    }
+  }
+
+  salesforce = system 'Salesforce organization' {
+    description 'Required external Salesforce source, with an OAuth-enabled connected app and Salesforce API v48.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    amplify = platform 'AWS Amplify' {
+      description 'Manages the web application services shown within its boundary; AWS recommends enabling secure headers.'
+      metadata {
+        uses 'aws-amplify'
+      }
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      description 'Resolves the assistant domain to its web destinations.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+
+    cloudfront = platform 'Amazon CloudFront' {
+      description 'Delivers the static web application stored in Amazon S3.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Stores the static web application and documents used as a Kendra data source.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      webApplication = database 'Static web application objects' {
+        description 'HTML, CSS, and JavaScript files for the browser application.'
+      }
+      knowledgeDocuments = database 'Financial knowledge documents' {
+        description 'Source objects such as financial planning guides, product guides, tax authority manuals, and HTML, Word, PowerPoint, PDF, or TXT files.'
+      }
+    }
+
+    cognito = platform 'Amazon Cognito' {
+      description 'Authenticates assistant users and returns temporary credentials to their browser or app.'
+      metadata {
+        uses 'amazon-cognito'
+      }
+    }
+
+    lex = platform 'Amazon Lex' {
+      description 'Conversational API used by the browser; its built-in Amazon Kendra search intent queries Kendra.'
+      metadata {
+        uses 'amazon-lex'
+      }
+    }
+
+    kendra = platform 'Amazon Kendra' {
+      description 'Indexes the S3 and Salesforce sources and answers Lex search-intent queries.'
+      metadata {
+        uses 'amazon-kendra'
+      }
+      searchIndex = database 'Amazon Kendra search index' {
+        description 'Index of content from the documented S3 and Salesforce data sources.'
+      }
+    }
+
+    iam = platform 'AWS Identity and Access Management' {
+      description 'Provides the IAM role that controls Amazon Kendra access to its data sources.'
+      metadata {
+        uses 'aws-iam'
+      }
+    }
+
+    secretsManager = platform 'AWS Secrets Manager' {
+      description 'Stores and rotates the Salesforce consumer key and secret used by the Salesforce connector.'
+      metadata {
+        uses 'aws-secrets-manager'
+      }
+    }
+
+    cloudtrail = platform 'AWS CloudTrail' {
+      description 'Additional AWS recommendation for tracking API usage.'
+      metadata {
+        uses 'aws-cloudtrail'
+      }
+    }
+
+    cloudwatch = platform 'Amazon CloudWatch' {
+      description 'Additional AWS recommendation for monitoring AWS resources.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+
+    kms = platform 'AWS Key Management Service' {
+      description 'Additional AWS recommendation for securely generating and managing encryption keys.'
+      metadata {
+        uses 'aws-kms'
+      }
+    }
+  }
+
+  advisor -> chatAssistant 'Uses the browser-based chat assistant'
+  chatAssistant -> aws.cognito '2. Authenticates and receives temporary credentials from'
+  chatAssistant -> aws.lex '3. Calls the Amazon Lex API with temporary credentials'
+  aws.route53 -> aws.cloudfront '1. Resolves the assistant domain to'
+  aws.route53 -> aws.s3 '1. Resolves the assistant domain to the S3 web destination'
+  aws.cloudfront -> aws.s3.webApplication 'Serves the static web application from'
+  aws.amplify -> aws.route53 'Manages'
+  aws.amplify -> aws.cloudfront 'Manages'
+  aws.amplify -> aws.s3 'Manages'
+  aws.amplify -> aws.cognito 'Manages'
+  aws.lex -> aws.kendra '4. Queries using the built-in Kendra search intent'
+  aws.kendra -> aws.s3.knowledgeDocuments '5. Indexes objects through the Amazon S3 connector'
+  aws.kendra -> salesforce '6–8. Indexes Salesforce content through its OAuth-enabled connector and API v48'
+  aws.iam -> aws.kendra 'Controls data-source access with an IAM role'
+  aws.kendra -> aws.secretsManager '9. Uses the rotated Salesforce consumer key and secret stored in'
+}

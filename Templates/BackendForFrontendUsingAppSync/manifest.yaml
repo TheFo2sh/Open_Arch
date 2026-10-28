@@ -1,0 +1,7 @@
+PackageId: OpenArch.BackendForFrontendUsingAppSync
+Name: Backend for Frontend Using AppSync
+Description: A serverless backend for frontend that serves denormalized DynamoDB projections through AppSync GraphQL and publishes real-time UI updates from domain events.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, serverless, backend-for-frontend, appsync, event-driven]
