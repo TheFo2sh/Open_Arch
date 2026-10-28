@@ -1,0 +1,125 @@
+// Omni-channel Customer Engagement for Lodging, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/omni-channel-customer-engagement-lodging/omni-channel-customer-engagement-lodging.html
+model {
+  agent = user 'Customer service team' {
+    description 'Uses the unified interface to provide customer service across channels.'
+  }
+  guest = user 'Guest' {
+    description 'Provides input through the chatbot and receives personalized recommendations.'
+  }
+
+  interface = system 'Omni-channel user interface' {
+    description 'Unified interface for customer service teams; its website and configuration files are stored in Amazon S3 and served through CloudFront.'
+  }
+  chatbot = system 'Guest chatbot experience' {
+    description 'Guest-facing chatbot interaction powered by Amazon Lex; the implementation of the user experience is not specified.'
+  }
+  records = system 'Lodging systems of record' {
+    description 'External property-owner relationship management, central reservation, property management, property point-of-sale, loyalty, booking engine, survey, and machine-learning output systems. AWS does not specify their vendors or integrations.'
+  }
+  notificationChannels = system 'Guest notification channels' {
+    description 'Email, text, and mobile push destinations shown or described by AWS; the source does not name a separate delivery provider.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    s3 = platform 'Amazon Simple Storage Service' {
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    cloudfront = platform 'Amazon CloudFront' {
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    cognito = platform 'Amazon Cognito' {
+      metadata {
+        uses 'amazon-cognito'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+
+      core = system 'Core function' {
+        description 'The core Lambda function shown between API Gateway, DynamoDB, and Lex.'
+      }
+      search = system 'Search function' {
+        description 'The Lambda function that searches the available-products index.'
+      }
+      recommendations = system 'Recommendations function' {
+        description 'The Lambda function that supports personalized recommendations and connects to the guest data store and Amazon Personalize.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      guestData = database 'Guest 360 data store' {
+        description 'Collects key guest data from systems of record and data-processing workload outputs.'
+      }
+    }
+    lex = platform 'Amazon Lex' {
+      metadata {
+        uses 'amazon-lex'
+      }
+    }
+    opensearch = platform 'Amazon OpenSearch Service' {
+      metadata {
+        uses 'amazon-opensearch-service'
+      }
+      productIndex = database 'Available-products index' {
+        description 'Search index for available products recommended to guests.'
+      }
+    }
+    personalize = platform 'Amazon Personalize' {
+      description 'Shown with datasets in the AI/ML area of the diagram; AWS does not specify its model, inputs, or exact role in the recommendation flow.'
+      metadata {
+        uses 'amazon-personalize'
+      }
+    }
+    pinpoint = platform 'Amazon Pinpoint' {
+      metadata {
+        uses 'amazon-pinpoint'
+      }
+    }
+  }
+
+  agent -> interface 'Uses'
+  guest -> chatbot 'Provides input through'
+  guest -> notificationChannels 'Receives recommendations through'
+  aws.s3 -> aws.cloudfront 'Stores website and configuration files served by'
+  aws.cloudfront -> interface 'Serves'
+  interface -> aws.cognito 'Submits login information to'
+  interface -> aws.apiGateway 'Calls application APIs through'
+  aws.cognito -> aws.apiGateway 'Controls access to'
+  aws.apiGateway -> aws.lambda.core 'Invokes'
+  records -> aws.dynamodb.guestData 'Provides guest 360-degree source data to'
+  aws.lambda.core -> aws.dynamodb.guestData 'Collects and uses guest data in'
+  aws.lambda.core -> aws.lex 'Invokes chatbot functionality through'
+  chatbot -> aws.lex 'Uses'
+  aws.lex -> aws.lambda.recommendations 'Uses for personalized interactions and recommendations'
+  aws.lambda.recommendations -> aws.dynamodb.guestData 'Reads and writes guest and workload data'
+  aws.lambda.search -> aws.opensearch.productIndex 'Searches for available products in'
+  aws.lambda.recommendations -> aws.personalize 'Uses personalization service'
+  aws.s3 -> aws.personalize 'Stores datasets shown with the AI/ML workload'
+  aws.lambda.recommendations -> aws.pinpoint 'Schedules guest recommendations through'
+  aws.pinpoint -> notificationChannels 'Sends recommendations to'
+}
+
+views {
+  view index {
+    title 'Omni-channel Customer Engagement for Lodging'
+    include *, aws.*, aws.lambda.*, aws.dynamodb.*, aws.opensearch.*
+  }
+}
