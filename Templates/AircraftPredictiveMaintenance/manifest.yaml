@@ -1,0 +1,7 @@
+PackageId: OpenArch.AircraftPredictiveMaintenance
+Name: Aircraft Predictive Maintenance
+Description: Correlates aircraft fault, QAR, maintenance, and flight data with AWS analytics and machine learning to predict component failures.
+Version: 1.0.0
+Icon: mdi:airplane
+Publisher: Open_Arch
+Tags: [aws, aviation, predictive-maintenance, machine-learning]
