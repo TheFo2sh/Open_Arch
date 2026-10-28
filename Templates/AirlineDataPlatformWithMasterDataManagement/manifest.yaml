@@ -1,0 +1,7 @@
+PackageId: OpenArch.AirlineDataPlatformWithMasterDataManagement
+Name: Airline Data Platform with Master Data Management
+Description: An AWS airline data platform augmented with customer master data management to reconcile duplicate traveler and loyalty records and publish a customer-centric view.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, airline, data-platform, master-data-management, analytics]

@@ -1,0 +1,7 @@
+PackageId: OpenArch.TrafficEncryptionOptionsInDirectConnect
+Name: Traffic Encryption Options in AWS Direct Connect
+Description: Four AWS reference patterns for encrypting traffic across Direct Connect with Site-to-Site VPN or MACsec, including customer-managed network endpoints.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, networking, security, direct-connect, encryption]

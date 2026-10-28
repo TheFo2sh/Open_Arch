@@ -1,0 +1,144 @@
+// Hosting Adobe Experience Manager on AWS, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/hosting-adobe-experience-manager/hosting-adobe-experience-manager.html
+// Read together with the repository's specification.c4. Systems and users are slots.
+model {
+  siteVisitors = user 'Site visitors' {
+    description 'Browse published AEM content.'
+  }
+  contentAuthors = user 'Content authors, editors, and approvers' {
+    description 'Create, administer, and approve website content.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    waf = platform 'AWS WAF' {
+      metadata {
+        uses 'aws-waf'
+      }
+    }
+    cloudfront = platform 'Amazon CloudFront' {
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    certificateManager = platform 'AWS Certificate Manager' {
+      metadata {
+        uses 'aws-certificate-manager'
+      }
+    }
+    publishAlb = platform 'Publish Application Load Balancer' {
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+    authorAlb = platform 'Optional author Application Load Balancer' {
+      description 'The source diagram shows an authoring load balancer with the optional author dispatcher tier.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+    autoScaling = platform 'Amazon EC2 Auto Scaling' {
+      metadata {
+        uses 'amazon-ec2-auto-scaling'
+      }
+      ec2 = platform 'Amazon EC2' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        aem = system 'Adobe Experience Manager website' {
+          description 'AEM authoring and publishing deployment spanning two Availability Zones.'
+
+          publishDispatcher = container 'AEM publish dispatcher' {
+            description 'Apache httpd-based dispatcher instances; AWS describes one dispatcher per publish instance in each Availability Zone.'
+            metadata {
+              uses 'aem-dispatcher, apache-http-server'
+            }
+          }
+          publish = container 'AEM publish tier' {
+            description 'AEM installation serving published content, with TarMK as its node store.'
+            metadata {
+              uses 'adobe-experience-manager, adobe-tarmk'
+            }
+          }
+          author = container 'AEM author tier' {
+            description 'AEM installation for authoring and website administration; TarMK on EBS is preferred.'
+            metadata {
+              uses 'adobe-experience-manager, adobe-tarmk'
+            }
+          }
+          authorStandby = container 'AEM author cold standby' {
+            description 'Cold-standby author instance for high availability; Lambda automates failover logic.'
+            metadata {
+              uses 'adobe-experience-manager, adobe-tarmk'
+            }
+          }
+          authorDispatcher = container 'Optional AEM author dispatcher' {
+            description 'Optional dispatcher instances for authoring performance, with caching disabled.'
+            metadata {
+              uses 'aem-dispatcher, apache-http-server'
+            }
+          }
+        }
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      binaryStore = database 'Shared binary content datastore' {
+        description 'Preferred shared datastore for binary content from AEM author and publish.'
+      }
+    }
+    ebs = platform 'Amazon EBS' {
+      metadata {
+        uses 'amazon-ebs'
+      }
+      authorNodeStore = database 'AEM author TarMK node store' {
+        description 'The source prefers TarMK on EBS for the author instance.'
+        metadata {
+          uses 'adobe-tarmk'
+        }
+      }
+    }
+  }
+
+  siteVisitors -> aws.autoScaling.ec2.aem 'Browse published content'
+  contentAuthors -> aws.autoScaling.ec2.aem 'Author and administer content'
+  aws.route53 -> aws.cloudfront 'Provides DNS configuration for'
+  aws.waf -> aws.cloudfront 'Protects AEM requests at'
+  aws.cloudfront -> aws.publishAlb 'Delivers content through'
+  aws.publishAlb -> aws.autoScaling.ec2.aem.publishDispatcher 'Distributes requests to'
+  aws.autoScaling.ec2.aem.publishDispatcher -> aws.autoScaling.ec2.aem.publish 'Forwards requests to'
+  aws.authorAlb -> aws.autoScaling.ec2.aem.authorDispatcher 'Distributes authoring requests to'
+  aws.autoScaling.ec2.aem.authorDispatcher -> aws.autoScaling.ec2.aem.author 'Forwards requests to'
+  aws.autoScaling.ec2.aem.author -> aws.autoScaling.ec2.aem.publish 'Replicates approved content to'
+  aws.autoScaling.ec2.aem.author -> aws.autoScaling.ec2.aem.authorStandby 'Maintains the cold standby for'
+  aws.autoScaling.ec2.aem.author -> aws.s3.binaryStore 'Reads and writes shared binary content'
+  aws.autoScaling.ec2.aem.publish -> aws.s3.binaryStore 'Reads shared binary content'
+  aws.autoScaling.ec2.aem.author -> aws.ebs.authorNodeStore 'Uses'
+  aws.certificateManager -> aws.autoScaling.ec2.aem 'Provisions certificates for'
+  aws.lambda -> aws.autoScaling 'Runs scaling and instance-pairing logic for'
+  aws.lambda -> aws.autoScaling.ec2.aem.publishDispatcher 'Pairs and unpairs with publish instances'
+  aws.lambda -> aws.autoScaling.ec2.aem.publish 'Updates replication agents for'
+  aws.lambda -> aws.autoScaling.ec2.aem.authorStandby 'Automates failover for'
+}
+
+views {
+  view index {
+    title 'Hosting Adobe Experience Manager on AWS'
+    include *, aws.*, aws.autoScaling.*, aws.autoScaling.ec2.*, aws.autoScaling.ec2.aem.*
+  }
+}
