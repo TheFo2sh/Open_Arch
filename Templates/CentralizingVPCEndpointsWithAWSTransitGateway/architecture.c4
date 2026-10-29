@@ -1,0 +1,134 @@
+// Centralizing Amazon VPC endpoint access with AWS Transit Gateway.
+// Based on the AWS reference diagram; workloads and their applications are slots.
+model {
+  aws = zone 'AWS Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    transitGateway = platform 'AWS Transit Gateway' {
+      description 'Connects spoke VPC A, spoke VPC B and the shared services VPC. The spoke route table sends 10.2.0.0/16 to shared services; the shared services route table sends 10.0.0.0/16 and 10.1.0.0/16 back to the respective spokes.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+
+    spokeVpcA = platform 'Spoke VPC A (10.0.0.0/16)' {
+      description 'One availability zone, with workload subnet 10.0.0.0/24 and Transit Gateway subnet 10.0.1.0/28.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      resolverA = platform 'VPC+2 DNS resolver' {
+        metadata {
+          uses 'amazon-route-53-resolver'
+        }
+      }
+      ec2A = platform 'Amazon EC2' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        workloadA = system 'Spoke VPC A workload' {
+          description 'EC2 workload that consumes the centralized endpoints; its application is not specified by AWS.'
+        }
+      }
+    }
+
+    spokeVpcB = platform 'Spoke VPC B (10.1.0.0/16)' {
+      description 'One availability zone, with workload subnet 10.1.0.0/24 and Transit Gateway subnet 10.1.1.0/28.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      resolverB = platform 'VPC+2 DNS resolver' {
+        metadata {
+          uses 'amazon-route-53-resolver'
+        }
+      }
+      ec2B = platform 'Amazon EC2' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        workloadB = system 'Spoke VPC B workload' {
+          description 'EC2 workload that consumes the centralized endpoints; its application is not specified by AWS.'
+        }
+      }
+    }
+
+    sharedVpc = platform 'Shared services VPC (10.2.0.0/16)' {
+      description 'One availability zone, with Transit Gateway subnet 10.2.1.0/28 and endpoints subnet 10.2.0.0/24.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      privatelink = platform 'AWS PrivateLink' {
+        metadata {
+          uses 'aws-privatelink'
+        }
+        s3Endpoint = platform 'Amazon S3 interface endpoint' {
+          description 'Interface endpoint in the shared services VPC.'
+          metadata {
+            uses 'amazon-vpc-interface-endpoints'
+          }
+        }
+        kinesisEndpoint = platform 'Amazon Kinesis interface endpoint' {
+          description 'Interface endpoint in the shared services VPC.'
+          metadata {
+            uses 'amazon-vpc-interface-endpoints'
+          }
+        }
+      }
+    }
+
+    privateZoneS3 = platform 'Amazon Route 53 private hosted zone for S3' {
+      description 'The diagram shows s3.us-east-1.amazonaws.com.'
+      metadata {
+        uses 'amazon-route-53-private-hosted-zones'
+      }
+    }
+    privateZoneKinesis = platform 'Amazon Route 53 private hosted zone for Kinesis' {
+      description 'The diagram shows kinesis.us-east-1.amazonaws.com.'
+      metadata {
+        uses 'amazon-route-53-private-hosted-zones'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+  }
+
+  aws.spokeVpcA.ec2A.workloadA -> aws.spokeVpcA.resolverA 'Resolves service names through'
+  aws.spokeVpcB.ec2B.workloadB -> aws.spokeVpcB.resolverB 'Resolves service names through'
+  aws.privateZoneS3 -> aws.spokeVpcA 'Associates with'
+  aws.privateZoneS3 -> aws.spokeVpcB 'Associates with'
+  aws.privateZoneS3 -> aws.sharedVpc 'Associates with'
+  aws.privateZoneKinesis -> aws.spokeVpcA 'Associates with'
+  aws.privateZoneKinesis -> aws.spokeVpcB 'Associates with'
+  aws.privateZoneKinesis -> aws.sharedVpc 'Associates with'
+  aws.privateZoneS3 -> aws.sharedVpc.privatelink.s3Endpoint 'Resolves the service name to'
+  aws.privateZoneKinesis -> aws.sharedVpc.privatelink.kinesisEndpoint 'Resolves the service name to'
+  aws.spokeVpcA.ec2A.workloadA -> aws.transitGateway 'Routes endpoint traffic through'
+  aws.spokeVpcB.ec2B.workloadB -> aws.transitGateway 'Routes endpoint traffic through'
+  aws.transitGateway -> aws.sharedVpc.privatelink.s3Endpoint 'Routes S3 traffic to'
+  aws.transitGateway -> aws.sharedVpc.privatelink.kinesisEndpoint 'Routes Kinesis traffic to'
+  aws.sharedVpc.privatelink.s3Endpoint -> aws.s3 'Connects privately to'
+  aws.sharedVpc.privatelink.kinesisEndpoint -> aws.kinesis 'Connects privately to'
+  aws.sharedVpc.privatelink.s3Endpoint -> aws.transitGateway 'Returns S3 traffic through'
+  aws.sharedVpc.privatelink.kinesisEndpoint -> aws.transitGateway 'Returns Kinesis traffic through'
+  aws.transitGateway -> aws.spokeVpcA.ec2A.workloadA 'Forwards responses to'
+  aws.transitGateway -> aws.spokeVpcB.ec2B.workloadB 'Forwards responses to'
+}
+
+views {
+  view index {
+    title 'Centralizing Amazon VPC endpoint access with AWS Transit Gateway'
+    include *
+  }
+}

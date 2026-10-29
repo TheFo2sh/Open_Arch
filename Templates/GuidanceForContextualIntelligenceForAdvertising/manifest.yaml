@@ -1,0 +1,7 @@
+PackageId: OpenArch.GuidanceForContextualIntelligenceForAdvertising
+Name: Guidance for Contextual Intelligence for Advertising
+Description: An event-driven AWS architecture that analyzes publisher content with machine learning, maps it to a taxonomy, and supplies categories to advertising bids.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, advertising, contextual-intelligence, machine-learning]

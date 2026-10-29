@@ -1,0 +1,7 @@
+PackageId: OpenArch.IOSBuildAndTestPipelineUsingJenkins
+Name: iOS Build and Test Pipeline Using Jenkins
+Description: A Jenkins-based pipeline that builds iOS app artifacts on Amazon EC2 Mac and tests them on AWS Device Farm.
+Version: 1.0.0
+Icon: logos:jenkins
+Publisher: Open_Arch
+Tags: [aws, ci-cd, ios, mobile, jenkins]

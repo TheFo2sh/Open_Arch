@@ -1,0 +1,231 @@
+// Connected Lodging Properties Using IoT and AI/ML, after AWS's reference architecture.
+// Systems and users are slots; implementation details absent from the source remain unspecified.
+model {
+  guest = user 'Lodging guest'
+  propertyStaff = user 'Property management and front desk staff'
+
+  guestVoice = system 'Alexa-enabled devices and app' {
+    description 'Voice-enabled endpoints used to personalize guest rooms; the source does not specify device models or app implementation.'
+  }
+
+  frontDeskApps = system 'Property management and front desk apps' {
+    description 'Applications shown receiving operational and property-management notifications.'
+  }
+
+  property = zone 'Lodging property' {
+    metadata {
+      platform 'other'
+    }
+
+    greengrass = platform 'AWS IoT Greengrass Core' {
+      description 'Connects property devices and runs local services at the edge.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+
+      edgeServices = system 'Property edge services' {
+        description 'Includes the local shadow service, MQTT broker, Lambda function, property metadata, and trained models shown at the edge.'
+      }
+    }
+
+    devices = system 'Property IoT devices' {
+      description 'FreeRTOS or other-OS devices include room thermostats, blinds, lights, and coffee makers; restroom thermostats, utilities, lights, and sensors; and cameras and sensors in the lobby, check-in, and driveway or valet areas.'
+
+      deviceSoftware = container 'IoT device software' {
+        description 'Communicates with Greengrass Core using MQTT.'
+        metadata {
+          uses 'freertos, mqtt'
+        }
+      }
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      description 'Maintains device shadows, connects and manages devices, supports OTA updates, and secures devices.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+
+    deviceDefender = platform 'AWS IoT Device Defender' {
+      metadata {
+        uses 'aws-iot-device-defender'
+      }
+    }
+
+    deviceManagement = platform 'AWS IoT Device Management' {
+      metadata {
+        uses 'aws-iot-device-management'
+      }
+    }
+
+    eventStream = platform 'Amazon Kinesis Data Streams' {
+      description 'Receives streaming device data and operational events.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+
+    operationalStore = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+
+      events = database 'Operational data store' {
+        description 'Stores events and operational data.'
+      }
+    }
+
+    publishedEvents = platform 'Amazon Kinesis Data Streams' {
+      description 'Carries published operational events to notifications.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+
+    pinpoint = platform 'Amazon Pinpoint' {
+      metadata {
+        uses 'amazon-pinpoint'
+      }
+    }
+
+    firehose = platform 'Amazon Kinesis Data Firehose' {
+      metadata {
+        uses 'amazon-kinesis-data-firehose'
+      }
+    }
+
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Stores the raw and processed data-lake datasets.'
+      metadata {
+        uses 'amazon-s3'
+      }
+
+      rawData = database 'Raw data lake' {
+        description 'Stores raw data.'
+      }
+
+      processedData = database 'Processed data lake' {
+        description 'Stores processed and curated datasets.'
+      }
+    }
+
+    glue = platform 'AWS Glue' {
+      description 'Provides the Data Catalog and data-processing services shown in the diagram.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+
+    emr = platform 'Amazon EMR' {
+      metadata {
+        uses 'amazon-emr'
+      }
+
+      processing = system 'Data processing workloads' {
+        description 'Processes data for the lodging analytics pipeline.'
+      }
+    }
+
+    groundTruth = platform 'Amazon SageMaker Ground Truth' {
+      metadata {
+        uses 'amazon-sagemaker-ground-truth'
+      }
+    }
+
+    sagemaker = platform 'Amazon SageMaker AI' {
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+
+      modelLifecycle = system 'Inference model lifecycle' {
+        description 'Builds, trains, and deploys lodging inference models.'
+      }
+    }
+
+    redshift = platform 'Amazon Redshift' {
+      metadata {
+        uses 'amazon-redshift'
+      }
+
+      dataMart = database 'Analytics data mart (optional)' {
+        description 'Optional data mart for heavily used analytics.'
+      }
+    }
+
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+
+    quickSight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+
+    stepFunctions = platform 'AWS Step Functions' {
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+
+      functions = system 'Lodging serverless functions' {
+        description 'Includes the IoT Core pass-through, Alexa event handler, and authentication functions shown in the diagram.'
+      }
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+
+    alexaVoice = platform 'Alexa Voice Service' {
+      description 'Supports voice-enabled guest room controls.'
+      metadata {
+        uses 'alexa-voice-service'
+      }
+    }
+  }
+
+  devices.deviceSoftware -> greengrass.edgeServices 'Communicates using MQTT'
+  greengrass.edgeServices -> aws.iotCore 'Publishes and subscribes to device data'
+  aws.iotCore -> aws.deviceDefender 'Uses for device security'
+  aws.iotCore -> aws.deviceManagement 'Uses for device management and OTA updates'
+  aws.iotCore -> aws.eventStream 'Routes device data to'
+  aws.eventStream -> aws.operationalStore.events 'Stores events in'
+  aws.operationalStore.events -> aws.publishedEvents 'Generates published events for'
+  aws.publishedEvents -> aws.pinpoint 'Delivers notifications through'
+  aws.pinpoint -> frontDeskApps 'Sends operational and property-management alerts to'
+  aws.iotCore -> aws.firehose 'Delivers raw device data to'
+  aws.firehose -> aws.s3.rawData 'Stores raw data in'
+  aws.glue -> aws.s3.rawData 'Catalogs and processes data from'
+  aws.glue -> aws.s3.processedData 'Creates curated datasets in'
+  aws.emr.processing -> aws.s3.processedData 'Processes data for'
+  aws.athena -> aws.s3.rawData 'Queries data in'
+  aws.athena -> aws.s3.processedData 'Queries data in'
+  aws.sagemaker.modelLifecycle -> aws.s3.processedData 'Uses curated datasets from'
+  aws.groundTruth -> aws.sagemaker.modelLifecycle 'Supports model development for'
+  aws.sagemaker.modelLifecycle -> property.greengrass.edgeServices 'Optionally deploys inference models to'
+  aws.quickSight -> aws.redshift.dataMart 'Analyzes data in'
+  aws.quickSight -> aws.athena 'Uses for data-lake analytics'
+  guest -> guestVoice 'Uses for voice-enabled room controls'
+  guestVoice -> aws.alexaVoice 'Uses'
+  aws.alexaVoice -> aws.apiGateway 'Connects to'
+  aws.apiGateway -> aws.lambda.functions 'Routes requests to'
+  aws.stepFunctions -> aws.lambda.functions 'Orchestrates'
+  aws.lambda.functions -> aws.iotCore 'Passes requests to'
+  propertyStaff -> frontDeskApps 'Uses'
+}
