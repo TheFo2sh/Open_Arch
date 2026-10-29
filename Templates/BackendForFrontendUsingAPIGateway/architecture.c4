@@ -1,0 +1,108 @@
+// Backend for Frontend Using API Gateway, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/backend-for-frontend-api-gateway/backend-for-frontend-api-gateway.html
+// Systems and users are slots. Runtime and event-source details absent from AWS's diagram are not inferred.
+model {
+  frontendUser = user 'Frontend client user' {
+    description 'Uses a frontend client that loads UI-ready projections and refreshes when domain data changes.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    cognito = platform 'Amazon Cognito' {
+      description 'Authenticates frontend clients and provides API authorization.'
+      metadata {
+        uses 'amazon-cognito'
+      }
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Provides the BFF REST or HTTP API and WebSocket endpoint.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the BFF request and DynamoDB stream handler functions.'
+      metadata {
+        uses 'aws-lambda'
+      }
+
+      requestHandlers = system 'BFF request handlers' {
+        description 'Lambda handlers for UI queries, WebSocket connections, and DynamoDB stream records.'
+
+        queryHandler = container 'Query handler' {
+          description 'Returns UI-ready data for API requests that use a Lambda query handler.'
+        }
+        connectionHandler = container 'WebSocket connection handler' {
+          description 'Updates the connected clients table when a client connects to the WebSocket endpoint.'
+        }
+        streamHandler = container 'DynamoDB stream handler' {
+          description 'Pushes change notifications to clients connected through API Gateway WebSockets.'
+        }
+      }
+    }
+
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Stores the denormalized BFF data and connected client records.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+
+      projections = database 'UI data projections' {
+        description 'Denormalized data projections queried by frontend clients.'
+      }
+      connectedClients = database 'Connected clients table' {
+        description 'Records the clients connected to the BFF WebSocket endpoint.'
+      }
+
+      streams = platform 'Amazon DynamoDB Streams' {
+        description 'Captures table changes and supplies stream records to the asynchronous Lambda trigger.'
+        metadata {
+          uses 'amazon-dynamodb-streams'
+        }
+      }
+    }
+
+    applicationMicroservices = system 'Application microservices' {
+      description 'Domain services that raise events about mutations in domain aggregates; AWS does not specify their runtime or event transport.'
+    }
+
+    eventConsumers = system 'BFF event consumers' {
+      description 'Purpose-built consumers that process application events and update denormalized UI projections; their runtime is not specified.'
+
+      consumer = container 'Domain-event consumers' {
+        description 'Consumes relevant application microservice events and updates the UI data projections.'
+      }
+    }
+  }
+
+  cognito -> apiGateway 'Provides client authorization for'
+
+  frontendUser -> aws.requestHandlers 'Loads UI data and subscribes to change notifications through'
+  apiGateway -> aws.lambda.requestHandlers.queryHandler 'Invokes for API queries'
+  apiGateway -> aws.dynamodb.projections 'Can query directly for UI data'
+  aws.lambda.requestHandlers.queryHandler -> aws.dynamodb.projections 'Reads UI-ready data from'
+
+  apiGateway -> aws.lambda.requestHandlers.connectionHandler 'Invokes for WebSocket connection events'
+  aws.lambda.requestHandlers.connectionHandler -> aws.dynamodb.connectedClients 'Updates the connected clients table'
+
+  aws.applicationMicroservices -> aws.eventConsumers.consumer 'Raises domain mutation events to'
+  aws.eventConsumers.consumer -> aws.dynamodb.projections 'Updates denormalized UI projections in'
+
+  aws.dynamodb.projections -> aws.dynamodb.streams 'Emits table change records to'
+  aws.dynamodb.connectedClients -> aws.dynamodb.streams 'Emits table change records to'
+  aws.dynamodb.streams -> aws.lambda.requestHandlers.streamHandler 'Triggers asynchronously with stream records'
+  aws.lambda.requestHandlers.streamHandler -> apiGateway 'Publishes notifications through the WebSocket endpoint'
+  aws.requestHandlers -> frontendUser 'Delivers change notifications so the client can refresh'
+}
+
+views {
+  view index {
+    title 'Backend for Frontend Using API Gateway'
+    include *, aws.*
+  }
+}

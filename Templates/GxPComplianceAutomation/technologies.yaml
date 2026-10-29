@@ -1,0 +1,112 @@
+# Technologies named by the AWS reference architecture, keyed as architecture.c4 uses them.
+technologies:
+  - key: aws-landing-zone
+    name: AWS Landing Zone
+    description: AWS solution used to automate setup of a secure and scalable environment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/solutions/implementations/landing-zone/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-service-catalog
+    name: AWS Service Catalog
+    description: Publishes approved infrastructure products for developers to use.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/servicecatalog/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-cloudformation
+    name: AWS CloudFormation
+    description: Uses templates to provision the resources in a Service Catalog product stack.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudformation/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-codecommit
+    name: AWS CodeCommit
+    description: Private source control repository for modified application code.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codecommit/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: One documented option for automating testing and installation qualification.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: python
+    name: Python
+    description: A documented alternative to AWS Lambda for automating testing and installation qualification.
+    vendor: Python Software Foundation
+    url: https://www.python.org/
+    types: [library]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores qualification reports and centralized audit and configuration logs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-cloudtrail
+    name: AWS CloudTrail
+    description: Records API activity for monitoring and audit.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudtrail/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc-flow-logs
+    name: Amazon VPC Flow Logs
+    description: Captures VPC network flow records for centralized review.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-config
+    name: AWS Config
+    description: Tracks stack changes and compliance status.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/config/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Monitors stack health and changes and raises rule-based alarms.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudwatch-events
+    name: Amazon CloudWatch Events
+    description: Sends change alerts for events that might make the system non-compliant.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/WhatIsCloudWatchEvents.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Queries centralized log data for audit and can convert query results to formats such as CSV.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Visualizes AWS CloudTrail logs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []

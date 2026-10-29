@@ -1,0 +1,301 @@
+technologies:
+  - key: aws-snowcone
+    name: AWS Snowcone
+    description: Edge device shown at a cell site as an option for Open RAN DU and CU deployments.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/snowcone/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-snowball-edge
+    name: AWS Snowball Edge
+    description: Edge compute device identified by AWS as an option for Open RAN DU and CU deployments based on throughput requirements.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/snowball/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-outposts
+    name: AWS Outposts
+    description: AWS infrastructure at a customer site for MEC workloads and the high-throughput 5G Core user plane.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/outposts/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-wavelength
+    name: AWS Wavelength
+    description: AWS infrastructure in communications service provider networks for low-latency applications.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/wavelength/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Virtual networking for the regional control plane, management services, and AWS edge environments.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ec2
+    name: Amazon Elastic Compute Cloud
+    description: Compute instances shown for MEC and 5G Core workloads.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ec2-auto-scaling
+    name: Amazon EC2 Auto Scaling
+    description: Auto Scaling group for the EC2 worker nodes that run the Outposts user-plane workload.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/autoscaling/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ecs
+    name: Amazon Elastic Container Service
+    description: Container orchestration option for MEC workloads on AWS Outposts and for regional management tools.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecs/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-eks
+    name: Amazon Elastic Kubernetes Service
+    description: Runs the regional 5G control-plane microservices and the Outposts user-plane microservices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eks/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Object storage service shown among the Outposts MEC and regional management services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: amazon-ebs
+    name: Amazon Elastic Block Store
+    description: Block storage service shown in the regional service set; the source does not identify volumes or their contents.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ebs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Serverless compute service shown with the Outposts MEC and regional management service sets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Connects on-premises 5G Core components and corporate data networks to an AWS Region.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-transit-gateway
+    name: AWS Transit Gateway
+    description: Interconnects VPCs that host 5G management and orchestration services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Network Load Balancer for the optional regional expansion of Outposts user-plane instances.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Monitoring and management service shown in the regional services and orchestration tooling.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-cloudformation
+    name: AWS CloudFormation
+    description: Infrastructure management service shown in the regional service set.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudformation/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-cloudtrail
+    name: AWS CloudTrail
+    description: AWS activity and audit service shown in the regional service set.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudtrail/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-codedeploy
+    name: AWS CodeDeploy
+    description: Deployment service shown in the regional service set.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codedeploy/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-elasticache
+    name: Amazon ElastiCache
+    description: Managed in-memory data store shown in the regional services; the source does not specify an engine or workload.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticache/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-aurora
+    name: Amazon Aurora
+    description: Managed relational database service shown in the regional service set; database contents are not specified.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Managed NoSQL database service shown in the regional services and management tooling.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-efs
+    name: Amazon Elastic File System
+    description: Shared file storage service shown in the regional service set; the source does not identify file shares or contents.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/efs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: aws-app-mesh
+    name: AWS App Mesh
+    description: Service mesh shown beside the Outposts user-plane workload.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/app-mesh/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-x-ray
+    name: AWS X-Ray
+    description: Distributed tracing service shown beside the Outposts user-plane workload.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/xray/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-codepipeline
+    name: AWS CodePipeline
+    description: CI/CD service shown among the regional management and orchestration tools.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codepipeline/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: Messaging service shown among the regional management and orchestration tools.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Workflow orchestration service shown among the regional management and orchestration tools.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sqs
+    name: Amazon Simple Queue Service
+    description: Message queue service shown among the regional management and orchestration tools.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sqs/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-service-catalog
+    name: AWS Service Catalog
+    description: Service catalog shown among the regional management and orchestration tools.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/servicecatalog/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Query service shown among the regional management and orchestration tools.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sagemaker
+    name: Amazon SageMaker
+    description: Machine learning service shown among the regional management and orchestration tools.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-fargate
+    name: AWS Fargate
+    description: Serverless compute option shown among the regional management and orchestration tools.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fargate/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: multus
+    name: Multus
+    description: Kubernetes CNI meta-plugin used to attach multiple network interfaces to a pod.
+    vendor: Kubernetes SIG Network
+    url: https://github.com/k8snetworkplumbingwg/multus-cni
+    types: [library]
+  - key: dpdk
+    name: Data Plane Development Kit
+    description: Packet-processing toolkit identified by AWS for high-performance 5G Core user-plane microservices.
+    vendor: Linux Foundation
+    url: https://www.dpdk.org/
+    types: [library]
+  - key: sriov
+    name: Single Root I/O Virtualization
+    description: I/O virtualization capability identified by AWS for high-performance user-plane networking.
+    vendor: PCI-SIG
+    url: https://pcisig.com/specifications/iov/single_root/
+    types: [library]
+  - key: prometheus
+    name: Prometheus
+    description: Monitoring system shown beside the Outposts user-plane workload.
+    vendor: The Prometheus Authors
+    url: https://prometheus.io/
+    types: [library]
+  - key: grafana
+    name: Grafana
+    description: Metrics visualization service shown beside the Outposts user-plane workload.
+    vendor: Grafana Labs
+    url: https://grafana.com/oss/grafana/
+    types: [library]
+  - key: fluentd
+    name: Fluentd
+    description: Log collection service shown beside the Outposts user-plane workload.
+    vendor: Fluentd Project
+    url: https://www.fluentd.org/
+    types: [library]

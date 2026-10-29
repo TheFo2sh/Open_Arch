@@ -1,0 +1,97 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: red-hat-openshift-service-on-aws
+    name: Red Hat OpenShift Service on AWS
+    description: Fully managed OpenShift service on AWS; Red Hat SRE teams manage the clusters.
+    vendor: Red Hat
+    url: https://aws.amazon.com/rosa/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: ibm-cloud-pak-for-data
+    name: IBM Cloud Pak for Data
+    description: IBM's cloud-native data integration and insights platform running as a container workload on ROSA.
+    vendor: IBM
+    url: https://www.ibm.com/products/cloud-pak-for-data
+    types: [data-platform]
+    platform: aws
+    hosts: [system]
+  - key: ibm-datastage
+    name: IBM DataStage
+    description: Data integration tool used to move, transform, enrich, and deliver data across sources and the warehouse.
+    vendor: IBM
+    url: https://www.ibm.com/products/datastage
+    types: [third-party]
+  - key: ibm-db2-warehouse-on-cloud
+    name: IBM Db2 Warehouse on Cloud
+    description: IBM data warehouse used to store and analyze integrated data and serve data marts.
+    vendor: IBM
+    url: https://www.ibm.com/products/db2/warehouse
+    types: [data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: AWS cloud data store identified as an example source for the integration jobs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-aurora
+    name: Amazon Aurora
+    description: AWS relational database identified as an example enterprise data source.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: AWS cloud data warehouse identified as an example data source.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-documentdb
+    name: Amazon DocumentDB (with MongoDB compatibility)
+    description: AWS document database identified as an example data source.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/documentdb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: AWS analytics and visualization service for dashboards and reporting.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: ibm-cognos-analytics
+    name: IBM Cognos Analytics
+    description: Example analytics and visualization tool named by the reference architecture.
+    vendor: IBM
+    url: https://www.ibm.com/products/cognos-analytics
+    types: [third-party]
+  - key: sap
+    name: SAP
+    description: SAP is given as an example of an enterprise database source; the reference does not specify a product or deployment.
+    vendor: SAP
+    url: https://www.sap.com/
+    types: [third-party]
+  - key: unspecified-enterprise-data-sources
+    name: Unspecified enterprise data sources
+    description: Placeholder for the on-premises SQL and non-SQL databases grouped by the reference; this is not a named product.
+    types: [data-platform]
+    platform: other
+    hosts: [database]

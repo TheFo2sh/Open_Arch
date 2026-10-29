@@ -1,0 +1,7 @@
+PackageId: OpenArch.GxPComplianceAutomation
+Name: GxP Compliance Automation
+Description: A reference architecture for publishing approved GxP infrastructure, automating qualification, and centralizing compliance evidence on AWS.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, gxp, compliance, healthcare]

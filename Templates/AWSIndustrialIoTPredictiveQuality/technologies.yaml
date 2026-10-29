@@ -1,0 +1,123 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-iot-greengrass
+    name: AWS IoT Greengrass
+    description: Edge runtime and connector environment on the factory gateway for data collection and local model inference.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/greengrass/v2/developerguide/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-iot-sitewise-connector
+    name: AWS IoT SiteWise Connector
+    description: Greengrass connector that collects factory equipment data over OPC-UA for AWS IoT SiteWise.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot-sitewise/latest/userguide/
+    types: [library]
+  - key: aws-iot-greengrass-lambda-connector
+    name: AWS IoT Greengrass Connector for AWS Lambda functions
+    description: Greengrass integration used for the diagram's local video-uploader and ML-inference functions.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/greengrass/v2/developerguide/
+    types: [library]
+  - key: opc-ua
+    name: OPC-UA
+    description: Industrial protocol used by the AWS IoT SiteWise Connector to connect to factory equipment.
+    url: https://opcfoundation.org/about/opc-technologies/opc-ua/
+    types: [third-party]
+  - key: modbus
+    name: Modbus
+    description: Industrial protocol labeled at the factory Greengrass gateway in the reference diagram.
+    url: https://www.modbus.org/
+    types: [third-party]
+  - key: mqtt
+    name: MQTT
+    description: Messaging protocol labeled at the factory Greengrass gateway in the reference diagram.
+    url: https://mqtt.org/
+    types: [third-party]
+  - key: http
+    name: HTTP
+    description: Protocol labeled at the factory Greengrass gateway in the reference diagram.
+    url: https://www.rfc-editor.org/rfc/rfc9110.html
+    types: [third-party]
+  - key: aws-iot-sitewise
+    name: AWS IoT SiteWise
+    description: Models assets representing on-premises devices, equipment, and processes.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot-sitewise/latest/userguide/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-iot-sitewise-monitor
+    name: AWS IoT SiteWise Monitor
+    description: Provides a web portal for near-real-time visualization of factory data.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot-sitewise/latest/userguide/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Exchanges messages with the Greengrass edge gateway and routes data using rules.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot/latest/developerguide/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-events
+    name: AWS IoT Events
+    description: Receives events routed by AWS IoT Core rules.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot-events/latest/developerguide/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-analytics
+    name: AWS IoT Analytics
+    description: Receives data routed by AWS IoT Core and provides the analytics source for Amazon QuickSight.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iotanalytics/latest/userguide/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sns
+    name: Amazon SNS
+    description: Publishes quality alerts when product defects are detected.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/sns/latest/dg/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Builds the computer-vision predictive-quality model and deploys it to the factory edge gateway.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/sagemaker/latest/dg/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-lake-formation
+    name: AWS Lake Formation
+    description: Manages the data lake that contains processed factory images used for model training.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/lake-formation/latest/dg/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores processed factory images in the data lake used by Lake Formation.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/AmazonS3/latest/userguide/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Derives insights from AWS IoT Analytics for operations managers.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/quicksight/latest/user/welcome.html
+    types: [managed-service]
+    platform: aws
+    hosts: []

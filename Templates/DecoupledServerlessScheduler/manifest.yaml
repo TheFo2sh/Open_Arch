@@ -1,0 +1,7 @@
+PackageId: OpenArch.DecoupledServerlessScheduler
+Name: Decoupled Serverless Scheduler
+Description: A decoupled AWS scheduler that queues HPC jobs, runs them on EC2 workers, records job status, and can scale workers from S3 events.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, serverless, hpc, batch-processing, job-scheduling]
