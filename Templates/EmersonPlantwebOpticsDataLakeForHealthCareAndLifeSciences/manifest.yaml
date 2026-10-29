@@ -1,0 +1,7 @@
+PackageId: OpenArch.EmersonPlantwebOpticsDataLakeForHealthCareAndLifeSciences
+Name: Emerson Plantweb Optics Data Lake for Health Care and Life Sciences
+Description: A hybrid manufacturing and laboratory data lake using Emerson Plantweb Optics, AWS ingestion services, governed storage, analytics, visualization, and machine learning.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, manufacturing, healthcare, life-sciences, data-lake]

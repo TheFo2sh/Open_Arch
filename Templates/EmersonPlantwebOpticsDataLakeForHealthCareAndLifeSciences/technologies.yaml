@@ -1,0 +1,170 @@
+# Technologies named in the AWS reference page and its architecture diagram.
+technologies:
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: VPC boundary shown around Plantweb Enterprise Core in the AWS diagram; network topology is not specified.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-control-tower
+    name: AWS Control Tower
+    description: Establishes and governs the regulated multi-account landing zone shown in the reference.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/controltower/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-organizations
+    name: AWS Organizations
+    description: Provides the management account and organizational units shown with Control Tower.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/organizations/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: API ingress shown between the PWODL Kinesis producer and Kinesis Data Streams.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Receives records from the PWODL Kinesis producer using the PutRecords API.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: amazon-msk
+    name: Amazon Managed Streaming for Apache Kafka
+    description: Receives records from the PWODL Kafka producer.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/msk/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Receives MQTT messages from the PWODL producer and routes them to IoT services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-data-firehose
+    name: Amazon Data Firehose
+    description: Reliably delivers streaming data into the AWS data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firehose/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Object storage for the AWS data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-comprehend
+    name: Amazon Comprehend
+    description: Extracts key phrases, entities, and sentiment from file-based data and log files.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/comprehend/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-managed-grafana
+    name: Amazon Managed Grafana
+    description: Visualizes PWODL data through a plug-in for the PWODL API.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/grafana/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Provides serverless read and write services to the PWODL REST API and handles the documented AI/ML result feedback.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Develops, trains, and deploys the architecture's machine-learning models.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-sitewise
+    name: AWS IoT SiteWise
+    description: Receives industrial data through the IoT rule shown in the reference diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-sitewise/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-lake-formation
+    name: AWS Lake Formation
+    description: Governs access to the data lake and its catalog.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lake-formation/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-glue-data-catalog
+    name: AWS Glue Data Catalog
+    description: Catalogs the data lake's datasets for governed discovery and use.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Queries the governed data lake for analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Visualizes insights from Amazon Redshift.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: emerson-plantweb-optics-data-lake
+    name: Emerson Plantweb Optics Data Lake
+    description: Third-party manufacturing data platform and its factory-side producer connectors.
+    vendor: Emerson
+    url: https://www.emerson.com/en-us/automation/control-and-safety-systems/plantweb-optics
+    types: [third-party]
+  - key: aws-sdk
+    name: AWS SDK
+    description: SDK used by the PWODL Kinesis producer to call the Kinesis PutRecords API.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/developer/tools/
+    types: [library]
+  - key: apache-kafka
+    name: Apache Kafka
+    description: Messaging protocol used by the PWODL producer to connect to Amazon MSK.
+    vendor: Apache Software Foundation
+    url: https://kafka.apache.org/
+    types: [third-party]
+  - key: mqtt
+    name: MQTT
+    description: Messaging protocol used by the PWODL producer to publish to AWS IoT Core topics.
+    vendor: OASIS
+    url: https://mqtt.org/
+    types: [third-party]

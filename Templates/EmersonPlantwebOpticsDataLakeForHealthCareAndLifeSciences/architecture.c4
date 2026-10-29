@@ -1,0 +1,218 @@
+// Emerson Plantweb Optics Data Lake for Health Care and Life Sciences, after AWS's reference architecture.
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/emerson-plantweb-optics-data-lake-hcls/emerson-plantweb-optics-data-lake-hcls.html
+// Systems are slots that applying the template maps onto the project's own systems.
+model {
+  lims = system 'Laboratory Information Management System (LIMS)'
+  cmms = system 'Computerized Maintenance Management System (CMMS)'
+  mes = system 'Manufacturing Execution System (MES)'
+  batch = system 'Batch processing system'
+  cms = system 'Configuration management system (CMS)'
+  dms = system 'Document management system (DMS)'
+  plc = system 'Programmable Logic Controllers (PLC)'
+
+  pwodl = system 'Emerson Plantweb Optics Data Lake (PWODL)' {
+    description 'Slot for the Emerson Plantweb Optics system and its factory-side and cloud-side integrations.'
+    technology 'Emerson Plantweb Optics Data Lake'
+
+    enterpriseCore = container 'Plantweb Enterprise Core' {
+      description 'Plantweb core shown in the AWS VPC and connected to factory-side Plantweb deployments.'
+    }
+    dataStudio = container 'Plantweb Data Studio' {
+      description 'Plantweb visualization and data-studio components shown in the reference diagram.'
+    }
+    producers = container 'Plantweb producer connectors' {
+      description 'Connectors publish manufacturing data to AWS streaming and IoT services.'
+      kinesisProducer = component 'Kinesis producer' {
+        description 'Sends records using the Kinesis PutRecords API; the diagram shows API Gateway in the ingress path.'
+        metadata {
+          uses 'aws-sdk'
+        }
+      }
+      kafkaProducer = component 'Kafka producer' {
+        description 'Connects to Amazon MSK using Apache Kafka.'
+        technology 'Apache Kafka'
+      }
+      mqttProducer = component 'MQTT producer' {
+        description 'Publishes to AWS IoT Core topics using MQTT.'
+        technology 'MQTT'
+      }
+    }
+    restApi = container 'PWODL Web and REST API' {
+      description 'Plantweb API used by AWS Lambda read/write services and the Amazon Managed Grafana plug-in.'
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Amazon VPC' {
+      description 'Network boundary depicted around Plantweb Enterprise Core; the reference does not specify its topology.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+    controlTower = platform 'AWS Control Tower' {
+      description 'Establishes and governs the regulated landing zone.'
+      metadata {
+        uses 'aws-control-tower'
+      }
+    }
+    organizations = platform 'AWS Organizations' {
+      description 'Management account and organizational units shown with Control Tower.'
+      metadata {
+        uses 'aws-organizations'
+      }
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'API ingress shown between the Kinesis producer and Kinesis Data Streams.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    msk = platform 'Amazon Managed Streaming for Apache Kafka' {
+      metadata {
+        uses 'amazon-msk'
+      }
+    }
+    iotCore = platform 'AWS IoT Core' {
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    sitewise = platform 'AWS IoT SiteWise' {
+      description 'The diagram shows an AWS IoT rule forwarding IoT Core data to SiteWise.'
+      metadata {
+        uses 'aws-iot-sitewise'
+      }
+      industrialData = database 'Industrial data store' {
+        description 'SiteWise data shown in the diagram; asset models and data details are not specified.'
+      }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      description 'Delivers streaming data reliably into the data lake.'
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Object storage for the AWS data lake.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Manufacturing and laboratory data lake' {
+        description 'Data landed from the documented PWODL ingestion paths; schema and retention are unspecified.'
+      }
+    }
+
+    comprehend = platform 'Amazon Comprehend' {
+      description 'Extracts key phrases, entities, and sentiment from files and log data.'
+      metadata {
+        uses 'amazon-comprehend'
+      }
+    }
+    grafana = platform 'Amazon Managed Grafana' {
+      description 'Visualizes PWODL through a plug-in for the PWODL API.'
+      metadata {
+        uses 'amazon-managed-grafana'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Provides the PWODL API integration and the diagrammed streaming-to-lake processing.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      pwodlServices = system 'PWODL API and data services' {
+        apiServices = container 'PWODL REST API read/write services' {
+          description 'Serverless services that provide read/write operations to the PWODL REST API.'
+        }
+        mskIngestion = container 'MSK data integration' {
+          description 'Lambda integration shown between Amazon MSK and the data lake delivery path.'
+        }
+        modelResultWriter = container 'AI/ML result writer' {
+          description 'Writes SageMaker AI/ML results back to an on-premises PWODL deployment.'
+        }
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Develops, trains, and deploys machine-learning models.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+
+    lakeFormation = platform 'AWS Lake Formation' {
+      description 'Governs the data lake and its catalog.'
+      metadata {
+        uses 'aws-lake-formation'
+      }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      catalog = database 'Data catalog' {
+        description 'Metadata catalog for data in the lake; catalog contents are not specified.'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      metadata {
+        uses 'amazon-redshift'
+      }
+      warehouse = database 'Analytics data store' {
+        description 'Redshift analytics data store; schema and loading details are not specified.'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+  }
+
+  lims -> pwodl.enterpriseCore 'Provides laboratory data to'
+  cmms -> pwodl.enterpriseCore 'Provides maintenance data to'
+  mes -> pwodl.enterpriseCore 'Provides manufacturing data to'
+  batch -> pwodl.enterpriseCore 'Provides batch data to'
+  cms -> pwodl.enterpriseCore 'Provides configuration data to'
+  dms -> pwodl.enterpriseCore 'Provides documents to'
+  plc -> pwodl.enterpriseCore 'Provides plant-floor data to'
+  pwodl.enterpriseCore -> pwodl.producers 'Feeds data to'
+  pwodl.producers.kinesisProducer -> aws.apiGateway 'Sends Kinesis records through'
+  aws.apiGateway -> aws.kinesis 'Provides ingress to'
+  pwodl.producers.kafkaProducer -> aws.msk 'Publishes records to'
+  pwodl.producers.mqttProducer -> aws.iotCore 'Publishes MQTT messages to'
+  aws.kinesis -> aws.firehose 'Delivers streaming records through'
+  aws.msk -> aws.lambda.mskIngestion 'Feeds the diagrammed data integration'
+  aws.lambda.mskIngestion -> aws.firehose 'Delivers streaming records through'
+  aws.firehose -> aws.s3 'Reliably loads data into'
+  aws.iotCore -> aws.sitewise 'Routes messages through an IoT rule to'
+
+  aws.s3 -> aws.comprehend 'Provides file-based data and logs for text analysis'
+  aws.comprehend -> aws.redshift 'Makes extracted text insights available for analytics'
+  aws.s3 -> aws.redshift 'Provides data for queries'
+  aws.sagemaker -> aws.s3 'Uses lake data to develop and train models'
+  aws.sagemaker -> aws.lambda.modelResultWriter 'Returns AI/ML results to'
+  aws.lambda.modelResultWriter -> pwodl.restApi 'Writes results back through'
+  aws.lambda.apiServices -> pwodl.restApi 'Provides read/write services to'
+  aws.grafana -> pwodl.restApi 'Visualizes data through the PWODL API plug-in'
+
+  aws.lakeFormation -> aws.s3 'Governs access to'
+  aws.lakeFormation -> aws.glueCatalog 'Governs the data catalog'
+  aws.redshift -> aws.quickSight 'Supplies analytics for visualization in'
+  aws.controlTower -> aws.organizations 'Establishes and governs the landing zone with'
+}
+
+views {
+  view index {
+    title 'Emerson Plantweb Optics Data Lake for Health Care and Life Sciences'
+    include *, aws.*
+  }
+}
