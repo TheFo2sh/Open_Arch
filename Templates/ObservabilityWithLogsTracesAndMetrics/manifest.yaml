@@ -1,0 +1,7 @@
+PackageId: OpenArch.ObservabilityWithLogsTracesAndMetrics
+Name: Observability with Logs, Traces, and Metrics
+Description: Collects, enriches, stores, and visualizes application logs, traces, and metrics using OpenSearch, Prometheus, and Grafana on AWS.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, observability, logs, traces, metrics]

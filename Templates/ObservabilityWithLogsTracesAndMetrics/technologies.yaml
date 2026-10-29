@@ -1,0 +1,51 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: fluent-bit
+    name: Fluent Bit
+    description: Open-source log collector that forwards application logs to OpenSearch Data Prepper.
+    vendor: Fluent Bit
+    url: https://fluentbit.io/
+    types: [library, third-party]
+  - key: opensearch-data-prepper
+    name: OpenSearch Data Prepper
+    description: Open-source collector that transforms and enriches logs and traces before forwarding them to Amazon OpenSearch Service.
+    vendor: OpenSearch Project
+    url: https://opensearch.org/docs/latest/data-prepper/
+    types: [library, third-party]
+  - key: aws-distro-for-opentelemetry
+    name: AWS Distro for OpenTelemetry
+    description: OpenTelemetry metric scrapers forward metrics to Amazon Managed Service for Prometheus and traces to OpenSearch Data Prepper.
+    vendor: Amazon Web Services
+    url: https://aws-otel.github.io/
+    types: [library]
+  - key: amazon-opensearch-service
+    name: Amazon OpenSearch Service
+    description: Managed data store for logs and traces received from OpenSearch Data Prepper; provides OpenSearch Dashboards.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/opensearch-service/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [system, database]
+  - key: opensearch-dashboards
+    name: OpenSearch Dashboards
+    description: Dashboard interface for exploring logs and traces stored in Amazon OpenSearch Service.
+    vendor: OpenSearch Project
+    url: https://opensearch.org/docs/latest/dashboards/
+    types: [library]
+  - key: amazon-managed-service-for-prometheus
+    name: Amazon Managed Service for Prometheus
+    description: Managed metrics store for metrics received from AWS Distro for OpenTelemetry scrapers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/prometheus/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-managed-grafana
+    name: Amazon Managed Grafana
+    description: Managed visualization service for interactive dashboards using OpenSearch and Prometheus data sources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/grafana/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
