@@ -1,0 +1,90 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+technologies:
+  - key: aws-data-exchange
+    name: AWS Data Exchange
+    description: Source for historical price data used by the trading architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/data-exchange/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores historical price data for cataloging and querying.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-glue-data-catalog
+    name: AWS Glue Data Catalog
+    description: Catalogs historical price data for discovery and queries.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Queries historical price data using the AWS Glue Data Catalog.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Trains machine-learning models for algorithmic trading strategies.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ecs
+    name: Amazon Elastic Container Service
+    description: Runs the backtest, Market Data Adapter, Broker Adapter, and Trading Strategy workloads.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecs/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-fargate
+    name: AWS Fargate
+    description: Serverless compute for the containerized backtest and trading services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fargate/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Transactional data store used by the market data and broker adapters.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-eventbridge
+    name: Amazon EventBridge
+    description: Schedules jobs that invoke AWS Lambda functions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eventbridge/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs functions invoked by Amazon EventBridge for job scheduling.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Monitors the algorithmic trading architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []

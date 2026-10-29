@@ -1,0 +1,165 @@
+// Amazon FSx for NetApp ONTAP NTFS connectivity to Domino Data Lab.
+// Based on https://docs.aws.amazon.com/reference-architecture-diagrams/latest/storage/fsxn-ntfs-domino.html
+model {
+  user = user 'Domino user' {
+    description 'Uses Domino in a browser and can access shared files directly from a local machine.'
+  }
+
+  fileClient = system 'Local file access client' {
+    description 'The user’s local machine for direct access to the shared FSx data.'
+  }
+  externalSources = system 'External data sources' {
+    description 'Optional data sources that Domino can integrate from the same or another VPC, another cloud, or on premises.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      description 'DNS service used by Domino Data Lab.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    secrets = platform 'AWS Secrets Manager' {
+      description 'Used by Domino Data Lab to help manage and secure resources.'
+      metadata {
+        uses 'aws-secrets-manager'
+      }
+    }
+    ecr = platform 'Amazon ECR' {
+      description 'Container registry used by Domino Data Lab to help deploy resources.'
+      metadata {
+        uses 'amazon-ecr'
+      }
+    }
+
+    vpc = platform 'Amazon VPC' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      loadBalancer = platform 'Elastic Load Balancing' {
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+      eks = platform 'Amazon EKS' {
+        description 'Kubernetes cluster running Domino Data Lab.'
+        metadata {
+          uses 'amazon-eks'
+        }
+
+        domino = system 'Domino Data Lab' {
+          description 'The Domino application, including its platform, compute, and GPU workloads.'
+
+          application = container 'Domino application' {
+            description 'Domino Data Lab application components running on EKS.'
+            technology 'Domino Data Lab'
+            metadata {
+              uses 'domino-data-lab'
+            }
+
+            platformServices = component 'Platform services' {
+              metadata {
+                uses 'domino-data-lab'
+              }
+            }
+            compute = component 'Compute workloads' {
+              metadata {
+                uses 'domino-data-lab'
+              }
+            }
+            gpu = component 'GPU workloads' {
+              metadata {
+                uses 'domino-data-lab'
+              }
+            }
+            trident = component 'NetApp Trident storage integration' {
+              description 'Provisions the NFS volumes Domino uses for FSx for ONTAP data.'
+              technology 'NetApp Trident'
+              metadata {
+                uses 'netapp-trident'
+              }
+            }
+          }
+        }
+      }
+      fsx = platform 'Amazon FSx for NetApp ONTAP' {
+        metadata {
+          uses 'amazon-fsx-for-netapp-ontap'
+        }
+        dataVolumes = database 'Domino data volumes' {
+          description 'Shared files stored on FSx for ONTAP. The NTFS security style and volume permissions are configured for direct SMB access while Domino retains NFS access.'
+        }
+      }
+      directory = platform 'AWS Directory Service' {
+        description 'Directory integration for the FSx storage virtual machine and direct SMB user authentication.'
+        metadata {
+          uses 'aws-directory-service'
+        }
+      }
+    }
+
+    peering = platform 'VPC Peering' {
+      description 'Optional route for data sources in another VPC.'
+      metadata {
+        uses 'vpc-peering'
+      }
+    }
+    transitGateway = platform 'AWS Transit Gateway' {
+      description 'Optional route for external data sources.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    internetGateway = platform 'Internet Gateway' {
+      description 'Optional internet route for external data sources.'
+      metadata {
+        uses 'internet-gateway'
+      }
+    }
+    vpn = platform 'AWS Site-to-Site VPN' {
+      description 'Optional VPN route for external data sources.'
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Optional dedicated route for external data sources.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+  }
+
+  user -> aws.vpc.eks.domino 'Uses Domino in a browser over HTTPS'
+  aws.route53 -> aws.vpc.loadBalancer 'Supports the Domino endpoint'
+  aws.vpc.loadBalancer -> aws.vpc.eks.domino 'Routes HTTPS traffic to available Domino nodes'
+  aws.vpc.eks.domino.application -> aws.vpc.fsx.dataVolumes 'Accesses Trident-managed volumes over NFS using a service account'
+  user -> fileClient 'Uses a local machine to access files'
+  fileClient -> aws.vpc.fsx.dataVolumes 'Reads and edits files directly over SMB or NFS'
+  aws.vpc.directory -> aws.vpc.fsx 'Joins the SVM to Active Directory for SMB authentication and group-based volume access'
+  aws.secrets -> aws.vpc.eks.domino 'Supports management and security of Domino resources'
+  aws.ecr -> aws.vpc.eks.domino 'Supports deployment of Domino resources'
+
+  externalSources -> aws.peering 'May connect through'
+  externalSources -> aws.transitGateway 'May connect through'
+  externalSources -> aws.internetGateway 'May connect through'
+  externalSources -> aws.vpn 'May connect through'
+  externalSources -> aws.directConnect 'May connect through'
+  aws.peering -> aws.vpc.eks.domino 'Provides an optional path to Domino'
+  aws.transitGateway -> aws.vpc.eks.domino 'Provides an optional path to Domino'
+  aws.internetGateway -> aws.vpc.eks.domino 'Provides an optional path to Domino'
+  aws.vpn -> aws.vpc.eks.domino 'Provides an optional path to Domino'
+  aws.directConnect -> aws.vpc.eks.domino 'Provides an optional path to Domino'
+}
+
+views {
+  view index {
+    title 'Amazon FSx for NetApp ONTAP NTFS connectivity to Domino Data Lab'
+    include *, aws.*, aws.vpc.*, aws.vpc.eks.*, aws.vpc.eks.domino.*, aws.vpc.fsx.*
+  }
+}

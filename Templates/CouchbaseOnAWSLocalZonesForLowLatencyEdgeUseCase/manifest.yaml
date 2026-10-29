@@ -1,0 +1,7 @@
+PackageId: OpenArch.CouchbaseOnAWSLocalZonesForLowLatencyEdgeUseCase
+Name: Couchbase on AWS Local Zones for Low Latency Edge Use Case
+Description: Couchbase Server and Sync Gateway deployments in an AWS parent Region and Local Zones, with Couchbase Lite clients synchronizing with nearby edge clusters.
+Version: 1.0.0
+Icon: logos:couchbase
+Publisher: Open_Arch
+Tags: [aws, couchbase, database, edge, low-latency, local-zones]

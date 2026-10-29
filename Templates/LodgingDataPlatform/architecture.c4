@@ -1,0 +1,175 @@
+// Lodging Data Platform, based on AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/lodging-data-platform/lodging-data-platform.html
+// Systems and users are slots to map to the adopting project's own domain.
+model {
+  lodgingSystems = system 'Lodging systems of record' {
+    description 'External property-owner relationship, central reservation, property management, point-of-sale, loyalty, booking, and survey systems.'
+  }
+  externalData = system 'External demographic and address data' {
+    description 'External data sources; the reference does not identify their providers or transfer protocols.'
+  }
+  apiClients = system 'Lodging API client applications' {
+    description 'Customer-service apps and dashboards, customer websites, and mobile customer apps that call the platform APIs.'
+  }
+  eventSubscribers = system 'Property systems and other event subscribers' {
+    description 'External systems that subscribe to published customer events.'
+  }
+  analyticsExperience = system 'Lodging analytics experience' {
+    description 'A project dashboard or analytics system for lodging users; the reference shows dashboard users but does not name their application.'
+  }
+  dashboardUsers = user 'Dashboard users' {
+    description 'People who use the customer analytics dashboards.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    s3 = platform 'Amazon S3 data lake' {
+      description 'Stores real-time and batch staging data, curated Parquet datasets, and reportable datasets.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Purpose-built operational data store, including the customer 360 data shown in the diagram.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      operationalData = database 'Lodging operational data' {
+        description 'Operational data for lodging domains; the source names properties, reservations, stays, and loyalty but does not define the table or entity design.'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Ingests events from lodging systems of record.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    transferFamily = platform 'AWS Transfer Family' {
+      description 'Batch file-ingestion path shown in the reference diagram.'
+      metadata {
+        uses 'aws-transfer-family'
+      }
+    }
+    dataExchange = platform 'AWS Data Exchange' {
+      description 'Data-exchange ingestion path shown in the reference diagram.'
+      metadata {
+        uses 'aws-data-exchange'
+      }
+    }
+    appFlow = platform 'Amazon AppFlow' {
+      description 'Batch-ingestion path shown in the reference diagram.'
+      metadata {
+        uses 'amazon-appflow'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'API entry point for the client applications shown in the diagram.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Orchestrates operational microservices and customer event processing.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Serverless compute used by the event-processing workflows and microservices.'
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+    fargate = platform 'AWS Fargate' {
+      description 'Container compute shown with Lambda in customer event processing.'
+      metadata {
+        uses 'aws-fargate'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Processes and transforms data lake datasets.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    emr = platform 'Amazon EMR' {
+      description 'Processes data lake datasets alongside AWS Glue.'
+      metadata {
+        uses 'amazon-emr'
+      }
+    }
+    dataCatalog = platform 'AWS Glue Data Catalog' {
+      description 'Catalogs data lake datasets for discovery and analysis.'
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      description 'Hosts enterprise data warehouse schemas and data marts for known usage patterns.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+      marts = database 'Lodging data warehouse and marts' {
+        description 'Enterprise warehouse schemas and data marts; the reference does not specify their schema.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Queries data in the lake for one-time analysis requirements.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Provides standard and custom AI/ML models, including customer segmentation and lifetime value.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Provides customer analytics for dashboard users.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+  }
+
+  dashboardUsers -> analyticsExperience 'Views lodging analytics'
+  analyticsExperience -> aws.quickSight 'Uses customer analytics from'
+  apiClients -> aws.apiGateway 'Calls APIs through'
+  aws.apiGateway -> aws.stepFunctions 'Routes requests to'
+  aws.stepFunctions -> aws.lambda 'Orchestrates'
+  aws.stepFunctions -> aws.fargate 'Orchestrates'
+  aws.stepFunctions -> aws.dynamodb 'Runs operational workflows against'
+  aws.dynamodb -> aws.stepFunctions 'Change streams trigger event workflows in'
+  aws.dynamodb -> aws.s3 'Supplies operational data for'
+  lodgingSystems -> aws.kinesis 'Publishes events to'
+  lodgingSystems -> aws.transferFamily 'Supplies batch files through'
+  externalData -> aws.dataExchange 'Provides data through'
+  externalData -> aws.appFlow 'Supplies batch data through'
+  aws.transferFamily -> aws.s3 'Stages batch data in'
+  aws.dataExchange -> aws.s3 'Stages exchanged data in'
+  aws.appFlow -> aws.s3 'Stages batch data in'
+  aws.kinesis -> aws.s3 'Stages streaming data in'
+  aws.kinesis -> aws.stepFunctions 'Triggers customer event processing'
+  aws.stepFunctions -> eventSubscribers 'Publishes customer events to'
+  aws.s3 -> aws.glue 'Provides datasets for transformation with'
+  aws.s3 -> aws.emr 'Provides datasets for processing with'
+  aws.glue -> aws.s3 'Writes transformed datasets to'
+  aws.emr -> aws.s3 'Writes transformed datasets to'
+  aws.dataCatalog -> aws.athena 'Publishes the catalog for'
+  aws.s3 -> aws.athena 'Provides data for analysis with'
+  aws.s3 -> aws.redshift 'Provides data for warehouse schemas and marts in'
+  aws.s3 -> aws.sagemaker 'Provides data for model development with'
+  aws.sagemaker -> aws.s3 'Publishes reportable datasets to'
+  aws.redshift -> aws.quickSight 'Provides data for customer analytics in'
+}
+
+views {
+  view index {
+    title 'Lodging Data Platform'
+    include *
+  }
+}

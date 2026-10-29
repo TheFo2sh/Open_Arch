@@ -1,0 +1,175 @@
+// Personalization and Predictive Consumer Engagement for CPG, after AWS's
+// reference architecture. Systems and users are slots mapped to the project's own.
+model {
+  consumer = user 'Consumer' {
+    description 'Receives personalized product recommendations and targeted notifications.'
+  }
+
+  transactions = system 'Transaction systems' {
+    description 'Customer-owned transaction data source; its product and integration are not specified by AWS.'
+  }
+  erpCrm = system 'ERP/CRM systems' {
+    description 'Customer-owned source of product, consumer, and metadata inputs; its products are not specified by AWS.'
+  }
+  web = system 'Web channel' {
+    description 'Customer-owned web experience that sends clickstream events and displays recommendations.'
+  }
+  mobile = system 'Mobile channel' {
+    description 'Customer-owned mobile experience that sends clickstream events and displays recommendations.'
+  }
+  messagingChannels = system 'Consumer messaging channels' {
+    description 'The consumer-facing notification endpoints; AWS does not specify their implementation or channel configuration.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    glueCrawler = platform 'AWS Glue Crawler' {
+      description 'Captures metadata from the ERP/CRM source.'
+      metadata {
+        uses 'aws-glue-crawler'
+      }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      description 'Holds catalog metadata used by batch preparation.'
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      catalog = database 'Source metadata catalog' {
+        description 'Metadata discovered from the customer ERP/CRM source.'
+      }
+    }
+    databrew = platform 'AWS Glue DataBrew' {
+      description 'Cleans and normalizes batch inputs for analytics and machine learning.'
+      metadata {
+        uses 'aws-glue-databrew'
+      }
+    }
+
+    eventApi = platform 'Amazon API Gateway - event ingestion' {
+      description 'Receives real-time clickstream events from the digital channels.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    servingApi = platform 'Amazon API Gateway - serving layer' {
+      description 'Exposes the recommendation serving layer to web and mobile channels.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    streams = platform 'Amazon Kinesis Data Streams' {
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+      eventStream = database 'Clickstream event stream' {
+        description 'Real-time web and mobile event data captured for delivery and Amazon Personalize updates.'
+      }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      eventWorkload = system 'Clickstream event workload' {
+        description 'Customer-owned function workload that forwards streamed consumer events to Amazon Personalize; implementation details are not specified.'
+        forwardEvents = container 'Event forwarding function'
+      }
+      servingWorkload = system 'Recommendation serving workload' {
+        description 'Customer-owned function workload that requests recommendations and serves the response; API and code details are not specified.'
+        getRecommendations = container 'Recommendation function'
+      }
+      campaignWorkload = system 'Campaign integration workload' {
+        description 'Customer-owned function workload that uses recommendations in a Pinpoint engagement; campaign logic is not specified.'
+        prepareCampaign = container 'Campaign integration function'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Persists prepared training inputs and streamed events for future use.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      interactionsObjects = database 'Interactions training objects' {
+        description 'Interaction data stored for training and potential retraining; exact bucket names and object formats are not specified.'
+      }
+      itemsObjects = database 'Items training objects' {
+        description 'Item descriptions such as category and availability, prepared for model input.'
+      }
+      usersObjects = database 'Users training objects' {
+        description 'User attributes such as age and loyalty membership, prepared for model input.'
+      }
+    }
+
+    personalize = platform 'Amazon Personalize' {
+      description 'Builds recommendations from interaction, item, and user data and incorporates recent consumer activity.'
+      metadata {
+        uses 'amazon-personalize'
+      }
+      interactions = database 'Interactions dataset' {
+        description 'Consumer activity history, updated with events captured by the Amazon Personalize event tracker.'
+      }
+      items = database 'Items dataset' {
+        description 'Product descriptions including attributes such as category and availability.'
+      }
+      users = database 'Users dataset' {
+        description 'Consumer attributes including examples such as age and loyalty membership.'
+      }
+    }
+    pinpoint = platform 'Amazon Pinpoint' {
+      description 'Sends personalized notifications to consumers using predictive recommendations.'
+      metadata {
+        uses 'amazon-pinpoint'
+      }
+    }
+  }
+
+  transactions -> aws.databrew 'Supplies batch transaction data to'
+  erpCrm -> aws.glueCrawler 'Provides source metadata for cataloging with'
+  aws.glueCrawler -> aws.glueCatalog.catalog 'Writes discovered metadata to'
+  aws.glueCatalog.catalog -> aws.databrew 'Provides catalog metadata to'
+  aws.databrew -> aws.s3.interactionsObjects 'Prepares interaction data in'
+  aws.databrew -> aws.s3.itemsObjects 'Prepares item data in'
+  aws.databrew -> aws.s3.usersObjects 'Prepares user data in'
+
+  web -> aws.eventApi 'Sends clickstream events to'
+  mobile -> aws.eventApi 'Sends clickstream events to'
+  aws.eventApi -> aws.streams.eventStream 'Forwards events to'
+  aws.streams.eventStream -> aws.firehose 'Delivers event data through'
+  aws.firehose -> aws.s3.interactionsObjects 'Persists streamed events in'
+  aws.streams.eventStream -> aws.lambda.eventWorkload.forwardEvents 'Feeds real-time events to'
+  aws.lambda.eventWorkload.forwardEvents -> aws.personalize.interactions 'Updates through the event tracker'
+
+  aws.s3.interactionsObjects -> aws.personalize.interactions 'Loads batch interaction data into'
+  aws.s3.itemsObjects -> aws.personalize.items 'Loads item data into'
+  aws.s3.usersObjects -> aws.personalize.users 'Loads user data into'
+
+  web -> aws.servingApi 'Requests recommendations through'
+  mobile -> aws.servingApi 'Requests recommendations through'
+  aws.servingApi -> aws.lambda.servingWorkload.getRecommendations 'Invokes'
+  aws.lambda.servingWorkload.getRecommendations -> aws.personalize 'Requests recommendations from'
+  aws.personalize -> aws.lambda.servingWorkload.getRecommendations 'Returns recommendations to'
+  aws.servingApi -> web 'Returns recommendation responses to'
+  aws.servingApi -> mobile 'Returns recommendation responses to'
+
+  aws.lambda.campaignWorkload.prepareCampaign -> aws.personalize 'Retrieves recommendations for targeted campaigns from'
+  aws.lambda.campaignWorkload.prepareCampaign -> aws.pinpoint 'Provides targeting context to'
+  aws.pinpoint -> messagingChannels 'Delivers personalized notifications through'
+  consumer -> messagingChannels 'Receives targeted notifications through'
+  consumer -> web 'Views personalized recommendations in'
+  consumer -> mobile 'Views personalized recommendations in'
+}
+
+views {
+  view index {
+    title 'Personalization and Predictive Consumer Engagement for CPG'
+    include *
+  }
+}

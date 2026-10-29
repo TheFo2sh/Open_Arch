@@ -1,0 +1,62 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores historical vehicle data and sensor logs, and archives telemetry delivered by Firehose.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Trains and deploys the battery-failure prediction model using historical telemetry; the diagram also shows a notebook instance.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/sagemaker/latest/dg/
+    types: [managed-service]
+    platform: aws
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Receives telemetry from connected vehicles and routes messages to processing.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot/latest/developerguide/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-data-firehose
+    name: Amazon Data Firehose
+    description: Delivers a stream of vehicle telemetry to Amazon S3 for historical use.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firehose/
+    types: [managed-service]
+    platform: aws
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the prediction function against live vehicle sensor logs using the trained model.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/lambda/latest/dg/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-aurora
+    name: Amazon Aurora
+    description: Stores completed battery-failure predictions for record-keeping and future model improvements; the source does not specify a database engine.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/AmazonRDS/latest/AuroraUserGuide/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Displays stored vehicle battery-failure predictions on a dashboard.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/quicksight/latest/developerguide/welcome.html
+    types: [managed-service]
+    platform: aws
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: Sends real-time predicted-failure warnings to connected vehicles.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/sns/latest/dg/
+    types: [managed-service]
+    platform: aws

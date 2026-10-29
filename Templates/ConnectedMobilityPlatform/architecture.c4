@@ -1,0 +1,252 @@
+// Connected Mobility Platform, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/connected-mobility-platform-on-aws/connected-mobility-platform-on-aws.html
+// The source page links the diagram as a PNG. Systems and users are slots.
+model {
+  fleetOperator = user 'Fleet operator'
+  callCenterAgent = user 'Call center agent'
+
+  externalInfrastructure = system 'External infrastructure' {
+    description 'Smart traffic lights and charging stations shown as connected-mobility context.'
+  }
+  telcoProvider = system 'Telecommunications provider' {
+    description 'Unspecified provider carrying vehicle connectivity between vehicles and AWS.'
+  }
+  externalApiConsumers = system 'Third-party service and data API consumers' {
+    description 'Includes the telecommunications and parking providers shown in the diagram; AWS does not specify which provider consumes which API.'
+  }
+  oemSystems = system 'OEM systems' {
+    partsInventory = container 'Parts inventory'
+    dealerManagement = container 'Dealer management'
+  }
+
+  vehicleEdge = zone 'Vehicle edge' {
+    metadata {
+      platform 'other'
+    }
+    greengrass = platform 'AWS IoT Greengrass' {
+      description 'Edge runtime shown hosting vehicle components and machine-learning inference.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+      vehicle = system 'Connected vehicle' {
+        description 'In-vehicle systems, including the gateway, IVI, telematics control unit, and battery; exact hardware and protocols are unspecified.'
+        edgeAgent = container 'FleetWise edge agent and device SDK' {
+          description 'Collects vehicle data and communicates with AWS IoT.'
+          metadata {
+            uses 'aws-iot-fleetwise-edge-agent, aws-iot-sdk'
+          }
+        }
+        edgeInference = container 'Edge ML inference' {
+          description 'Runs machine-learning inference at the edge; the model and deployment mechanism are unspecified.'
+        }
+      }
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    deviceManagement = platform 'AWS IoT Device Management' {
+      metadata {
+        uses 'aws-iot-device-management'
+      }
+    }
+    deviceShadow = platform 'AWS IoT Device Shadow' {
+      metadata {
+        uses 'aws-iot-device-shadow'
+      }
+    }
+    fleetwise = platform 'AWS IoT FleetWise' {
+      metadata {
+        uses 'aws-iot-fleetwise'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      mobilityFunctions = system 'Connected mobility functions' {
+        description 'Functions shown for device management, vehicle-data processing, notifications, and fleet operations.'
+      }
+    }
+    eventBridge = platform 'Amazon EventBridge' {
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    neptune = platform 'Amazon Neptune' {
+      metadata {
+        uses 'amazon-neptune'
+      }
+      vehicleGraph = database 'Vehicle attributes and subscriptions' {
+        description 'Graph data used for vehicle-attribute and subscription management.'
+      }
+    }
+
+    kinesisStreams = platform 'Amazon Kinesis Data Streams' {
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      description 'The diagram labels this service Amazon Kinesis Data Firehose.'
+      metadata {
+        uses 'amazon-kinesis-data-firehose'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      rawData = database 'Raw mobility data'
+      curatedData = database 'Curated mobility data'
+      anonymizedData = database 'Anonymized mobility data'
+      portalAssets = database 'Fleet portal assets'
+    }
+    lakeFormation = platform 'AWS Lake Formation' {
+      metadata {
+        uses 'aws-lake-formation'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      tripSummaries = database 'Trip information and driver scores'
+      fleetData = database 'Fleet information'
+    }
+    timestream = platform 'Amazon Timestream' {
+      metadata {
+        uses 'amazon-timestream'
+      }
+      telemetry = database 'Vehicle telemetry'
+    }
+
+    dataExchange = platform 'AWS Data Exchange' {
+      metadata {
+        uses 'aws-data-exchange'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    flink = platform 'Amazon Managed Service for Apache Flink' {
+      description 'The source prose names Managed Service for Apache Flink; the diagram labels Kinesis Data Analytics.'
+      metadata {
+        uses 'amazon-managed-service-for-apache-flink'
+      }
+    }
+    kinesisVideo = platform 'Amazon Kinesis Video Streams' {
+      metadata {
+        uses 'amazon-kinesis-video-streams'
+      }
+    }
+    rekognition = platform 'Amazon Rekognition' {
+      metadata {
+        uses 'amazon-rekognition'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    location = platform 'Amazon Location Service' {
+      metadata {
+        uses 'amazon-location-service'
+      }
+    }
+
+    fleetPortal = system 'Fleet management portal' {
+      description 'Portal for fleet operators to monitor vehicles near real time.'
+    }
+    connect = platform 'Amazon Connect' {
+      metadata {
+        uses 'amazon-connect'
+      }
+      callCenter = system 'Connected mobility call center' {
+        description 'Call-center workflow enabled by Amazon Connect and Amazon Chime.'
+      }
+    }
+    chime = platform 'Amazon Chime' {
+      metadata {
+        uses 'amazon-chime'
+      }
+    }
+    comprehend = platform 'Amazon Comprehend' {
+      metadata {
+        uses 'amazon-comprehend'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+  }
+
+  externalInfrastructure -> vehicle 'Exchanges connected-mobility signals with'
+  vehicle -> telcoProvider 'Uses vehicle connectivity from'
+  telcoProvider -> aws.iotCore 'Carries vehicle data to'
+  aws.iotCore -> telcoProvider 'Returns cloud messages through'
+  aws.iotCore -> aws.fleetwise 'Receives FleetWise vehicle data through'
+  aws.deviceManagement -> aws.fleetwise 'Onboards vehicles and manages their lifecycle with'
+  aws.deviceManagement -> aws.deviceShadow 'Performs remote operations using'
+  aws.deviceShadow -> aws.lambda.mobilityFunctions 'Sends remote-operation events to'
+  aws.iotCore -> aws.lambda.mobilityFunctions 'Routes connectivity rules and actions to'
+  aws.lambda.mobilityFunctions -> aws.eventBridge 'Coordinates vehicle attributes and subscriptions through'
+  aws.eventBridge -> aws.neptune.vehicleGraph 'Updates vehicle attribute and subscription data in'
+
+  aws.iotCore -> aws.kinesisStreams 'Streams vehicle data to'
+  aws.kinesisStreams -> aws.lambda.mobilityFunctions 'Sends data for aggregation to'
+  aws.lambda.mobilityFunctions -> aws.dynamodb.tripSummaries 'Stores aggregated trip information and driver scores in'
+  aws.iotCore -> aws.timestream.telemetry 'Stores vehicle telemetry in'
+  aws.iotCore -> aws.firehose 'Delivers vehicle data through'
+  aws.firehose -> aws.s3.rawData 'Stores raw data in'
+  aws.firehose -> aws.s3.curatedData 'Stores curated data in'
+  aws.firehose -> aws.s3.anonymizedData 'Stores anonymized data in'
+  aws.lakeFormation -> aws.s3.rawData 'Governs data access to'
+  aws.lakeFormation -> aws.s3.curatedData 'Governs data access to'
+  aws.lakeFormation -> aws.s3.anonymizedData 'Governs data access to'
+
+  aws.kinesisVideo -> aws.rekognition 'Supports video recognition and personalization use cases for'
+  aws.kinesisStreams -> aws.flink 'Provides streams for near-real-time alert and insight processing in'
+  aws.flink -> aws.lambda.mobilityFunctions 'Routes alert and insight events to'
+  aws.lambda.mobilityFunctions -> aws.sns 'Publishes notifications through'
+
+  fleetOperator -> aws.fleetPortal 'Monitors vehicles through'
+  aws.fleetPortal -> aws.s3.portalAssets 'Loads portal assets from'
+  aws.fleetPortal -> aws.apiGateway 'Uses fleet APIs through'
+  aws.apiGateway -> aws.lambda.mobilityFunctions 'Routes fleet requests to'
+  aws.lambda.mobilityFunctions -> aws.dynamodb.fleetData 'Reads and updates fleet information in'
+  aws.lambda.mobilityFunctions -> aws.location 'Uses vehicle location capabilities from'
+  aws.apiGateway -> externalApiConsumers 'Exposes service APIs to'
+  aws.dataExchange -> externalApiConsumers 'Exposes data APIs to'
+
+  callCenterAgent -> aws.connect.callCenter 'Handles connected-mobility calls through'
+  aws.connect.callCenter -> aws.chime 'Uses communications capabilities from'
+  aws.connect.callCenter -> aws.comprehend 'Uses language analysis from'
+  aws.connect.callCenter -> aws.quickSight 'Visualizes call insights with'
+  aws.connect.callCenter -> oemSystems 'Integrates with'
+}
+
+views {
+  view index {
+    title 'Connected Mobility Platform'
+    include *, aws.*, aws.iotCore.*, aws.lambda.*, aws.neptune.*, aws.s3.*, aws.dynamodb.*, aws.timestream.*, aws.connect.*, vehicleEdge.*, vehicleEdge.greengrass.*
+  }
+}

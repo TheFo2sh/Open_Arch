@@ -1,0 +1,86 @@
+# The AWS services and encryption standards used by the blueprint.
+technologies:
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Dedicated or hosted network connection between a customer network and AWS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect-public-vif
+    name: AWS Direct Connect public virtual interface
+    description: Public virtual interface used to reach public AWS VPN endpoint addresses over Direct Connect.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/directconnect/latest/UserGuide/WorkingWithVirtualInterfaces.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect-transit-vif
+    name: AWS Direct Connect transit virtual interface
+    description: Transit virtual interface used with a Direct Connect gateway to connect to a Transit Gateway.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/directconnect/latest/UserGuide/WorkingWithVirtualInterfaces.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect-gateway
+    name: AWS Direct Connect gateway
+    description: Gateway associated with a transit virtual interface and a Transit Gateway for private IP VPN or MACsec patterns.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/directconnect/latest/UserGuide/direct-connect-gateways-intro.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-site-to-site-vpn
+    name: AWS Site-to-Site VPN
+    description: Managed IPsec VPN connection between a customer gateway and a VPC or Transit Gateway.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-virtual-private-gateway
+    name: AWS virtual private gateway
+    description: VPN endpoint attached to an Amazon VPC for the public VIF Site-to-Site VPN pattern.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpn/latest/s2svpn/VPNTunnels.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-transit-gateway
+    name: AWS Transit Gateway
+    description: VPN and Direct Connect routing hub for one or more attached VPCs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc
+    name: Amazon VPC
+    description: Virtual network containing the workload reached through the VPN or Transit Gateway.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute instances used as the VPC workload endpoint in the reference traffic flows.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: ipsec
+    name: IPsec
+    description: Network-layer security protocol used by AWS Site-to-Site VPN tunnels; the implementation is customer-configured.
+    vendor: Internet Engineering Task Force
+    url: https://www.rfc-editor.org/rfc/rfc4301.html
+    types: [library]
+  - key: macsec
+    name: MACsec (IEEE 802.1AE)
+    description: Link-layer security standard used on a supported dedicated Direct Connect connection.
+    vendor: IEEE
+    url: https://docs.aws.amazon.com/directconnect/latest/UserGuide/MACsec.html
+    types: [library]

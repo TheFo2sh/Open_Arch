@@ -1,0 +1,7 @@
+PackageId: OpenArch.EmbeddedMLModelsUsingAmazonSageMakerOnAWSMarketplace
+Name: Embedded ML models using Amazon SageMaker AI on AWS Marketplace
+Description: A buyer consumes a seller's machine learning model in a network-isolated Amazon SageMaker endpoint, with subscription authorization and buyer-managed request and response handling.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, machine-learning, sagemaker, marketplace, inference]
