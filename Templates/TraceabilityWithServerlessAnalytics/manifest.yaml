@@ -1,0 +1,7 @@
+PackageId: OpenArch.TraceabilityWithServerlessAnalytics
+Name: Traceability with Serverless Analytics
+Description: Trace and monitor data lake processing with AWS X-Ray and serverless analytics services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, data-lake, analytics, traceability, serverless]
