@@ -1,0 +1,7 @@
+PackageId: OpenArch.IBMInstanaObservabilityOnAWS
+Name: IBM Instana Observability on AWS
+Description: Hybrid observability with Instana host agents and sensors on AWS and corporate data-center hosts, CloudWatch telemetry collection, dashboards, and alert delivery.
+Version: 1.0.0
+Icon: simple-icons:instana
+Publisher: Open_Arch
+Tags: [aws, observability, monitoring, ibm, instana]
