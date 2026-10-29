@@ -1,0 +1,174 @@
+// PTC Windchill Product Lifecycle Management on AWS, based on AWS's reference architecture.
+// Systems and users are slots; the template does not deploy infrastructure.
+model {
+  windchillUsers = user 'Windchill users' {
+    description 'Access Windchill from a web browser, Office applications, a CAD tool, or a mobile device.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Amazon Virtual Private Cloud' {
+      description 'VPC with public, private, and database subnets across two Availability Zones.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      webLoadBalancer = platform 'Elastic Load Balancing' {
+        description 'Routes user traffic to available Windchill web server nodes.'
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+      methodLoadBalancer = platform 'Elastic Load Balancing' {
+        description 'Balances client transactions and interactions with other systems across foreground Method Servers.'
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+
+      ec2 = platform 'Amazon EC2' {
+        description 'Hosts Windchill application roles and PTC Solution Monitor instances across Availability Zones.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+
+        windchill = system 'PTC Windchill PLM' {
+          description 'Windchill application deployed as a highly available cluster.'
+
+          webServers = container 'Windchill Web Servers' {
+            description 'Receive user requests routed by Elastic Load Balancing.'
+          }
+          methodServers = container 'Foreground Method Servers' {
+            description 'Handle client transactions and interactions with other systems.'
+          }
+          backgroundServer = container 'Background Server' {
+            description 'Generates dynamic content for end users and backend systems.'
+          }
+          workers = container 'CAD/Doc Workers' {
+            description 'Render CAD and Office content into PDF documents.'
+          }
+          solr = container 'Solr Index Server' {
+            description 'Supports keyword searches, including searches across application metadata.'
+            metadata {
+              uses 'apache-solr'
+            }
+          }
+          replicationServer = container 'Windchill Replication Server' {
+            description 'Replicates content between Windchill deployments.'
+          }
+        }
+
+        solutionMonitor = system 'PTC Solution Monitor' {
+          description 'Real-time monitoring of Windchill system, application, and database performance.'
+        }
+      }
+
+      rds = platform 'Amazon RDS' {
+        description 'Relational database service for Windchill metadata, synchronously replicated across Availability Zones.'
+        metadata {
+          uses 'amazon-rds'
+        }
+        metadataPrimary = database 'Windchill Metadata Primary' {
+          description 'Primary database for Windchill application metadata; database engine and configuration are unspecified.'
+        }
+        metadataReplica = database 'Windchill Metadata Replica' {
+          description 'Synchronous replica of Windchill metadata in another Availability Zone.'
+        }
+      }
+
+    }
+
+    vpn = platform 'AWS VPN' {
+      description 'VPN connection shown between the on-premises environment and AWS.'
+      metadata {
+        uses 'aws-vpn'
+      }
+    }
+    directoryService = platform 'AWS Directory Service' {
+      description 'Integrates the corporate LDAP directory for Windchill authentication and account management.'
+      metadata {
+        uses 'aws-directory-service'
+      }
+    }
+    vpcPeering = platform 'Amazon VPC Peering' {
+      description 'Network connectivity used to replicate content between Windchill deployments.'
+      metadata {
+        uses 'amazon-vpc-peering'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores Windchill application content and generated PDF documents.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      content = database 'Windchill Content' {
+        description 'Application content and PDF renderings of CAD and Office documents; bucket layout is unspecified.'
+      }
+    }
+  }
+
+  separateRegion = zone 'Separate AWS Region (optional)' {
+    metadata {
+      platform 'aws'
+    }
+    regionalVpc = platform 'Amazon Virtual Private Cloud' {
+      description 'VPC for an optional separate-region Windchill deployment; its topology is not specified.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+      regionalEc2 = platform 'Amazon EC2' {
+        description 'EC2 hosting for the optional separate-region Windchill workload.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        regionalWindchill = system 'Separate-region Windchill deployment' {
+          description 'Optional Windchill workload in another Region; its server topology is not detailed.'
+        }
+      }
+    }
+  }
+
+  onPremises = zone 'On-premises' {
+    metadata {
+      platform 'other'
+    }
+    corporateLdap = system 'Corporate LDAP Directory' {
+      description 'Customer-provided corporate LDAP directory; product and deployment details are unspecified.'
+    }
+    replicationServer = system 'On-premises Replication Server' {
+      description 'Replication Server shown in the on-premises environment for collaboration across Windchill deployments.'
+    }
+  }
+
+  windchillUsers -> aws.vpc.ec2.windchill 'Accesses from browser, Office, CAD, or mobile clients'
+  aws.vpc.webLoadBalancer -> aws.vpc.ec2.windchill.webServers 'Routes user traffic to'
+  aws.vpc.methodLoadBalancer -> aws.vpc.ec2.windchill.methodServers 'Balances client transactions across'
+  aws.vpc.ec2.windchill.methodServers -> aws.vpc.ec2.windchill.backgroundServer 'Requests dynamic content from'
+  aws.vpc.ec2.windchill.methodServers -> aws.vpc.ec2.windchill.workers 'Uses to render CAD and Office documents'
+  aws.vpc.ec2.windchill.workers -> aws.s3.content 'Stores generated PDF documents in'
+  aws.vpc.ec2.windchill.methodServers -> aws.s3.content 'Reads and writes application content in'
+  aws.vpc.ec2.windchill.methodServers -> aws.vpc.ec2.windchill.solr 'Uses for keyword search'
+  aws.vpc.ec2.windchill.methodServers -> aws.vpc.rds.metadataPrimary 'Reads and writes metadata in'
+  aws.vpc.rds.metadataPrimary -> aws.vpc.rds.metadataReplica 'Replicates synchronously across Availability Zones to'
+  aws.vpc.ec2.solutionMonitor -> aws.vpc.ec2.windchill 'Monitors system and application performance for'
+  aws.vpc.ec2.solutionMonitor -> aws.vpc.rds.metadataPrimary 'Monitors database performance for'
+  aws.vpc.ec2.solutionMonitor -> aws.vpc.rds.metadataReplica 'Monitors database performance for'
+  onPremises.corporateLdap -> aws.directoryService 'Integrates through'
+  aws.directoryService -> aws.vpc.ec2.windchill 'Provides authentication and account management for'
+  onPremises.corporateLdap -> aws.vpn 'Connects to AWS through'
+  onPremises.replicationServer -> aws.vpn 'Connects to AWS through'
+  aws.vpn -> aws.vpc 'Connects the on-premises environment to'
+  onPremises.replicationServer -> aws.vpc.ec2.windchill.replicationServer 'Replicates content with'
+  aws.vpcPeering -> separateRegion.regionalVpc 'Provides VPC peering connectivity to'
+  aws.vpc.ec2.windchill.replicationServer -> separateRegion.regionalVpc.regionalEc2.regionalWindchill 'Replicates content to the optional separate-region deployment'
+}
+
+views {
+  view index {
+    title 'PTC Windchill Product Lifecycle Management on AWS'
+    include *
+  }
+}

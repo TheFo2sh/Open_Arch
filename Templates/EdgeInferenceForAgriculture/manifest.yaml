@@ -1,0 +1,7 @@
+PackageId: OpenArch.EdgeInferenceForAgriculture
+Name: Edge Inference for Agriculture
+Description: Run low-latency agricultural inference on AWS Snowball Edge with AWS IoT Greengrass, SageMaker AI Neo-optimized models, Lambda functions, and SNS.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, agriculture, edge, iot, machine-learning]

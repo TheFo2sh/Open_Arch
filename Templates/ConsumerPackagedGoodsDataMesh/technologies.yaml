@@ -1,0 +1,85 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-cloudformation
+    name: AWS CloudFormation
+    description: Provides the CloudFormation templates shown in producer and consumer domains for organization-level blueprints.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudformation/
+    types: [managed-service]
+    platform: aws
+  - key: aws-lake-formation
+    name: AWS Lake Formation
+    description: Centrally governs fine-grained permissions and supports automatic schema discovery and conversion.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lake-formation/
+    types: [managed-service]
+    platform: aws
+  - key: aws-glue
+    name: AWS Glue
+    description: Provides data cataloging and the crawlers shown for producer and consumer domains.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+  - key: aws-glue-data-catalog
+    name: AWS Glue Data Catalog
+    description: Catalogs metadata for datasets in the data mesh.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/features/#DataCatalog
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-glue-databrew
+    name: AWS Glue DataBrew
+    description: The diagram shows DataBrew beside ML transforms; its exact role and data flow are not specified.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/features/databrew/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-neptune
+    name: Amazon Neptune
+    description: Stores data lineage metadata for the mesh.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/neptune/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores data contracts used by consumers to search for data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores domain and shared data shown in the architecture diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Provides analytics over data in the mesh.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-opensearch-service
+    name: Amazon OpenSearch Service
+    description: Provides analysis of mesh data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/opensearch-service/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Provides machine learning and analytics for mesh data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/ai/
+    types: [managed-service]
+    platform: aws

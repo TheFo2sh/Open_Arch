@@ -1,0 +1,146 @@
+// Guidance for Contextual Intelligence for Advertising, after the AWS reference architecture.
+// Systems are slots mapped onto the project's own systems when the template is applied.
+model {
+  adPartners = system 'DSPs, SSPs, and ad publishers' {
+    description 'External advertising platforms and publishers that request discovery of their content.'
+  }
+  biddingServers = system 'Bidding servers' {
+    description 'External programmatic bidding systems that retrieve contextual categories.'
+  }
+  contentManagementSystem = system 'Content management system (optional)' {
+    description 'An existing CMS API may provide content instead of the serverless crawler.'
+  }
+  industryTaxonomy = system 'Industry-standard content taxonomy' {
+    description 'The taxonomy used for mapping; AWS gives the IAB Content Taxonomy as an example.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Accepts content-discovery requests and provides the category lookup API.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Orchestrates content discovery, event handling, and analysis workflows.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      description 'Carries content-discovery completion and analysis events.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the crawler, controller, content-analysis, and category-writing functions.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      contextualSolution = system 'Contextual intelligence pipeline' {
+        description 'The project-owned functions that discover content, coordinate analysis, and store mapped categories.'
+
+        crawler = container 'Serverless crawler' {
+          description 'Explores and downloads publisher content and records discovery metadata.'
+        }
+        controller = container 'Content discovery controller' {
+          description 'Coordinates the transition from completed discovery to content analysis.'
+        }
+        analysis = container 'Content analysis functions' {
+          description 'Analyze text, images, video, and audio with AWS AI services.'
+        }
+        categoryWriter = container 'Category service function' {
+          description 'Gets taxonomy mappings and stores them for low-latency category lookups.'
+        }
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Stores the discovery, content, analysis, and category data used by the workflows.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      discoveryData = database 'Ephemeral discovery data'
+      contentMetadata = database 'Content metadata'
+      analysisResults = database 'Topics, sentiment, and object labels'
+      categoryMappings = database 'Mapped categories'
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores discovered content for analysis.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      content = database 'Discovered content'
+    }
+    comprehend = platform 'Amazon Comprehend' {
+      metadata {
+        uses 'amazon-comprehend'
+      }
+    }
+    rekognition = platform 'Amazon Rekognition' {
+      metadata {
+        uses 'amazon-rekognition'
+      }
+    }
+    transcribe = platform 'Amazon Transcribe' {
+      metadata {
+        uses 'amazon-transcribe'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Hosts the Contextual Intelligence Taxonomy Mapper.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+      taxonomyMapper = system 'Contextual Intelligence Taxonomy Mapper' {
+        description 'Maps analyzed metadata to an industry-standard taxonomy using BERT.'
+
+        bert = container 'BERT model' {
+          metadata {
+            uses 'bert-model'
+          }
+        }
+      }
+    }
+  }
+
+  // 1. Advertising partners request discovery and provide content to the API.
+  adPartners -> aws.apiGateway 'Requests content discovery through'
+  // 2. Step Functions orchestrates the crawler; DynamoDB stores transient discovery state.
+  aws.apiGateway -> aws.stepFunctions 'Starts content discovery with'
+  aws.stepFunctions -> aws.lambda.contextualSolution.crawler 'Orchestrates'
+  aws.lambda.contextualSolution.crawler -> aws.dynamodb.discoveryData 'Stores ephemeral discovery data in'
+  // 3-4. The crawler or an optional CMS stores content in S3; metadata is kept in DynamoDB.
+  aws.lambda.contextualSolution.crawler -> aws.s3.content 'Stores discovered content in'
+  contentManagementSystem -> aws.s3.content 'Can provide extracted content to'
+  aws.lambda.contextualSolution.crawler -> aws.dynamodb.contentMetadata 'Stores available content metadata in'
+  // 5-7. A completion event starts controller orchestration and content analysis.
+  aws.s3.content -> aws.sns 'Signals content-discovery completion to'
+  aws.sns -> aws.stepFunctions 'Starts controller orchestration with'
+  aws.stepFunctions -> aws.lambda.contextualSolution.controller 'Coordinates'
+  aws.lambda.contextualSolution.controller -> aws.sns 'Publishes content-analysis events to'
+  aws.sns -> aws.lambda.contextualSolution.analysis 'Invokes'
+  aws.lambda.contextualSolution.analysis -> aws.comprehend 'Analyzes text with'
+  aws.lambda.contextualSolution.analysis -> aws.rekognition 'Analyzes images and video with'
+  aws.lambda.contextualSolution.analysis -> aws.transcribe 'Processes audio with'
+  aws.lambda.contextualSolution.analysis -> aws.dynamodb.analysisResults 'Stores topics, sentiment, and object labels in'
+  // 8-9. SageMaker hosts the BERT-based mapper; a Lambda function stores the result.
+  aws.dynamodb.analysisResults -> aws.sagemaker.taxonomyMapper 'Provides analyzed metadata to'
+  aws.sagemaker.taxonomyMapper.bert -> industryTaxonomy 'Maps metadata to'
+  aws.sagemaker.taxonomyMapper -> aws.lambda.contextualSolution.categoryWriter 'Returns category mappings to'
+  aws.lambda.contextualSolution.categoryWriter -> aws.dynamodb.categoryMappings 'Stores mapped categories in'
+  // 10. Bidding servers retrieve categories through the category service API.
+  biddingServers -> aws.apiGateway 'Requests categories from'
+  aws.apiGateway -> aws.dynamodb.categoryMappings 'Reads mapped categories from'
+}
+
+views {
+  view index {
+    title 'Guidance for Contextual Intelligence for Advertising'
+    include *, aws.*, aws.lambda.*, aws.lambda.contextualSolution.*, aws.dynamodb.*, aws.s3.*, aws.sagemaker.*, aws.sagemaker.taxonomyMapper.*
+  }
+}
