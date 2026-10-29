@@ -1,0 +1,7 @@
+PackageId: OpenArch.IBMPlanningAnalyticsWithWatsonOnAWS
+Name: IBM Planning Analytics with Watson on AWS
+Description: IBM Planning Analytics on AWS with a highly available TM1 data tier, private corporate access, cross-AZ storage replication, and human-initiated failover.
+Version: 1.0.0
+Icon: logos:ibm
+Publisher: Open_Arch
+Tags: [aws, analytics, ibm, planning-analytics, tm1]
