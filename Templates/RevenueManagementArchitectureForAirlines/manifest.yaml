@@ -1,0 +1,7 @@
+PackageId: OpenArch.RevenueManagementArchitectureForAirlines
+Name: Revenue Management Architecture for Airlines
+Description: An AWS migration pattern for airline revenue management, combining tiered S3 data feeds, EC2 Spot batch modules, On-Demand booking controls, and lake-based reporting.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, travel, airlines, revenue-management, analytics]

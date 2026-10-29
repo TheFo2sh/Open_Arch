@@ -1,0 +1,124 @@
+// Revenue Management Architecture for Airlines, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/revenue-management-airlines/revenue-management-airlines.html
+// Systems and users are slots mapped onto a project's own domain model.
+model {
+  revenueManagementTeam = user 'Revenue management team' {
+    description 'Uses reporting and analytics and adjusts revenue-management configuration.'
+  }
+
+  atpco = system 'ATPCO' {
+    description 'External source named for airline batch and near-real-time data feeds.'
+    technology 'ATPCO'
+  }
+  ql2Infare = system 'QL2 / INFARE' {
+    description 'External source named for airline batch and near-real-time data feeds.'
+    technology 'QL2 / INFARE'
+  }
+  threeVictors = system '3Victors' {
+    description 'External source named for airline batch and near-real-time data feeds.'
+    technology '3Victors'
+  }
+  availabilityServices = system 'Availability services' {
+    description 'Services that consume current fares, rules, and availability.'
+  }
+  dashboard = system 'Revenue management dashboard' {
+    description 'Provides reporting and analytics and supports configuration adjustments.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Tiered data lake for incoming feeds and revenue-management module outputs.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      inputData = database 'Input data lake tiers' {
+        description 'Batch and near-real-time source data used by revenue-management workloads.'
+      }
+      moduleOutputs = database 'Revenue-management module outputs' {
+        description 'Outputs written back to the lake for reporting and analytics.'
+      }
+    }
+    ec2Spot = platform 'Amazon EC2 Spot Instances' {
+      description 'Spot compute for migrated batch revenue-management modules.'
+      metadata {
+        uses 'amazon-ec2-spot'
+      }
+      batchRevenueManagement = system 'Revenue management modules' {
+        description 'Existing modules migrated to EC2 Spot for batch processing.'
+        batchModules = container 'Batch revenue-management modules' {
+          description 'Processes input data and writes module outputs to the data lake.'
+        }
+      }
+    }
+    efs = platform 'Amazon Elastic File System' {
+      description 'Shared file system that reproduces the structure required by the migrated modules.'
+      metadata {
+        uses 'amazon-efs'
+      }
+    }
+    ec2OnDemand = platform 'Amazon EC2 On-Demand Instances' {
+      description 'On-Demand compute for near-real-time booking controls.'
+      metadata {
+        uses 'amazon-ec2-on-demand'
+      }
+      bookingControls = system 'Near-real-time booking controls' {
+        description 'Updates fares, rules, and availability for availability services.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Serves fare, rule, and availability data updated by booking controls.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      availabilityData = database 'Fares, rules, and availability' {
+        description 'Current booking-control data made available to availability services.'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      description 'Supports flexible revenue reporting over data lake information.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+      reportingData = database 'Revenue reporting data' {
+        description 'Reporting data used with the lake; the source does not specify its schema or loading method.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Queries data lake information for flexible reporting.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+  }
+
+  atpco -> aws.s3.inputData 'Provides airline data feeds to'
+  ql2Infare -> aws.s3.inputData 'Provides airline data feeds to'
+  threeVictors -> aws.s3.inputData 'Provides airline data feeds to'
+
+  aws.s3.inputData -> aws.ec2Spot.batchRevenueManagement.batchModules 'Provides input data for'
+  aws.ec2Spot.batchRevenueManagement.batchModules -> aws.s3.moduleOutputs 'Stores processing outputs in'
+  aws.ec2Spot.batchRevenueManagement.batchModules -> aws.efs 'Uses the shared file structure on'
+
+  aws.ec2OnDemand.bookingControls -> aws.dynamodb.availabilityData 'Updates fares, rules, and availability in'
+  availabilityServices -> aws.dynamodb.availabilityData 'Consumes fares, rules, and availability from'
+
+  aws.s3.inputData -> aws.redshift.reportingData 'Provides lake data for reporting'
+  aws.s3.moduleOutputs -> aws.redshift.reportingData 'Provides module outputs for reporting'
+  aws.s3.inputData -> aws.athena 'Provides data lake input for queries'
+  aws.s3.moduleOutputs -> aws.athena 'Provides module outputs for queries'
+  aws.redshift.reportingData -> dashboard 'Provides reporting data to'
+  aws.athena -> dashboard 'Provides query results to'
+  revenueManagementTeam -> dashboard 'Uses reporting and adjusts configuration through'
+  dashboard -> aws.ec2OnDemand.bookingControls 'Supports booking-control configuration adjustments'
+}
+
+views {
+  view index {
+    title 'Revenue Management Architecture for Airlines'
+    include *, aws.*
+  }
+}
