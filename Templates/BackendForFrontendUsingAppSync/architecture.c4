@@ -1,0 +1,79 @@
+// Backend for Frontend Using AppSync, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/backend-for-frontend-appsync/backend-for-frontend-appsync.html
+// Systems and users are slots mapped onto the project's own when applying the template.
+model {
+  user = user 'Frontend user' {
+    description 'Uses a client application and receives UI refresh notifications.'
+  }
+  frontend = system 'Frontend client applications' {
+    description 'Authenticate with Cognito, query the BFF GraphQL API, and subscribe to changes.'
+  }
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    microservices = system 'Application microservices' {
+      description 'Existing domain services that emit events about mutations in domain aggregates.'
+    }
+
+    cognito = platform 'Amazon Cognito' {
+      description 'Authenticates frontend clients.'
+      metadata {
+        uses 'amazon-cognito'
+      }
+    }
+    appsync = platform 'AWS AppSync' {
+      description 'BFF GraphQL API; serves data and emits subscription notifications over WebSockets.'
+      metadata {
+        uses 'amazon-appsync'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Serverless compute for BFF query handlers, event consumers, and the stream handler.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      bff = system 'BFF handlers' {
+        description 'Purpose-built event consumers maintain projections; an optional query handler serves API reads; the stream handler invokes an empty AppSync mutation.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Stores the denormalized frontend data view.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      projections = database 'BFF projection tables' {
+        description 'UI-ready data projections maintained by event consumers.'
+      }
+      streams = platform 'Amazon DynamoDB Streams' {
+        description 'Captures changes to the BFF tables and triggers the stream handler.'
+        metadata {
+          uses 'amazon-dynamodb-streams'
+        }
+      }
+    }
+  }
+
+  user -> frontend 'Uses'
+  frontend -> aws.cognito 'Authenticates with (step 2)'
+  frontend -> aws.appsync 'Queries on UI load (step 2)'
+  frontend -> aws.appsync 'Subscribes over WebSockets (step 3)'
+  aws.appsync -> aws.dynamodb.projections 'Reads projection data directly (step 2)'
+  aws.appsync -> aws.lambda.bff 'Invokes the optional query handler (step 2)'
+  aws.lambda.bff -> aws.dynamodb.projections 'Reads projection data for API queries (step 2)'
+  aws.microservices -> aws.lambda.bff 'Raises events consumed by (steps 1, 4)'
+  aws.lambda.bff -> aws.dynamodb.projections 'Updates denormalized projections (steps 1, 4)'
+  aws.dynamodb.projections -> aws.dynamodb.streams 'Emits change records to (step 5)'
+  aws.dynamodb.streams -> aws.lambda.bff 'Triggers the stream handler asynchronously (step 5)'
+  aws.lambda.bff -> aws.appsync 'Invokes an empty mutation (step 6)'
+  aws.appsync -> frontend 'Pushes subscription change notifications (step 7)'
+  frontend -> user 'Refreshes the UI with updated content (step 7)'
+}
+
+views {
+  view index {
+    title 'Backend for Frontend Using AppSync'
+    include *, aws.*, aws.lambda.*, aws.dynamodb.*
+  }
+}

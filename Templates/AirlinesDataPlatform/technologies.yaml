@@ -1,0 +1,164 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Streams operational events from airline systems for real-time staging and customer event processing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-transfer-family
+    name: AWS Transfer Family
+    description: Transfers batch data sets from airline systems into the data platform.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/aws-transfer-family/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-data-exchange
+    name: AWS Data Exchange
+    description: Supplies external data sets for batch ingestion into the data platform.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/data-exchange/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-appflow
+    name: Amazon AppFlow
+    description: Ingests external data into the airline data platform.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/appflow/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service (Amazon S3)
+    description: Stores real-time and batch staging data, parquet data, and reportable data sets in the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-emr
+    name: Amazon EMR
+    description: Provides managed big data processing for transforming data sets in the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/emr/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-glue
+    name: AWS Glue
+    description: Discovers, catalogs, and transforms data for the data lake and analytics workloads.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-glue-data-catalog
+    name: AWS Glue Data Catalog
+    description: Publishes the data lake catalog for ad hoc queries and analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores customer 360 data used by customer event processing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Orchestrates customer event processing, microservices, and complex event processing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs event-processing functions orchestrated by AWS Step Functions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-fargate
+    name: AWS Fargate
+    description: Runs containerized customer microservices orchestrated by AWS Step Functions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fargate/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Provides the API entry point for mobile customer service apps, dashboards, websites, and mobile apps.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Stores enterprise data warehouse schemas and customer data marts for known analytics query patterns.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Builds customer segmentation, lifetime value, and other customer analysis models.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/ai/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Queries the data lake directly for ad hoc analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Provides customer analytics to dashboard users.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: worldtracer
+    name: WorldTracer
+    description: External baggage-tracking service shown as a customer event destination in the reference diagram; integration details are not specified.
+    types: [third-party]
+  - key: nettracer
+    name: NetTracer
+    description: External baggage-tracking service shown as a customer event destination in the reference diagram; integration details are not specified.
+    types: [third-party]

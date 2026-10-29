@@ -1,0 +1,130 @@
+// Cold Chain Logistics Powered by Mendix and AWS, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/cold-chain-logistics-mendix/cold-chain-logistics-mendix-cloud.html
+// Systems are slots mapped onto the project's own systems when the template is applied.
+model {
+  devices = system 'Cold-chain IoT devices' {
+    description 'IoT sensors publish telemetry, and actuators can be controlled through device shadows.'
+  }
+  externalSources = system 'External data sources' {
+    description 'External systems can feed information into the data lake.'
+  }
+
+  mendix = zone 'Mendix Cloud' {
+    metadata {
+      platform 'other'
+    }
+
+    cloud = platform 'Mendix Cloud' {
+      description 'Third-party application platform as a service hosting the cold-chain application.'
+      metadata {
+        uses 'mendix-cloud'
+      }
+
+      logistics = system 'Cold chain logistics application' {
+        description 'Mendix application that integrates IoT devices and AWS services using native connectors.'
+        metadata {
+          uses 'aws-sdk, jdbc-driver'
+        }
+      }
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    iot = platform 'AWS IoT Core' {
+      description 'Provides device connectivity and processes telemetry with custom rules.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    api = platform 'Amazon API Gateway' {
+      description 'Exposes backend AWS services through REST endpoints with Signature Version 4 authentication.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    rekognition = platform 'Amazon Rekognition' {
+      description 'Analyzes images submitted by the Mendix application.'
+      metadata {
+        uses 'amazon-rekognition'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Stores the data lake, unstructured files, and backups.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'S3 data lake and files' {
+        description 'Data-lake content from external systems and object/file data managed by Mendix.'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      description 'Supports topic exploration and publishing messages with attributes.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Queries and analyzes data-lake content using SQL.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    timestream = platform 'Amazon Timestream' {
+      metadata {
+        uses 'amazon-timestream'
+      }
+      sensorData = database 'Sensor time-series data' {
+        description 'Time-series data from IoT sensors, queried by Mendix using the database connector.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      applicationData = database 'High-performance application data' {
+        description 'Backend data for systems requiring high-performance processing at scale.'
+      }
+    }
+    aurora = platform 'Amazon Aurora' {
+      metadata {
+        uses 'amazon-aurora'
+      }
+      applicationDb = database 'Aurora database' {
+        description 'External database that a Mendix application can access through JDBC.'
+      }
+    }
+    rds = platform 'Amazon RDS' {
+      metadata {
+        uses 'amazon-rds'
+      }
+      relationalDb = database 'RDS database' {
+        description 'External database that a Mendix application can access through JDBC.'
+      }
+    }
+  }
+
+  devices -> aws.iot 'Publishes telemetry'
+  mendix.cloud.logistics -> aws.iot 'Uses IoT connectors over MQTT and updates device shadows'
+  externalSources -> aws.s3.dataLake 'Feeds information into'
+  mendix.cloud.logistics -> aws.api 'Calls backend REST services with Signature Version 4'
+  mendix.cloud.logistics -> aws.rekognition 'Analyzes images using connector microflows'
+  mendix.cloud.logistics -> aws.s3.dataLake 'Uploads, modifies, deletes, and backs up files'
+  mendix.cloud.logistics -> aws.sns 'Explores topics and publishes attributed messages'
+  mendix.cloud.logistics -> aws.athena 'Queries data-lake content using SQL'
+  aws.athena -> aws.s3.dataLake 'Reads and analyzes'
+  mendix.cloud.logistics -> aws.timestream.sensorData 'Queries records using JDBC'
+  mendix.cloud.logistics -> aws.dynamodb.applicationData 'Uses as a backend database'
+  mendix.cloud.logistics -> aws.aurora.applicationDb 'Connects to using JDBC'
+  mendix.cloud.logistics -> aws.rds.relationalDb 'Connects to using JDBC'
+}
+
+views {
+  view index {
+    title 'Cold Chain Logistics Powered by Mendix and AWS'
+    include *, mendix.*, mendix.cloud.*, aws.*
+  }
+}

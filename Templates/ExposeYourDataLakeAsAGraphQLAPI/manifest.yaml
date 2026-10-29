@@ -1,0 +1,7 @@
+PackageId: OpenArch.ExposeYourDataLakeAsAGraphQLAPI
+Name: Expose Your Data Lake as a GraphQL API
+Description: Automatically generate and deploy an AppSync GraphQL API from an AWS Glue data catalog, then let authorized clients query the data lake through Athena.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, data-lake, graphql, api, serverless]

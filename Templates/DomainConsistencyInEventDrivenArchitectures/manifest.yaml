@@ -1,0 +1,7 @@
+PackageId: OpenArch.DomainConsistencyInEventDrivenArchitectures
+Name: Domain Consistency in Event-Driven Architectures
+Description: An outbox and change-data-capture pattern for eventual consistency between a monolith and bounded-context microservices.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, event-driven-architecture, domain-driven-design, messaging]

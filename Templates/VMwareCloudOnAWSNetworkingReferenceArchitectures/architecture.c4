@@ -1,0 +1,237 @@
+// VMware Cloud on AWS Networking Reference Architectures, after AWS:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/vmware-cloud-networking/
+// The four chapters are alternative patterns; systems are slots mapped onto project systems.
+model {
+  onPremises = system 'Customer on-premises network' {
+    description 'Slot for customer systems and routers that connect to AWS and VMware Cloud; AWS does not specify the hardware or carrier.'
+  }
+  publicServices = system 'AWS public services and endpoints' {
+    description 'Slot representing AWS public services reached using public IP addresses; the source does not enumerate them.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    directConnectA = platform 'AWS Direct Connect (Region A)' {
+      metadata {
+        uses 'aws-direct-connect'
+      }
+      privateVifSddcA = platform 'Private VIF to SDDC A' {
+        metadata {
+          uses 'aws-direct-connect-private-vif'
+        }
+      }
+      privateVifDxgw = platform 'Private VIF to Direct Connect gateway' {
+        metadata {
+          uses 'aws-direct-connect-private-vif'
+        }
+      }
+      publicVifA = platform 'Public VIF (Region A)' {
+        metadata {
+          uses 'aws-direct-connect-public-vif'
+        }
+      }
+      transitVifA = platform 'Transit VIF (Region A)' {
+        metadata {
+          uses 'aws-direct-connect-transit-vif'
+        }
+      }
+    }
+
+    directConnectB = platform 'AWS Direct Connect (Region B)' {
+      metadata {
+        uses 'aws-direct-connect'
+      }
+      privateVifSddcB = platform 'Private VIF to SDDC B' {
+        metadata {
+          uses 'aws-direct-connect-private-vif'
+        }
+      }
+      transitVifB = platform 'Transit VIF (Region B)' {
+        metadata {
+          uses 'aws-direct-connect-transit-vif'
+        }
+      }
+    }
+
+    dxgw = platform 'AWS Direct Connect gateway' {
+      metadata {
+        uses 'aws-direct-connect-gateway'
+      }
+    }
+    vgwA = platform 'Virtual private gateway (Region A)' {
+      metadata {
+        uses 'aws-virtual-private-gateway'
+      }
+    }
+    vgwB = platform 'Virtual private gateway (Region B)' {
+      metadata {
+        uses 'aws-virtual-private-gateway'
+      }
+    }
+
+    vpnSddcA = platform 'Site-to-Site VPN backup to SDDC A' {
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    vpnSddcB = platform 'Site-to-Site VPN to SDDC B over public VIF' {
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    vpnVgwA = platform 'Site-to-Site VPN backup to VPC (Region A)' {
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    vpnVgwB = platform 'Site-to-Site VPN backup to VPC (Region B)' {
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    vpnTgwA = platform 'Transit Gateway VPN attachment (Region A)' {
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    vpnTgwB = platform 'Transit Gateway VPN attachment (Region B)' {
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+
+    transitGatewayA = platform 'AWS Transit Gateway (Region A)' {
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    transitGatewayB = platform 'AWS Transit Gateway (Region B)' {
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    vpcA = platform 'Amazon VPC (Region A)' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+    vpcB = platform 'Amazon VPC (Region B)' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+    spokeVpcs = platform 'Spoke VPCs' {
+      description 'One or more VPCs attached to Transit Gateway; the diagrams do not specify their workloads.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+
+    internetGateway = platform 'AWS internet gateway' {
+      metadata {
+        uses 'aws-internet-gateway'
+      }
+    }
+    securityVpc = platform 'Security VPC' {
+      description 'Centralized inspection point for SDDC ingress and egress traffic in the security VPC pattern.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+      networkFirewall = platform 'AWS Network Firewall' {
+        description 'AWS documents this or an unspecified third-party firewall as the security VPC firewall option.'
+        metadata {
+          uses 'aws-network-firewall'
+        }
+      }
+    }
+
+    vmwareCloud = platform 'VMware Cloud on AWS' {
+      metadata {
+        uses 'vmware-cloud-on-aws'
+      }
+      sddcA = platform 'VMware Cloud SDDC (Region A)' {
+        metadata {
+          uses 'vmware-cloud-sddc'
+        }
+        workloadsA = system 'SDDC A workloads' {
+          description 'Slot for the project systems in the Region A SDDC; AWS does not specify their applications.'
+        }
+      }
+      sddcB = platform 'VMware Cloud SDDC (Region B)' {
+        metadata {
+          uses 'vmware-cloud-sddc'
+        }
+        workloadsB = system 'SDDC B workloads' {
+          description 'Slot for the project systems in the Region B SDDC; AWS does not specify their applications.'
+        }
+      }
+      transitConnectA = platform 'VMware Transit Connect (Region A)' {
+        metadata {
+          uses 'vmware-transit-connect'
+        }
+      }
+      transitConnectB = platform 'VMware Transit Connect (Region B)' {
+        metadata {
+          uses 'vmware-transit-connect'
+        }
+      }
+    }
+  }
+
+  onPremises -> aws.directConnectA.privateVifSddcA 'Connects directly to SDDC A over'
+  aws.directConnectA.privateVifSddcA -> aws.vmwareCloud.sddcA.workloadsA 'Provides private connectivity to'
+  onPremises -> aws.vpnSddcA 'Uses internet VPN as backup for private VIF connectivity'
+  aws.vpnSddcA -> aws.vmwareCloud.sddcA.workloadsA 'Provides backup connectivity to'
+  onPremises -> aws.directConnectA.publicVifA 'Uses'
+  aws.directConnectA.publicVifA -> publicServices 'Provides public-IP access to'
+  aws.directConnectA.publicVifA -> aws.vpnSddcB 'Carries the VPN path to SDDC B'
+  aws.vpnSddcB -> aws.vmwareCloud.sddcB.workloadsB 'Connects to'
+  onPremises -> aws.directConnectB.privateVifSddcB 'Connects directly to SDDC B over'
+  aws.directConnectB.privateVifSddcB -> aws.vmwareCloud.sddcB.workloadsB 'Provides private connectivity to'
+
+  onPremises -> aws.directConnectA.privateVifDxgw 'Uses'
+  onPremises -> aws.directConnectA.transitVifA 'Uses a transit VIF over'
+  onPremises -> aws.directConnectB.transitVifB 'Uses a transit VIF over'
+  aws.directConnectA.privateVifDxgw -> aws.dxgw 'Connects through'
+  aws.directConnectA.transitVifA -> aws.dxgw 'Connects through'
+  aws.directConnectB.transitVifB -> aws.dxgw 'Connects through'
+  aws.dxgw -> aws.transitGatewayA 'Associates with'
+  aws.dxgw -> aws.transitGatewayB 'Associates with'
+  aws.dxgw -> aws.vgwA 'Associates with for VPC connectivity'
+  aws.dxgw -> aws.vgwB 'Associates with for VPC connectivity'
+  aws.vgwA -> aws.vpcA 'Is attached to'
+  aws.vgwB -> aws.vpcB 'Is attached to'
+  aws.vpnVgwA -> aws.vgwA 'Provides backup connectivity to'
+  aws.vpnVgwB -> aws.vgwB 'Provides backup connectivity to'
+  aws.transitGatewayA -> aws.vpcA 'Connects by VPC attachment to'
+  aws.transitGatewayB -> aws.vpcB 'Connects by VPC attachment to'
+  aws.transitGatewayA -> aws.spokeVpcs 'Connects by VPC attachments to'
+  aws.transitGatewayB -> aws.spokeVpcs 'Connects by VPC attachments to'
+  aws.transitGatewayA -> aws.transitGatewayB 'Connects across Regions by peering attachment'
+  aws.transitGatewayA -> aws.vpnTgwA 'Uses a VPN attachment for SDDC connectivity'
+  aws.vpnTgwA -> aws.vmwareCloud.sddcA.workloadsA 'Provides connectivity to; VMkernel traffic uses the private VIF instead'
+  aws.transitGatewayB -> aws.vpnTgwB 'Uses a VPN attachment for SDDC connectivity'
+  aws.vpnTgwB -> aws.vmwareCloud.sddcB.workloadsB 'Provides connectivity to; VMkernel traffic uses the private VIF instead'
+
+  aws.vmwareCloud.transitConnectA -> aws.vmwareCloud.sddcA.workloadsA 'Connects SDDC group networks'
+  aws.vmwareCloud.transitConnectB -> aws.vmwareCloud.sddcB.workloadsB 'Connects SDDC group networks'
+  aws.vmwareCloud.transitConnectA -> aws.vmwareCloud.transitConnectB 'Peers across Regions for SDDC networks only'
+  aws.vmwareCloud.transitConnectA -> aws.transitGatewayA 'Uses an external Transit Gateway peering attachment'
+  aws.vmwareCloud.transitConnectB -> aws.transitGatewayB 'Uses an external Transit Gateway peering attachment'
+  aws.vmwareCloud.transitConnectA -> aws.vpcA 'Can attach VPCs for same-vTGW SDDC networks'
+
+  aws.transitGatewayA -> aws.securityVpc 'Routes inspected traffic through'
+  aws.transitGatewayA -> aws.spokeVpcs 'Routes spoke VPC traffic through the security VPC'
+  aws.vmwareCloud.transitConnectA -> aws.transitGatewayA 'Routes SDDC ingress and egress traffic for inspection'
+  aws.internetGateway -> aws.securityVpc 'Provides centralized internet access through'
+}
+
+views {
+  view index {
+    title 'VMware Cloud on AWS Networking Reference Architectures'
+    include *
+  }
+}

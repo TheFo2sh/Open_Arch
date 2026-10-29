@@ -1,0 +1,153 @@
+// Domain Consistency in Event-Driven Architectures, based on AWS's verified
+// architecture notes: https://docs.aws.amazon.com/reference-architecture-diagrams/latest/domain-consistency-event-driven/domain-consistency-event-driven.html
+// Systems are slots mapped onto systems in the applying project. The one bounded
+// context shown represents the repeated per-microservice queue and projection pattern.
+model {
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    monolith = system 'Monolith' {
+      description 'The existing monolithic application; its product and hosting are not specified.'
+      domainLogic = container 'Domain logic' {
+        description 'Monolith logic that writes the relational entity tables.'
+      }
+    }
+
+    relationalDatabase = platform 'Relational database (engine unspecified)' {
+      description 'The source does not name a relational database product or engine.'
+      metadata {
+        uses 'relational-database-unspecified'
+      }
+      monolithEntityA = database 'Entity A table' {
+        description 'A relational entity table updated by monolith domain logic.'
+      }
+      monolithEntityB = database 'Entity B table' {
+        description 'A relational entity table updated by monolith domain logic.'
+      }
+      monolithOutbox = database 'Monolith outbox table' {
+        description 'Outbox rows written atomically with relational entity changes.'
+      }
+    }
+
+    dms = platform 'AWS Database Migration Service' {
+      description 'Captures database changes into Kinesis Data Streams.'
+      metadata {
+        uses 'aws-dms'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Carries CDC records, including monolith outbox inserts, to the publisher.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs microservice functions, relational CDC and DynamoDB Streams publishers, and the event consumer.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      contextFunctions = system 'Bounded-context Lambda functions' {
+        description 'Application functions shown for the bounded-context microservice; detailed responsibilities are not specified.'
+      }
+      handlers = system 'Domain event handlers' {
+        description 'Lambda function slots used to publish outbox events and consume queued domain events.'
+
+        relationalPublisher = container 'Relational outbox publisher' {
+          description 'Reads outbox inserts from the DMS CDC stream and publishes domain events.'
+        }
+        dynamodbPublisher = container 'DynamoDB outbox publisher' {
+          description 'Publishes new microservice outbox records observed through DynamoDB Streams.'
+        }
+        eventConsumer = container 'Bounded-context event consumer' {
+          description 'Processes queued events and updates locally readable external-domain projections.'
+        }
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Orchestration shown for the bounded-context microservice; the workflow is not specified.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    fargate = platform 'AWS Fargate' {
+      description 'Container compute shown for the bounded-context microservice.'
+      metadata {
+        uses 'aws-fargate'
+      }
+      boundedContext = system 'Bounded-context microservice' {
+        description 'Representative microservice; each bounded context has its own entity and outbox tables, event queue, consumer, and external-domain projections.'
+      }
+    }
+    eventBridge = platform 'Amazon EventBridge custom bus' {
+      description 'Receives domain events and routes relevant events to bounded-context queues using rules.'
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    contextQueue = platform 'Bounded-context event queue (Amazon SQS)' {
+      description 'The representative bounded-context queue; each microservice has its own queue.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    deadLetterQueue = platform 'Bounded-context dead-letter queue (Amazon SQS)' {
+      description 'Receives messages that the bounded-context consumer cannot process.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Stores bounded-context entities, outbox records, and locally readable domain projections.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      contextEntities = database 'Entity C table' {
+        description 'The bounded-context microservice entity table.'
+      }
+      contextOutbox = database 'Outbox table' {
+        description 'Domain events committed atomically with the microservice entity changes.'
+      }
+      externalProjections = database 'Entities A+B projection table' {
+        description 'Locally readable projection of external domain entities A and B, maintained by event consumers.'
+      }
+      streams = platform 'Amazon DynamoDB Streams' {
+        description 'Captures new outbox records for publication.'
+        metadata {
+          uses 'amazon-dynamodb-streams'
+        }
+      }
+    }
+  }
+
+  aws.monolith.domainLogic -> aws.relationalDatabase.monolithEntityA 'Updates in a local ACID transaction'
+  aws.monolith.domainLogic -> aws.relationalDatabase.monolithEntityB 'Updates in a local ACID transaction'
+  aws.monolith.domainLogic -> aws.relationalDatabase.monolithOutbox 'Writes outbox rows in the same ACID transaction'
+  aws.relationalDatabase.monolithEntityA -> aws.dms 'Database changes are captured by'
+  aws.relationalDatabase.monolithEntityB -> aws.dms 'Database changes are captured by'
+  aws.relationalDatabase.monolithOutbox -> aws.dms 'Outbox changes are captured by'
+  aws.dms -> aws.kinesis 'Streams CDC records to'
+  aws.kinesis -> aws.lambda.handlers.relationalPublisher 'Delivers CDC records to'
+  aws.lambda.handlers.relationalPublisher -> aws.eventBridge 'Publishes domain events to'
+  aws.eventBridge -> aws.contextQueue 'Rules route relevant events to'
+  aws.contextQueue -> aws.lambda.handlers.eventConsumer 'Delivers queued events to'
+  aws.contextQueue -> aws.deadLetterQueue 'Redrives failed messages to'
+  aws.lambda.handlers.eventConsumer -> aws.dynamodb.externalProjections 'Builds and updates'
+  aws.boundedContext -> aws.dynamodb.externalProjections 'Reads local projections from'
+  aws.lambda.contextFunctions -> aws.dynamodb.externalProjections 'Reads'
+  aws.lambda.contextFunctions -> aws.dynamodb.contextEntities 'Writes'
+  aws.boundedContext -> aws.dynamodb.contextEntities 'Writes entity changes to'
+  aws.boundedContext -> aws.dynamodb.contextOutbox 'Atomically writes outbox records with entity changes to'
+  aws.dynamodb.contextOutbox -> aws.dynamodb.streams 'New outbox records are captured by'
+  aws.dynamodb.streams -> aws.lambda.handlers.dynamodbPublisher 'Invokes the publisher path for'
+  aws.lambda.handlers.dynamodbPublisher -> aws.eventBridge 'Publishes domain events to'
+}
+
+views {
+  view index {
+    title 'Domain Consistency in Event-Driven Architectures'
+    include *
+  }
+}

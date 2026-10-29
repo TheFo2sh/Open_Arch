@@ -1,0 +1,342 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Private connectivity between the bank data center and AWS; the reference recommends two diverse connections.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-site-to-site-vpn
+    name: AWS Site-to-Site VPN
+    description: VPN connectivity between the bank data center and AWS alongside Direct Connect.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/site-to-site-vpn/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-transit-gateway
+    name: AWS Transit Gateway
+    description: Central hub for interconnecting workloads and accounts, including shared Direct Connect and VPN connectivity.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: VPC networking boundary used for outbound proxy traffic and private API integrations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-waf
+    name: AWS WAF
+    description: Web application firewall integrated with API Gateway to protect Open Banking APIs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/waf/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: API management for Open Banking and authorization APIs, with mutual TLS and private integrations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Object storage for public client certificates used as a trust store and for collected service logs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-privatelink
+    name: AWS PrivateLink
+    description: Private connectivity from API Gateway integrations to services in other VPCs or AWS accounts.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/privatelink/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Network Load Balancer used with the private service connectivity path.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: DNS and traffic management for Open Banking endpoints.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Delivery of static data for third-party and consumer-facing experiences.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-shield
+    name: AWS Shield
+    description: DDoS protection shown for CloudFront-delivered static data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/shield/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ecs-fargate
+    name: Amazon ECS with AWS Fargate
+    description: Containerized Account Information and Payments microservices, including payment-status webhooks.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fargate/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-elasticache
+    name: Amazon ElastiCache
+    description: Cache for customer account information.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticache/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Storage for consumer consents, aggregated data, and API performance metrics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-rds
+    name: Amazon RDS
+    description: AWS-hosted copy of the bank system of record, synchronized from the core system in near real time.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-guardduty
+    name: Amazon GuardDuty
+    description: Threat detection for malicious activity and unauthorized behavior.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/guardduty/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-security-hub
+    name: AWS Security Hub CSPM
+    description: Aggregated view of security alerts and security posture across AWS accounts.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/security-hub/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-network-firewall
+    name: AWS Network Firewall
+    description: Network firewall service shown among the architecture's security services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/network-firewall/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-identity-and-access-management
+    name: AWS Identity and Access Management
+    description: Identity and access management shown among the architecture's security services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iam/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-key-management-service
+    name: AWS Key Management Service
+    description: Key management shown among the architecture's security services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kms/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-inspector
+    name: Amazon Inspector
+    description: Workload security assessment shown among the architecture's security services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/inspector/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-secrets-manager
+    name: AWS Secrets Manager
+    description: Secrets management shown among the architecture's security services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/secrets-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-certificate-manager
+    name: AWS Certificate Manager
+    description: Certificate management shown among the architecture's security services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/certificate-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-macie
+    name: Amazon Macie
+    description: Data security service shown among the architecture's security services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/macie/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Monitoring and observability service shown in the logging and monitoring area.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-cloudtrail
+    name: AWS CloudTrail
+    description: AWS activity logging service shown in the logging and monitoring area.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudtrail/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-x-ray
+    name: AWS X-Ray
+    description: Distributed tracing service shown in the logging and monitoring area.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/xray/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-opensearch-service
+    name: Amazon OpenSearch Service
+    description: Log analysis and monitoring; the architecture diagram was published in 2021.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/opensearch-service/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-systems-manager
+    name: AWS Systems Manager
+    description: Configuration management for the AWS environment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/systems-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-cloudformation
+    name: AWS CloudFormation
+    description: Environment deployment and infrastructure management.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudformation/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-code-services
+    name: AWS Code Services
+    description: Code services shown in the architecture's management tools.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/products/developer-tools/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-eventbridge
+    name: Amazon EventBridge
+    description: Event-driven notifications between services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eventbridge/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sqs
+    name: Amazon Simple Queue Service
+    description: Message queues used for notification capability between services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sqs/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: Notifications between services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: apache-kafka
+    name: Apache Kafka
+    description: Example streaming technology named by AWS for sending new and updated core banking transactions.
+    vendor: Apache Software Foundation
+    url: https://kafka.apache.org/
+    types: [third-party]
+  - key: forgerock
+    name: ForgeRock
+    description: One of the alternative identity provider products shown for the separate OAuth 2.0 identity provider account.
+    vendor: ForgeRock
+    url: https://www.forgerock.com/
+    types: [third-party]
+  - key: ping-identity
+    name: Ping Identity
+    description: One of the alternative identity provider products shown for the separate OAuth 2.0 identity provider account.
+    vendor: Ping Identity
+    url: https://www.pingidentity.com/
+    types: [third-party]
+  - key: keycloak
+    name: Keycloak
+    description: One of the alternative identity provider products shown for the separate OAuth 2.0 identity provider account.
+    vendor: Red Hat
+    url: https://www.keycloak.org/
+    types: [third-party]
