@@ -1,0 +1,348 @@
+// Payor Strategic Focus Areas, based on AWS's three reference diagrams:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/healthcare-payor-strategic-focus-areas/healthcare-payor-strategic-focus-areas.html
+model {
+  businessUsers = user 'Business users' {
+    description 'Review payor performance, reports, and dashboards.'
+  }
+  researchers = user 'Researchers' {
+    description 'Explore healthcare data and clinical insights.'
+  }
+  dataScientists = user 'Data scientists' {
+    description 'Build and evaluate analytics and machine-learning models.'
+  }
+  technicalUsers = user 'Technical users' {
+    description 'Query and reconcile structured healthcare data.'
+  }
+  providers = user 'Providers' {
+    description 'Access patient-population data and healthcare insights.'
+  }
+  callers = user 'Callers and members' {
+    description 'Contact the payor through phone or other customer channels.'
+  }
+  agents = user 'Contact-center agents' {
+    description 'Use member and provider context to respond to callers.'
+  }
+
+  sourceSystems = system 'Payor, provider, and clinical data sources' {
+    description 'Existing on-premises or cloud systems supplying claims, provider, clinical, EMR, and core payor data.'
+  }
+  contentRepositories = system 'Healthcare content repositories' {
+    description 'Existing repositories supplying healthcare content for standardization and analysis.'
+  }
+  rulesEngine = system 'Data quality rules engine' {
+    description 'Placeholder for the rules engine holding common and plan-specific standardization and data-quality rules; AWS does not name its implementation.'
+  }
+  identityServices = system 'Identity and terminology services (EMPI)' {
+    description 'Optional bring-your-own identity and terminology services for data harmonization; AWS does not specify a vendor or interface.'
+  }
+  careManagement = system 'Care management system' {
+    description 'Existing payor system that consumes data products and uses enriched member and provider profiles to determine next actions.'
+  }
+  analyticsApplications = system 'Analytics applications' {
+    description 'Custom applications and data products that consume analytical results.'
+  }
+  agentApplication = system 'Call-center application' {
+    description 'Application used by callers and agents for customer-service workflows.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    dataSync = platform 'AWS DataSync' {
+      description 'Ingests data from on-premises or cloud sources for near real-time transfer with secure connectivity and encryption in transit and at rest.'
+      metadata {
+        uses 'aws-data-sync'
+      }
+    }
+    dms = platform 'AWS Database Migration Service' {
+      description 'Ingests source databases when database migration is appropriate, with secure connectivity and encryption in transit and at rest.'
+      metadata {
+        uses 'aws-database-migration-service'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores raw, curated, atomic, document, data-lake, and call-log objects.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      landing = database 'Landing data' {
+        description 'Raw data retained in its source format in the data-hub landing zone.'
+      }
+      curatedDocuments = database 'Curated documents' {
+        description 'Documents stored alongside curated data.'
+      }
+      atomicDocuments = database 'Atomic documents' {
+        description 'Documents stored alongside the atomic data layer.'
+      }
+      healthcareDataLake = database 'Healthcare data lake' {
+        description 'Healthcare data lake used by downstream healthcare analytics.'
+      }
+      callLogs = database 'Call logs' {
+        description 'Call logs persisted for analysis.'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs shorter curation and referential-integrity jobs and can initiate AWS Glue ETL jobs.'
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Runs Spark ETL jobs and provides crawlers that discover data stores for cataloging.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      description 'Stores the curated and atomic data layers for analytics.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+      curatedData = database 'Curated data' {
+        description 'Curated, standardized datasets in the data warehouse.'
+      }
+      atomicData = database 'Atomic data' {
+        description 'Atomic datasets checked for referential integrity and supplied with context.'
+      }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      description 'Stores technical metadata and references to AWS Glue ETL source and target data.'
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+    }
+    lakeFormation = platform 'AWS Lake Formation' {
+      description 'Centralizes access control and data governance.'
+      metadata {
+        uses 'aws-lake-formation'
+      }
+    }
+    healthLake = platform 'AWS HealthLake' {
+      description 'Stores FHIR healthcare data and provides member and provider profiles for analytics and care workflows.'
+      metadata {
+        uses 'aws-healthlake'
+      }
+      fhirData = database 'FHIR healthcare data' {
+        description 'FHIR R4 healthcare data for patient-population access and analytics.'
+      }
+    }
+    rds = platform 'Amazon RDS' {
+      description 'Purpose-built relational and transactional store for downstream consumers.'
+      metadata {
+        uses 'amazon-rds'
+      }
+      relationalData = database 'Relational and transactional data' {
+        description 'Purpose-built relational and transactional data; the engine is not specified by AWS.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Queries structured claims data and supports data preparation and reconciliation.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Builds dashboards and visualizations over healthcare and payor analytics.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    sageMaker = platform 'Amazon SageMaker AI' {
+      description 'Builds, trains, and deploys machine-learning models and analyzes call logs.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+    iam = platform 'AWS IAM' {
+      description 'Provides solution-wide security propagation across AWS services.'
+      metadata {
+        uses 'aws-iam'
+      }
+    }
+    kms = platform 'AWS Key Management Service' {
+      description 'Provides encryption key management for solution data.'
+      metadata {
+        uses 'aws-key-management-service'
+      }
+    }
+    cloudWatch = platform 'Amazon CloudWatch' {
+      description 'Monitors solution metrics, logs, and alarms.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    cloudTrail = platform 'AWS CloudTrail' {
+      description 'Monitors access to AWS endpoints.'
+      metadata {
+        uses 'aws-cloudtrail'
+      }
+    }
+    comprehendMedical = platform 'Amazon Comprehend Medical' {
+      description 'Supports syntactic parsing and semantic harmonization of healthcare data.'
+      metadata {
+        uses 'amazon-comprehend-medical'
+      }
+    }
+    textract = platform 'Amazon Textract' {
+      description 'Supports document extraction for healthcare data enrichment.'
+      metadata {
+        uses 'amazon-textract'
+      }
+    }
+    bedrock = platform 'Amazon Bedrock' {
+      description 'Can provide large language models for data enrichment and natural-language FHIR queries.'
+      metadata {
+        uses 'amazon-bedrock'
+      }
+    }
+    neptune = platform 'Amazon Neptune' {
+      description 'Optional graph database for healthcare information.'
+      metadata {
+        uses 'amazon-neptune'
+      }
+      graphData = database 'Healthcare graph data' {
+        description 'Healthcare data stored in a graph database.'
+      }
+    }
+    dynamoDb = platform 'Amazon DynamoDB' {
+      description 'Optional NoSQL database for healthcare information.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      keyValueData = database 'Healthcare key-value data' {
+        description 'Healthcare data stored in a NoSQL key-value database.'
+      }
+    }
+    dataZone = platform 'Amazon DataZone' {
+      description 'Creates data products and makes them available in a catalog.'
+      metadata {
+        uses 'amazon-datazone'
+      }
+    }
+    amazonQ = platform 'Amazon Q' {
+      description 'Integrates with QuickSight dashboards and can translate English requests into SQL FHIR queries.'
+      metadata {
+        uses 'amazon-q'
+      }
+    }
+    amplify = platform 'AWS Amplify' {
+      description 'Supports enhanced patient and agent applications.'
+      metadata {
+        uses 'aws-amplify'
+      }
+    }
+    connect = platform 'Amazon Connect' {
+      description 'Routes inbound customer calls.'
+      metadata {
+        uses 'amazon-connect'
+      }
+    }
+    lex = platform 'Amazon Lex' {
+      description 'Provides conversational capabilities for Amazon Connect.'
+      metadata {
+        uses 'amazon-lex'
+      }
+    }
+    cognito = platform 'Amazon Cognito' {
+      description 'Provides security for customer-experience applications.'
+      metadata {
+        uses 'amazon-cognito'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Provides API-based access for call-log analysis.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      description 'Ingests call logs for storage in Amazon S3.'
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+    pinpoint = platform 'Amazon Pinpoint' {
+      description 'Connects with customers through targeted multi-channel communications.'
+      metadata {
+        uses 'amazon-pinpoint'
+      }
+    }
+  }
+
+  // 1. Modernize core payor functions: ingest sources, curate and govern data.
+  sourceSystems -> aws.dataSync '1. Transfers source data near real time'
+  sourceSystems -> aws.dms '1. Migrates source databases'
+  contentRepositories -> aws.dataSync '1. Supplies source content'
+  aws.dataSync -> aws.s3.landing '2. Lands raw data in source format'
+  aws.dms -> aws.s3.landing '2. Lands migrated source data'
+  aws.s3.landing -> aws.lambda '3. Supplies data for shorter curation jobs'
+  aws.lambda -> aws.glue '3. Initiates Spark ETL jobs'
+  aws.glue -> aws.s3.curatedDocuments '4. Stores curated documents'
+  aws.glue -> aws.s3.atomicDocuments '4. Stores atomic-layer documents'
+  aws.glue -> aws.redshift.curatedData '4. Writes standardized curated datasets'
+  aws.glue -> aws.redshift.atomicData '4. Writes atomic datasets'
+  aws.glue -> aws.glueCatalog '5. Uses catalog references for ETL sources and targets'
+  aws.glueCatalog -> aws.s3.landing '5. Catalogs source data'
+  aws.glueCatalog -> aws.redshift.curatedData '5. Catalogs target data'
+  aws.lakeFormation -> aws.s3 '5. Governs data access'
+  aws.lakeFormation -> aws.redshift '5. Governs data access'
+  sourceSystems -> aws.healthLake.fhirData '6. Can directly ingest FHIR data'
+  aws.glue -> aws.rds.relationalData '6. Loads relational and transactional data'
+  aws.glue -> aws.s3.healthcareDataLake '6. Stores other data types'
+  aws.redshift.curatedData -> aws.athena '7. Supplies structured claims for query and analysis'
+  aws.s3.healthcareDataLake -> aws.athena '7. Supplies data for direct query and reconciliation'
+  aws.athena -> aws.quickSight '7. Supplies analytics for dashboards'
+  aws.redshift -> aws.sageMaker '7. Supplies available data for model development'
+  aws.healthLake -> aws.sageMaker '7. Supplies healthcare data for model development'
+  aws.redshift -> aws.dataZone '7. Makes analytical data available as data products'
+
+  // 2. Advanced analytics: enrich data, hydrate purpose-built stores, and expose insights.
+  sourceSystems -> aws.comprehendMedical '1. Supplies healthcare data for harmonization'
+  sourceSystems -> aws.textract '1. Supplies source documents for extraction'
+  sourceSystems -> aws.lambda '1. Supplies batch or streaming data for ingestion'
+  aws.comprehendMedical -> aws.healthLake.fhirData '2. Enriches data for FHIR ingestion'
+  aws.lambda -> aws.healthLake.fhirData '2. Loads normalized FHIR R4 data'
+  aws.bedrock -> aws.healthLake.fhirData '2. Can support conversion to FHIR for ingestion'
+  aws.s3.healthcareDataLake -> aws.healthLake.fhirData '3. Hydrates the FHIR data store'
+  aws.neptune.graphData -> aws.healthLake.fhirData '3. Supplies data from a graph store'
+  aws.dynamoDb.keyValueData -> aws.healthLake.fhirData '3. Supplies data from a NoSQL store'
+  aws.healthLake.fhirData -> aws.athena '4. Supports provider queries and insights'
+  aws.healthLake.fhirData -> aws.redshift '4. Supplies data for analytics'
+  aws.healthLake.fhirData -> aws.sageMaker '4. Supplies data for machine-learning insights'
+  aws.bedrock -> aws.healthLake '4. Supports natural-language FHIR queries'
+  aws.dataZone -> analyticsApplications '4. Makes data products available to consumers'
+  aws.quickSight -> aws.amazonQ '5. Integrates dashboards with Amazon Q'
+  aws.amplify -> analyticsApplications '5. Supports enhanced longitudinal patient applications'
+  analyticsApplications -> aws.quickSight '7. Presents dashboard insights'
+  businessUsers -> analyticsApplications 'Reviews reports and dashboards'
+  researchers -> analyticsApplications 'Explores healthcare insights'
+  dataScientists -> analyticsApplications 'Builds and evaluates models'
+  technicalUsers -> analyticsApplications 'Queries and reconciles data'
+  providers -> analyticsApplications 'Accesses patient-population insights'
+
+  // 3. Improve customer experience: route calls, analyze logs, and enrich care.
+  callers -> agentApplication '1. Contacts the payor through phone or other channels'
+  agents -> agentApplication '1. Uses the call-center application'
+  agentApplication -> aws.connect '2. Routes customer calls'
+  aws.connect -> aws.lex '2. Uses conversational capabilities'
+  agentApplication -> aws.amplify '2. Uses an agent application'
+  agentApplication -> aws.cognito '2. Uses application security'
+  aws.apiGateway -> aws.lambda '2. Exposes call-log analysis APIs'
+  aws.lambda -> aws.firehose '3. Sends call logs for ingestion'
+  aws.firehose -> aws.s3.callLogs '3. Persists call logs'
+  aws.s3.callLogs -> aws.sageMaker '3. Supplies logs for analysis and next-step decisions'
+  aws.healthLake.fhirData -> careManagement '5. Provides enriched member and provider profiles'
+  aws.s3.healthcareDataLake -> careManagement '5. Provides member and provider data'
+  careManagement -> agentApplication '5. Supplies the next action for member calls'
+  careManagement -> aws.pinpoint '4. Sends targeted multi-channel communications'
+
+  // Cross-cutting controls are shown without implying deployment configuration.
+  aws.iam -> aws.dataSync '8. Provides security propagation'
+  aws.iam -> aws.healthLake '8. Provides security propagation'
+  aws.kms -> aws.s3 '8. Supports data encryption'
+  aws.kms -> aws.redshift '8. Supports data encryption'
+  aws.cloudWatch -> aws.lambda '8. Monitors solution metrics, logs, and alarms'
+  aws.cloudTrail -> aws.apiGateway '8. Monitors access to AWS endpoints'
+}

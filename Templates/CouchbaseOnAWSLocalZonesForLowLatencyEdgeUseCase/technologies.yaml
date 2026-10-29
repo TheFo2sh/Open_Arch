@@ -1,0 +1,112 @@
+# Technologies named in AWS's Couchbase on AWS Local Zones reference architecture.
+technologies:
+  - key: amazon-vpc
+    name: Amazon VPC
+    description: Virtual network extended from the parent Region into multiple AWS Local Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2-auto-scaling
+    name: Amazon EC2 Auto Scaling
+    description: Auto Scaling groups run the parent Region Couchbase Server, Sync Gateway, and bastion host deployments.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/autoscaling/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform for the Couchbase Server and Sync Gateway deployments in Local Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-local-zones
+    name: AWS Local Zones
+    description: AWS infrastructure locations that extend the parent Region's VPC closer to edge clients.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/about-aws/global-infrastructure/localzones/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: couchbase-server
+    name: Couchbase Server
+    description: Third-party distributed NoSQL database deployed in the parent Region and Local Zones.
+    vendor: Couchbase
+    url: https://www.couchbase.com/products/server/
+    types: [data-platform, third-party]
+    platform: aws
+    hosts: [database]
+  - key: couchbase-sync-gateway
+    name: Couchbase Sync Gateway
+    description: Third-party sync service deployed in the parent Region and Local Zones for client sync and inter-gateway replication.
+    vendor: Couchbase
+    url: https://www.couchbase.com/products/sync-gateway/
+    types: [compute-platform, third-party]
+    platform: aws
+    hosts: [system]
+  - key: couchbase-lite
+    name: Couchbase Lite
+    description: Third-party embedded NoSQL database used by mobile, desktop, and embedded clients.
+    vendor: Couchbase
+    url: https://www.couchbase.com/products/lite/
+    types: [library, third-party]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Centralized destination for Couchbase metrics and logs, with alerts.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: DNS service that uses geolocation-based routing to direct clients to the nearest Local Zone or parent Region.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage destination for Couchbase Server backups.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-nat-gateway
+    name: AWS NAT Gateway
+    description: Provides outbound internet connectivity for Couchbase Server in the parent Region's private subnet.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/features/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc-endpoints
+    name: Amazon VPC endpoints
+    description: Private connections between the VPC and AWS services without requiring internet access.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Application Load Balancer in front of the parent Region's multi-Availability Zone Sync Gateway deployment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-internet-gateway
+    name: Amazon VPC internet gateway
+    description: Internet gateway shown for the parent Region and each Local Zone VPC subnet.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []

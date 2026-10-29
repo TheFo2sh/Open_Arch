@@ -1,0 +1,90 @@
+// Bot Mitigation for Travel and Hospitality, after AWS's reference architecture
+// (https://docs.aws.amazon.com/reference-architecture-diagrams/latest/bot-mitigation-travel-hospitality/bot-mitigation-travel-hospitality.html).
+// Systems and users are slots; the AWS source leaves implementation choices open.
+model {
+  traveler = user 'Traveler or guest' {
+    description 'A legitimate visitor using a travel or hospitality website or mobile app.'
+  }
+  bot = user 'Bot or scraper' {
+    description 'An automated requester that may scrape prices or attempt automated purchases.'
+  }
+
+  endpoints = system 'Travel and hospitality endpoints' {
+    description 'Website or mobile-app endpoints that originate HTTP requests; their implementation is not specified.'
+  }
+  partner = system 'APN bot mitigation partner' {
+    description 'Optional external partner offering. AWS does not name a provider or specify its API.'
+  }
+  httpOrigin = system 'HTTP website origin' {
+    description 'Optional HTTP endpoint configured as the CloudFront origin instead of an Amazon S3 website.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    waf = platform 'AWS WAF' {
+      description 'Rules block common attack patterns, including known bad IPs, HTTP headers, and URI strings.'
+      metadata {
+        uses 'aws-waf'
+      }
+    }
+    cloudfront = platform 'Amazon CloudFront' {
+      description 'Receives validated requests, serves the configured origin, and streams access logs.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    lambdaEdge = platform 'AWS Lambda@Edge' {
+      description 'Intercepts HTTP requests at CloudFront and runs custom validation logic.'
+      metadata {
+        uses 'aws-lambda-at-edge'
+      }
+      validator = system 'Request validation logic' {
+        description 'Custom code checks requester signals and processes or rejects requests; AWS does not specify the code or validation thresholds.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Optional custom-service path for storing requester fingerprints.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      fingerprints = database 'Requester fingerprints' {
+        description 'Fingerprint information used by custom validation logic; the schema and retention are not specified.'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Receives CloudFront logs in real time for traffic analytics.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Optional CloudFront website origin; choose this or an HTTP endpoint.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+  }
+
+  traveler -> endpoints 'Uses'
+  bot -> endpoints 'Automates requests to'
+  endpoints -> aws.cloudfront 'Sends HTTP requests through'
+  aws.waf -> aws.cloudfront 'Applies request-filtering rules to'
+  aws.cloudfront -> aws.lambdaEdge.validator 'Invokes at the edge for request inspection'
+  aws.lambdaEdge.validator -> aws.dynamodb.fingerprints 'Looks up or records requester fingerprints'
+  aws.lambdaEdge.validator -> partner 'Optionally sends requester signals for partner validation'
+  partner -> aws.lambdaEdge.validator 'Returns a validation result to'
+  aws.lambdaEdge.validator -> aws.cloudfront 'Allows validated requests to continue to'
+  aws.cloudfront -> aws.kinesis 'Streams access logs to'
+  aws.cloudfront -> aws.s3 'Serves the optional S3 website origin'
+  aws.cloudfront -> httpOrigin 'Serves the optional HTTP origin'
+}
+
+views {
+  view index {
+    title 'Bot Mitigation for Travel and Hospitality'
+    include *, aws.*
+  }
+}

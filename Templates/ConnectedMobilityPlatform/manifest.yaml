@@ -1,0 +1,7 @@
+PackageId: OpenArch.ConnectedMobilityPlatform
+Name: Connected Mobility Platform
+Description: AWS connected mobility architecture spanning vehicle edge processing, fleet operations, telemetry, data governance, APIs, and call-center services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, connected-mobility, automotive, iot, serverless]

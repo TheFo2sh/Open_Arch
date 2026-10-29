@@ -1,0 +1,118 @@
+technologies:
+  - key: amazon-datazone
+    name: Amazon DataZone
+    description: Managed data catalog for discovering, cataloging, sharing, and governing data assets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/datazone/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-appflow
+    name: Amazon AppFlow
+    description: Managed service for transferring data between supported SaaS applications and AWS services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/appflow/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-glue
+    name: AWS Glue
+    description: Managed data integration service used to extract and prepare data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-glue-crawler
+    name: AWS Glue Crawler
+    description: Discovers structured and semi-structured data in Amazon S3 and populates catalog metadata.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/glue/latest/dg/add-crawler.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-glue-data-catalog
+    name: AWS Glue Data Catalog
+    description: Metadata catalog for data assets discovered by AWS Glue and other data sources.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/glue/latest/dg/catalog-and-crawler.html
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-glue-data-quality
+    name: AWS Glue Data Quality
+    description: Evaluates data quality for tables in the AWS Glue Data Catalog.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/features/data-quality/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-kinesis
+    name: Amazon Kinesis
+    description: Managed streaming data service shown as one of the source data ingestion options.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-msk
+    name: Amazon Managed Streaming for Apache Kafka
+    description: Managed Apache Kafka service shown as one of the source data ingestion options.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/msk/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-dms
+    name: AWS Database Migration Service
+    description: Managed service shown for extracting data from databases.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dms/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage for structured, semi-structured, and unstructured data lake assets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Cloud data warehouse whose table and view metadata can be imported into Amazon DataZone.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-aurora
+    name: Amazon Aurora
+    description: Managed relational database option for purpose-built data storage.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Managed NoSQL database option for purpose-built data storage.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]

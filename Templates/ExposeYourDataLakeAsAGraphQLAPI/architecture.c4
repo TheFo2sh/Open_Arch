@@ -1,0 +1,134 @@
+// Expose Your Data Lake as a GraphQL API, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/data-lake-graphql-api/data-lake-graphql-api.html
+model {
+  clients = user 'GraphQL clients' {
+    description 'Authorized external clients that query the data lake with GraphQL over HTTPS.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    lakeFormation = platform 'AWS Lake Formation' {
+      description 'Data lake governance used when setting up the lake and reading its current security settings.'
+      metadata {
+        uses 'aws-lake-formation'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Data lake' {
+        description 'Source data crawled by AWS Glue and queried with Athena; its format and layout are unspecified.'
+      }
+      queryResults = database 'Athena query results' {
+        description 'Amazon S3 results location used by Athena; its bucket configuration is unspecified.'
+      }
+    }
+
+    glue = platform 'AWS Glue' {
+      description 'Crawlers scan the S3 data lake to build and update the data catalog.'
+      metadata {
+        uses 'aws-glue'
+      }
+      catalog = database 'AWS Glue Data Catalog' {
+        description 'Metadata catalog built from the data lake and consulted when generating the API and querying data.'
+      }
+    }
+
+    cloudWatch = platform 'Amazon CloudWatch' {
+      description 'Monitors AWS Glue Data Catalog changes and triggers the schema generator.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      apiFunctions = system 'Data lake GraphQL functions' {
+        description 'Lambda functions that generate the API schema and resolve GraphQL queries.'
+
+        schemaGenerator = container 'API schema generator' {
+          description 'Reads the latest catalog and security settings, generates the API schema and resolvers, and commits the source code.'
+        }
+        queryResolvers = container 'Athena query resolvers' {
+          description 'Translate GraphQL queries into Athena SQL, run jobs synchronously, and limit results and execution time.'
+          metadata {
+            uses 'athena-express'
+          }
+        }
+      }
+    }
+
+    codeCommit = platform 'AWS CodeCommit' {
+      metadata {
+        uses 'aws-codecommit'
+      }
+    }
+    codePipeline = platform 'AWS CodePipeline' {
+      metadata {
+        uses 'aws-codepipeline'
+      }
+    }
+    codeBuild = platform 'AWS CodeBuild' {
+      metadata {
+        uses 'aws-codebuild'
+      }
+    }
+    codeDeploy = platform 'AWS CodeDeploy' {
+      metadata {
+        uses 'aws-codedeploy'
+      }
+    }
+
+    appSync = platform 'AWS AppSync' {
+      description 'Serves the external GraphQL API over HTTPS and uses server-side caching.'
+      metadata {
+        uses 'aws-appsync'
+      }
+      api = system 'Data lake GraphQL API' {
+        description 'Self-documented GraphQL API whose schema and Lambda resolvers are generated from the current data catalog.'
+      }
+    }
+
+    athena = platform 'Amazon Athena' {
+      description 'Runs SQL queries against the data lake and writes query results to S3.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+  }
+
+  aws.lakeFormation -> aws.s3.dataLake 'Governs data lake setup and access'
+  aws.glue -> aws.s3.dataLake 'Crawls data in'
+  aws.s3.dataLake -> aws.glue.catalog 'Provides data for the crawler catalog'
+  aws.cloudWatch -> aws.glue.catalog 'Monitors changes to'
+  aws.cloudWatch -> aws.lambda.apiFunctions.schemaGenerator 'Triggers on catalog changes'
+  aws.lambda.apiFunctions.schemaGenerator -> aws.glue.catalog 'Reads the latest metadata from'
+  aws.lambda.apiFunctions.schemaGenerator -> aws.lakeFormation 'Reads current security settings from'
+  aws.lambda.apiFunctions.schemaGenerator -> aws.codeCommit 'Commits generated schema and resolver code to'
+  aws.codeCommit -> aws.codePipeline 'Triggers the CI/CD pipeline'
+  aws.codePipeline -> aws.codeBuild 'Starts a build with'
+  aws.codeBuild -> aws.codeDeploy 'Passes the new API version to'
+  aws.codeDeploy -> aws.appSync.api 'Deploys the updated GraphQL API to'
+  aws.codeDeploy -> aws.lambda.apiFunctions 'Deploys the updated query resolvers to'
+
+  clients -> aws.appSync.api 'Queries over HTTPS with the chosen authentication mechanism'
+  aws.appSync.api -> aws.lambda.apiFunctions.queryResolvers 'Invokes Lambda query resolvers'
+  aws.lambda.apiFunctions.queryResolvers -> aws.athena 'Runs SQL queries with athena-express'
+  aws.athena -> aws.s3.dataLake 'Queries data in'
+  aws.athena -> aws.glue.catalog 'Reads table metadata from'
+  aws.athena -> aws.s3.queryResults 'Writes query results to'
+}
+
+views {
+  view index {
+    title 'Expose Your Data Lake as a GraphQL API'
+    include *, aws.*, aws.lambda.*, aws.lambda.apiFunctions.*, aws.appSync.*
+  }
+}

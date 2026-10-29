@@ -1,0 +1,65 @@
+// Edit in the Cloud on AWS, after AWS's reference architecture.
+model {
+  editor = user 'Editor' {
+    description 'Uses a remote display client to access the video-editing workstation.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    ec2 = platform 'Amazon EC2' {
+      metadata {
+        uses 'amazon-ec2'
+      }
+
+      workstation = system 'Edit workstation' {
+        description 'A Windows-based cloud workstation for an editor and their chosen non-linear editing software.'
+
+        editingEnvironment = container 'Video editing environment' {
+          description 'Windows Server 2019 with NVIDIA T4 GPU drivers and an NLE chosen by the team; AWS does not specify the NLE product.'
+          technology 'Windows Server 2019, NVIDIA T4 GPU drivers'
+          metadata {
+            uses 'windows-server-2019, nvidia-t4-gpu-drivers'
+          }
+        }
+        remoteDisplay = container 'Remote display access' {
+          description 'Select one option for the workstation: NICE DCV or Teradici Cloud Access Software (PCoIP).'
+          metadata {
+            uses 'nice-dcv, teradici-cloud-access-software'
+          }
+        }
+      }
+    }
+
+    directoryService = platform 'AWS Directory Service' {
+      metadata {
+        uses 'aws-directory-service'
+      }
+      userDirectory = database 'Editor directory' {
+        description 'Directory used to authenticate workstation users.'
+      }
+    }
+
+    fsx = platform 'Amazon FSx for Windows File Server' {
+      metadata {
+        uses 'amazon-fsx-windows-file-server'
+      }
+      mediaShare = database 'Media asset share' {
+        description 'Shared Windows file storage for the media assets used by the non-linear editor.'
+      }
+    }
+  }
+
+  editor -> aws.ec2.workstation 'Connects to using one remote display client'
+  aws.ec2.workstation -> aws.directoryService.userDirectory 'Authenticates editor logins against'
+  aws.ec2.workstation -> aws.fsx.mediaShare 'Mounts to read and write media assets'
+}
+
+views {
+  view index {
+    title 'Edit in the Cloud on AWS'
+    include *, aws.*, aws.ec2.*, aws.ec2.workstation.*
+  }
+}
