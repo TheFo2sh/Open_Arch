@@ -1,0 +1,30 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-s3
+    name: Amazon Simple Storage Service (Amazon S3)
+    description: Curated data lake storage for lodging, guest, marketing, and digital interaction data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: customer-data-platform
+    name: Customer Data Platform (vendor not specified)
+    description: Vendor-neutral CDP product slot for client-side collection, anonymous-activity recognition, and guest-profile unification; AWS does not identify a vendor.
+    vendor: Not specified by AWS
+    url: https://docs.aws.amazon.com/reference-architecture-diagrams/latest/guest-360-data-platform-lodging/guest-360-data-platform-lodging.html
+    types: [third-party]
+  - key: master-data-management
+    name: Master data management tool (vendor not specified)
+    description: Vendor-neutral MDM product slot for merging loyalty and registration or stay attributes into unified guest profiles.
+    vendor: Not specified by AWS
+    url: https://docs.aws.amazon.com/reference-architecture-diagrams/latest/guest-360-data-platform-lodging/guest-360-data-platform-lodging.html
+    types: [third-party]
+  - key: tag-management
+    name: Tag management solution (vendor not specified)
+    description: Vendor-neutral tag management product slot used by client-side guest activity collection; AWS does not identify a vendor.
+    vendor: Not specified by AWS
+    url: https://docs.aws.amazon.com/reference-architecture-diagrams/latest/guest-360-data-platform-lodging/guest-360-data-platform-lodging.html
+    types: [third-party]
