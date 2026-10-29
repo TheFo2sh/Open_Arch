@@ -1,0 +1,176 @@
+technologies:
+  - key: siemens-industrial-edge
+    name: Siemens Industrial Edge
+    description: Shop-floor software platform that hosts industrial edge devices and their applications.
+    vendor: Siemens
+    url: https://www.siemens.com/global/en/products/automation/topic-areas/industrial-edge.html
+    types: [compute-platform, third-party]
+    platform: other
+    hosts: [system]
+  - key: siemens-industrial-edge-management
+    name: Siemens Industrial Edge Management
+    description: Central management for Industrial Edge devices and applications; the reference leaves its deployment location open.
+    vendor: Siemens
+    types: [library, third-party]
+  - key: siemens-industrial-edge-hub
+    name: Siemens Industrial Edge Hub
+    description: Industrial Edge management and application-distribution capability shown in the reference diagram.
+    vendor: Siemens
+    types: [library, third-party]
+  - key: siemens-global-software-app-repository
+    name: Global Software and App Repository
+    description: Software and application repository shown with the Industrial Edge Hub.
+    vendor: Siemens
+    types: [library, third-party]
+  - key: industrial-information-hub
+    name: Industrial Information Hub
+    description: Industrial data-layer component shown on the Industrial Edge device.
+    vendor: Siemens
+    types: [library, third-party]
+  - key: industrial-edge-databus
+    name: Industrial Edge Databus
+    description: Data-bus component shown in the Industrial Edge applications data layer.
+    vendor: Siemens
+    types: [library, third-party]
+  - key: opc-ua
+    name: OPC UA
+    description: Industrial communication protocol named in the reference diagram for southbound connectors.
+    types: [library]
+  - key: modbus
+    name: Modbus
+    description: Industrial communication protocol named in the reference diagram for southbound connectors.
+    types: [library]
+  - key: simatic-s7
+    name: SIMATIC S7
+    description: Industrial controller connectivity named in the reference diagram for southbound connectors.
+    vendor: Siemens
+    types: [library, third-party]
+  - key: ethernet-ip
+    name: EtherNet/IP
+    description: Industrial communication protocol named in the reference diagram for southbound connectors.
+    types: [library]
+  - key: tcp
+    name: TCP
+    description: Network protocol named in the reference diagram for southbound connectors.
+    types: [library]
+  - key: mendix
+    name: Mendix
+    description: Application development platform named as an option for Industrial Edge apps and analytics applications.
+    vendor: Mendix
+    url: https://www.mendix.com/
+    types: [library, third-party]
+  - key: flow-creator
+    name: Flow Creator
+    description: Application development option named in the reference for Industrial Edge apps.
+    vendor: Siemens
+    types: [library, third-party]
+  - key: docker
+    name: Docker
+    description: Container technology named as an option for creating Industrial Edge apps.
+    vendor: Docker
+    url: https://www.docker.com/
+    types: [library, third-party]
+  - key: aws-iot-sitewise-edge
+    name: AWS IoT SiteWise Edge
+    description: Edge software that collects and aggregates industrial data before sending it to AWS IoT SiteWise.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-sitewise/
+    types: [library]
+  - key: aws-iot-sitewise
+    name: AWS IoT SiteWise
+    description: Cloud service for industrial data ingestion, asset modeling, and data management.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-sitewise/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-iot-sitewise-monitor
+    name: AWS IoT SiteWise Monitor
+    description: Visualization option for collected industrial data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-sitewise/
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-iot-twinmaker
+    name: AWS IoT TwinMaker
+    description: Visualization option for industrial data and digital twins.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-twinmaker/
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-managed-grafana
+    name: Amazon Managed Grafana
+    description: Managed visualization option for collected industrial data and analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/grafana/
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-iot-app-kit
+    name: AWS IoT App Kit
+    description: Development library shown as an option for building industrial data applications.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-sitewise/
+    types: [library]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores cold industrial IoT data for downstream analytics and machine learning.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Queries cold industrial IoT data stored in Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Analytics and visualization option for industrial data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: siemens-ai-sdk
+    name: Siemens AI SDK
+    description: Packages and deploys machine-learning models to Industrial Edge, as described by AWS.
+    vendor: Siemens
+    types: [library, third-party]
+  - key: siemens-ai-model-manager
+    name: Siemens AI Model Manager
+    description: Deploys and manages machine-learning models on Industrial Edge devices.
+    vendor: Siemens
+    types: [library, third-party]
+  - key: siemens-ai-inference-server
+    name: Siemens AI Inference Server
+    description: Runs machine-learning models on Industrial Edge devices.
+    vendor: Siemens
+    types: [library, third-party]
+  - key: siemens-ai-model-monitor
+    name: Siemens AI Model Monitor
+    description: Monitors machine-learning models on Industrial Edge devices.
+    vendor: Siemens
+    types: [library, third-party]
+  - key: siemens-ai-model-monitor-agent
+    name: Siemens AI Model Monitor Agent
+    description: Edge-side model-monitoring agent shown in the reference diagram.
+    vendor: Siemens
+    types: [library, third-party]
+  - key: amazon-sagemaker-studio-lab
+    name: Amazon SageMaker Studio Lab
+    description: AWS machine-learning environment shown in the reference diagram.
+    vendor: Amazon Web Services
+    url: https://studiolab.sagemaker.aws/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]

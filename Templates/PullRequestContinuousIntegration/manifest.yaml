@@ -1,0 +1,7 @@
+PackageId: OpenArch.PullRequestContinuousIntegration
+Name: Pull Request Continuous Integration
+Description: Runs pull request validation and CI through queued source, staged testing, preview environments, and status feedback to the Git provider.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, ci, cd, devops, pull-request]

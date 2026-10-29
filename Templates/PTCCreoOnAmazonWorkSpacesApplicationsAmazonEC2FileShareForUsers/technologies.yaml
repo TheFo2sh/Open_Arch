@@ -1,0 +1,85 @@
+# The technologies used by the blueprint, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: VPC containing the bastion host, WorkSpaces Applications fleet, image builder, file share, and network gateways.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-workspaces-applications
+    name: Amazon WorkSpaces Applications
+    description: Managed application-streaming service; the 2022 source diagram labels it Amazon AppStream 2.0.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/workspaces/applications/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: EC2 instances for the administrator bastion, global Creo license manager, and shared SMB file server.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ec2-image-builder
+    name: Amazon EC2 Image Builder
+    description: Image-builder AMI shown in the source diagram for generating the WorkSpaces Applications fleet image; build details are not specified.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/image-builder/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ebs
+    name: Amazon Elastic Block Store
+    description: EBS volumes backing the EC2-based SMB file share.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ebs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Per-user home folders for persistent application settings, user data, and files.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-vpc-internet-gateway
+    name: Amazon VPC Internet Gateway
+    description: Internet gateway shown attached to the VPC.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-nat-gateway
+    name: AWS NAT Gateway
+    description: NAT gateway shown in the public subnet of Availability Zone 1; the source does not describe its traffic.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/features/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: ptc-creo
+    name: PTC Creo
+    description: Third-party CAD application available in the WorkSpaces Applications fleet; version and image configuration are not specified.
+    vendor: PTC
+    url: https://www.ptc.com/en/products/creo
+    types: [third-party]
+  - key: ptc-creo-license-manager
+    name: PTC Creo License Manager
+    description: Global Creo license manager shown running on EC2; license-server topology and configuration are not specified.
+    vendor: PTC
+    url: https://www.ptc.com/en/products/creo
+    types: [third-party]
+  - key: ptc-windchill-plm
+    name: PTC Windchill PLM
+    description: External product lifecycle management system whose file vault receives finalized CADs; its deployment is outside this architecture.
+    vendor: PTC
+    url: https://www.ptc.com/en/products/windchill
+    types: [third-party]

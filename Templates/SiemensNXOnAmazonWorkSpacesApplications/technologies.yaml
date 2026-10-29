@@ -1,0 +1,131 @@
+# The technologies used by the blueprint, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-workspaces-applications
+    name: Amazon WorkSpaces Applications
+    description: Managed application streaming service for Siemens NX fleets and image builders.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/appstream2/latest/developerguide/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Network boundary containing the streaming, storage, and administration resources in the relevant deployment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-internet-gateway
+    name: Amazon VPC internet gateway
+    description: Internet gateway shown in the EBS shared-folders network diagram.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-nat-gateway
+    name: Amazon VPC NAT gateway
+    description: NAT gateway shown in the EBS shared-folders public subnet.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform for the EBS SMB file server, Windows RDP jump server, and multi-Region Active Directory instances.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ebs
+    name: Amazon Elastic Block Store
+    description: Block volume attached to an EC2 instance and served as a shared folder in the EBS architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ebs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: User home folder selected for persisting WorkSpaces Applications settings, user data, and files.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: amazon-fsx
+    name: Amazon FSx
+    description: Managed file storage used for user and shared folders and in the multi-Region replication option.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/fsx/latest/WindowsGuide/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: aws-directory-service
+    name: AWS Directory Service for Microsoft Active Directory
+    description: Directory service for users, computers, and Amazon FSx access in the Teamcenter and FSx option.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/directoryservice/latest/admin-guide/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc-peering
+    name: Amazon VPC Peering
+    description: VPC peering connection used by the Teamcenter option to connect the WorkSpaces Applications VPC to the VPC hosting Siemens Teamcenter.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: siemens-nx
+    name: Siemens NX
+    description: Siemens computer-aided design application streamed through Amazon WorkSpaces Applications.
+    vendor: Siemens
+    url: https://www.sw.siemens.com/en-US/products/nx/
+    types: [library]
+  - key: siemens-teamcenter
+    name: Siemens Teamcenter
+    description: Product lifecycle management system that Siemens NX communicates with in the Teamcenter option.
+    vendor: Siemens
+    url: https://www.sw.siemens.com/en-US/digital-thread/
+    types: [library]
+  - key: microsoft-smb
+    name: Server Message Block
+    description: File-sharing protocol used by the EC2 instance that exports its attached EBS volume as a shared folder.
+    vendor: Microsoft
+    url: https://learn.microsoft.com/en-us/windows/win32/fileio/microsoft-smb-protocol-and-cifs-protocol-overview
+    types: [library]
+  - key: microsoft-rdp
+    name: Microsoft Remote Desktop Protocol
+    description: Remote desktop protocol used by the Windows jump-server instance in the EBS architecture.
+    vendor: Microsoft
+    url: https://learn.microsoft.com/en-us/windows-server/remote/remote-desktop-services/clients/remote-desktop-clients
+    types: [library]
+  - key: microsoft-active-directory
+    name: Microsoft Active Directory
+    description: Directory software running on EC2 instances in each Region of the multi-Region option.
+    vendor: Microsoft
+    url: https://www.microsoft.com/en-us/windows-server/active-directory
+    types: [library]
+  - key: microsoft-dfs-replication
+    name: Microsoft Distributed File System Replication
+    description: Microsoft replication technology identified for bidirectional Amazon FSx data replication in the multi-Region option.
+    vendor: Microsoft
+    url: https://learn.microsoft.com/en-us/windows-server/storage/dfs-replication/dfsr-overview
+    types: [library]
+  - key: auth0
+    name: Auth0
+    description: Third-party identity service used with Active Directory SAML 2.0 federation for single sign-on in the Teamcenter option.
+    vendor: Auth0
+    url: https://auth0.com/
+    types: [third-party]
+  - key: saml-2-0
+    name: SAML 2.0
+    description: Federation protocol used between Active Directory and Auth0 for single sign-on in the Teamcenter option.
+    vendor: OASIS
+    url: https://www.oasis-open.org/standard/saml/
+    types: [library]
