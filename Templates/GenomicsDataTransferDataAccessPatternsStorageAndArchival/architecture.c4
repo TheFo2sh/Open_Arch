@@ -1,0 +1,156 @@
+// Genomics data transfer, access, storage, and archival, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/genomics-data-transfer-storage-archival/genomics-data-transfer-storage-archival.html
+// Systems and users are slots. The blueprint does not prescribe deployment details omitted by AWS.
+model {
+  technician = user 'Sequencing technician' {
+    description 'Loads samples onto sequencing instruments.'
+  }
+  researchCommunity = user 'Research community' {
+    description 'Provides annotation data for genomics research.'
+  }
+  clinicalResearchers = user 'Clinical researchers' {
+    description 'Provide clinical data associated with genomics research.'
+  }
+  researchScientist = user 'Research scientist' {
+    description 'Accesses genomics data for research.'
+  }
+  dataScientist = user 'Data scientist' {
+    description 'Accesses genomics data for analysis.'
+  }
+  bioinformaticsScientist = user 'Bioinformatics scientist' {
+    description 'Uses bioinformatics applications and compute clusters with genomics data.'
+  }
+
+  onPremises = zone 'On-premises' {
+    metadata {
+      platform 'other'
+    }
+
+    sequencer = system 'Sequencer and local storage' {
+      description 'Sequencers write sample output to a folder on local on-premises storage.'
+    }
+    existingBioinformatics = system 'Existing bioinformatics applications' {
+      description 'Existing tools access Amazon S3 data through S3 File Gateway using NFS or SMB.'
+    }
+    onPremCompute = system 'On-premises compute cluster' {
+      description 'Optional on-premises compute in the hybrid cluster pattern using the shared file system.'
+    }
+  }
+
+  uploadSources = system 'Clinical and annotation data uploads' {
+    description 'External file-upload path for clinical and annotation data; the specific client is not specified.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    dataSync = platform 'AWS DataSync' {
+      description 'Synchronizes raw genomics data from local storage; the architecture includes a DataSync agent.'
+      metadata {
+        uses 'aws-datasync'
+      }
+    }
+    transferFamily = platform 'AWS Transfer Family' {
+      description 'Receives clinical and annotation file uploads over FTP, SFTP, or FTPS.'
+      metadata {
+        uses 'aws-transfer-family'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Stores incoming genomics data and makes it available for access and processing.'
+      metadata {
+        uses 'amazon-s3'
+      }
+
+      rawData = database 'Raw genomics data bucket' {
+        description 'Receives raw sequencing data transferred from on-premises by DataSync.'
+      }
+      clinicalData = database 'Clinical and annotation data bucket' {
+        description 'Receives clinical and annotation files uploaded through Transfer Family.'
+      }
+      instrumentRuns = database 'Infrequent-access instrument run data' {
+        description 'Stores instrument run data in an infrequent-access S3 bucket before lifecycle archival.'
+      }
+    }
+    fileGateway = platform 'Amazon S3 File Gateway' {
+      description 'Connects existing bioinformatics tools to S3 data through NFS or SMB.'
+      metadata {
+        uses 'amazon-s3-file-gateway'
+      }
+    }
+    fsx = platform 'Amazon FSx for Lustre' {
+      description 'Shared high-throughput parallel file system for on-premises or cloud compute clusters.'
+      metadata {
+        uses 'amazon-fsx-for-lustre'
+      }
+      sharedFileSystem = database 'Shared parallel file system' {
+        description 'Provides shared, high-throughput file access and can use data already stored in Amazon S3.'
+      }
+    }
+    batch = platform 'AWS Batch' {
+      description 'Manages genomics compute jobs running on Amazon EC2 instances.'
+      metadata {
+        uses 'aws-batch'
+      }
+    }
+    ec2 = platform 'Amazon Elastic Compute Cloud' {
+      description 'Cloud compute instances used by bioinformatics clusters managed through AWS Batch.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+      cloudCompute = system 'AWS bioinformatics compute cluster' {
+        description 'EC2-based compute cluster used for genomics workloads.'
+      }
+    }
+    s3Glacier = platform 'Amazon S3 Glacier' {
+      description 'Archive destination for data transitioned from S3 by lifecycle policy.'
+      metadata {
+        uses 'amazon-s3-glacier'
+      }
+      archive = database 'Genomics data archive' {
+        description 'Data transitioned from Amazon S3 to archival storage according to access patterns.'
+      }
+    }
+    cloudApplications = system 'AWS-account research applications' {
+      description 'Applications in an AWS account access data stored in Amazon S3.'
+    }
+  }
+
+  technician -> onPremises.sequencer 'Loads samples into'
+  researchCommunity -> uploadSources 'Provides annotation files through'
+  clinicalResearchers -> uploadSources 'Provides clinical files through'
+  researchScientist -> onPremises.existingBioinformatics 'Uses local data access tools'
+  researchScientist -> aws.cloudApplications 'Uses cloud data access applications'
+  dataScientist -> onPremises.existingBioinformatics 'Uses local data access tools'
+  dataScientist -> aws.cloudApplications 'Uses cloud data access applications'
+  bioinformaticsScientist -> onPremises.existingBioinformatics 'Uses local data access tools'
+  bioinformaticsScientist -> aws.cloudApplications 'Uses cloud data access applications'
+
+  onPremises.sequencer -> aws.dataSync 'Synchronizes raw sequencing data with'
+  aws.dataSync -> aws.s3.rawData 'Transfers raw sequencing data to'
+  uploadSources -> aws.transferFamily 'Uploads files through'
+  aws.transferFamily -> aws.s3.clinicalData 'Stores clinical and annotation files in'
+
+  onPremises.existingBioinformatics -> aws.fileGateway 'Accesses S3 files over NFS or SMB through'
+  aws.fileGateway -> aws.s3.rawData 'Provides file access to'
+  aws.fileGateway -> aws.s3.clinicalData 'Provides file access to'
+  aws.fileGateway -> aws.s3.instrumentRuns 'Provides file access to'
+  aws.cloudApplications -> aws.s3.rawData 'Accesses'
+  aws.cloudApplications -> aws.s3.clinicalData 'Accesses'
+  aws.cloudApplications -> aws.s3.instrumentRuns 'Accesses'
+
+  onPremises.onPremCompute -> aws.fsx.sharedFileSystem 'Uses the shared high-throughput file system'
+  aws.ec2.cloudCompute -> aws.fsx.sharedFileSystem 'Uses the shared high-throughput file system'
+  aws.batch -> aws.ec2.cloudCompute 'Manages jobs on'
+  aws.s3.rawData -> aws.fsx.sharedFileSystem 'Provides existing data to'
+  aws.s3.instrumentRuns -> aws.s3Glacier.archive 'Lifecycle policy transitions archival data to'
+}
+
+views {
+  view index {
+    title 'Genomics Data Transfer, Data Access Patterns, Storage, and Archival'
+    include *, onPremises.*, aws.*, aws.s3.*, aws.fsx.*, aws.ec2.*
+  }
+}

@@ -1,0 +1,7 @@
+PackageId: OpenArch.GenomicsDataTransferDataAccessPatternsStorageAndArchival
+Name: Genomics Data Transfer, Data Access Patterns, Storage, and Archival
+Description: Transfer genomics and clinical data to Amazon S3, provide file and parallel filesystem access for bioinformatics workloads, and transition infrequently accessed data to archival storage.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, genomics, data-transfer, storage, archival, bioinformatics]

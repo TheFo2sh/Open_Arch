@@ -1,0 +1,63 @@
+# Technologies used by the blueprint, keyed by their metadata { uses } values.
+technologies:
+  - key: aws-datasync
+    name: AWS DataSync
+    description: Transfers raw sequencing data from on-premises storage to Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/datasync/
+    types: [managed-service]
+    platform: aws
+  - key: aws-transfer-family
+    name: AWS Transfer Family
+    description: Accepts clinical and annotation data uploads to Amazon S3 over FTP, SFTP, or FTPS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/aws-transfer-family/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores raw genomics, clinical and annotation, and instrument run data in buckets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-s3-file-gateway
+    name: Amazon S3 File Gateway
+    description: Provides existing bioinformatics tools file-based access to Amazon S3 data through NFS or SMB.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/storagegateway/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-fsx-for-lustre
+    name: Amazon FSx for Lustre
+    description: Provides a shared high-throughput parallel file system for compute clusters and can use existing Amazon S3 data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fsx/lustre/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-batch
+    name: AWS Batch
+    description: Manages genomics compute jobs on Amazon EC2 instances.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/batch/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ec2
+    name: Amazon Elastic Compute Cloud
+    description: Provides cloud compute instances for bioinformatics clusters managed through AWS Batch.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-s3-glacier
+    name: Amazon S3 Glacier
+    description: Stores archival data transitioned from Amazon S3 according to bucket lifecycle policies.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/storage-classes/glacier/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
