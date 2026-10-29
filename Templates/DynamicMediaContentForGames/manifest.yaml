@@ -1,0 +1,7 @@
+PackageId: OpenArch.DynamicMediaContentForGames
+Name: Dynamic Media Content for Games
+Description: Selects dynamic game media origins with Lambda@Edge and replicated DynamoDB routing rules, while delivering and caching content through CloudFront from Amazon S3.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, games, media, content-delivery]

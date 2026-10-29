@@ -1,0 +1,74 @@
+// Dynamic Media Content for Games, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/dynamic-media-content-games/dynamic-media-content-games.html
+// Systems and users are slots. The AWS flow does not specify a game backend.
+model {
+  player = user 'Game player' {
+    description 'Requests dynamic media through a game client.'
+  }
+  gameClient = system 'Game client' {
+    description 'Requests dynamic media and supplies generic, low-cardinality player attributes.'
+  }
+
+  edge = zone 'AWS edge' {
+    metadata {
+      platform 'aws'
+    }
+
+    cloudfront = platform 'Amazon CloudFront' {
+      description 'Accepts dynamic media requests, invokes edge origin selection, fetches from the selected S3 origin on cache misses, and caches and returns content at edge locations.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    lambdaEdge = platform 'AWS Lambda@Edge' {
+      description 'Executes near the requester and selects or rewrites the content origin request using player attributes and routing rules.'
+      metadata {
+        uses 'aws-lambda-edge'
+      }
+      originSelector = system 'Dynamic media origin selector' {
+        description 'Applies routing rules to the request and identifies the content origin.'
+      }
+    }
+  }
+
+  content = zone 'AWS content and routing services' {
+    metadata {
+      platform 'aws'
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Origin storage for dynamic media content.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      mediaObjects = database 'Dynamic media objects' {
+        description 'Game media served from the selected S3 origin.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB Global Tables' {
+      description 'Replicates the routing rules across Regions for edge functions to read from a nearby regional copy.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      routingRules = database 'Replicated media routing rules' {
+        description 'Routing rules available in regional replicas; the edge function reads from the nearest replica.'
+      }
+    }
+  }
+
+  player -> gameClient 'Requests dynamic media with'
+  gameClient -> edge.cloudfront 'Requests media and supplies low-cardinality player attributes to'
+  edge.cloudfront -> edge.lambdaEdge.originSelector 'Invokes edge logic to select or rewrite the origin request'
+  edge.lambdaEdge.originSelector -> content.dynamodb.routingRules 'Reads routing rules from the nearest regional replica'
+  edge.lambdaEdge.originSelector -> edge.cloudfront 'Rewrites the request for the selected content origin'
+  edge.cloudfront -> content.s3.mediaObjects 'Fetches selected content from the S3 origin on a cache miss'
+  content.s3.mediaObjects -> edge.cloudfront 'Returns media for caching at edge locations'
+  edge.cloudfront -> gameClient 'Returns cached or origin content'
+}
+
+views {
+  view index {
+    title 'Dynamic Media Content for Games'
+    include *
+  }
+}
