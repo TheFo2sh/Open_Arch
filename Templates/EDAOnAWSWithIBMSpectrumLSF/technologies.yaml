@@ -1,0 +1,43 @@
+# The technologies used by the blueprint, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform for the EDA login server and the dynamic execution hosts provisioned by IBM Spectrum LSF.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-efs
+    name: Amazon Elastic File System
+    description: Shared filesystem for EDA project and scratch data and the IBM Spectrum LSF binaries, configuration, and logs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/efs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: ibm-spectrum-lsf
+    name: IBM Spectrum LSF
+    description: Third-party workload scheduler that queues EDA simulation jobs, dispatches them to execution hosts, and terminates dynamic hosts after completion.
+    vendor: IBM
+    url: https://www.ibm.com/products/hpc-workload-management
+    types: [third-party]
+  - key: ibm-spectrum-lsf-resource-connector
+    name: IBM Spectrum LSF Resource Connector
+    description: IBM Spectrum LSF capability that provisions dynamic Amazon EC2 execution hosts and joins them to the cluster.
+    vendor: IBM
+    url: https://www.ibm.com/docs/en/spectrum-lsf/10.1.0?topic=connector-resource
+    types: [third-party]
+  - key: fpga-developer-ami
+    name: FPGA Developer AMI
+    description: Machine image identified by the source as the image from which execution hosts load the prelicensed Vivado design suite.
+    types: [third-party]
+  - key: xilinx-vivado
+    name: Xilinx Vivado Design Suite
+    description: FPGA design suite used by EDA simulation jobs, prelicensed in the FPGA Developer AMI.
+    vendor: AMD Xilinx
+    url: https://www.amd.com/en/products/software/adaptive-socs-and-fpgas/vivado.html
+    types: [library]

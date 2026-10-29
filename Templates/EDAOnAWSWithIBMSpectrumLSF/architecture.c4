@@ -1,0 +1,79 @@
+// EDA on AWS with IBM Spectrum LSF, based on AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/eda-ibm-spectrum-lsf/eda-ibm-spectrum-lsf.html
+// System and user elements are slots mapped onto the project's own when applied.
+model {
+  engineer = user 'Corporate EDA engineer' {
+    description 'Logs into the EDA environment and submits simulation jobs.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    ec2 = platform 'Amazon EC2' {
+      description 'Runs the login server and the dynamic execution hosts managed by IBM Spectrum LSF.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+
+      eda = system 'EDA simulation environment' {
+        description 'Logical EDA system containing the login, job scheduling, and simulation execution roles. The source does not specify their exact host separation.'
+
+        login = container 'EDA login server' {
+          description 'Entry point where corporate engineers log in and submit EDA simulation jobs.'
+          technology 'IBM Spectrum LSF'
+        }
+        lsf = container 'IBM Spectrum LSF job scheduler' {
+          description 'Queues submitted EDA simulation jobs, dispatches queued work, and manages the dynamic execution hosts.'
+          technology 'IBM Spectrum LSF'
+
+          resourceConnector = component 'IBM Spectrum LSF Resource Connector' {
+            description 'Provisions dynamic EC2 execution hosts and joins them to the LSF cluster.'
+            technology 'IBM Spectrum LSF Resource Connector'
+          }
+        }
+        workers = container 'Dynamic EC2 execution hosts' {
+          description 'Run simulation jobs using Vivado loaded from the prelicensed FPGA Developer AMI; LSF terminates the hosts after jobs complete.'
+          technology 'FPGA Developer AMI, Xilinx Vivado Design Suite'
+          metadata {
+            uses 'xilinx-vivado'
+          }
+        }
+      }
+    }
+
+    efs = platform 'Amazon Elastic File System' {
+      description 'Shared filesystem for EDA project data, scratch and results, and LSF software and operational files.'
+      metadata {
+        uses 'amazon-efs'
+      }
+
+      projectFiles = database 'EDA project designs and IP (/ec2-nfs/proj)' {
+        description 'Designs and IP read by Vivado simulation jobs.'
+      }
+      scratch = database 'EDA scratch and results (/ec2-nfs/scratch)' {
+        description 'Runtime data and simulation results written by Vivado jobs.'
+      }
+      lsfFiles = database 'LSF shared files' {
+        description 'IBM Spectrum LSF binaries, configuration, and logs.'
+      }
+    }
+  }
+
+  engineer -> aws.ec2.eda 'Logs into and submits simulation jobs through'
+  aws.ec2.eda.login -> aws.ec2.eda.lsf 'Submits jobs to'
+  aws.ec2.eda.lsf -> aws.ec2.eda.workers 'The Resource Connector provisions and joins hosts; LSF dispatches jobs and terminates hosts after completion'
+  aws.ec2.eda.workers -> aws.efs.projectFiles 'Vivado reads designs and IP from'
+  aws.ec2.eda.workers -> aws.efs.scratch 'Vivado writes runtime data and results to'
+  aws.ec2.eda.login -> aws.efs.lsfFiles 'Uses shared LSF binaries and configuration; writes logs to'
+  aws.ec2.eda.lsf -> aws.efs.lsfFiles 'Uses shared binaries and configuration; writes logs to'
+  aws.ec2.eda.workers -> aws.efs.lsfFiles 'Uses shared LSF binaries and configuration'
+}
+
+views {
+  view index {
+    title 'EDA on AWS with IBM Spectrum LSF'
+    include *, aws.*, aws.ec2.*, aws.ec2.eda.*, aws.ec2.eda.lsf.*, aws.efs.*
+  }
+}
