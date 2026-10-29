@@ -1,0 +1,123 @@
+// Connected Home Telemetry, after AWS's reference architecture diagram.
+// The device and client application systems are slots; this blueprint is not a deployment design.
+model {
+  devices = zone 'Connected home devices' {
+    metadata {
+      platform 'other'
+    }
+
+    freertos = platform 'FreeRTOS' {
+      description 'Device operating system for the direct MQTT connection path.'
+      metadata {
+        uses 'freertos'
+      }
+
+      deviceFirmware = system 'Connected home device firmware' {
+        description 'Publishes telemetry from connected home devices using an AWS IoT Device SDK.'
+        telemetryPublisher = container 'Telemetry publisher' {
+          description 'Sends device telemetry to AWS IoT Core over MQTT.'
+          metadata {
+            uses 'aws-iot-device-sdk'
+          }
+        }
+      }
+    }
+
+    greengrass = platform 'AWS IoT Greengrass' {
+      description 'Optional edge path for connecting devices to AWS IoT Core; the source does not specify its deployment.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+      edgeDevices = system 'Devices using Greengrass' {
+        description 'Connected home devices that send telemetry to AWS IoT Core through Greengrass.'
+      }
+    }
+  }
+
+  clients = zone 'Client applications' {
+    metadata {
+      platform 'other'
+    }
+    clientApps = system 'Client applications' {
+      description 'Retrieve telemetry through an API and visualize data with Amazon QuickSight.'
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      description 'Receives device telemetry and routes selected messages to downstream services with topic rules.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Stores meaningful telemetry selected by an AWS IoT Core topic rule.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      telemetryData = database 'Selected telemetry data' {
+        description 'Stores meaningful data selected by an AWS IoT Core topic rule.'
+      }
+    }
+    iotEvents = platform 'AWS IoT Events' {
+      description 'Receives selected device data through an IoT Core topic rule and detects specified conditions.'
+      metadata {
+        uses 'aws-iot-events'
+      }
+    }
+    iotAnalytics = platform 'AWS IoT Analytics' {
+      description 'Ingests data directly from AWS IoT Greengrass for analysis.'
+      metadata {
+        uses 'aws-iot-analytics'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Accepts client application requests for telemetry data and invokes AWS Lambda.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the function invoked by API Gateway to retrieve requested telemetry from DynamoDB.'
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      description 'Sends notifications triggered by AWS IoT Events for specified changes in telemetry.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Visualizes data imported from AWS IoT Analytics.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+  }
+
+  devices.freertos.deviceFirmware.telemetryPublisher -> aws.iotCore 'Publishes telemetry over MQTT'
+  devices.greengrass.edgeDevices -> aws.iotCore 'Connects devices through Greengrass'
+  aws.iotCore -> aws.dynamodb.telemetryData 'Topic rule stores selected meaningful data'
+  aws.iotCore -> aws.iotEvents 'Topic rule sends data for event detection'
+  devices.greengrass.edgeDevices -> aws.iotAnalytics 'Sends data directly to IoT Analytics'
+  clients.clientApps -> aws.apiGateway 'Requests telemetry data'
+  aws.apiGateway -> aws.lambda 'Invokes a function'
+  aws.lambda -> aws.dynamodb.telemetryData 'Retrieves requested data'
+  aws.iotEvents -> aws.sns 'Triggers notifications for specified data changes'
+  aws.iotAnalytics -> aws.quickSight 'Provides data for visualization and insights'
+  clients.clientApps -> aws.quickSight 'Visualizes telemetry data'
+  aws.sns -> clients.clientApps 'Delivers notifications'
+}
+
+views {
+  view index {
+    title 'Connected Home Telemetry on AWS'
+    include *, devices.*, devices.freertos.*, clients.*, aws.*
+  }
+}

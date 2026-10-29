@@ -1,0 +1,84 @@
+// Amazon EKS on AWS Outposts Rack, after the AWS reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/amazon-eks-on-aws-outposts-rack/amazon-eks-on-aws-outposts-rack.html
+// The workloads, cluster operator, and on-premises systems are slots for a team's own systems and users.
+model {
+  clusterOperator = user 'Cluster operator' {
+    description 'A user or role authorized to access the cluster through IAM.'
+  }
+
+  onPremises = system 'On-premises systems' {
+    description 'Systems on the local network that can reach the Outposts nodes through the local gateway.'
+  }
+
+  aws = zone 'AWS Region and Outposts rack' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Amazon VPC' {
+      description 'Regional VPC with private subnets in two Availability Zones, plus the Outposts subnet. Private service endpoints are needed when the subnets have no internet path.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+    eks = platform 'Amazon EKS control plane' {
+      description 'Private regional control plane; its managed network interfaces are placed in the selected VPC subnets.'
+      metadata {
+        uses 'amazon-eks'
+      }
+    }
+    ecr = platform 'Amazon ECR' {
+      metadata {
+        uses 'amazon-ecr'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    iam = platform 'AWS IAM' {
+      metadata {
+        uses 'aws-iam'
+      }
+    }
+    cloudwatch = platform 'Amazon CloudWatch' {
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+
+    outposts = platform 'AWS Outposts rack' {
+      description 'On-premises Outposts rack connected to its parent Region through the service link; includes a local gateway (LGW).'
+      metadata {
+        uses 'aws-outposts'
+      }
+      ec2 = platform 'Amazon EC2 on Outposts' {
+        description 'Self-managed Amazon EKS node group.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        workloads = system 'Kubernetes workloads' {
+          description 'Customer-provided workloads on the self-managed nodes; AWS does not specify their applications or containers.'
+        }
+      }
+    }
+  }
+
+  clusterOperator -> aws.outposts.ec2.workloads 'Operates cluster workloads with IAM-authorized access'
+  aws.eks -> aws.vpc 'Places managed control-plane network interfaces in selected private subnets'
+  aws.outposts -> aws.eks 'Connects to the parent Region over the service link'
+  aws.eks -> aws.outposts.ec2.workloads 'Manages the self-managed node group'
+  aws.vpc -> aws.ecr 'Provides private-subnet access through a VPC endpoint'
+  aws.vpc -> aws.s3 'Provides private-subnet access through a VPC endpoint'
+  aws.iam -> aws.eks 'Manages user and role access'
+  onPremises -> aws.outposts 'Reaches the Outposts nodes through the local gateway'
+  aws.outposts -> aws.cloudwatch 'Supports CloudWatch metrics'
+}
+
+views {
+  view index {
+    title 'Amazon EKS on AWS Outposts Rack'
+    include *, aws.*
+  }
+}

@@ -1,0 +1,106 @@
+# Technologies named in the AWS diagram and its numbered flow.
+technologies:
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: Provides DNS services for traffic reaching the OpenShift cluster.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: elastic-load-balancing-network-load-balancer
+    name: Elastic Load Balancing Network Load Balancer
+    description: Network Load Balancers provide traffic to the OpenShift cluster; the diagram shows internal and external load balancers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/network-load-balancer/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute infrastructure beneath the Red Hat OpenShift cluster in the AWS VPC.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: red-hat-openshift
+    name: Red Hat OpenShift Container Platform
+    description: Container platform shown running on Amazon EC2 in the AWS VPC.
+    vendor: Red Hat
+    url: https://www.redhat.com/en/technologies/cloud-computing/openshift/container-platform
+    types: [compute-platform, third-party]
+    platform: aws
+    hosts: [system]
+  - key: amazon-efs
+    name: Amazon Elastic File System
+    description: Network file storage connected to the OpenShift cluster.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/efs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ebs
+    name: Amazon Elastic Block Store
+    description: Block storage used by the OpenShift cluster; the diagram shows EBS volumes and mount points across availability zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ebs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-documentdb
+    name: Amazon DocumentDB (with MongoDB compatibility)
+    description: Stores the Maximo Application Suite data dictionary and local user management data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/documentdb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-internet-gateway
+    name: AWS Internet Gateway
+    description: Internet gateway depicted in the AWS VPC; the reference does not specify its individual traffic flows.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-nat-gateway
+    name: AWS NAT Gateway
+    description: The diagram depicts one NAT gateway in each of three availability zones; its traffic flows are not described.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: ibm-maximo-visual-inspection
+    name: IBM Maximo Visual Inspection
+    description: IBM computer-vision software for ingesting and annotating training images, training models, and returning edge inference results.
+    vendor: IBM
+    url: https://www.ibm.com/products/maximo/visual-inspection
+    types: [third-party]
+  - key: ibm-maximo-application-suite
+    name: IBM Maximo Application Suite
+    description: IBM suite that uses Amazon DocumentDB for its data dictionary and local user management in this reference architecture.
+    vendor: IBM
+    url: https://www.ibm.com/products/maximo
+    types: [third-party]
+  - key: mqtt
+    name: MQTT
+    description: Messaging protocol used between operator workstations, the depicted edge broker, and MVI edge and mobile clients.
+    vendor: OASIS Open
+    url: https://mqtt.org/
+    types: [third-party]
+  - key: rtsp
+    name: Real Time Streaming Protocol (RTSP)
+    description: Protocol identified for video data from the assembly-line camera to the edge inspection flow.
+    vendor: IETF
+    url: https://www.rfc-editor.org/rfc/rfc2326
+    types: [third-party]

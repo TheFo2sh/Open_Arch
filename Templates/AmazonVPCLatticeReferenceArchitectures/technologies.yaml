@@ -1,0 +1,105 @@
+technologies:
+  - key: amazon-vpc-lattice
+    name: Amazon VPC Lattice
+    description: Application-layer service for service networks, services, associations, access policies, and service-to-service connectivity.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/lattice/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Isolated virtual network containing consumer or provider resources and associated with a VPC Lattice service network.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc-security-groups
+    name: Amazon VPC security groups
+    description: Optional stateful network filter attached to a VPC association with a VPC Lattice service network.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon Elastic Compute Cloud
+    description: Virtual machine compute platform for consumer applications and service targets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ec2-auto-scaling
+    name: Amazon EC2 Auto Scaling
+    description: Scales EC2 instances that are registered as targets for a VPC Lattice service.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/autoscaling/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Serverless compute platform used for consumer functions and VPC Lattice service targets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-eks
+    name: Amazon Elastic Kubernetes Service
+    description: Managed Kubernetes platform hosting service target pods.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eks/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Application Load Balancer used as a VPC Lattice service target in the traffic-flow example.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-route-53-resolver
+    name: Amazon Route 53 Resolver
+    description: VPC DNS resolver used by clients to resolve VPC Lattice service names.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: DNS service with a private hosted zone and alias record for a VPC Lattice custom domain.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-certificate-manager
+    name: AWS Certificate Manager
+    description: Optional source of the SSL/TLS certificate required when serving HTTPS on a custom VPC Lattice service domain.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/certificate-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-resource-access-manager
+    name: AWS Resource Access Manager
+    description: Shares service networks and services with other AWS accounts.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ram/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-organizations
+    name: AWS Organizations
+    description: Organization boundary referenced by the examples, which allow shared resources across accounts in the same or different organizations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/organizations/
+    types: [managed-service]
+    platform: aws
+    hosts: []

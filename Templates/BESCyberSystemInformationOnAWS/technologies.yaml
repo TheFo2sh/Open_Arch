@@ -1,0 +1,301 @@
+technologies:
+  - key: aws-control-tower
+    name: AWS Control Tower
+    description: Centralized cloud governance service shown in the management and governance group.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/controltower/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-config
+    name: AWS Config
+    description: Assesses cloud resource configurations and changes.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/config/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-organizations
+    name: AWS Organizations
+    description: Account management service shown in the management and governance group.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/organizations/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-cloudtrail
+    name: AWS CloudTrail
+    description: Logs AWS account activity.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudtrail/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Monitoring service shown in the management and governance group.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-systems-manager
+    name: AWS Systems Manager
+    description: Cloud operations service shown in the management and governance group.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/systems-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-cloudformation
+    name: AWS CloudFormation
+    description: Infrastructure management service shown in the management and governance group.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudformation/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-backup
+    name: AWS Backup
+    description: Backup service shown in the management and governance group.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/backup/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-audit-manager
+    name: AWS Audit Manager
+    description: Helps assess and audit AWS usage against compliance requirements.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/audit-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iam
+    name: AWS Identity and Access Management (IAM)
+    description: Controls access to AWS resources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iam/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-directory-service
+    name: AWS Directory Service
+    description: Directory service shown as an access-control option.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directoryservice/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-guardduty
+    name: Amazon GuardDuty
+    description: Monitors network traffic for malicious activity.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/guardduty/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-kms
+    name: AWS Key Management Service (KMS)
+    description: Encrypts compute resources, relational database data, and data lake data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kms/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-firewall-manager
+    name: AWS Firewall Manager
+    description: Security service shown in the security, identity, and compliance group.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firewall-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-security-hub
+    name: AWS Security Hub
+    description: Security service shown in the security, identity, and compliance group.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/security-hub/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc
+    name: Amazon VPC
+    description: Isolated virtual network for the compute and database resources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Dedicated connectivity option for guaranteed bandwidth; AWS recommends MACsec encryption with this option.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-site-to-site-vpn
+    name: AWS Site-to-Site VPN
+    description: VPN connectivity option between the utility OT network and AWS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-virtual-private-gateway
+    name: AWS Virtual Private Gateway
+    description: VPN gateway shown between the utility network and the VPC.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc-endpoints
+    name: Amazon VPC endpoints
+    description: Private route for data flows into the VPC.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/privatelink/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-database-migration-service
+    name: AWS Database Migration Service (AWS DMS)
+    description: One of the data-ingestion service options shown for importing OT data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dms/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-storage-gateway
+    name: AWS Storage Gateway (File Gateway)
+    description: File Gateway option shown for data ingestion from OT systems.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/storagegateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-transfer-family
+    name: AWS Transfer Family
+    description: Secure file transfer option shown as AWS SFTP for data ingestion.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/aws-transfer-family/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-kinesis
+    name: Amazon Kinesis
+    description: Streaming data-ingestion option for OT data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute option shown for analysis and simulations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-eks
+    name: Amazon EKS
+    description: Kubernetes compute option shown for analysis and simulations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eks/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-emr
+    name: Amazon EMR
+    description: Compute and analytics option shown for analysis and simulations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/emr/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ecs
+    name: Amazon ECS
+    description: Container compute option shown for analysis and simulations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecs/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Serverless compute option shown for analysis and simulations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-fargate
+    name: AWS Fargate
+    description: Container compute option named by the source for containerized applications.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fargate/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-aurora
+    name: Amazon Aurora
+    description: Highly available relational database option for BES Cyber System Information.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-rds
+    name: Amazon RDS
+    description: Highly available relational database option for BES Cyber System Information.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: AI/ML service for analysis and assessment of BES Cyber System Information.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage for the OT data lake, with raw and curated data areas.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-glue
+    name: AWS Glue
+    description: ETL service for processing data and creating the data catalog.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-glue-data-catalog
+    name: AWS Glue Data Catalog
+    description: Data catalog for the OT data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-s3-glacier
+    name: Amazon S3 Glacier
+    description: Archive tier named by the source for storing data from the OT data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/storage-classes/glacier/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: third-party-ml-analytics
+    name: Third-party ML/analytics (vendor unspecified)
+    description: The diagram labels a third-party ML/analytics element but does not identify a vendor, product, or behavior.
+    types: [third-party]

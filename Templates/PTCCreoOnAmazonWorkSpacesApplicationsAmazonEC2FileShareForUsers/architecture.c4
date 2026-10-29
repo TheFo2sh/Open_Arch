@@ -1,0 +1,113 @@
+// PTC Creo on Amazon WorkSpaces Applications – EC2-based File Share for Users.
+// Based on the AWS reference diagram; systems and users are slots.
+model {
+  designers = user 'PTC Creo users' {
+    description 'Use the streamed Creo application, collaborate on CAD files, and commit finalized designs to Windchill.'
+  }
+  administrators = user 'Administrators' {
+    description 'Use the bastion host to log on to instances in the private subnet.'
+  }
+
+  windchill = system 'PTC Windchill PLM' {
+    description 'External PLM file vault where users commit finalized CADs; the target diagram does not show its deployment or integration.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Amazon VPC' {
+      description 'Contains public and private subnets across two Availability Zones; detailed subnet and routing configuration is not specified.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      internetGateway = platform 'Amazon VPC Internet Gateway' {
+        description 'Internet gateway shown attached to the VPC.'
+        metadata {
+          uses 'amazon-vpc-internet-gateway'
+        }
+      }
+      natGateway = platform 'AWS NAT Gateway' {
+        description 'NAT gateway shown in the public subnet in Availability Zone 1; its traffic path is not described.'
+        metadata {
+          uses 'aws-nat-gateway'
+        }
+      }
+
+      ec2 = platform 'Amazon EC2' {
+        description 'Hosts the bastion, global Creo license manager, and shared file server instances shown in Availability Zone 1.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+
+        bastion = system 'Windows bastion host' {
+          description 'EC2 instance in the public subnet that administrators use to log on to instances in the private subnet.'
+        }
+        licenseManager = system 'Global Creo License Manager' {
+          description 'Creo license manager running on EC2 instances; licenses are consumed when fleet instances are created and released when they are deprecated.'
+        }
+        fileShare = system 'EC2 SMB file share' {
+          description 'Common SMB share for users to collaborate on CADs before committing finalized designs to Windchill.'
+        }
+      }
+
+      workspaces = platform 'Amazon WorkSpaces Applications' {
+        description 'Fleet instances in private subnets across two Availability Zones, available on an on-demand or always-on basis; the source diagram labels the service Amazon AppStream 2.0.'
+        metadata {
+          uses 'amazon-workspaces-applications'
+        }
+
+        creo = system 'PTC Creo design workspace' {
+          description 'Slot for the streamed Creo application session; the source does not specify the Creo version, operating system, or image configuration.'
+        }
+      }
+
+      imageBuilder = platform 'Amazon EC2 Image Builder' {
+        description 'Image-builder AMI shown in the private subnet in Availability Zone 1 for generating the WorkSpaces Applications fleet image.'
+        metadata {
+          uses 'amazon-ec2-image-builder'
+        }
+      }
+
+      ebs = platform 'Amazon Elastic Block Store' {
+        description 'Block storage backing the EC2-based file share.'
+        metadata {
+          uses 'amazon-ebs'
+        }
+        sharedFiles = database 'Shared CAD files' {
+          description 'Data stored on the EBS volumes backing the common SMB share; filesystem and retention details are not specified.'
+        }
+      }
+    }
+
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Stores a private home folder for each WorkSpaces Applications user.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      homeFolders = database 'Users’ home folders' {
+        description 'Per-user folders for persistent application settings, user data, and files.'
+      }
+    }
+  }
+
+  administrators -> aws.vpc.ec2.bastion 'Logs in to private-subnet instances through'
+  aws.vpc.ec2.bastion -> aws.vpc.ec2.licenseManager 'Provides administrator access to'
+  aws.vpc.ec2.bastion -> aws.vpc.ec2.fileShare 'Provides administrator access to'
+  designers -> aws.vpc.workspaces.creo 'Connect using a web browser or the WorkSpaces Applications Windows Client'
+  aws.vpc.imageBuilder -> aws.vpc.workspaces.creo 'Provides the image used to generate fleet instances'
+  aws.vpc.ec2.licenseManager -> aws.vpc.workspaces.creo 'Provides licenses when fleet instances are created and releases them when instances are deprecated'
+  aws.vpc.workspaces.creo -> aws.vpc.ec2.fileShare 'Collaborates on CAD files using the common SMB share'
+  aws.vpc.ec2.fileShare -> aws.vpc.ebs.sharedFiles 'Stores shared files on'
+  aws.vpc.workspaces.creo -> aws.s3.homeFolders 'Persists user settings, data, and files in'
+  designers -> windchill 'Commits finalized CADs to the file vault'
+}
+
+views {
+  view index {
+    title 'PTC Creo on Amazon WorkSpaces Applications – EC2-based File Share for Users'
+    include *, aws.*, aws.vpc.*, aws.vpc.ec2.*
+  }
+}

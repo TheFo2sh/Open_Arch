@@ -1,0 +1,83 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores the unified interface website and configuration files, as well as the datasets shown in the architecture diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Serves the unified customer-engagement interface.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cognito
+    name: Amazon Cognito
+    description: Controls access to the application APIs and handles the login flow shown for the unified interface.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cognito/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Provides the application APIs through which the unified interface invokes backend functionality.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the core, search, and recommendations functions shown in the architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores key guest 360-degree data collected from source systems and data-processing workload outputs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-lex
+    name: Amazon Lex
+    description: Powers the chatbot that collects guest input and supports automated personalized interactions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lex/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-opensearch-service
+    name: Amazon OpenSearch Service
+    description: Provides search over the available-products index for recommendations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/opensearch-service/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-personalize
+    name: Amazon Personalize
+    description: Personalization service shown with the datasets in the diagram's AI/ML area; the source does not describe its model or data flow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/personalize/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-pinpoint
+    name: Amazon Pinpoint
+    description: Schedules and sends guest recommendations through email or mobile push notifications; the diagram also depicts text notifications.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/pinpoint/
+    types: [managed-service]
+    platform: aws
+    hosts: []

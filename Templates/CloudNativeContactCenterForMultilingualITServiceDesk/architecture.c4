@@ -1,0 +1,224 @@
+// Cloud-native Contact Center for Multilingual IT Service Desk, after AWS's reference architecture.
+// The AWS source page, numbered flow, and linked diagram are documented in README.md.
+// Systems and users are slots to map to the adopting project's own.
+model {
+  endUsers = user 'End users' {
+    description 'Contact the IT service desk by voice, web chat, or smartphone.'
+  }
+  agents = user 'Service desk agents' {
+    description 'Handle contacts through the browser-based Contact Control Panel (CCP).'
+  }
+
+  customer = zone 'Customer workloads' {
+    metadata {
+      platform 'other'
+    }
+
+    crm = system 'CRM system' {
+      description 'Customer CRM integration target; the source names Salesforce and Zendesk as examples, not requirements.'
+    }
+    itsm = system 'ITSM ticketing system' {
+      description 'Ticketing integration target; ServiceNow is shown as an example, not a required product.'
+    }
+    bi = system 'BI and analytics tools' {
+      description 'Customer analytics tools shown in the customer-workloads area; the source does not specify an integration flow.'
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Customer-location connectivity shown in the diagram; routing and target resources are not specified.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    vpn = platform 'AWS Site-to-Site VPN' {
+      description 'VPN connectivity shown in the diagram; the topology is not specified.'
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    internetGateway = platform 'Internet Gateway' {
+      description 'Internet gateway shown in the diagram; no VPC or routing details are supplied.'
+      metadata {
+        uses 'aws-internet-gateway'
+      }
+    }
+
+    connect = platform 'Amazon Connect' {
+      description 'Provides inbound and outbound voice, web chat, mobile chat, skills-based routing, queues, contact flows, and real-time metrics.'
+      metadata {
+        uses 'amazon-connect'
+      }
+
+      contactCenter = system 'IT service desk contact center' {
+        description 'The contact center slot mapped to the adopting project; its phone numbers, queues, contact flows, and routing profiles are configured by the consumer.'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      description 'Runs custom CRM or ITSM integrations and the functions shown in the chatbot and contact analytics flows.'
+      metadata {
+        uses 'aws-lambda'
+      }
+
+      automation = system 'Contact center automation functions' {
+        description 'Consumer-defined functions for integrations, chatbot processing, and contact trace record analytics.'
+
+        integrations = container 'CRM and ITSM integrations' {
+          description 'Custom integrations used where a partner connector is not selected.'
+        }
+        botFunctions = container 'Chatbot functions' {
+          description 'Lambda functions shown with Amazon Lex in the conversational bot channel; the exact validation and fulfillment logic is unspecified.'
+        }
+        analytics = container 'Contact trace record processing' {
+          description 'Processes contact trace records in the analytics flow.'
+        }
+      }
+    }
+
+    lex = platform 'Amazon Lex' {
+      description 'Provides conversational bots for automating high-volume service desk contacts.'
+      metadata {
+        uses 'amazon-lex'
+      }
+
+      chatbot = system 'IT service desk chatbot' {
+        description 'Conversational self-service integrated with Amazon Connect.'
+      }
+    }
+
+    smsEvents = platform 'Amazon SMS Events' {
+      description 'The diagram shows SMS events feeding the bot channel but does not name the SMS service or integration.'
+      metadata {
+        uses 'amazon-sms-events'
+      }
+    }
+
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Database shown in the conversational bot channel; the source does not describe its data model.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+
+      botData = database 'Bot data' {
+        description 'Data used by the bot integration; schema and purpose are not specified.'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Stores call recordings and the additional data stores shown in the analysis and reporting areas.'
+      metadata {
+        uses 'amazon-s3'
+      }
+
+      recordings = database 'Call recordings' {
+        description 'Amazon Connect call recordings, protected by Amazon Macie.'
+      }
+      convertedText = database 'Converted contact text' {
+        description 'S3 data store shown with text analysis; exact contents and retention are unspecified.'
+      }
+      analyticsData = database 'Analytics data' {
+        description 'S3 data store shown in the contact trace record analytics flow.'
+      }
+    }
+
+    transcribe = platform 'Amazon Transcribe' {
+      description 'Converts speech from call recordings to text.'
+      metadata {
+        uses 'amazon-transcribe'
+      }
+    }
+    translate = platform 'Amazon Translate' {
+      description 'Supports translation of contact text; language pairs and workflow are not specified.'
+      metadata {
+        uses 'amazon-translate'
+      }
+    }
+    comprehend = platform 'Amazon Comprehend' {
+      description 'Analyzes key topics and sentiment in contact text.'
+      metadata {
+        uses 'amazon-comprehend'
+      }
+    }
+    macie = platform 'Amazon Macie' {
+      description 'Protects sensitive data stored in call recordings.'
+      metadata {
+        uses 'amazon-macie'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Analyzes relationships in converted contact text.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Streams contact trace records and real-time metrics for analysis.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    firehose = platform 'Amazon Kinesis Data Firehose' {
+      description 'Delivers processed contact analytics data to the data stores shown in the diagram.'
+      metadata {
+        uses 'amazon-kinesis-data-firehose'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      description 'Stores contact trace record analytics for reporting.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+
+      warehouse = database 'Contact analytics warehouse' {
+        description 'Contact trace record analytics; the source does not specify its schema.'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Displays contact analytics in dashboards.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+  }
+
+  endUsers -> aws.connect.contactCenter 'Requests support through voice, web chat, or mobile chat'
+  agents -> aws.connect.contactCenter 'Handles contacts from the browser-based CCP'
+  aws.connect.contactCenter -> customer.crm 'Integrates with CRM tools through partner connectors or custom integrations'
+  aws.connect.contactCenter -> customer.itsm 'Integrates with ITSM ticketing tools such as ServiceNow'
+  aws.connect.contactCenter -> customer.bi 'Can integrate with analytics tools; the source does not specify the flow'
+  aws.connect.contactCenter -> aws.lambda.automation.integrations 'Invokes custom integrations when used'
+  aws.lambda.automation.integrations -> customer.itsm 'Connects to the selected ticketing system'
+  aws.connect.contactCenter -> aws.lex.chatbot 'Routes conversational contacts to the chatbot'
+  aws.lex.chatbot -> aws.lambda.automation.botFunctions 'Uses chatbot validation and processing functions'
+  aws.smsEvents -> aws.lambda.automation.botFunctions 'Feeds SMS events into the chatbot flow'
+  aws.lambda.automation.botFunctions -> aws.dynamodb.botData 'Uses bot data; the data model is unspecified'
+  aws.connect.contactCenter -> aws.s3.recordings 'Stores call recordings'
+  aws.s3.recordings -> aws.transcribe 'Provides recorded speech for transcription'
+  aws.transcribe -> aws.translate 'Provides text for translation'
+  aws.translate -> aws.s3.convertedText 'Stores converted contact text'
+  aws.translate -> aws.comprehend 'Provides text for topic and sentiment analysis'
+  aws.comprehend -> aws.s3.convertedText 'Stores analysis data'
+  aws.macie -> aws.s3.recordings 'Protects sensitive recording data'
+  aws.athena -> aws.s3.convertedText 'Analyzes relationships in converted text'
+  aws.connect.contactCenter -> aws.kinesis 'Provides real-time metrics and contact trace records'
+  aws.kinesis -> aws.lambda.automation.analytics 'Streams contact trace records for processing'
+  aws.lambda.automation.analytics -> aws.firehose 'Delivers processed contact analytics'
+  aws.firehose -> aws.redshift.warehouse 'Loads contact analytics for reporting'
+  aws.firehose -> aws.s3.analyticsData 'Delivers analytics data to Amazon S3'
+  aws.quickSight -> aws.redshift.warehouse 'Displays contact analytics in dashboards'
+
+}
+
+views {
+  view index {
+    title 'Cloud-native Contact Center for Multilingual IT Service Desk'
+    include *, customer.*, aws.*, aws.connect.*, aws.lambda.*, aws.lambda.automation.*, aws.lex.*, aws.dynamodb.*, aws.s3.*, aws.redshift.*
+  }
+}

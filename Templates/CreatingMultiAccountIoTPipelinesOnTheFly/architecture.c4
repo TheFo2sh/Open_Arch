@@ -1,0 +1,155 @@
+// Creating Multi-Account IoT Pipelines On-The-Fly, after AWS's reference architecture.
+// Systems are slots that applying the template maps onto project systems.
+model {
+  devices = system 'IoT device groups' {
+    description 'Produces device telemetry; a device group is represented by a Kinesis shard.'
+  }
+
+  pipelineAccount = zone 'AWS Cloud — pipeline' {
+    metadata {
+      platform 'aws'
+    }
+
+    telemetry = platform 'Amazon Kinesis Data Streams' {
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+      telemetryStream = database 'Telemetry stream'
+      shardEvents = database 'Shard registration stream'
+      registrationEvents = database 'Channel registration stream'
+      datasetEvents = database 'Dataset registration stream'
+    }
+    flink = platform 'Amazon Managed Service for Apache Flink' {
+      metadata {
+        uses 'amazon-managed-service-for-apache-flink'
+      }
+      streamProcessor = system 'Telemetry stream processor' {
+        description 'Detects unregistered shards, buffers their messages, then routes data after channel registration.'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      shardRegistration = system 'Account and shard registration' {
+        registerShard = container 'Register shard function' {
+          metadata {
+            uses 'aws-sdk'
+          }
+        }
+      }
+      datasetRegistration = system 'Dataset registration' {
+        registerDataset = container 'Register dataset function' {
+          metadata {
+            uses 'aws-sdk'
+          }
+        }
+      }
+    }
+    organizations = platform 'AWS Organizations' {
+      metadata {
+        uses 'aws-organizations'
+      }
+    }
+    shardMetadata = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      shardMetadataDb = database 'Shard and channel metadata'
+    }
+    cloudwatch = platform 'Amazon CloudWatch' {
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+  }
+
+  customerAccount1 = zone 'Customer account 1 (illustrative)' {
+    metadata {
+      platform 'aws'
+    }
+    iotAnalytics1 = platform 'AWS IoT Analytics' {
+      metadata {
+        uses 'aws-iot-analytics'
+      }
+      channel1 = database 'Device-group channel'
+      datasets1 = database 'Per-device datasets'
+    }
+    s3Account1 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataStore1 = database 'IoT Analytics data store'
+      bucket1 = database 'Account bucket'
+    }
+  }
+
+  customerAccount2 = zone 'Customer account 2 (illustrative)' {
+    metadata {
+      platform 'aws'
+    }
+    iotAnalytics2 = platform 'AWS IoT Analytics' {
+      metadata {
+        uses 'aws-iot-analytics'
+      }
+      channel2 = database 'Device-group channel'
+      datasets2 = database 'Per-device datasets'
+    }
+    s3Account2 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataStore2 = database 'IoT Analytics data store'
+      bucket2 = database 'Account bucket'
+    }
+  }
+
+  queryAccount = zone 'AWS Cloud — analytics queries' {
+    metadata {
+      platform 'aws'
+    }
+    glue = platform 'AWS Glue' {
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    spectrum = platform 'Amazon Redshift Spectrum' {
+      metadata {
+        uses 'amazon-redshift-spectrum'
+      }
+    }
+  }
+
+  devices -> pipelineAccount.telemetry.telemetryStream 'Sends telemetry to'
+  pipelineAccount.telemetry.telemetryStream -> pipelineAccount.flink.streamProcessor 'Processes device telemetry'
+  pipelineAccount.flink.streamProcessor -> pipelineAccount.telemetry.shardEvents 'Emits an event for an unregistered shard'
+  pipelineAccount.telemetry.shardEvents -> pipelineAccount.lambda.shardRegistration.registerShard 'Triggers shard and account registration'
+  pipelineAccount.lambda.shardRegistration.registerShard -> pipelineAccount.organizations 'Creates an account when capacity is insufficient'
+  pipelineAccount.lambda.shardRegistration.registerShard -> pipelineAccount.shardMetadata.shardMetadataDb 'Registers shard and channel metadata in'
+  pipelineAccount.lambda.shardRegistration.registerShard -> pipelineAccount.telemetry.registrationEvents 'Emits channel registration information to'
+  pipelineAccount.telemetry.registrationEvents -> pipelineAccount.flink.streamProcessor 'Resumes buffered processing for the registered channel'
+  pipelineAccount.flink.streamProcessor -> customerAccount1.iotAnalytics1.channel1 'Routes telemetry to the registered account'
+  pipelineAccount.flink.streamProcessor -> customerAccount2.iotAnalytics2.channel2 'Routes telemetry to the registered account'
+  pipelineAccount.flink.streamProcessor -> pipelineAccount.telemetry.datasetEvents 'Emits an asynchronous event when a device is detected'
+  pipelineAccount.telemetry.datasetEvents -> pipelineAccount.lambda.datasetRegistration.registerDataset 'Triggers per-device dataset creation'
+  pipelineAccount.lambda.datasetRegistration.registerDataset -> customerAccount1.iotAnalytics1.datasets1 'Creates datasets in'
+  pipelineAccount.lambda.datasetRegistration.registerDataset -> customerAccount2.iotAnalytics2.datasets2 'Creates datasets in'
+  pipelineAccount.lambda.shardRegistration.registerShard -> customerAccount1.s3Account1.bucket1 'Creates a bucket when needed'
+  pipelineAccount.lambda.shardRegistration.registerShard -> customerAccount2.s3Account2.bucket2 'Creates a bucket when needed'
+  customerAccount1.iotAnalytics1.channel1 -> customerAccount1.s3Account1.dataStore1 'Transforms messages through its pipeline and stores them in'
+  customerAccount2.iotAnalytics2.channel2 -> customerAccount2.s3Account2.dataStore2 'Transforms messages through its pipeline and stores them in'
+  customerAccount1.s3Account1.dataStore1 -> customerAccount1.iotAnalytics1.datasets1 'Provides the most recent five minutes of device data to'
+  customerAccount2.s3Account2.dataStore2 -> customerAccount2.iotAnalytics2.datasets2 'Provides the most recent five minutes of device data to'
+  queryAccount.glue -> customerAccount1.s3Account1.dataStore1 'Queries device data in'
+  queryAccount.glue -> customerAccount2.s3Account2.dataStore2 'Queries device data in'
+  queryAccount.spectrum -> customerAccount1.s3Account1.dataStore1 'Queries device data in'
+  queryAccount.spectrum -> customerAccount2.s3Account2.dataStore2 'Queries device data in'
+  pipelineAccount.flink.streamProcessor -> pipelineAccount.cloudwatch 'Publishes monitoring data to'
+}
+
+views {
+  view index {
+    title 'Creating Multi-Account IoT Pipelines On-The-Fly'
+    include *, pipelineAccount.*, customerAccount1.*, customerAccount2.*, queryAccount.*
+  }
+}

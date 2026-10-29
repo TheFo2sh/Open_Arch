@@ -1,0 +1,129 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-cognito
+    name: Amazon Cognito
+    description: User and identity pools that authenticate portal users and provide temporary credentials.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cognito/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iam-identity-center
+    name: AWS IAM Identity Center
+    description: Federated identity and access portal for administrators, managers, and sandbox users.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iam/identity-center/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Delivers the web interface from Amazon S3 to portal users.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores the static web interface and long-term archives of solution logs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [system, database]
+  - key: aws-waf
+    name: AWS WAF
+    description: Protects the API Gateway REST API from common web exploits.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/waf/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Exposes the REST API used by the signed web interface requests.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs API handlers and event-driven functions for account and lease lifecycle management.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores solution settings and operational records for leases, accounts, templates, and principals.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-organizations
+    name: AWS Organizations
+    description: Manages the sandbox organizational units and moves existing accounts through their lifecycle.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/organizations/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-eventbridge
+    name: Amazon EventBridge
+    description: Routes domain events for lease monitoring, notifications, and account lifecycle actions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eventbridge/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ses
+    name: Amazon Simple Email Service
+    description: Sends email notifications triggered by sandbox lease events.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ses/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Orchestrates multi-step blueprint deployment and assignment workflows.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-codebuild
+    name: AWS CodeBuild
+    description: Runs the account cleanup project invoked by the solution's Lambda functions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codebuild/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-nuke
+    name: AWS Nuke
+    description: Third-party cleanup tool run by CodeBuild to delete user-created resources in sandbox accounts.
+    vendor: AWS Nuke project
+    url: https://aws-nuke.ekristen.dev/
+    types: [library, third-party]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Collects solution compute logs before they are archived to Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-appconfig
+    name: AWS AppConfig
+    description: Stores AWS Nuke filters and post-cleanup validation exclusions used by cleanup runs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/systems-manager/features/appconfig/
+    types: [managed-service]
+    platform: aws
+    hosts: []

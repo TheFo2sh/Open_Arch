@@ -1,0 +1,233 @@
+// Customer Engagement Using AI/ML for Lodging, after the AWS reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/customer-engagement-ai-ml-lodging/customer-engagement-ai-ml-lodging.html
+// Read together with the linked PDF and diagram. Systems and users are slots.
+model {
+  guest = user 'Guest or customer' {
+    description 'Uses lodging customer-engagement channels and receives personalized interactions.'
+  }
+  agent = user 'Customer service agent' {
+    description 'Handles guest contacts through the contact center and service portal.'
+  }
+  dashboardUser = user 'Dashboard user' {
+    description 'Uses customer and interaction analytics.'
+  }
+  mdmUser = user 'MDM user' {
+    description 'Uses the optional master data management system.'
+  }
+
+  customerApps = system 'Customer and service applications' {
+    description 'Customer website and mobile apps, customer-service apps, and service dashboards shown as API clients.'
+  }
+  systemsOfRecord = system 'Lodging systems of record' {
+    description 'Property owner relationship management, central reservations, property management and point-of-sale systems, loyalty, booking, and survey systems.'
+  }
+  externalData = system 'External demographic and address data' {
+    description 'External demographic and address data sources shown for data lake enrichment.'
+  }
+  mdmSystem = system 'Master data management system' {
+    description 'Optional, vendor-neutral MDM system; AWS does not specify a product or integration.'
+  }
+  contactCenterPortal = system 'Contact center portal' {
+    description 'Customer service, loyalty membership, and reservations interfaces integrated with the contact center.'
+  }
+  contactChannels = system 'Phone, email, and messaging channels' {
+    description 'Guest contact and notification channels; the reference does not identify a separate channel provider.'
+  }
+  eventSubscribers = system 'Property systems and other event subscribers' {
+    description 'Downstream lodging systems and other subscribers to published customer events.'
+  }
+  chatbot = system 'Guest chatbot experience' {
+    description 'Guest-facing conversational interaction automated with Amazon Lex.'
+  }
+  analyticsDashboard = system 'Customer analytics dashboard' {
+    description 'Business-facing dashboard experience backed by Amazon QuickSight.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    connect = platform 'Amazon Connect' {
+      metadata {
+        uses 'amazon-connect'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      eventFunctions = system 'Customer event processing functions' {
+        description 'Lambda functions used with Step Functions for customer event processing and operational-data access.'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    fargate = platform 'AWS Fargate' {
+      metadata {
+        uses 'aws-fargate'
+      }
+      eventTasks = system 'Customer event processing tasks' {
+        description 'Container tasks used in customer event processing.'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    lex = platform 'Amazon Lex' {
+      metadata {
+        uses 'amazon-lex'
+      }
+    }
+    personalize = platform 'Amazon Personalize' {
+      metadata {
+        uses 'amazon-personalize'
+      }
+    }
+    transcribe = platform 'Amazon Transcribe' {
+      metadata {
+        uses 'amazon-transcribe'
+      }
+    }
+    comprehend = platform 'Amazon Comprehend' {
+      metadata {
+        uses 'amazon-comprehend'
+      }
+    }
+    pinpoint = platform 'Amazon Pinpoint' {
+      metadata {
+        uses 'amazon-pinpoint'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Operational data lake' {
+        description 'Data zones for customer events, demographic and operational data, staging, Parquet, reportable datasets, and interactions.'
+      }
+    }
+    transferFamily = platform 'AWS Transfer Family' {
+      metadata {
+        uses 'aws-transfer-family'
+      }
+    }
+    dataExchange = platform 'AWS Data Exchange' {
+      metadata {
+        uses 'aws-data-exchange'
+      }
+    }
+    appFlow = platform 'Amazon AppFlow' {
+      metadata {
+        uses 'amazon-appflow'
+      }
+    }
+    emr = platform 'Amazon EMR' {
+      metadata {
+        uses 'amazon-emr'
+      }
+      transformJobs = system 'Data transformation jobs' {
+        description 'Jobs that transform and convert operational data lake datasets.'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      metadata {
+        uses 'aws-glue'
+      }
+      dataCatalog = database 'AWS Glue Data Catalog' {
+        description 'Catalog of data lake tables and schemas.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      customer360 = database 'Customer 360 data' {
+        description 'Customer 360 data used for customer insights and event processing.'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      metadata {
+        uses 'amazon-redshift'
+      }
+      customerMarts = database 'Customer data marts' {
+        description 'Customer analytics marts shown in the data platform.'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker' {
+      metadata {
+        uses 'amazon-sagemaker'
+      }
+      customerAnalysis = system 'Customer analysis workloads' {
+        description 'Customer analysis shown in the operational data platform.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+  }
+
+  guest -> chatbot 'Interacts through'
+  guest -> contactChannels 'Contacts the lodging business through'
+  agent -> contactCenterPortal 'Uses'
+  dashboardUser -> analyticsDashboard 'Uses'
+  aws.quickSight -> analyticsDashboard 'Provides customer analytics for'
+  mdmUser -> mdmSystem 'Uses'
+
+  customerApps -> aws.apiGateway 'Calls customer-facing APIs through'
+  aws.apiGateway -> aws.stepFunctions 'Routes requests to customer event workflows in'
+  aws.stepFunctions -> aws.lambda.eventFunctions 'Orchestrates processing with'
+  aws.stepFunctions -> aws.fargate.eventTasks 'Orchestrates processing with'
+  aws.stepFunctions -> aws.dynamodb.customer360 'Reads and updates customer 360 data in'
+  aws.dynamodb.customer360 -> aws.stepFunctions 'Supplies customer insights and change events to'
+  aws.dynamodb.customer360 -> aws.personalize 'Provides customer insights for real-time personalization'
+  aws.stepFunctions -> aws.connect 'Supports contact-center workflows for'
+  aws.connect -> contactCenterPortal 'Integrates the Contact Control Panel with'
+  aws.connect -> contactChannels 'Handles customer contact through'
+  aws.stepFunctions -> aws.pinpoint 'Coordinates customer notification workflows with'
+  aws.pinpoint -> contactChannels 'Schedules customer interactions through'
+  chatbot -> aws.lex 'Uses'
+
+  aws.connect -> aws.transcribe 'Supports transcription for customer interaction analysis with'
+  aws.transcribe -> aws.comprehend 'Supports sentiment and intent analysis with'
+  aws.comprehend -> aws.connect 'Provides interaction insights to inform operations for'
+
+  systemsOfRecord -> aws.kinesis 'Publishes customer events to'
+  mdmSystem -> aws.kinesis 'Optionally publishes MDM events to'
+  externalData -> aws.dataExchange 'Supplies external datasets through'
+  externalData -> aws.appFlow 'Supplies connected-source data through'
+  systemsOfRecord -> aws.transferFamily 'Supplies batch files through'
+  systemsOfRecord -> aws.appFlow 'Supplies connected-source data through'
+  aws.kinesis -> aws.s3.dataLake 'Stages customer event data in'
+  aws.transferFamily -> aws.s3.dataLake 'Loads batch files into'
+  aws.dataExchange -> aws.s3.dataLake 'Loads external datasets into'
+  aws.appFlow -> aws.s3.dataLake 'Loads connected-source datasets into'
+  aws.s3.dataLake -> aws.stepFunctions 'Makes operational data available to'
+  aws.s3.dataLake -> aws.emr.transformJobs 'Provides datasets for transformation to'
+  aws.emr.transformJobs -> aws.s3.dataLake 'Writes transformed datasets to'
+  aws.s3.dataLake -> aws.glue 'Provides datasets for transformation and cataloging to'
+  aws.glue.dataCatalog -> aws.s3.dataLake 'Catalogs data lake datasets'
+  aws.s3.dataLake -> aws.redshift.customerMarts 'Provides data for customer marts'
+  aws.s3.dataLake -> aws.sagemaker.customerAnalysis 'Provides data for customer analysis to'
+  aws.s3.dataLake -> aws.athena 'Makes datasets available for queries through'
+  aws.redshift.customerMarts -> aws.quickSight 'Provides customer analytics data to'
+  aws.athena -> aws.quickSight 'Provides queried data for analytics to'
+  aws.stepFunctions -> eventSubscribers 'Publishes customer events to'
+}
