@@ -1,0 +1,39 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-batch
+    name: AWS Batch
+    description: Schedules and runs the parallel batch processing jobs in the imagery workflow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/batch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-fargate
+    name: AWS Fargate
+    description: Serverless compute option used for imagery-processing jobs; the source does not assign individual stages to it.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fargate/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Serverless compute option used for imagery-processing jobs; the source does not assign individual stages to it.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service (Amazon S3)
+    description: Stores collection metadata, preprocessed imagery, and final imagery and analytics in appropriate storage tiers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: satellite-imagery-source
+    name: Satellite imagery source
+    description: Generic upstream satellite imagery provider; the source does not name a provider, product, or transfer protocol.
+    types: [third-party]

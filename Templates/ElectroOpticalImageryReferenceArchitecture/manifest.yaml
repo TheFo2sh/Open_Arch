@@ -1,0 +1,7 @@
+PackageId: OpenArch.ElectroOpticalImageryReferenceArchitecture
+Name: Electro-Optical Imagery Reference Architecture
+Description: Processes satellite electro-optical imagery from signal preparation through quality assurance, parallel preprocessing, postprocessing, storage, and customer dissemination.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, imagery, geospatial, satellite, data-processing]

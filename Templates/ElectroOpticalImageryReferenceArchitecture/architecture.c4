@@ -1,0 +1,108 @@
+// Electro-Optical Imagery Reference Architecture, based on AWS's numbered flow.
+// The supplied source notes do not identify a vendor for the satellite imagery source.
+model {
+  customer = user 'Imagery customer' {
+    description 'Receives final imagery and analytics; customer roles and delivery protocol are not specified.'
+  }
+
+  satelliteSource = system 'Satellite imagery source' {
+    description 'Generic upstream source of satellite signals and imagery; provider, sensor, and transfer method are not specified.'
+    technology 'Satellite imagery source'
+  }
+
+  aws = zone 'AWS processing Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    batch = platform 'AWS Batch' {
+      description 'Schedules parallel jobs for the imagery-processing workflow.'
+      metadata {
+        uses 'aws-batch'
+      }
+    }
+    fargate = platform 'AWS Fargate' {
+      description 'One of the documented compute options for imagery-processing jobs; the source does not map stages to runtimes.'
+      metadata {
+        uses 'aws-fargate'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'One of the documented compute options for imagery-processing jobs; the source does not map stages to runtimes.'
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Stores metadata and imagery in appropriate storage tiers; specific tiers and bucket layout are not supplied.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      collectionMetadata = database 'Collection metadata' {
+        description 'Collection location, Region, date, and time metadata.'
+      }
+      preprocessedImagery = database 'Preprocessed imagery' {
+        description 'Imagery produced by the parallel sensor-correction, orthorectification, georeferencing, and thumbnail jobs.'
+      }
+      finalProducts = database 'Final imagery and analytics' {
+        description 'Postprocessed imagery and analytics prepared for dissemination.'
+      }
+    }
+
+    imageryWorkflow = system 'Electro-optical imagery processing' {
+      description 'The processing workflow from received satellite signals through quality checks, imagery processing, analytics, and dissemination.'
+
+      signalPreparation = container 'Signal preparation' {
+        description 'Demodulates and decodes the signal, removes forward error correction, then decommutates and decrypts signal frames into raw sensor data.'
+      }
+      qualityAssurance = container 'Imagery quality assurance' {
+        description 'Checks whether raw sensor data is suitable for subsequent imagery processing.'
+      }
+      preprocessing = container 'Parallel imagery preprocessing' {
+        description 'Runs sensor correction, orthorectification, georeferencing, and thumbnail generation as parallel jobs.'
+      }
+      postprocessing = container 'Imagery postprocessing' {
+        description 'Extracts features, names and tags them, and organizes results as time series.'
+      }
+      dissemination = container 'Imagery dissemination' {
+        description 'Makes final imagery and analytics available to customers.'
+      }
+    }
+
+    provenanceLog = system 'Cryptographic provenance log' {
+      description 'Optional variant: abstract immutable transaction-log role for cryptographic provenance; implementation is not specified.'
+    }
+  }
+
+  classifiedRegion = zone 'Optional Region for classified processing' {
+    metadata {
+      platform 'aws'
+    }
+
+    classifiedProcessing = system 'Classified processing destination' {
+      description 'Optional region-specific processing destination; AWS does not specify its services, controls, or classification approval.'
+    }
+  }
+
+  satelliteSource -> aws.imageryWorkflow.signalPreparation 'Provides satellite signals or imagery to'
+  aws.imageryWorkflow.signalPreparation -> aws.imageryWorkflow.qualityAssurance 'Passes raw sensor data to'
+  aws.imageryWorkflow.qualityAssurance -> aws.imageryWorkflow.preprocessing 'Allows suitable data to proceed to'
+  aws.imageryWorkflow -> aws.batch 'Schedules parallel processing jobs with'
+  aws.batch -> aws.fargate 'Uses documented serverless compute option'
+  aws.batch -> aws.lambda 'Uses documented serverless compute option'
+  aws.imageryWorkflow.preprocessing -> aws.s3.preprocessedImagery 'Stores preprocessed imagery in'
+  aws.imageryWorkflow -> aws.s3.collectionMetadata 'Stores collection location, Region, date, and time in'
+  aws.s3.preprocessedImagery -> aws.imageryWorkflow.postprocessing 'Supplies imagery to'
+  aws.imageryWorkflow.postprocessing -> aws.s3.finalProducts 'Stores final imagery and analytics in'
+  aws.imageryWorkflow.postprocessing -> aws.provenanceLog 'Optionally appends immutable cryptographic provenance to'
+  aws.s3.preprocessedImagery -> classifiedRegion.classifiedProcessing 'Optional transfer for classified processing; dataset and mechanism unspecified'
+  customer -> aws.imageryWorkflow 'Receives disseminated imagery and analytics from'
+}
+
+views {
+  view index {
+    title 'Electro-Optical Imagery Reference Architecture'
+    include *
+  }
+}
