@@ -1,0 +1,7 @@
+PackageId: OpenArch.MultiRegionCQRSForOnPremisesMonoliths
+Name: Multi-Region CQRS for On-Premises Monoliths
+Description: Multi-Region read-local, write-global access to an on-premises transactional monolith using AWS services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, "category: architecture", cqrs, multi-region, on-premises]

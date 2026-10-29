@@ -1,0 +1,175 @@
+// Multi-Region CQRS for On-Premises Monoliths, after AWS's reference architecture.
+// Systems and users are slots mapped onto the project's own when the template is applied.
+model {
+  primaryClients = user 'Primary Region clients' {
+    description 'Send queries and commands to the API in the primary Region.'
+  }
+  secondaryClients = user 'Secondary Region clients' {
+    description 'Send queries and commands to an API in a secondary Region.'
+  }
+
+  onPremises = zone 'On-premises data center' {
+    metadata {
+      platform 'other'
+    }
+
+    monolith = system 'On-premises monolith service' {
+      description 'Processes commands and preserves the existing transactional isolation and atomicity.'
+    }
+    relationalDatabase = platform 'On-premises relational database platform' {
+      description 'Hosts the monolith database; the source does not identify a database product or engine.'
+      metadata {
+        uses 'on-premises-relational-database'
+      }
+      monolithDatabase = database 'Monolith relational database' {
+        description 'Source for database change data capture.'
+      }
+    }
+  }
+
+  primaryRegion = zone 'Primary AWS Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Provides hybrid connectivity between the on-premises installation and the primary Region.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    dms = platform 'AWS Database Migration Service' {
+      description 'Captures change data from the on-premises relational database.'
+      metadata {
+        uses 'aws-dms'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Carries the change data capture stream to the Lambda CDC handler.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the CDC handler and primary API dispatcher.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      cdcHandler = system 'CDC handler' {
+        description 'Denormalizes Kinesis change events into the read projection.'
+      }
+      primaryDispatcher = system 'Primary API dispatcher' {
+        description 'Serves queries from the local projection and dispatches commands to the on-premises monolith; applies a health-aware circuit breaker.'
+      }
+    }
+    primaryProjection = platform 'Amazon DynamoDB Global Tables' {
+      description 'Hosts the primary Region replica of the denormalized read projection.'
+      metadata {
+        uses 'amazon-dynamodb-global-tables'
+      }
+      primaryProjectionDatabase = database 'Primary read projection' {
+        description 'Denormalized data queried by the primary API.'
+      }
+    }
+    primaryApi = system 'Primary regional API' {
+      description 'API endpoint exposed to clients in the primary Region.'
+    }
+  }
+
+  secondaryRegion = zone 'Secondary AWS Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the secondary API dispatcher.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      secondaryDispatcher = system 'Secondary API dispatcher' {
+        description 'Serves queries from its local projection and forwards commands to the primary dispatcher; applies a health-aware circuit breaker.'
+      }
+    }
+    secondaryProjection = platform 'Amazon DynamoDB Global Tables' {
+      description 'Hosts a secondary Region replica of the denormalized read projection.'
+      metadata {
+        uses 'amazon-dynamodb-global-tables'
+      }
+      secondaryProjectionDatabase = database 'Secondary read projection' {
+        description 'Locally replicated denormalized data queried by the secondary API.'
+      }
+    }
+    secondaryApi = system 'Secondary regional API' {
+      description 'API endpoint exposed to clients in a secondary Region.'
+    }
+  }
+
+  healthRegion = zone 'us-east-1 Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      description 'Monitors the health of the regional APIs from us-east-1.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      description 'Receives Route 53 health alarms.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Processes regional API health alarms.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      healthHandler = system 'Regional health information handler' {
+        description 'Updates the state and location of regional APIs from health alarms.'
+      }
+    }
+    availabilityTable = platform 'Amazon DynamoDB Global Tables' {
+      description 'Stores API availability and location separately from the query projection.'
+      metadata {
+        uses 'amazon-dynamodb-global-tables'
+      }
+      availabilityDatabase = database 'Regional API state and locations' {
+        description 'Global Table used by regional dispatchers to make circuit-breaker decisions.'
+      }
+    }
+  }
+
+  primaryClients -> primaryRegion.primaryApi 'Calls'
+  secondaryClients -> secondaryRegion.secondaryApi 'Calls'
+  primaryRegion.primaryApi -> primaryRegion.lambda.primaryDispatcher 'Dispatches queries and commands to'
+  secondaryRegion.secondaryApi -> secondaryRegion.lambda.secondaryDispatcher 'Dispatches queries and commands to'
+
+  onPremises.relationalDatabase.monolithDatabase -> primaryRegion.dms 'Provides change data to'
+  primaryRegion.dms -> primaryRegion.kinesis 'Streams CDC events to'
+  primaryRegion.kinesis -> primaryRegion.lambda.cdcHandler 'Delivers CDC events to'
+  primaryRegion.lambda.cdcHandler -> primaryRegion.primaryProjection.primaryProjectionDatabase 'Writes denormalized data to'
+  primaryRegion.primaryProjection.primaryProjectionDatabase -> secondaryRegion.secondaryProjection.secondaryProjectionDatabase 'Replicates changes asynchronously to'
+
+  primaryRegion.lambda.primaryDispatcher -> primaryRegion.primaryProjection.primaryProjectionDatabase 'Reads queries from'
+  secondaryRegion.lambda.secondaryDispatcher -> secondaryRegion.secondaryProjection.secondaryProjectionDatabase 'Reads queries from'
+  secondaryRegion.lambda.secondaryDispatcher -> primaryRegion.lambda.primaryDispatcher 'Forwards commands to the primary Region'
+  primaryRegion.lambda.primaryDispatcher -> onPremises.monolith 'Dispatches commands to'
+  primaryRegion.directConnect -> onPremises.monolith 'Provides hybrid connectivity to'
+
+  healthRegion.route53 -> primaryRegion.primaryApi 'Monitors health of'
+  healthRegion.route53 -> secondaryRegion.secondaryApi 'Monitors health of'
+  healthRegion.route53 -> healthRegion.sns 'Sends health alarms to'
+  healthRegion.sns -> healthRegion.lambda.healthHandler 'Delivers health alarms to'
+  healthRegion.lambda.healthHandler -> healthRegion.availabilityTable.availabilityDatabase 'Updates API state and location in'
+  primaryRegion.lambda.primaryDispatcher -> healthRegion.availabilityTable.availabilityDatabase 'Reads availability for its circuit breaker'
+  secondaryRegion.lambda.secondaryDispatcher -> healthRegion.availabilityTable.availabilityDatabase 'Reads availability for its circuit breaker'
+}
+
+views {
+  view index {
+    title 'Multi-Region CQRS for On-Premises Monoliths'
+    include *
+  }
+}
