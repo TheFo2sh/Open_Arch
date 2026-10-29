@@ -1,0 +1,7 @@
+PackageId: OpenArch.MultiModelInferenceWorkflowOrchestration
+Name: Multi-Model Inference Workflow Orchestration
+Description: An AWS workflow that accepts inference jobs, invokes category-specific SageMaker endpoints in parallel, and returns aggregated insights.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, machine-learning, inference, orchestration]
