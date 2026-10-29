@@ -1,0 +1,7 @@
+PackageId: OpenArch.Guest360DataPlatformForLodging
+Name: Guest 360 Data Platform for Lodging
+Description: A guest 360 data platform that unifies lodging profiles, curates guest data, and supports personalized campaigns and experiences.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, lodging, hospitality, guest-360, customer-data, data-platform]

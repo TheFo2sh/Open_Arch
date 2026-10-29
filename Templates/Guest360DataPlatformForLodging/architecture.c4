@@ -1,0 +1,91 @@
+// Guest 360 Data Platform for Lodging, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/guest-360-data-platform-lodging/guest-360-data-platform-lodging.html
+// Systems and users are slots. Vendor-neutral external products stay generic.
+model {
+  guest = user 'Lodging guest' {
+    description 'Registers, stays at a property, and interacts through web and mobile channels.'
+  }
+
+  guestChannels = system 'Guest web and mobile channels' {
+    description 'Lodging websites and mobile apps that collect digital activity and deliver personalized experiences.'
+  }
+  lodgingSystems = system 'Lodging systems of record' {
+    description 'Systems supplying loyalty and reward membership, registration, reservations, stays, and purchases.'
+  }
+  tagManagement = system 'Tag management solution' {
+    description 'Vendor-neutral client-side tag management product slot; the source does not name a provider.'
+    technology 'Tag management solution (vendor not specified)'
+  }
+  cdp = system 'Customer data platform (CDP)' {
+    description 'Vendor-neutral CDP slot. Its client-side components collect web and mobile activity; server-side components recognize anonymous activity and combine it with loyalty and unified guest records.'
+    technology 'Customer Data Platform (vendor not specified)'
+  }
+  mdm = system 'Master data management (MDM) tool' {
+    description 'Vendor-neutral MDM slot that merges loyalty or rewards membership with attributes collected at registration and during stays into unified guest profiles.'
+    technology 'Master data management tool (vendor not specified)'
+  }
+  optionalIdentifiers = system 'Optional third-party cookie and mobile ID sources' {
+    description 'Optional enrichment inputs from third-party cookies and mobile identifiers; providers and exchange details are not specified.'
+  }
+  campaignChannels = system 'Campaign and acquisition channels' {
+    description 'Destinations for outbound campaigns and acquisition activity, plus inbound web and mobile engagement; specific providers are not identified.'
+  }
+  partnerCdp = system 'Optional CDP partner' {
+    description 'Optional partner endpoint for exchanging anonymous guest and prospect attributes; provider and exchange protocol are not specified.'
+    technology 'Customer Data Platform (vendor not specified)'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Stores curated lodging and guest data for the data platform.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Curated guest data lake' {
+        description 'Curated data for loyalty, reservations, stays, purchases, marketing, and digital interactions.'
+      }
+    }
+
+    guest360 = system 'Guest 360 data platform' {
+      description 'AWS-hosted data platform capabilities shown by the source; exact AWS analytics and microservice products are not specified.'
+
+      analytics = container 'Guest analytics and profile enrichment' {
+        description 'Uses AWS analytics capabilities to enrich guest profiles and support outbound, inbound web or mobile, and acquisition campaigns. AWS does not name the analytics services.'
+      }
+      experience = container 'Guest 360 microservices and business events' {
+        description 'Guest 360 microservices and business events that personalize offers and experiences; implementation services and event contracts are not specified.'
+      }
+    }
+  }
+
+  guest -> guestChannels 'Registers and interacts through'
+  guestChannels -> tagManagement 'Collects client-side activity using'
+  tagManagement -> cdp 'Passes tagged web and mobile activity to'
+  optionalIdentifiers -> cdp 'Optionally enriches anonymous activity with'
+  guestChannels -> cdp 'Sends web and mobile activity to'
+
+  lodgingSystems -> mdm 'Supplies loyalty, registration, and stay attributes to'
+  mdm -> cdp 'Provides unified guest records to'
+  lodgingSystems -> aws.s3.dataLake 'Supplies reservation, stay, purchase, loyalty, and registration data to'
+  cdp -> aws.s3.dataLake 'Contributes digital interaction and guest profile data to'
+  aws.s3.dataLake -> guest360.analytics 'Provides curated datasets to'
+  mdm -> aws.s3.dataLake 'Supplies unified guest profiles to'
+
+  guest360.analytics -> cdp 'Enriches profiles and supports audience activation in'
+  guest360.analytics -> campaignChannels 'Supports campaign and acquisition activity through'
+  guest360.experience -> guestChannels 'Personalizes web and mobile offers and experiences for'
+  guest360.experience -> campaignChannels 'Personalizes offers and experiences through'
+  cdp -> partnerCdp 'Optionally exchanges anonymous guest and prospect attributes with'
+  partnerCdp -> cdp 'Optionally returns anonymous guest and prospect attributes to'
+}
+
+views {
+  view index {
+    title 'Guest 360 Data Platform for Lodging'
+    include *
+  }
+}
