@@ -1,0 +1,133 @@
+// o9 Demand Planning for CPG, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/o9-demand-planning-cpg/o9-demand-planning-cpg.html
+// Systems are slots that consumers map to their own systems.
+model {
+  aws = zone 'AWS customer account' {
+    metadata { platform 'aws' }
+
+    dms = platform 'AWS Database Migration Service' {
+      metadata { uses 'aws-database-migration-service' }
+    }
+    appFlow = platform 'Amazon AppFlow' {
+      metadata { uses 'amazon-appflow' }
+    }
+    dataSync = platform 'AWS DataSync' {
+      metadata { uses 'aws-datasync' }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      metadata { uses 'amazon-kinesis-data-streams' }
+    }
+    msk = platform 'Amazon Managed Streaming for Apache Kafka' {
+      metadata { uses 'amazon-msk' }
+    }
+    iotCore = platform 'AWS IoT Core' {
+      metadata { uses 'aws-iot-core' }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata { uses 'amazon-s3' }
+      ingestedData = database 'Ingested data' {
+        description 'Logical store for data ingested into the AWS account.'
+      }
+      analyticsData = database 'Outbound and analytics data' {
+        description 'Logical store for outbound o9 data used by analytics and AI/ML workloads.'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      metadata { uses 'aws-glue' }
+    }
+    dataExchange = platform 'AWS Data Exchange' {
+      metadata { uses 'aws-data-exchange' }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata { uses 'aws-lambda' }
+    }
+    forecast = platform 'Amazon Forecast' {
+      metadata { uses 'amazon-forecast' }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      metadata { uses 'amazon-sagemaker-ai' }
+    }
+    emr = platform 'Amazon EMR' {
+      metadata { uses 'amazon-emr' }
+    }
+    redshift = platform 'Amazon Redshift' {
+      metadata { uses 'amazon-redshift' }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      metadata { uses 'aws-glue-data-catalog' }
+    }
+    lakeFormation = platform 'AWS Lake Formation' {
+      metadata { uses 'aws-lake-formation' }
+    }
+    iam = platform 'AWS Identity and Access Management (IAM)' {
+      metadata { uses 'aws-iam' }
+    }
+  }
+
+  sqlNoSqlSources = system 'SQL and NoSQL source systems' {
+    description 'Slot for customer databases that supply demand-planning data.'
+  }
+  businessApplicationSources = system 'ERP, CRM, and SaaS sources' {
+    description 'Slot for enterprise and SaaS applications that supply demand-planning data.'
+  }
+  fileShareSources = system 'File shares' {
+    description 'Slot for file shares that supply demand-planning data.'
+  }
+  streamingSources = system 'Streaming sources' {
+    description 'Slot for streaming data sources.'
+  }
+  sellingPartnerApi = system 'Amazon.com Selling Partner API' {
+    description 'Source for vendor sales orders and product catalog data.'
+  }
+  thirdPartyProviders = system 'Third-party data providers' {
+    description 'Slot for providers such as TransUnion or Reuters that supply datasets through AWS Data Exchange.'
+  }
+  o9 = system 'o9 Demand Planning SaaS' {
+    description 'Slot for the o9 SaaS solution and its enterprise knowledge graph; the source documents native o9 APIs and SFTP.'
+  }
+
+  sqlNoSqlSources -> aws.dms 'Database ingestion'
+  businessApplicationSources -> aws.appFlow 'Application data ingestion'
+  fileShareSources -> aws.dataSync 'File ingestion'
+  streamingSources -> aws.kinesis 'Streaming ingestion'
+  streamingSources -> aws.msk 'Streaming ingestion option'
+  streamingSources -> aws.iotCore 'Streaming ingestion option'
+  sellingPartnerApi -> o9 'Provides vendor sales orders and product catalog data'
+  thirdPartyProviders -> aws.dataExchange 'Provides third-party datasets'
+
+  aws.dms -> aws.s3.ingestedData 'Stores ingested data'
+  aws.appFlow -> aws.s3.ingestedData 'Stores ingested data'
+  aws.dataSync -> aws.s3.ingestedData 'Stores ingested data'
+  aws.kinesis -> aws.lambda 'Optional SDK or Lambda path to Amazon S3'
+  aws.msk -> aws.s3.ingestedData 'Stores ingested data'
+  aws.iotCore -> aws.s3.ingestedData 'Stores ingested data'
+  aws.lambda -> aws.s3.ingestedData 'Stores streaming data'
+  aws.dataExchange -> aws.s3.ingestedData 'Makes subscribed data available in AWS'
+
+  sqlNoSqlSources -> o9 'Direct ingestion option through native o9 APIs or SFTP'
+  businessApplicationSources -> o9 'Direct ingestion option through native o9 APIs or SFTP'
+  fileShareSources -> o9 'Direct ingestion option through native o9 APIs or SFTP'
+  streamingSources -> o9 'Direct ingestion option through native o9 APIs or SFTP'
+  aws.kinesis -> o9 'Streaming data through native o9 REST APIs'
+  aws.s3.ingestedData -> aws.glue 'Batch ingestion to o9 through the AWS SDK or AWS Lambda'
+  aws.glue -> o9 'Batch-ingests AWS customer account data'
+  o9 -> aws.lambda 'Optional API-based data exchange'
+  aws.lambda -> o9 'Optional API-based data exchange'
+  o9 -> aws.s3.analyticsData 'Collects outbound o9 data in Amazon S3'
+
+  aws.s3.analyticsData -> aws.forecast 'Complementary machine learning workloads'
+  aws.s3.analyticsData -> aws.sagemaker 'Complementary machine learning workloads'
+  aws.s3.analyticsData -> aws.emr 'Big data processing'
+  aws.s3.analyticsData -> aws.redshift 'Data warehousing'
+  aws.s3.analyticsData -> aws.glueCatalog 'Cataloged for the data lake'
+  aws.s3.analyticsData -> aws.lakeFormation 'Governed data lake storage'
+  aws.glueCatalog -> aws.lakeFormation 'Data lake catalog'
+  aws.iam -> aws.lakeFormation 'Permissions for the data lake'
+}
+
+views {
+  view index {
+    title 'o9 Demand Planning for CPG'
+    include *
+  }
+}
