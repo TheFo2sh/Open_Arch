@@ -1,0 +1,7 @@
+PackageId: OpenArch.O9DemandPlanningForCPG
+Name: o9 Demand Planning for CPG
+Description: Reference architecture for CPG demand planning data exchange between source systems, o9 SaaS, and AWS ingestion, analytics, and machine learning services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, demand-planning, cpg, supply-chain, o9]
