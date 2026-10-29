@@ -1,0 +1,108 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-vpc
+    name: Amazon VPC
+    description: Virtual network boundary for the Maintenix application, integration, reporting, and database tiers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Highly available private network connectivity from on-premises routers into AWS through Transit Gateway.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-site-to-site-vpn
+    name: AWS Site-to-Site VPN
+    description: Highly available VPN connectivity between on-premises routers and AWS through Transit Gateway.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/site-to-site-vpn/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-transit-gateway
+    name: AWS Transit Gateway
+    description: Connects the hybrid Direct Connect and Site-to-Site VPN paths to the AWS VPC.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2-auto-scaling
+    name: Amazon EC2 Auto Scaling
+    description: Auto Scaling groups run the Maintenix application, integration, and reporting tiers across two Availability Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/autoscaling/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: EC2 instances host the Maintenix application, integration, and reporting tiers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Public and private Application Load Balancers provide the documented user, integration, and reporting access paths.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-rds-oracle
+    name: Amazon RDS for Oracle
+    description: Oracle database platform configured for Multi-AZ high availability with a failover standby instance.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/oracle/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-dms
+    name: AWS Database Migration Service
+    description: Captures database changes with Change Data Capture and replicates them to a data warehouse for analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dms/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: Resolves the public Maintenix application endpoint for internet-connected users.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-waf
+    name: AWS WAF
+    description: Protects the public Application Load Balancer for the internet access path.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/waf/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: ifs-maintenix
+    name: IFS Maintenix
+    description: Third-party aviation maintenance management software deployed across the Maintenix application, integration, and reporting tiers.
+    vendor: IFS
+    url: https://www.ifs.com/en/products/aviation-maintenance
+    types: [library]
