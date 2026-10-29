@@ -1,0 +1,85 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Redundant dedicated connections between hospital sites and AWS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-vpc
+    name: Amazon VPC
+    description: Virtual network boundary for the MetaVision application, integration, and database tiers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform for the MetaVision application, MVIE cluster, SQL Server FCIs, and reporting replica.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system, database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-fsx-windows-file-server
+    name: Amazon FSx for Windows File Server
+    description: Windows file shares provide shared SQL Server storage and the failover cluster file-share witness.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fsx/windows/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: imdsoft-metavision-suite
+    name: iMDSoft MetaVision Suite
+    description: Clinical information system whose application and integration tiers are represented in this architecture.
+    vendor: iMDsoft
+    url: https://imd-soft.com/metavision/
+    types: [third-party]
+  - key: citrix
+    name: Citrix
+    description: Citrix client workstations and Citrix application-server software shown in the reference; the product and version are unspecified.
+    vendor: Citrix
+    url: https://www.citrix.com/
+    types: [third-party]
+  - key: microsoft-windows-server
+    name: Microsoft Windows Server
+    description: Windows Server operating system used by the MetaVision Integration Engine instances; version and edition are unspecified.
+    vendor: Microsoft
+    url: https://www.microsoft.com/windows-server
+    types: [third-party]
+  - key: windows-server-failover-clustering
+    name: Windows Server Failover Clustering
+    description: Failover clustering configured for the MetaVision Integration Engine; cluster settings are unspecified.
+    vendor: Microsoft
+    url: https://learn.microsoft.com/windows-server/failover-clustering/failover-clustering-overview
+    types: [third-party]
+  - key: microsoft-sql-server
+    name: Microsoft SQL Server
+    description: Database software for the MetaVision databases and standalone reporting replica; version and edition are unspecified.
+    vendor: Microsoft
+    url: https://www.microsoft.com/sql-server
+    types: [third-party]
+  - key: sql-server-always-on-failover-cluster-instances
+    name: SQL Server Always On Failover Cluster Instances
+    description: SQL Server FCI configuration used for the high-availability MetaVision database across Availability Zones.
+    vendor: Microsoft
+    url: https://learn.microsoft.com/sql/sql-server/failover-clusters/windows/always-on-failover-cluster-instances-sql-server
+    types: [third-party]
+  - key: sql-server-transactional-replication
+    name: SQL Server transactional replication
+    description: Replication used to synchronize on-premises Emergency Data Access workstations.
+    vendor: Microsoft
+    url: https://learn.microsoft.com/sql/relational-databases/replication/transactional/transactional-replication
+    types: [third-party]
+  - key: tls
+    name: Transport Layer Security (TLS)
+    description: Encryption in transit on the hospital-to-AWS connections; the source does not specify a TLS version.
+    types: [library]

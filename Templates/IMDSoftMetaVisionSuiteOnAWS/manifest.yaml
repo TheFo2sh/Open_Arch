@@ -1,0 +1,7 @@
+PackageId: OpenArch.IMDSoftMetaVisionSuiteOnAWS
+Name: iMDSoft MetaVision Suite on AWS
+Description: Reference architecture for MetaVision clinical workflows on AWS, with Citrix application servers, clustered device integration, SQL Server high availability, reporting, and Emergency Data Access synchronization.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, healthcare, clinical-information-system, imdsoft]
