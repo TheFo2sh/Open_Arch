@@ -1,0 +1,138 @@
+# Technologies used by the blueprint, by the key its metadata { uses } names them by.
+# The third-party tools are examples named in the AWS diagram, not prescribed choices.
+technologies:
+  - key: aws-codecommit
+    name: AWS CodeCommit
+    description: Source control for application code and database scripts, with approval rules for code reviews.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codecommit/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-codeguru-reviewer
+    name: Amazon CodeGuru Reviewer
+    description: Automatically reviews code changes and offers recommendations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codeguru/reviewer/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-codepipeline
+    name: AWS CodePipeline
+    description: Orchestrates source, build, test, and deployment actions for application and database changes.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codepipeline/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-codebuild
+    name: AWS CodeBuild
+    description: Runs the pipeline build and test actions for application and database code.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codebuild/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-codedeploy
+    name: AWS CodeDeploy
+    description: Deployment service shown for the CodePipeline deploy action.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codedeploy/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-codeartifact
+    name: AWS CodeArtifact
+    description: Repository for publishing build artifacts for other consumers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codeartifact/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform shown hosting the database change management tool.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-rds
+    name: Amazon RDS
+    description: Hosts the development and production databases targeted by database changes.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-rds-performance-insights
+    name: Amazon RDS Performance Insights
+    description: Optional RDS capability shown for detecting database performance bottlenecks.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/performance-insights/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-devops-guru
+    name: Amazon DevOps Guru
+    description: Optional service shown applying machine learning to detect performance bottlenecks and operational issues.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/devops-guru/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Monitoring service shown in the development workflow diagram; AWS does not specify its role in the accompanying steps.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-eventbridge
+    name: Amazon EventBridge
+    description: Captures events and sends them to an SNS topic for notifications.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eventbridge/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: SNS topic used to deliver event notifications to appointed teams.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: apache-maven
+    name: Apache Maven
+    description: Example build management tool shown in the AWS development workflow diagram; AWS does not prescribe it.
+    vendor: Apache Software Foundation
+    url: https://maven.apache.org/
+    types: [third-party]
+  - key: flyway
+    name: Flyway
+    description: Example database change management tool shown in the AWS diagrams; AWS does not prescribe it.
+    vendor: Redgate
+    url: https://www.red-gate.com/products/flyway/
+    types: [third-party]
+  - key: liquibase
+    name: Liquibase
+    description: Example database change management tool shown in the AWS diagrams; AWS does not prescribe it.
+    vendor: Liquibase
+    url: https://www.liquibase.com/
+    types: [third-party]

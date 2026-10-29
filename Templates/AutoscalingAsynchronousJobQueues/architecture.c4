@@ -1,0 +1,108 @@
+// AWS Autoscaling Asynchronous Job Queues:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/autoscaling-async-job-queues/autoscaling-async-job-queues.html
+model {
+  jobClient = system 'Job API client' {
+    description 'The consumer system that uses the API to add, query, and cancel jobs; AWS does not specify the client.'
+  }
+  statusSubscribers = system 'Job status subscribers' {
+    description 'Consumer systems that receive job items when job state changes; AWS does not name the subscribers.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Provides the interface to add, query, and cancel jobs.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      jobApi = system 'Job management functions' {
+        description 'The Lambda functions that create, query, and cancel job records.'
+        addJob = container 'Add job function' {
+          description 'Creates a job state item in DynamoDB and enqueues its job ID.'
+        }
+        queryJobs = container 'Query jobs function' {
+          description 'Reads job state from DynamoDB for API queries.'
+        }
+        cancelJob = container 'Cancel job function' {
+          description 'Updates job state in DynamoDB for API cancellation requests.'
+        }
+      }
+    }
+    jobQueue = platform 'Amazon SQS queues (one per job type)' {
+      description 'Each job-type queue contains messages with IDs of jobs to process.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    cloudWatch = platform 'Amazon CloudWatch' {
+      description 'Monitors each queue and provides alarms for configurable queue-depth thresholds and empty queues.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    ecs = platform 'Amazon Elastic Container Service' {
+      description 'Each job type has an ECS service starting at desiredCount zero; alarms change desired count to scale parallel jobs.'
+      metadata {
+        uses 'amazon-ecs'
+      }
+    }
+    fargate = platform 'AWS Fargate' {
+      description 'Runs the job processing containers.'
+      metadata {
+        uses 'aws-fargate'
+      }
+      workers = system 'Job processing workers' {
+        description 'Workers for a job type that poll its SQS queue and process the referenced jobs.'
+        processor = container 'Job processor' {
+          description 'Reads job state and parameters, performs the job, updates its state and results, and publishes state changes.'
+        }
+      }
+    }
+    dynamoDb = platform 'Amazon DynamoDB' {
+      description 'Stores job state, parameters, and results keyed by job ID.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      jobs = database 'Job records' {
+        description 'The job state items read and updated by the API functions and processing containers.'
+      }
+    }
+    ecr = platform 'Amazon Elastic Container Registry' {
+      description 'Stores the job processing container images.'
+      metadata {
+        uses 'amazon-ecr'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      description 'Publishes job items when their state changes.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+  }
+
+  jobClient -> aws.apiGateway 'Adds, queries, and cancels jobs through'
+  aws.apiGateway -> aws.lambda.jobApi.addJob 'Routes add-job requests to'
+  aws.apiGateway -> aws.lambda.jobApi.queryJobs 'Routes query requests to'
+  aws.apiGateway -> aws.lambda.jobApi.cancelJob 'Routes cancellation requests to'
+  aws.lambda.jobApi.addJob -> aws.dynamoDb.jobs 'Creates the job state item in'
+  aws.lambda.jobApi.addJob -> aws.jobQueue 'Enqueues the job ID on'
+  aws.cloudWatch -> aws.jobQueue 'Monitors queue depth and empty-queue alarms for'
+  aws.cloudWatch -> aws.ecs 'Scales job processing when alarms trigger'
+  aws.ecs -> aws.fargate.workers 'Changes desired task count for'
+  aws.jobQueue -> aws.fargate.workers.processor 'Provides job IDs to poll'
+  aws.ecr -> aws.fargate.workers.processor 'Provides the job processor image to'
+  aws.fargate.workers.processor -> aws.dynamoDb.jobs 'Reads job data and updates status and results in'
+  aws.fargate.workers.processor -> aws.sns 'Publishes job items on state changes to'
+  aws.lambda.jobApi.queryJobs -> aws.dynamoDb.jobs 'Reads job state from'
+  aws.lambda.jobApi.cancelJob -> aws.dynamoDb.jobs 'Updates job state in'
+  aws.sns -> statusSubscribers 'Publishes job status notifications to'
+}

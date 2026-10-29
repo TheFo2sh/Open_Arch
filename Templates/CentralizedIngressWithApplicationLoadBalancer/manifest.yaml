@@ -1,0 +1,7 @@
+PackageId: OpenArch.CentralizedIngressWithApplicationLoadBalancer
+Name: Centralized Ingress with Application Load Balancer
+Description: Centralized AWS ingress with an Application Load Balancer and Transit Gateway, using EC2 IP targets, a Network Load Balancer with Auto Scaling, or a chained application load balancer.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, networking, ingress, load-balancing]
