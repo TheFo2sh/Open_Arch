@@ -1,0 +1,7 @@
+PackageId: OpenArch.ReplayingParallelRequestsToBreakAMonolith
+Name: Replaying Parallel Requests to Break a Monolith
+Description: Record legacy requests and responses, replay requests against a new microservice from a database baseline, and compare the results.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, migration, modernization, serverless, strangler-fig]

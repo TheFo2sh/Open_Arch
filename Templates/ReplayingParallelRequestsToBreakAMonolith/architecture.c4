@@ -1,0 +1,155 @@
+// Replaying Parallel Requests to Break a Monolith, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/replaying-parallel-requests/replaying-parallel-requests.html
+// Systems and users are slots mapped to the project's own when applying the template.
+model {
+  user = user 'User' {
+    description 'Sends application requests that are routed through the strangler facade.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    refactorSpaces = platform 'AWS Migration Hub Refactor Spaces' {
+      metadata {
+        uses 'aws-migration-hub-refactor-spaces'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    ec2 = platform 'Amazon EC2' {
+      metadata {
+        uses 'amazon-ec2'
+      }
+      legacyMonolith = system 'Legacy monolith' {
+        description 'The existing application whose endpoints and database are being modernized.'
+      }
+    }
+    rds = platform 'Amazon RDS' {
+      metadata {
+        uses 'amazon-rds'
+      }
+      monolithDb = database 'Monolith database' {
+        description 'The legacy application database periodically backed up as the replay baseline.'
+      }
+      replayDb = database 'Temporary microservice database' {
+        description 'Temporary database reset from a monolith snapshot before replay.'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      recorder = system 'Recorder system' {
+        proxyRecorder = container 'Proxy recorder function' {
+          description 'Forwards modernized endpoint requests to the monolith and copies request and response payloads.'
+        }
+      }
+      replayFunctions = system 'Replay and comparison functions' {
+        sorter = container 'Sorter function' {
+          description 'Stores recorded payloads in chronological order.'
+        }
+        databaseReset = container 'Database reset function' {
+          description 'Resets the temporary microservice database from the monolith backup.'
+        }
+        sequencer = container 'Sequencer function' {
+          description 'Fetches ordered requests since the backup baseline and places them on the FIFO queue.'
+        }
+        requestRepeater = container 'Request repeater function' {
+          description 'Invokes the microservice API with each queued request and stores its response.'
+        }
+        responseComparer = container 'Response comparer function' {
+          description 'Compares the corresponding monolith and microservice responses and records the result.'
+        }
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    firehose = platform 'Amazon Kinesis Data Firehose' {
+      metadata {
+        uses 'amazon-kinesis-data-firehose'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      recordedPayloads = database 'Recorded requests and monolith responses' {
+        description 'Bucket receiving the monolith-payload stream.'
+      }
+      snapshots = database 'Monolith database snapshots' {
+        description 'Bucket holding periodic database snapshots used as replay baselines.'
+      }
+      replayResponses = database 'Microservice replay responses' {
+        description 'Bucket holding responses produced by the microservice replay.'
+      }
+    }
+    timestream = platform 'Amazon Timestream' {
+      metadata {
+        uses 'amazon-timestream'
+      }
+      requestsDb = database 'Ordered requests and replay results' {
+        description 'Time-ordered recorded requests and final comparison results.'
+      }
+    }
+    backup = platform 'AWS Backup' {
+      metadata {
+        uses 'aws-backup'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    sqs = platform 'Amazon Simple Queue Service' {
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    microserviceApi = system 'Microservice API' {
+      description 'The new API invoked for each request during the isolated replay.'
+    }
+  }
+
+  user -> aws.ec2.legacyMonolith 'Calls endpoints through the strangler facade'
+  aws.refactorSpaces -> aws.apiGateway 'Provides routing for'
+  aws.apiGateway -> aws.ec2.legacyMonolith 'Routes unchanged endpoints to'
+  aws.apiGateway -> aws.lambda.recorder.proxyRecorder 'Routes modernized endpoints to'
+  aws.lambda.recorder.proxyRecorder -> aws.ec2.legacyMonolith 'Proxies requests to'
+  aws.ec2.legacyMonolith -> aws.rds.monolithDb 'Reads from and writes to'
+  aws.lambda.recorder.proxyRecorder -> aws.kinesis 'Records copies of requests and responses in'
+  aws.kinesis -> aws.firehose 'Delivers the payload stream through'
+  aws.firehose -> aws.s3.recordedPayloads 'Stores payloads in'
+  aws.s3.recordedPayloads -> aws.lambda.replayFunctions.sorter 'Prompts sorting of recorded payloads'
+  aws.lambda.replayFunctions.sorter -> aws.timestream.requestsDb 'Stores payloads chronologically in'
+
+  aws.rds.monolithDb -> aws.backup 'Is periodically backed up by'
+  aws.backup -> aws.s3.snapshots 'Stores snapshots in'
+  aws.stepFunctions -> aws.lambda.replayFunctions.databaseReset 'Starts the replay by invoking'
+  aws.s3.snapshots -> aws.rds.replayDb 'Restores the baseline to'
+  aws.lambda.replayFunctions.databaseReset -> aws.rds.replayDb 'Resets'
+  aws.stepFunctions -> aws.lambda.replayFunctions.sequencer 'Then invokes'
+  aws.lambda.replayFunctions.sequencer -> aws.timestream.requestsDb 'Fetches requests since the baseline from'
+  aws.lambda.replayFunctions.sequencer -> aws.sqs 'Queues requests in FIFO order in'
+  aws.sqs -> aws.lambda.replayFunctions.requestRepeater 'Delivers queued requests to'
+  aws.lambda.replayFunctions.requestRepeater -> aws.microserviceApi 'Replays each request against'
+  aws.microserviceApi -> aws.rds.replayDb 'Reads from and writes to'
+  aws.lambda.replayFunctions.requestRepeater -> aws.s3.replayResponses 'Stores microservice responses in'
+  aws.s3.recordedPayloads -> aws.lambda.replayFunctions.responseComparer 'Provides matching monolith responses to'
+  aws.s3.replayResponses -> aws.lambda.replayFunctions.responseComparer 'Provides replay responses to'
+  aws.lambda.replayFunctions.responseComparer -> aws.sns 'Raises an alarm for differences through'
+  aws.lambda.replayFunctions.responseComparer -> aws.timestream.requestsDb 'Stores final comparison results in'
+}
