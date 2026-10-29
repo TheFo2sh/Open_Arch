@@ -1,0 +1,143 @@
+// Content Moderation and Compliance Using AWS AI Services, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/content-moderation-compliance/content-moderation-compliance.html
+// Systems and users are slots; applying the template maps them onto the project's own.
+model {
+  submitter = user 'End user' {
+    description 'Uploads image, audio, video, text, or document content for moderation.'
+  }
+  workforce = user 'Human workforce' {
+    description 'Labels data or reviews cases that need human input.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    amplify = platform 'AWS Amplify' {
+      description 'Front-end service shown in the content-ingestion stage.'
+      metadata {
+        uses 'aws-amplify'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'API service shown in the content-ingestion stage.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    cloudFront = platform 'Amazon CloudFront' {
+      description 'Content delivery service shown in the content-ingestion stage.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    kinesisVideo = platform 'Amazon Kinesis Video Streams' {
+      description 'Video streaming service shown in the content-ingestion stage.'
+      metadata {
+        uses 'amazon-kinesis-video-streams'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Securely persists content in the staging stage.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      content = database 'Content staging bucket' {
+        description 'Stores image, audio, video, text, and document content.'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Workflow service shown in the moderation integration stage.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    eventBridge = platform 'Amazon EventBridge' {
+      description 'Event service shown in the moderation integration stage.'
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    sqs = platform 'Amazon SQS' {
+      description 'Queue service shown in the moderation integration stage.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs custom code shown in the moderation integration stage.'
+      metadata {
+        uses 'aws-lambda'
+      }
+
+      moderation = system 'Content moderation workflow' {
+        description 'Custom workflow code coordinates content analysis and human review.'
+
+        code = container 'Custom moderation code' {
+          description 'Custom code used with workflow and publisher/subscription patterns to moderate content.'
+        }
+      }
+    }
+    transcribe = platform 'Amazon Transcribe' {
+      metadata {
+        uses 'amazon-transcribe'
+      }
+    }
+    translate = platform 'Amazon Translate' {
+      metadata {
+        uses 'amazon-translate'
+      }
+    }
+    comprehend = platform 'Amazon Comprehend' {
+      metadata {
+        uses 'amazon-comprehend'
+      }
+    }
+    rekognition = platform 'Amazon Rekognition' {
+      metadata {
+        uses 'amazon-rekognition'
+      }
+    }
+    textract = platform 'Amazon Textract' {
+      metadata {
+        uses 'amazon-textract'
+      }
+    }
+    groundTruth = platform 'Amazon SageMaker Ground Truth' {
+      metadata {
+        uses 'amazon-sagemaker-ground-truth'
+      }
+    }
+    a2i = platform 'Amazon Augmented AI (Amazon A2I)' {
+      metadata {
+        uses 'amazon-augmented-ai'
+      }
+    }
+  }
+
+  submitter -> aws.lambda.moderation 'Submits content for moderation'
+  workforce -> aws.lambda.moderation 'Provides labels or human-review input'
+  aws.amplify -> aws.s3.content 'Ingests submitted content into staging'
+  aws.apiGateway -> aws.s3.content 'Ingests submitted content into staging'
+  aws.cloudFront -> aws.s3.content 'Ingests submitted content into staging'
+  aws.kinesisVideo -> aws.s3.content 'Ingests submitted content into staging'
+  aws.s3.content -> aws.lambda.moderation 'Makes staged content available for processing'
+  aws.stepFunctions -> aws.lambda.moderation 'Orchestrates moderation workflows'
+  aws.eventBridge -> aws.lambda.moderation 'Supports publisher/subscription patterns for'
+  aws.sqs -> aws.lambda.moderation 'Queues moderation work for'
+  aws.lambda.moderation -> aws.transcribe 'Processes audio from video and audio streams with'
+  aws.lambda.moderation -> aws.translate 'Uses for translation in the documented moderation paths'
+  aws.lambda.moderation -> aws.comprehend 'Uses for natural language processing in the documented moderation paths'
+  aws.lambda.moderation -> aws.rekognition 'Analyzes images and video with'
+  aws.lambda.moderation -> aws.textract 'Extracts document content with'
+  aws.lambda.moderation -> aws.groundTruth 'Uses for human labeling and customized vocabularies'
+  aws.lambda.moderation -> aws.a2i 'Uses for human review of cases not fully automatable'
+}
+
+views {
+  view index {
+    title 'Content Moderation and Compliance Using AWS AI Services'
+    include *, aws.*
+  }
+}
