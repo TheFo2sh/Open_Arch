@@ -1,0 +1,137 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-kinesis-data-firehose
+    name: Amazon Kinesis Data Firehose
+    description: Optional ingest path that delivers incoming data to the raw S3 bucket.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-transfer-family
+    name: AWS Transfer Family
+    description: Managed SFTP ingest path shown as AWS SFTP in the architecture diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/aws-transfer-family/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-datasync
+    name: AWS DataSync
+    description: Data transfer service shown as an ingest option for the raw S3 bucket.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/datasync/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores raw, curated, and aggregated data lake stages.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Query service shown in the data curation blocks and named as an analytics option for S3 data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-glue
+    name: AWS Glue
+    description: Data curation service shown in the raw-to-curated and curated-to-aggregated processing blocks.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs data curation functions and the downstream CloudWatch signal collection and alert functions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Orchestrates the successive data lake curation blocks.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-x-ray
+    name: AWS X-Ray
+    description: Captures traces at S3, Step Functions, and Lambda checkpoints to diagnose processing lifecycle issues.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/xray/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-x-ray-sdk
+    name: AWS X-Ray SDK
+    description: Optional Lambda instrumentation for recording outgoing calls and adding trace annotations and metadata.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/xray/latest/devguide/xray-sdk.html
+    types: [library]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Analytics service named as an option for using data from the S3 data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Visualizes data lake analytics and dashboards of downstream pipeline metrics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Receives relevant pipeline logs, metrics, and events for downstream analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Central streaming store for preprocessed pipeline signals.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-kinesis-data-analytics
+    name: Amazon Kinesis Data Analytics
+    description: Analyzes the Kinesis stream in near real time, stores aggregated metrics, and evaluates abnormal-behavior thresholds.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-analytics/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-timestream
+    name: Amazon Timestream
+    description: Stores aggregated time-series metrics for further analysis.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/timestream/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: Sends real-time alerts from the downstream analytics Lambda function.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []

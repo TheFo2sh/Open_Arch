@@ -1,0 +1,183 @@
+// Traceability with Serverless Analytics, based on AWS's two related patterns.
+// The data producer and pipeline systems are slots mapped onto the project's own systems.
+model {
+  dataProducers = system 'Data producers' {
+    description 'Slot for the diverse sources that deliver data to the data lake; AWS does not specify their identities.'
+  }
+  dataPipelines = system 'Data lake processing pipelines' {
+    description 'Slot for pipeline components that produce data and publish relevant logs, metrics, or events.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    firehose = platform 'Amazon Kinesis Data Firehose' {
+      description 'One of the ingest options shown before the raw-data bucket.'
+      metadata {
+        uses 'amazon-kinesis-data-firehose'
+      }
+    }
+    transferFamily = platform 'AWS Transfer Family' {
+      description 'SFTP ingest option, shown as AWS SFTP in the source diagram.'
+      metadata {
+        uses 'aws-transfer-family'
+      }
+    }
+    dataSync = platform 'AWS DataSync' {
+      description 'Data transfer ingest option shown in the source diagram.'
+      metadata {
+        uses 'aws-datasync'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      rawData = database 'Raw data bucket' {
+        description 'First landing stage; S3 Event Notifications provide the first X-Ray trace checkpoint.'
+      }
+      curatedData = database 'Curated data bucket' {
+        description 'Intermediate data stage after the first curation block.'
+      }
+      aggregatedData = database 'Aggregated data bucket' {
+        description 'Final data lake stage, ready for analytics.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Query service shown in the curation blocks and named for analytics against S3 data.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Data curation service shown in both processing blocks.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Triggers the successive data curation blocks.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+
+      curation = system 'Data lake curation functions' {
+        description 'Lambda processing blocks in the ingest and curation flow.'
+        firstBlock = container 'First curation block' {
+          description 'Processes data from the raw bucket into the curated stage.'
+        }
+        nextBlock = container 'Next curation block' {
+          description 'Continues curation from the curated stage into the aggregated bucket.'
+        }
+      }
+      telemetryCollector = system 'Pipeline telemetry collector' {
+        description 'Fetches pipeline signals from CloudWatch, preprocesses them, and pushes them to Kinesis Data Streams.'
+      }
+      alertFunction = system 'Pipeline alert function' {
+        description 'Receives threshold analytics and can send real-time alerts through SNS.'
+      }
+    }
+    xray = platform 'AWS X-Ray' {
+      description 'Captures ingest traces from S3 notifications, Step Functions, and Lambda.'
+      metadata {
+        uses 'aws-x-ray'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      description 'One of the analytics tools named for data in the S3 data lake.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Visualizes data lake analytics and downstream pipeline trends.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    cloudWatch = platform 'Amazon CloudWatch' {
+      description 'Receives pipeline logs, metrics, and events for downstream processing.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Central near-real-time stream for preprocessed pipeline signals.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+      signalStream = database 'Pipeline signal stream' {
+        description 'Streaming logs, metrics, and events before real-time analysis.'
+      }
+    }
+    kinesisAnalytics = platform 'Amazon Kinesis Data Analytics' {
+      description 'Analyzes the signal stream, writes aggregated metrics, and evaluates threshold queries.'
+      metadata {
+        uses 'amazon-kinesis-data-analytics'
+      }
+    }
+    timestream = platform 'Amazon Timestream' {
+      metadata {
+        uses 'amazon-timestream'
+      }
+      metrics = database 'Aggregated pipeline metrics' {
+        description 'Time-series metrics stored for further analysis.'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      description 'Delivers real-time pipeline alerts.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+  }
+
+  dataProducers -> aws.firehose 'Can ingest data through'
+  dataProducers -> aws.transferFamily 'Can transfer data through SFTP'
+  dataProducers -> aws.dataSync 'Can transfer data through'
+  dataProducers -> aws.s3.rawData 'Deliver data to'
+  aws.firehose -> aws.s3.rawData 'Delivers ingest data to'
+  aws.transferFamily -> aws.s3.rawData 'Receives SFTP data into'
+  aws.dataSync -> aws.s3.rawData 'Transfers data into'
+
+  aws.stepFunctions -> aws.lambda.curation.firstBlock 'Triggers the first curation block'
+  aws.stepFunctions -> aws.lambda.curation.nextBlock 'Triggers the next curation block'
+  aws.s3.rawData -> aws.lambda.curation.firstBlock 'Provides data for curation'
+  aws.lambda.curation.firstBlock -> aws.glue 'Uses for data curation'
+  aws.athena -> aws.s3.rawData 'Queries data in'
+  aws.glue -> aws.s3.curatedData 'Writes the first curated stage to'
+  aws.s3.curatedData -> aws.lambda.curation.nextBlock 'Provides data for the next curation block'
+  aws.lambda.curation.nextBlock -> aws.glue 'Uses for continued data curation'
+  aws.athena -> aws.s3.curatedData 'Queries data in'
+  aws.glue -> aws.s3.aggregatedData 'Writes the aggregated stage to'
+  aws.athena -> aws.s3.aggregatedData 'Queries analytics data in'
+  aws.redshift -> aws.s3.aggregatedData 'Uses data from'
+  aws.s3.aggregatedData -> aws.quickSight 'Provides data for visualization'
+
+  aws.s3.rawData -> aws.xray 'Emits the first trace through S3 Event Notifications'
+  aws.stepFunctions -> aws.xray 'Emits orchestration traces to'
+  aws.lambda.curation -> aws.xray 'Emits function traces to'
+
+  dataPipelines -> aws.cloudWatch 'Publishes logs, metrics, and events to'
+  aws.cloudWatch -> aws.lambda.telemetryCollector 'Provides pipeline signals to'
+  aws.lambda.telemetryCollector -> aws.kinesis.signalStream 'Pushes preprocessed signals to'
+  aws.kinesis.signalStream -> aws.kinesisAnalytics 'Feeds near-real-time analysis'
+  aws.kinesisAnalytics -> aws.timestream.metrics 'Stores aggregated metrics in'
+  aws.kinesisAnalytics -> aws.lambda.alertFunction 'Sends threshold analytics to'
+  aws.lambda.alertFunction -> aws.sns 'Sends real-time alerts through'
+  aws.timestream.metrics -> aws.quickSight 'Dashboard data source is not specified by AWS; this is a likely analytics path'
+}
+
+views {
+  view index {
+    title 'Traceability with Serverless Analytics'
+    include *, aws.*
+  }
+}
