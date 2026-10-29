@@ -1,0 +1,7 @@
+PackageId: OpenArch.LodgingDataPlatformWithMasterDataManagement
+Name: Lodging Data Platform with Master Data Management
+Description: An AWS lodging data platform enhanced with master data management to deduplicate loyalty records, unify guest profiles, and deliver customer-centric data to operational and analytical consumers.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, lodging, data-platform, master-data-management, analytics]
