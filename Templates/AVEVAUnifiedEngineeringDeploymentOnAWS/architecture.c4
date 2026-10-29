@@ -1,0 +1,143 @@
+// AVEVA Unified Engineering Deployment on AWS, based on AWS's reference architecture.
+// Network boundaries are deployment context; the blueprint models service and data flows.
+model {
+  engineers = user 'Unified Engineering users' {
+    description 'Engineers who access AVEVA Unified Engineering applications through Amazon WorkSpaces.'
+  }
+  administrators = user 'Operations administrators' {
+    description 'Administrators who use a bastion host to reach private-subnet administration and service hosts.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    directoryService = platform 'AWS Directory Service' {
+      description 'Managed domain access control for engineers using WorkSpaces.'
+      metadata {
+        uses 'aws-directory-service'
+      }
+      directory = database 'Engineering directory' {
+        description 'Managed directory used for access control; the source does not specify the directory type or configuration.'
+      }
+    }
+
+    workspaces = platform 'Amazon WorkSpaces' {
+      description 'GPU-powered and CPU-based virtual desktops deployed in two Availability Zones.'
+      metadata {
+        uses 'amazon-workspaces'
+      }
+      engineering = system 'AVEVA Unified Engineering' {
+        description 'The engineering application system accessed by users through WorkSpaces.'
+        desktop = container 'Engineering desktop applications' {
+          description 'Windows desktop applications for process simulation and 1D, 2D, and 3D engineering and design.'
+          metadata {
+            uses 'aveva-unified-engineering, microsoft-windows'
+          }
+        }
+      }
+    }
+
+    loadBalancer = platform 'Elastic Load Balancing' {
+      description 'Load balances EC2 instances hosting the integration and AIS servers.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+
+    ec2 = platform 'Amazon EC2' {
+      description 'Hosts the public-subnet bastion, private administration and AVEVA servers, and primary and secondary SQL Server deployments across two Availability Zones.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+
+      operations = system 'Operations administration' {
+        description 'Administration access and server configuration on EC2.'
+        bastion = container 'Bastion host' {
+          description 'Public-subnet host in the first depicted Availability Zone, used by operations administrators to reach private-subnet servers.'
+        }
+        adminServer = container 'Admin server' {
+          description 'Private-subnet server in the first depicted Availability Zone, used by operations administrators for Active Directory administration, SQL administration, and service configuration.'
+        }
+      }
+
+      backend = system 'AVEVA backend services' {
+        description 'Server roles shown in the reference architecture; specific instance sizes and deployment details are not supplied.'
+        integrationServer = container 'Integration server' {
+          description 'Hosts AVEVA middleware in the first depicted Availability Zone.'
+          metadata {
+            uses 'aveva-middleware'
+          }
+        }
+        aisServer = container 'AIS server' {
+          description 'Server labeled AIS in the source diagram in the second depicted Availability Zone; the source does not expand the acronym.'
+        }
+      }
+
+      primarySql = database 'Primary SQL Server' {
+        description 'Primary Microsoft SQL Server deployment on EC2 in one Availability Zone.'
+        metadata {
+          uses 'microsoft-sql-server'
+        }
+      }
+      secondarySql = database 'Secondary SQL Server' {
+        description 'Secondary Microsoft SQL Server deployment on EC2 in the other Availability Zone.'
+        metadata {
+          uses 'microsoft-sql-server'
+        }
+      }
+    }
+
+    fsx = platform 'Amazon FSx for Windows File Server' {
+      description 'SMB file storage replicated between two Availability Zones.'
+      metadata {
+        uses 'amazon-fsx-windows-file-server'
+      }
+      dabacon = database 'AVEVA Dabacon databases and project files' {
+        description 'Dabacon databases and project files stored on FSx and accessed through SMB.'
+      }
+    }
+
+    ebs = platform 'Amazon Elastic Block Store' {
+      description 'EC2 block storage included in the AWS Backup scope; the source does not depict specific volumes.'
+      metadata {
+        uses 'amazon-ebs'
+      }
+    }
+
+    backup = platform 'AWS Backup' {
+      description 'Protects the AIS, administration, and SQL Server EC2 instances, plus EBS and FSx.'
+      metadata {
+        uses 'aws-backup'
+      }
+    }
+  }
+
+  engineers -> aws.workspaces.engineering 'Accesses through'
+  administrators -> aws.ec2.operations 'Administers through'
+  aws.directoryService.directory -> aws.workspaces.engineering 'Provides domain access control for'
+  aws.ec2.operations.bastion -> aws.ec2.operations.adminServer 'Provides administrator access to'
+  aws.ec2.operations.bastion -> aws.directoryService.directory 'Allows administrators to manage'
+  aws.ec2.operations.bastion -> aws.ec2.primarySql 'Allows SQL administration of'
+  aws.ec2.operations.bastion -> aws.ec2.secondarySql 'Allows SQL administration of'
+  aws.loadBalancer -> aws.ec2.backend.integrationServer 'Load balances'
+  aws.loadBalancer -> aws.ec2.backend.aisServer 'Load balances'
+  aws.ec2.backend -> aws.ec2.primarySql 'Stores AVEVA data in'
+  aws.ec2.backend -> aws.ec2.secondarySql 'Uses the secondary SQL Server in'
+  aws.ec2.backend -> aws.fsx.dabacon 'Accesses Dabacon databases and project files through SMB'
+  aws.workspaces.engineering.desktop -> aws.fsx.dabacon 'Accesses project files through SMB'
+  aws.backup -> aws.ec2.operations.adminServer 'Backs up'
+  aws.backup -> aws.ec2.backend.aisServer 'Backs up'
+  aws.backup -> aws.ec2.primarySql 'Backs up'
+  aws.backup -> aws.ec2.secondarySql 'Backs up'
+  aws.backup -> aws.ebs 'Backs up'
+  aws.backup -> aws.fsx 'Backs up'
+}
+
+views {
+  view index {
+    title 'AVEVA Unified Engineering Deployment on AWS'
+    include *
+  }
+}

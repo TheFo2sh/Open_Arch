@@ -1,0 +1,166 @@
+// Temenos WealthSuite Front Office on AWS, after the AWS overview and VPC/networking diagrams.
+// The product system, users, and external systems are slots for the adopting project.
+model {
+  internetUsers = user 'Internet users' {
+    description 'Use the wealth management experience over the internet.'
+  }
+  branchUsers = user 'Branch users' {
+    description 'Use the wealth management application from branch or on-premises networks.'
+  }
+  apiConsumers = system 'External API consumers' {
+    description 'External systems that call the application business interfaces.'
+  }
+  externalSystems = system 'External systems' {
+    description 'Systems that exchange data with the application through its integration layer.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    cloudfront = platform 'Amazon CloudFront' {
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    waf = platform 'AWS WAF' {
+      metadata {
+        uses 'aws-waf'
+      }
+    }
+    shield = platform 'AWS Shield' {
+      metadata {
+        uses 'aws-shield'
+      }
+    }
+    certificateManager = platform 'AWS Certificate Manager' {
+      metadata {
+        uses 'aws-certificate-manager'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'API management and the entry point for external interfaces; private endpoints are used for on-premises access in the networking design.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    directConnect = platform 'AWS Direct Connect' {
+      description 'On-premises connectivity option; AWS also allows a VPN, without specifying its implementation.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    vpcLink = platform 'Amazon API Gateway VPC Link' {
+      description 'VPC Link resource used to restrict access to the VPC through API Gateway.'
+      metadata {
+        uses 'amazon-api-gateway-vpc-link'
+      }
+    }
+
+    vpc = platform 'Amazon VPC' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      alb = platform 'Application Load Balancer' {
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+      eks = platform 'Amazon Elastic Kubernetes Service' {
+        description 'Runs the application layers in containers; AWS lists Fargate, EC2, or a combination as compute choices.'
+        metadata {
+          uses 'amazon-eks'
+        }
+
+        wealthSuite = system 'Temenos WealthSuite Front Office' {
+          description 'The wealth management application; map this system slot to the adopting project’s system.'
+          technology 'Temenos WealthSuite Front Office'
+
+          uxp = container 'User Experience Platform (UXP)' {
+            description 'Provides the IDE-based UI and UX designer, with support for major mobile platforms.'
+          }
+          api = container 'API layer' {
+            description 'Provides business logic and acts as the key entry point for external interfaces.'
+          }
+          finance = container 'Finance Services (FIN)' {
+            description 'Scalable calculation engines initiated by the API layer.'
+          }
+          integration = container 'Integration Layer (INT)' {
+            description 'Imports, extracts, routes, and transforms data in batch or near real time using SFTP, HTTPS, Amazon MQ, Apache Kafka, or an enterprise service bus.'
+            technology 'SFTP, HTTPS, Amazon MQ, Apache Kafka, Enterprise Service Bus'
+          }
+        }
+      }
+
+      rds = platform 'Amazon RDS for Oracle' {
+        metadata {
+          uses 'amazon-rds-oracle'
+        }
+        wealthDatabase = database 'WealthSuite database' {
+          description 'Logical Oracle database; the diagram shows primary and secondary instances, and the networking design identifies Multi-AZ as an availability option.'
+        }
+      }
+      serviceEndpoints = platform 'Amazon VPC endpoints' {
+        description 'Provide private access to AWS services without requiring internet access.'
+        metadata {
+          uses 'amazon-vpc-endpoints'
+        }
+      }
+      secretsManager = platform 'AWS Secrets Manager' {
+        description 'Shown in the overview diagram; its specific role is not described by AWS.'
+        metadata {
+          uses 'aws-secrets-manager'
+        }
+      }
+      ecr = platform 'Amazon Elastic Container Registry' {
+        description 'Shown in the overview diagram; its specific role is not described by AWS.'
+        metadata {
+          uses 'amazon-ecr'
+        }
+      }
+      cloudwatch = platform 'Amazon CloudWatch' {
+        description 'Shown in the overview diagram; its specific role is not described by AWS.'
+        metadata {
+          uses 'amazon-cloudwatch'
+        }
+      }
+    }
+
+    mq = platform 'Amazon MQ' {
+      description 'An AWS source or target for integration data.'
+      metadata {
+        uses 'amazon-mq'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'An AWS source or target for integration data.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+  }
+
+  internetUsers -> aws.vpc.eks.wealthSuite 'Use the internet-facing experience through CloudFront and API Gateway'
+  branchUsers -> aws.vpc.eks.wealthSuite 'Use private access through API Gateway and a VPN or Direct Connect'
+  apiConsumers -> aws.apiGateway 'Call external interfaces through'
+  apiConsumers -> aws.vpc.eks.wealthSuite 'Use the application business interfaces'
+  externalSystems -> aws.vpc.eks.wealthSuite.integration 'Exchange integration data with'
+
+  aws.waf -> aws.cloudfront 'Protects internet usage with web filtering for'
+  aws.shield -> aws.cloudfront 'Protects internet usage for'
+  aws.cloudfront -> aws.apiGateway 'Forwards requests to'
+  aws.certificateManager -> aws.apiGateway 'Provides certificates for'
+  aws.directConnect -> aws.apiGateway 'Provides on-premises connectivity to private endpoints on'
+  aws.apiGateway -> aws.vpcLink 'Connects to VPC resources through'
+  aws.vpcLink -> aws.vpc.alb 'Forwards private API traffic to'
+  aws.vpc.alb -> aws.vpc.eks.wealthSuite 'Distributes application traffic to'
+
+  aws.vpc.eks.wealthSuite.uxp -> aws.vpc.eks.wealthSuite.api 'Presents the user experience through'
+  aws.vpc.eks.wealthSuite.api -> aws.vpc.eks.wealthSuite.finance 'Initiates processing in'
+  aws.vpc.eks.wealthSuite -> aws.vpc.rds.wealthDatabase 'Uses the managed Oracle database'
+  aws.vpc.eks.wealthSuite.integration -> aws.vpc.serviceEndpoints 'Accesses AWS integration services through'
+  aws.vpc.serviceEndpoints -> aws.mq 'Provides private access to'
+  aws.vpc.serviceEndpoints -> aws.s3 'Provides private access to'
+}

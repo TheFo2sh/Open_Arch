@@ -1,0 +1,7 @@
+PackageId: OpenArch.CustomerEngagementUsingAIMLForLodging
+Name: Customer Engagement Using AI/ML for Lodging
+Description: A lodging customer-engagement architecture that combines contact-center workflows, conversational automation, real-time personalization, and customer analytics on AWS.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, lodging, hospitality, customer-engagement, ai-ml, contact-center, personalization]

@@ -1,0 +1,56 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# The third-party registry entries document image-source alternatives; they are not all required.
+technologies:
+  - key: aws-snowball-edge
+    name: AWS Snowball Edge
+    description: Edge device platform used for low-latency inference in rural and remote environments.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/snowball/latest/developer-guide/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-iot-greengrass
+    name: AWS IoT Greengrass
+    description: Edge runtime and deployment service used to run workloads locally and deliver model updates over the air.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/greengrass/v2/developerguide/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-iot-greengrass-lambda-connector
+    name: AWS IoT Greengrass Connector for AWS Lambda functions
+    description: Greengrass integration for the Lambda functions that collect sensor data and coordinate model inference on the edge device.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/greengrass/v2/developerguide/
+    types: [library]
+  - key: amazon-sagemaker-ai-neo
+    name: Amazon SageMaker AI Neo
+    description: Compiles machine-learning models to run on edge devices with a compact runtime.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/sagemaker/latest/dg/neo.html
+    types: [managed-service]
+    platform: aws
+  - key: amazon-ecr
+    name: Amazon Elastic Container Registry
+    description: AWS container image registry listed as one option for supplying images to the edge workload.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/AmazonECR/latest/userguide/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-sns
+    name: Amazon SNS
+    description: Notification service used by AWS IoT Greengrass connectors for inference responses.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/sns/latest/dg/
+    types: [managed-service]
+    platform: aws
+  - key: third-party-container-registry
+    name: Public or private container registry
+    description: Generic registry option for container images; AWS does not specify a provider.
+    types: [third-party]
+  - key: docker-hub
+    name: Docker Hub
+    description: Third-party container image registry listed as an image-source option.
+    vendor: Docker
+    url: https://hub.docker.com/
+    types: [third-party]
