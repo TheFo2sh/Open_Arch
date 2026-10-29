@@ -1,0 +1,7 @@
+PackageId: OpenArch.ServerlessRealTimeAnalyticsForGames
+Name: Serverless Real-Time Analytics for Games
+Description: Collects game events for real-time processing, metrics and alerts, with a durable data lake for batch analytics.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, games, analytics, serverless, real-time]

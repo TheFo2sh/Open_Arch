@@ -1,0 +1,234 @@
+# Technologies named in AWS's Digital River for CPG architecture.
+technologies:
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Delivers static content through AWS edge locations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda-at-edge
+    name: AWS Lambda@Edge
+    description: Provides edge computing for dynamic content.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/edge/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-shield
+    name: AWS Shield
+    description: Provides DDoS protection for applications delivered through AWS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/shield/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-waf
+    name: AWS WAF
+    description: Filters web requests to help protect the commerce experience.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/waf/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2-auto-scaling
+    name: Amazon EC2 Auto Scaling
+    description: Provides scalable compute for the B2B and DTC website frontend.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/autoscaling/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-amplify
+    name: AWS Amplify
+    description: AWS service shown with the storefront and headless application technologies.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/amplify/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-appsync
+    name: AWS AppSync
+    description: Managed API service shown in the headless ecommerce application layer.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/appsync/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs application logic in the storefront and headless ecommerce layers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Provides API endpoints for the headless ecommerce application.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-aurora
+    name: Amazon Aurora
+    description: Relational database service shown in the headless application data layer; AWS does not specify an engine.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Managed database shown in the headless application data layer.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: One of the diagram's alternative options for secure connectivity in transit.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-site-to-site-vpn
+    name: AWS Site-to-Site VPN
+    description: One of the diagram's alternative options for secure connectivity in transit.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-outposts
+    name: AWS Outposts
+    description: Adds AWS compute and storage capability at stores in 1U and 2U form factors.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/outposts/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: digital-river-commerce
+    name: Digital River Commerce Platform
+    description: Third-party multi-tenant SaaS providing core order-to-cash commerce functionality.
+    vendor: Digital River
+    url: https://www.digitalriver.com/
+    types: [managed-service, third-party]
+    platform: aws
+    hosts: []
+  - key: amazon-rds
+    name: Amazon Relational Database Service
+    description: Relational database service named in the Digital River SaaS layer; engine and data model are not specified.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-ecs
+    name: Amazon Elastic Container Service
+    description: Container service named as part of the Digital River SaaS layer.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecs/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Load balancing service named as part of the Digital River SaaS layer.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-opensearch-service
+    name: Amazon OpenSearch Service
+    description: Search service named as part of the Digital River SaaS layer.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/opensearch-service/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Streaming service shown in the Digital River SaaS layer.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: DNS service named as part of the Digital River SaaS layer.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: react
+    name: React
+    description: JavaScript UI library named for the storefront.
+    vendor: Meta
+    url: https://react.dev/
+    types: [library]
+  - key: node-js
+    name: Node.js
+    description: JavaScript runtime named for the storefront and application layer.
+    vendor: OpenJS Foundation
+    url: https://nodejs.org/
+    types: [library]
+  - key: graphql
+    name: GraphQL
+    description: API query language named for the storefront and application layer.
+    vendor: GraphQL Foundation
+    url: https://graphql.org/
+    types: [library]
+  - key: astra-db-cassandra
+    name: Astra DB for Cassandra
+    description: Third-party database product shown among corporate applications and databases.
+    vendor: DataStax
+    url: https://www.datastax.com/products/datastax-astra
+    types: [managed-service, data-platform, third-party]
+    platform: other
+    hosts: [database]
+  - key: corporate-relational-databases
+    name: Relational databases
+    description: Unspecified relational databases shown among corporate applications and databases.
+    types: [data-platform]
+    platform: other
+    hosts: [database]
+  - key: oracle-database
+    name: Oracle DB
+    description: Oracle database technology named as an example in the corporate network.
+    vendor: Oracle
+    url: https://www.oracle.com/database/
+    types: [data-platform, third-party]
+    platform: other
+    hosts: [database]
+  - key: apache-kafka
+    name: Apache Kafka
+    description: Streaming platform named among corporate applications and databases.
+    vendor: Apache Software Foundation
+    url: https://kafka.apache.org/
+    types: [data-platform, third-party]
+    platform: other
+    hosts: []
+  - key: apache-mesos-marathon
+    name: Apache Mesos on Marathon
+    description: Compute platform named among corporate applications and databases.
+    vendor: Apache Software Foundation
+    url: https://mesos.apache.org/
+    types: [compute-platform, third-party]
+    platform: other
+    hosts: [system]
+  - key: chaossearch
+    name: ChaosSearch
+    description: Third-party search technology named among corporate applications and databases.
+    vendor: ChaosSearch
+    url: https://www.chaossearch.io/
+    types: [managed-service, data-platform, third-party]
+    platform: other
+    hosts: [database]

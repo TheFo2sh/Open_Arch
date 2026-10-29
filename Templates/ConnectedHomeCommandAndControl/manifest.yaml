@@ -1,0 +1,7 @@
+PackageId: OpenArch.ConnectedHomeCommandAndControl
+Name: Connected Home Command and Control on AWS
+Description: Alexa voice control and proactive notifications for connected home devices using AWS IoT, serverless authorization, and real-time device data processing.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, iot, connected-home, alexa, serverless]

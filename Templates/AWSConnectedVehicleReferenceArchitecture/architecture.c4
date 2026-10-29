@@ -1,0 +1,322 @@
+// AWS Connected Vehicle Reference Architecture, based on AWS's five diagrams:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/aws-connected-vehicle/aws-connected-vehicle.html
+// System and user elements are mapping slots. AWS does not specify the implementations
+// of the external systems or the vendor of the private cellular network.
+model {
+  vehicleOwner = user 'Vehicle owner' {
+    description 'Uses a companion application to view vehicle state and send remote commands.'
+  }
+  dataScientist = user 'Data scientist' {
+    description 'Uses vehicle data and analytics for model improvement and fleet insights.'
+  }
+  vehicleAnalytics = system 'Vehicle analytics and model-development workloads' {
+    description 'Project workloads that consume vehicle data for analysis and ADAS or AV model improvement.'
+  }
+
+  vehicle = system 'Connected vehicle and ECUs' {
+    description 'Vehicle sensors, telematics control unit, and ECUs that publish telemetry and receive commands.'
+    software = container 'Vehicle software and FleetWise Edge Agent' {
+      description 'Collects vehicle signals and exchanges MQTT messages; the IoT Device SDK and Encryption SDK are optional.'
+      metadata {
+        uses 'aws-iot-fleetwise-edge-agent, aws-iot-device-sdk, aws-encryption-sdk'
+      }
+    }
+  }
+  companionApp = system 'Vehicle companion applications' {
+    description 'Native and web applications for vehicle owners and other authorized users.'
+    client = container 'Companion application client' {
+      description 'Uses AWS Amplify to send AppSync mutations and receive state updates.'
+      metadata {
+        uses 'aws-amplify'
+      }
+    }
+  }
+  vehicleManagement = system 'Vehicle management platform' {
+    description 'External vehicle-management application consuming vehicle state and issuing authorized commands.'
+  }
+  fleetAggregator = system 'Fleet aggregator and third-party applications' {
+    description 'External consumers of connected-vehicle data and APIs; AWS does not identify their products.'
+  }
+  privateCellularNetwork = system 'Private cellular network' {
+    description 'Third-party private APN and vehicle SIM connectivity; provider and topology are not specified.'
+  }
+  certificateBroker = system 'Certificate broker' {
+    description 'Generic broker that authenticates a vehicle with its attestation certificate and obtains operational certificates.'
+  }
+  offlineRootCa = system 'Offline root certificate authority' {
+    description 'Customer or OEM root CA that signs the AWS Private CA subordinate CA certificate.'
+  }
+  securityOperationsCenter = system 'Vehicle security operations center' {
+    description 'External security operations center that can receive vehicle security findings.'
+  }
+  oem = system 'Vehicle manufacturer operations' {
+    description 'OEM systems that publish critical retained messages to vehicles.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      description 'Resolves device endpoints to an AWS Region based on location or latency.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    privateLink = platform 'AWS PrivateLink' {
+      description 'Connects the private cellular network and customer IoT endpoint to AWS IoT Core.'
+      metadata {
+        uses 'aws-private-link'
+      }
+    }
+    iotCore = platform 'AWS IoT Core' {
+      description 'Receives authenticated MQTT traffic and provides rules, request topics, lifecycle events, and device shadows.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    fleetWise = platform 'AWS IoT FleetWise' {
+      description 'Defines data campaigns for collecting selected vehicle signals and forwarding campaign data.'
+      metadata {
+        uses 'aws-iot-fleetwise'
+      }
+    }
+    deviceManagement = platform 'AWS IoT Device Management' {
+      description 'Provides OTA management through IoT jobs and fleet indexing for device state and connectivity.'
+      metadata {
+        uses 'aws-iot-device-management'
+      }
+    }
+    ecs = platform 'Amazon Elastic Container Service' {
+      description 'Scales client workers that decode, process, and persist vehicle telemetry.'
+      metadata {
+        uses 'amazon-ecs'
+      }
+      telemetryProcessing = system 'Vehicle telemetry processing' {
+        description 'Client workers that decode and process encoded vehicle messages.'
+        decoder = container 'Telemetry decoder and processor' {
+          description 'Processes IoT Core messages at peak demand; the source does not name its runtime or persistence destination.'
+        }
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs event-triggered registration, remote-command, decryption, and vehicle-state functions.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      backend = system 'Connected vehicle backend functions' {
+        description 'Template slot for the Lambda functions described by AWS; implementation boundaries are not specified.'
+        registration = container 'Vehicle registration and certificate function' {
+          description 'Validates first-use certificates, checks custom authorization, and creates the IoT thing, policy, and activation.'
+        }
+        remoteCommand = container 'Remote-command function' {
+          description 'Handles API requests, encrypts command payloads when configured, and publishes IoT requests.'
+        }
+        payloadDecryption = container 'Sensitive-payload decryption function' {
+          description 'Decrypts client-encrypted telemetry using AWS KMS and the AWS Encryption SDK.'
+          metadata {
+            uses 'aws-encryption-sdk'
+          }
+        }
+        vehicleState = container 'Vehicle-state and lifecycle functions' {
+          description 'Checks connection state, handles queued events and responses, and coordinates AppSync updates.'
+        }
+        certificateRotation = container 'Certificate-rotation functions' {
+          description 'Orchestrates CSR generation, certificate issuance and registration, delivery, and old-certificate revocation.'
+        }
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Receives authenticated remote commands for vehicles.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    appSync = platform 'AWS AppSync' {
+      description 'Receives companion-application mutations and subscriptions and fans out vehicle-state changes.'
+      metadata {
+        uses 'aws-appsync'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Persists command, vehicle-state, and certificate-policy data.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      commandData = database 'Remote command data' {
+        description 'Persists customer remote commands; the source does not specify a table schema.'
+      }
+      vehicleStateData = database 'Vehicle connected state and command data' {
+        description 'Persists connection state and companion-application command and response state.'
+      }
+      certificatePolicyData = database 'Vehicle registration policy data' {
+        description 'Supplies vehicle-specific policy information to the certificate registration function.'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Stores compressed-message descriptor files and AWS IoT FleetWise campaign data.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      descriptorFiles = database 'Telemetry descriptor files' {
+        description 'Descriptor files used by AWS IoT rules to interpret compressed payloads.'
+      }
+      campaignData = database 'FleetWise campaign data' {
+        description 'Optional campaign destination for the selected vehicle data described by AWS.'
+      }
+      companionAssets = database 'Companion application static assets' {
+        description 'Static web assets served through Amazon CloudFront.'
+      }
+    }
+    timestream = platform 'Amazon Timestream' {
+      description 'Optional destination for time- and event-based vehicle campaign data.'
+      metadata {
+        uses 'amazon-timestream'
+      }
+      campaignTimeseries = database 'Vehicle campaign time series' {
+        description 'Selected campaign data stored in the time-series destination named by AWS.'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Supports ADAS and AV model improvement and vehicle-design optimization.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Visualizes near-real-time FleetWise data for vehicle quality, safety, and autonomy.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    privateCa = platform 'AWS Private Certificate Authority' {
+      description 'Signs operational vehicle certificates and provides the OCSP responder.'
+      metadata {
+        uses 'aws-private-ca'
+      }
+    }
+    deviceDefender = platform 'AWS IoT Device Defender' {
+      description 'Audits certificates and monitors vehicle behavior for security findings.'
+      metadata {
+        uses 'aws-iot-device-defender'
+      }
+    }
+    securityHub = platform 'AWS Security Hub CSPM' {
+      description 'Aggregates and normalizes security findings from AWS services and partner products.'
+      metadata {
+        uses 'aws-security-hub'
+      }
+    }
+    eventBridge = platform 'Amazon EventBridge' {
+      description 'Routes security findings to certificate remediation and external security operations.'
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Orchestrates certificate rotation and remediation workflows.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    kms = platform 'AWS Key Management Service' {
+      description 'Manages keys for service-side encryption and optional client-side payload encryption.'
+      metadata {
+        uses 'aws-kms'
+      }
+    }
+    sqs = platform 'Amazon Simple Queue Service' {
+      description 'Delays disconnected-device checks and buffers vehicle responses in a FIFO queue.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      description 'Sends SMS notifications when commands are waiting for disconnected vehicles.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    cloudfront = platform 'Amazon CloudFront' {
+      description 'Distributes the companion applications static assets.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+  }
+
+  vehicleOwner -> companionApp 'Uses'
+  vehicle -> aws.iotCore 'Publishes telemetry and receives command topics over MQTT'
+  vehicle -> privateCellularNetwork 'Connects through its SIM and private APN'
+  privateCellularNetwork -> aws.privateLink 'Connects the private endpoint through'
+  aws.privateLink -> aws.iotCore 'Provides private connectivity to'
+  aws.route53 -> aws.iotCore 'Resolves a regional IoT endpoint for'
+  aws.iotCore -> aws.ecs.telemetryProcessing 'Routes encoded telemetry to workers on'
+  aws.s3.descriptorFiles -> aws.iotCore 'Provides the descriptor used by rules to decode compressed messages'
+  aws.iotCore -> aws.lambda.backend.registration 'Invokes for first-use certificate registration'
+  aws.fleetWise -> vehicle.software 'Defines data campaigns executed by the FleetWise Edge Agent in'
+  aws.fleetWise -> aws.iotCore 'Sends selected campaign payloads through'
+  aws.fleetWise -> aws.timestream.campaignTimeseries 'Can deliver time- and event-based campaign data to'
+  aws.fleetWise -> aws.s3.campaignData 'Can deliver selected campaign data to'
+  aws.fleetWise -> aws.quickSight 'Provides near-real-time data for quality, safety, and autonomy analysis'
+  vehicleAnalytics -> aws.sagemaker 'Improves ADAS and AV models with'
+  vehicleAnalytics -> aws.quickSight 'Reviews fleet analysis in'
+  dataScientist -> vehicleAnalytics 'Uses'
+  aws.deviceManagement -> vehicle 'Uses IoT jobs for OTA management and fleet indexing'
+  vehicle -> certificateBroker 'Requests an operational certificate using its attestation certificate'
+  offlineRootCa -> aws.privateCa 'Signs the subordinate CA certificate registered with'
+  certificateBroker -> aws.privateCa 'Requests signed operational certificates from'
+  certificateBroker -> vehicle 'Returns the signed operational certificate to'
+  aws.privateCa -> aws.iotCore 'Registers its subordinate CA with'
+  aws.lambda.backend.registration -> aws.dynamodb.certificatePolicyData 'Reads vehicle-specific policy information from'
+  aws.lambda.backend.registration -> aws.privateCa 'Checks certificate status through the OCSP responder'
+  aws.lambda.backend.registration -> aws.iotCore 'Creates the thing and policy and activates the certificate in'
+  aws.iotCore -> vehicle 'Accepts registered operational certificates and exchanges device messages with'
+  aws.deviceDefender -> aws.iotCore 'Monitors devices connected to'
+  aws.deviceDefender -> aws.securityHub 'Publishes certificate and behavior findings to'
+  aws.securityHub -> aws.eventBridge 'Sends normalized findings to'
+  aws.eventBridge -> aws.stepFunctions 'Starts certificate rotation and remediation workflows in'
+  aws.eventBridge -> securityOperationsCenter 'Can forward findings to'
+  aws.stepFunctions -> aws.lambda.backend.certificateRotation 'Orchestrates'
+  aws.lambda.backend.certificateRotation -> aws.iotCore 'Uses IoT jobs and topics to request new CSRs and register rotated certificates'
+  aws.lambda.backend.certificateRotation -> aws.privateCa 'Issues and revokes operational certificates through'
+  vehicle -> aws.kms 'Can use temporary IoT credentials and the Encryption SDK for client-side encryption'
+  aws.lambda.backend.payloadDecryption -> aws.kms 'Decrypts sensitive payload data keys with'
+  aws.lambda.backend.remoteCommand -> aws.kms 'Can encrypt sensitive command payloads with'
+  companionApp.client -> aws.apiGateway 'Submits authenticated remote commands through'
+  vehicleManagement -> aws.apiGateway 'Can submit authorized remote commands through'
+  aws.apiGateway -> aws.lambda.backend.remoteCommand 'Invokes the request function'
+  aws.lambda.backend.remoteCommand -> aws.dynamodb.commandData 'Persists remote-command data in'
+  aws.lambda.backend.remoteCommand -> aws.iotCore 'Publishes remote commands to request topics on'
+  aws.iotCore -> vehicle 'Delivers remote commands and retained OEM messages to'
+  oem -> aws.iotCore 'Publishes retained critical system messages to'
+  vehicle -> aws.iotCore 'Returns remote-command results on response topics'
+  vehicle -> aws.iotCore 'Publishes connection lifecycle events to'
+  aws.iotCore -> aws.sqs 'Queues lifecycle events for delayed offline checks in'
+  aws.sqs -> aws.lambda.backend.vehicleState 'Invokes after the delay so connectivity can be rechecked by'
+  aws.lambda.backend.vehicleState -> aws.appSync 'Persists connected state and command updates through'
+  aws.appSync -> aws.dynamodb.vehicleStateData 'Persists connection state and command data in'
+  companionApp.client -> aws.appSync 'Sends secure WebSocket mutations and receives subscriptions through'
+  vehicleManagement -> aws.appSync 'Receives vehicle-state updates through'
+  aws.appSync -> aws.lambda.backend.vehicleState 'Processes command subscriptions with'
+  aws.lambda.backend.vehicleState -> aws.iotCore 'Publishes connected-vehicle commands to'
+  aws.lambda.backend.vehicleState -> aws.sns 'Sends an SMS alert for a waiting command to a disconnected vehicle through'
+  aws.sns -> privateCellularNetwork 'Sends an SMS to the vehicle SIM through'
+  privateCellularNetwork -> vehicle 'Delivers the wake-up notification to'
+  vehicle -> aws.iotCore 'Publishes command responses on the response topic'
+  aws.iotCore -> aws.sqs 'Buffers command responses in the FIFO queue'
+  aws.sqs -> aws.lambda.backend.vehicleState 'Delivers batched command responses to'
+  aws.appSync -> companionApp 'Fans out vehicle-state updates to'
+  aws.appSync -> vehicleManagement 'Fans out vehicle-state updates to'
+  aws.s3.companionAssets -> aws.cloudfront 'Supplies static assets to'
+  aws.cloudfront -> companionApp 'Distributes static application assets to'
+  fleetAggregator -> aws.iotCore 'Uses downstream integrations for connected-vehicle use cases'
+}
+
+views {
+  view index {
+    title 'AWS Connected Vehicle Reference Architecture'
+    include *, aws.*, aws.ecs.*, aws.lambda.*, aws.dynamodb.*, aws.s3.*, aws.timestream.*
+  }
+}

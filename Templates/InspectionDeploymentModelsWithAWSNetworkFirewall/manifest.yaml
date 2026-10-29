@@ -1,0 +1,7 @@
+PackageId: OpenArch.InspectionDeploymentModelsWithAWSNetworkFirewall
+Name: Inspection Deployment Models with AWS Network Firewall
+Description: Six AWS Network Firewall inspection patterns spanning single and intra-VPC, east-west, north-south, combined, and multi-Region traffic.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, networking, security, traffic-inspection, network-firewall]

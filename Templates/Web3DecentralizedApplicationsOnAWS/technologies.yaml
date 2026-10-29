@@ -1,0 +1,71 @@
+# Technologies named in the AWS reference architecture, keyed by metadata { uses }.
+technologies:
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Distributes the static DApp from an S3 origin to edge locations and serves browser requests.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service (Amazon S3)
+    description: Object storage for static DApp files; the source page restricts access to the configured CloudFront origin access identity.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Receives API requests from the browser and routes them to the DApp backend.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the DApp backend that turns API path and method requests into signed Web3.js requests.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud (Amazon VPC)
+    description: Network boundary containing the Amazon Managed Blockchain Ethereum node in the diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-managed-blockchain
+    name: Amazon Managed Blockchain
+    description: Managed Ethereum node that receives and processes the DApp backend's Web3 requests.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/managed-blockchain/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: web3-js
+    name: Web3.js
+    description: JavaScript library used by the Lambda backend to create requests for the Ethereum node.
+    vendor: Web3.js
+    url: https://web3js.org/
+    types: [library]
+    packages: [{manager: npm, name: web3}]
+  - key: aws-signature-version-4
+    name: AWS Signature Version 4 (SigV4)
+    description: AWS request-signing protocol used by the HTTP request provider; the source does not specify the provider implementation.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/IAM/latest/UserGuide/reference_aws-signing.html
+    types: [library]
+  - key: ethereum-mainnet
+    name: Ethereum Blockchain Mainnet
+    description: External decentralized Ethereum network that propagates requests and returns blockchain responses; the source does not identify a node provider.
+    vendor: Ethereum
+    url: https://ethereum.org/en/what-is-ethereum/
+    types: [data-platform, third-party]
+    platform: other
+    hosts: []

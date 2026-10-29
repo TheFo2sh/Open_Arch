@@ -1,0 +1,405 @@
+// Deploying E2E 5G Network with AWS, based on AWS's page and linked diagram.
+// Systems and users are slots mapped onto a project's own architecture.
+model {
+  subscriber = user 'Mobile subscriber' {
+    description 'Uses voice and data services delivered over the 5G network.'
+  }
+  developer = user 'Developer community' {
+    description 'Builds or accesses applications in the communications service provider environment.'
+  }
+
+  radioSite = zone 'Radio access network sites' {
+    metadata {
+      platform 'other'
+    }
+
+    ran = system 'Radio Access Network (RAN)' {
+      description 'Cell-site radio workloads, including the Central Unit (CU) and Distributed Unit (DU); vendor and implementation are not specified.'
+      cu = container 'Central Unit (CU)' {
+        description 'Centralized RAN function shown at cell sites; software and vendor are not specified.'
+      }
+      du = container 'Distributed Unit (DU)' {
+        description 'Distributed RAN function shown at cell sites; software and vendor are not specified.'
+      }
+    }
+    snowcone = platform 'AWS Snowcone' {
+      description 'Edge device shown at a cell site as an alternative for DU/CU deployments.'
+      metadata {
+        uses 'aws-snowcone'
+      }
+    }
+    snowballEdge = platform 'AWS Snowball Edge' {
+      description 'Edge device AWS recommends for DU/CU deployments according to throughput requirements.'
+      metadata {
+        uses 'aws-snowball-edge'
+      }
+    }
+  }
+
+  operatorCore = zone 'Corporate data network' {
+    metadata {
+      platform 'other'
+    }
+
+    coreDataCenter = system 'Corporate data centers (core)' {
+      description 'On-premises 5G Core components connected to an AWS Region for control and management; products are not specified.'
+    }
+    dataNetwork = system 'Corporate data network' {
+      description 'Operator data network shown with AWS Wavelength and a connection to an AWS Region.'
+    }
+  }
+
+  outpostsSite = zone 'AWS Outposts site' {
+    metadata {
+      platform 'aws'
+    }
+
+    outposts = platform 'AWS Outposts' {
+      description 'On-premises AWS infrastructure hosting MEC and the high-throughput 5G Core user plane.'
+      metadata {
+        uses 'aws-outposts'
+      }
+
+      edgeVpc = platform 'Amazon Virtual Private Cloud' {
+        description 'Outposts extension of the regional VPC used by the user-plane workload.'
+        metadata {
+          uses 'amazon-vpc'
+        }
+
+        edgeEks = platform 'Amazon Elastic Kubernetes Service' {
+          description 'Runs the Outposts 5G Core user-plane microservices.'
+          metadata {
+            uses 'amazon-eks'
+          }
+
+          userPlane = system '5G Core user plane' {
+            description 'High-throughput User Plane Function (UPF) deployed on premises.'
+
+            upf = container 'User Plane Function (UPF)' {
+              description 'UPF microservices using multiple network interfaces and high-performance packet processing.'
+              metadata {
+                uses 'multus, dpdk, sriov'
+              }
+            }
+            telemetry = container 'User-plane telemetry and logging' {
+              description 'Prometheus, Grafana, and Fluentd are shown beside the Outposts workload.'
+              metadata {
+                uses 'prometheus, grafana, fluentd'
+              }
+            }
+          }
+        }
+      }
+
+      edgeEcs = platform 'Amazon Elastic Container Service' {
+        description 'Container orchestration option for MEC workloads on Outposts.'
+        metadata {
+          uses 'amazon-ecs'
+        }
+
+        mec = system 'Multi-access edge computing (MEC)' {
+          description 'Edge applications and capabilities; application workloads and data flows are not specified.'
+          applications = container 'MEC applications' {
+            description 'Applications hosted near the communications service provider network; products are not specified.'
+          }
+        }
+      }
+
+      ec2 = platform 'Amazon Elastic Compute Cloud' {
+        description 'EC2 worker-node compute shown for Outposts workloads.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+      }
+      autoScaling = platform 'Amazon EC2 Auto Scaling' {
+        description 'Auto Scaling group shown for the Outposts 5G Core worker nodes.'
+        metadata {
+          uses 'amazon-ec2-auto-scaling'
+        }
+      }
+      edgeS3 = platform 'Amazon Simple Storage Service' {
+        description 'Amazon S3 is listed among the services used to build MEC capabilities; the source does not specify its data.'
+        metadata {
+          uses 'amazon-s3'
+        }
+      }
+      edgeLambda = platform 'AWS Lambda' {
+        description 'AWS Lambda is listed among the services used to build MEC capabilities; no function is specified.'
+        metadata {
+          uses 'aws-lambda'
+        }
+      }
+      appMesh = platform 'AWS App Mesh' {
+        description 'Service mesh shown beside the Outposts 5G Core workload.'
+        metadata {
+          uses 'aws-app-mesh'
+        }
+      }
+      xray = platform 'AWS X-Ray' {
+        description 'Distributed tracing service shown beside the Outposts 5G Core workload.'
+        metadata {
+          uses 'aws-x-ray'
+        }
+      }
+    }
+  }
+
+  region = zone 'AWS Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Amazon Virtual Private Cloud' {
+      description 'Regional VPC hosting the 5G Core control plane.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      regionalEks = platform 'Amazon Elastic Kubernetes Service' {
+        description 'Regional EKS cluster for the 5G control-plane microservices.'
+        metadata {
+          uses 'amazon-eks'
+        }
+
+        controlPlane = system '5G Core control plane' {
+          description 'Regional 5G control-plane functions shown across three Availability Zones.'
+          functions = container '5G control-plane functions' {
+            description 'Control-plane microservices; the source names NSSF, AMF, and SMF.'
+            nssf = component 'Network Slice Selection Function (NSSF)' {
+              description 'Named 5G Core control-plane function; AWS does not specify its detailed responsibilities.'
+            }
+            amf = component 'Access and Mobility Management Function (AMF)' {
+              description 'Named 5G Core control-plane function; AWS does not specify its detailed responsibilities.'
+            }
+            smf = component 'Session Management Function (SMF)' {
+              description 'Named 5G Core control-plane function; AWS does not specify its detailed responsibilities.'
+            }
+          }
+        }
+      }
+    }
+
+    managementVpc = platform 'Amazon Virtual Private Cloud' {
+      description 'A VPC for the management and orchestration services connected through AWS Transit Gateway.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      management = system '5G management and orchestration' {
+        description 'Service design and creation, service orchestration, and service assurance workloads.'
+        design = container 'Service design and creation' {
+          description 'Service design workload shown in the regional management VPC; implementation is not specified.'
+        }
+        orchestration = container 'Service orchestration' {
+          description 'Service orchestration workload shown in the regional management VPC; implementation is not specified.'
+        }
+        assurance = container 'Service assurance' {
+          description 'Service assurance workload shown in the regional management VPC; implementation is not specified.'
+        }
+      }
+    }
+
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Provides connectivity between on-premises 5G Core components and the AWS Region.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    transitGateway = platform 'AWS Transit Gateway' {
+      description 'Connects VPCs that host 5G management and orchestration services.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    networkLoadBalancer = platform 'Network Load Balancer' {
+      description 'Optional regional entry point for expanding user-plane instances into an AWS Region.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+    regionalUpf = platform 'Amazon EC2 Auto Scaling' {
+      description 'Optional regional EC2 Auto Scaling group for expanded UPF instances.'
+      metadata {
+        uses 'amazon-ec2-auto-scaling'
+      }
+
+      expandedUserPlane = system 'Regional UPF expansion' {
+        description 'Optional regional user-plane instances; the reference does not specify their count or deployment details.'
+      }
+    }
+
+    ecs = platform 'Amazon Elastic Container Service' {
+      description 'Container service shown among regional management and orchestration options.'
+      metadata {
+        uses 'amazon-ecs'
+      }
+    }
+    fargate = platform 'AWS Fargate' {
+      description 'Serverless compute option shown among regional management and orchestration tools.'
+      metadata {
+        uses 'aws-fargate'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Serverless compute service shown among regional management and orchestration tools.'
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Object storage service shown in the regional management and orchestration tools.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Database service shown in the regional management and orchestration tools.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+    }
+    codePipeline = platform 'AWS CodePipeline' {
+      description 'CI/CD service shown in the regional management and orchestration tools.'
+      metadata {
+        uses 'aws-codepipeline'
+      }
+    }
+    cloudWatch = platform 'Amazon CloudWatch' {
+      description 'Monitoring service shown in the regional service set and management tools.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      description 'Notification service shown among regional management and orchestration tools.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Workflow service shown among regional management and orchestration tools.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    sqs = platform 'Amazon Simple Queue Service' {
+      description 'Queue service shown among regional management and orchestration tools.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    serviceCatalog = platform 'AWS Service Catalog' {
+      description 'Service catalog shown among regional management and orchestration tools.'
+      metadata {
+        uses 'aws-service-catalog'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Query service shown among regional management and orchestration tools.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker' {
+      description 'Machine learning service shown among regional management and orchestration tools.'
+      metadata {
+        uses 'amazon-sagemaker'
+      }
+    }
+
+    ec2 = platform 'Amazon Elastic Compute Cloud' {
+      description 'Regional compute service shown in the AWS service set.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+    }
+    ebs = platform 'Amazon Elastic Block Store' {
+      description 'Block storage service shown in the regional service set.'
+      metadata {
+        uses 'amazon-ebs'
+      }
+    }
+    elasticache = platform 'Amazon ElastiCache' {
+      description 'Managed in-memory data store shown in the regional service set.'
+      metadata {
+        uses 'amazon-elasticache'
+      }
+    }
+    aurora = platform 'Amazon Aurora' {
+      description 'Managed relational database service shown in the regional service set.'
+      metadata {
+        uses 'amazon-aurora'
+      }
+    }
+    efs = platform 'Amazon Elastic File System' {
+      description 'Shared file storage service shown in the regional service set.'
+      metadata {
+        uses 'amazon-efs'
+      }
+    }
+    cloudFormation = platform 'AWS CloudFormation' {
+      description 'Infrastructure management service shown in the regional service set.'
+      metadata {
+        uses 'aws-cloudformation'
+      }
+    }
+    cloudTrail = platform 'AWS CloudTrail' {
+      description 'AWS activity and audit service shown in the regional service set.'
+      metadata {
+        uses 'aws-cloudtrail'
+      }
+    }
+    codeDeploy = platform 'AWS CodeDeploy' {
+      description 'Deployment service shown in the regional service set.'
+      metadata {
+        uses 'aws-codedeploy'
+      }
+    }
+  }
+
+  wavelengthZone = zone 'AWS Wavelength Zone' {
+    metadata {
+      platform 'aws'
+    }
+
+    wavelength = platform 'AWS Wavelength' {
+      description 'Provides low-latency application access in a communications service provider environment.'
+      metadata {
+        uses 'aws-wavelength'
+      }
+
+      wavelengthVpc = platform 'Amazon Virtual Private Cloud' {
+        description 'VPC hosting applications for the developer community and subscribers.'
+        metadata {
+          uses 'amazon-vpc'
+        }
+
+        applications = system 'Developer community applications' {
+          description 'Low-latency applications for subscribers; application functions and vendors are not specified.'
+        }
+      }
+    }
+  }
+
+  subscriber -> radioSite.ran 'Uses the 5G radio network'
+  radioSite.ran -> radioSite.snowcone 'Can deploy DU/CU workloads on'
+  radioSite.ran -> radioSite.snowballEdge 'Can deploy DU/CU workloads on'
+  radioSite.ran -> outpostsSite.outposts.edgeVpc.edgeEks.userPlane 'Carries subscriber traffic to the user plane'
+  outpostsSite.outposts.edgeVpc.edgeEks.userPlane -> outpostsSite.outposts.autoScaling 'Uses EC2 worker nodes managed by'
+  operatorCore.coreDataCenter -> region.directConnect 'Connects to the AWS Region through'
+  operatorCore.dataNetwork -> region.directConnect 'Connects to the AWS Region through'
+  region.directConnect -> region.vpc 'Connects on-premises 5G Core components to'
+  region.controlPlane -> outpostsSite.outposts.edgeVpc.edgeEks.userPlane 'Controls user-plane functions'
+  region.transitGateway -> region.managementVpc 'Connects management and orchestration VPCs'
+  outpostsSite.outposts.edgeVpc.edgeEks.userPlane -> region.networkLoadBalancer 'Can expand user-plane instances through'
+  region.networkLoadBalancer -> region.regionalUpf.expandedUserPlane 'Routes traffic to optional regional UPF instances'
+  developer -> wavelengthZone.wavelength.wavelengthVpc.applications 'Builds and accesses applications in'
+  subscriber -> wavelengthZone.wavelength.wavelengthVpc.applications 'Uses low-latency applications in'
+}
+
+views {
+  view index {
+    title 'Deploying E2E 5G Network with AWS'
+    include *, radioSite.*, operatorCore.*, outpostsSite.*, outpostsSite.outposts.*, outpostsSite.outposts.edgeVpc.*, outpostsSite.outposts.edgeVpc.edgeEks.*, outpostsSite.outposts.edgeEcs.*, region.*, region.vpc.*, region.vpc.regionalEks.*, region.regionalUpf.*, region.managementVpc.*, wavelengthZone.*, wavelengthZone.wavelength.*, wavelengthZone.wavelength.wavelengthVpc.*
+  }
+}

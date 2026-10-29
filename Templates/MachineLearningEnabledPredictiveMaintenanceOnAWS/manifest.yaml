@@ -1,0 +1,7 @@
+PackageId: OpenArch.MachineLearningEnabledPredictiveMaintenanceOnAWS
+Name: Machine Learning Enabled Predictive Maintenance on AWS
+Description: Near-real-time condition-based maintenance for sucker rod pumping systems using AWS IoT Core, Amazon Timestream, Amazon Lookout for Equipment, and Amazon Managed Grafana.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, manufacturing, industrial-iot, predictive-maintenance, machine-learning]

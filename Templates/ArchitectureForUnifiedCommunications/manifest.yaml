@@ -1,0 +1,7 @@
+PackageId: OpenArch.ArchitectureForUnifiedCommunications
+Name: Architecture for Unified Communications
+Description: Avaya Aura Unified Communications on AWS with hybrid connectivity, EC2-hosted roles, WorkSpaces administration, and a unified directory.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, unified-communications, avaya, hybrid]

@@ -1,0 +1,175 @@
+technologies:
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: DNS service that directs users to the Moodle application through CloudFront.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Content delivery network that serves cached content from edge locations and forwards application requests to the load balancer.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-certificate-manager
+    name: AWS Certificate Manager
+    description: Manages TLS certificates used to secure CloudFront and/or the Application Load Balancer.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/certificate-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: application-load-balancer
+    name: Elastic Load Balancing (Application Load Balancer)
+    description: Distributes incoming application traffic across Moodle servers in multiple Availability Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/application-load-balancer/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-internet-gateway
+    name: Amazon VPC Internet Gateway
+    description: Provides the VPC internet entry and egress path used by the public-facing load balancer and NAT gateways.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-nat-gateway
+    name: AWS NAT Gateway
+    description: Allows resources in private application subnets to initiate outbound internet connections.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/features/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2-auto-scaling
+    name: Amazon EC2 Auto Scaling
+    description: Maintains and scales the Moodle application server group across Availability Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/autoscaling/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Virtual machine platform hosting Moodle application server instances.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-efs
+    name: Amazon Elastic File System
+    description: Shared file storage for Moodle data and other content, mounted by application servers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/efs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-elasticache-redis
+    name: Amazon ElastiCache for Redis
+    description: Managed cache service shown in the reference diagram for Moodle sessions and application caches.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticache/redis/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-elasticache-memcached
+    name: Amazon ElastiCache for Memcached
+    description: Alternative ElastiCache engine documented for Moodle session and application caching.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticache/memcached/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-aurora
+    name: Amazon Aurora
+    description: Managed relational database cluster for Moodle, with writer and reader nodes.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-codecommit
+    name: AWS CodeCommit
+    description: Private Git repository for Moodle application source and deployment configuration.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codecommit/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-codebuild
+    name: AWS CodeBuild
+    description: Builds and tests Moodle application artifacts for deployment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codebuild/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-codedeploy
+    name: AWS CodeDeploy
+    description: Coordinates application deployment to Moodle servers, including zero-downtime deployment options.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codedeploy/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-codepipeline
+    name: AWS CodePipeline
+    description: Orchestrates the source, build, and deployment phases for Moodle changes.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codepipeline/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-secrets-manager
+    name: AWS Secrets Manager
+    description: Protects Moodle application secrets and supports automatic secret rotation.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/secrets-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-systems-manager-parameter-store
+    name: AWS Systems Manager Parameter Store
+    description: Stores Moodle environment configuration parameters such as shared storage, database, and cache endpoints.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/systems-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: moodle
+    name: Moodle
+    description: Third-party learning management system deployed as the Moodle web application.
+    vendor: Moodle Pty Ltd
+    url: https://moodle.org/
+    types: [library]
+  - key: php
+    name: PHP
+    description: Runtime used by the Moodle web application.
+    vendor: The PHP Group
+    url: https://www.php.net/
+    types: [library]

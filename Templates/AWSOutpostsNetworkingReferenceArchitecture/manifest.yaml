@@ -1,0 +1,7 @@
+PackageId: OpenArch.AWSOutpostsNetworkingReferenceArchitecture
+Name: AWS Outposts Networking Reference Architecture
+Description: A reference blueprint for AWS Outposts Rack connectivity to customer LANs, the public internet or AWS Direct Connect, Amazon VPCs, and regional AWS services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, networking, hybrid-cloud, outposts]

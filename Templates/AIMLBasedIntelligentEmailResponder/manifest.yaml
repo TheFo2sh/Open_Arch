@@ -1,0 +1,7 @@
+PackageId: OpenArch.AIMLBasedIntelligentEmailResponder
+Name: AI/ML Based Intelligent Email Responder
+Description: An AWS email workflow that classifies incoming messages, recommends or sends responses, and routes uncertain cases to customer service agents.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, ai, machine-learning, email, customer-service]
