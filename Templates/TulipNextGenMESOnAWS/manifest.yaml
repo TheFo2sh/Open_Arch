@@ -1,0 +1,7 @@
+PackageId: OpenArch.TulipNextGenMESOnAWS
+Name: Tulip Next-Gen MES on AWS
+Description: End-to-end manufacturing data flows between Tulip's Frontline Operations Platform, factory-floor sources, and AWS ingestion, storage, analytics, machine learning, and API services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, manufacturing, mes, industrial-iot, tulip]

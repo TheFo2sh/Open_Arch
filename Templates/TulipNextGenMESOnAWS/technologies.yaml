@@ -1,0 +1,306 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: tulip-frontline-operations-platform
+    name: Tulip Frontline Operations Platform
+    description: Tulip's SaaS no-code environment for creating frontline operations applications.
+    vendor: Tulip Interfaces
+    url: https://tulip.co/
+    types: [third-party]
+  - key: tulip-edge-io
+    name: Tulip Edge IO
+    description: On-premises device that connects barcode scanners, cameras, printers, and scales to Tulip.
+    vendor: Tulip Interfaces
+    url: https://tulip.co/
+    types: [third-party]
+  - key: tulip-connector-host
+    name: Tulip Connector Host
+    description: On-premises host for Tulip connectors that connect to local devices and systems.
+    vendor: Tulip Interfaces
+    url: https://tulip.co/
+    types: [third-party]
+  - key: tulip-player
+    name: Tulip Player
+    description: Tulip application player used by factory operators.
+    vendor: Tulip Interfaces
+    url: https://tulip.co/
+    types: [third-party]
+  - key: tulip-connectors
+    name: Tulip Connectors
+    description: Interfaces used to ingest data into Tulip applications.
+    vendor: Tulip Interfaces
+    url: https://tulip.co/
+    types: [third-party]
+  - key: tulip-sql-connector
+    name: Tulip SQL Connector
+    description: Tulip connector shown integrating the platform with SQL databases.
+    vendor: Tulip Interfaces
+    url: https://tulip.co/
+    types: [third-party]
+  - key: tulip-rest-connector
+    name: Tulip REST Connector
+    description: Tulip connector shown integrating the platform with SaaS applications.
+    vendor: Tulip Interfaces
+    url: https://tulip.co/
+    types: [third-party]
+  - key: tulip-api
+    name: Tulip API
+    description: Tulip API shown alongside the platform's SQL and REST connectors.
+    vendor: Tulip Interfaces
+    url: https://tulip.co/
+    types: [third-party]
+  - key: aws-partner-solutions
+    name: AWS Partner solutions
+    description: Unspecified partner solutions that connect additional data sources and provide context.
+    url: https://aws.amazon.com/partners/
+    types: [third-party]
+  - key: opc-ua
+    name: OPC UA
+    description: Industrial connectivity protocol supported by AWS IoT Greengrass connectors.
+    vendor: OPC Foundation
+    url: https://opcfoundation.org/about/opc-technologies/opc-ua/
+    types: [third-party]
+  - key: modbus-tcp
+    name: Modbus TCP
+    description: Industrial connectivity protocol supported by AWS IoT Greengrass connectors.
+    url: https://www.modbus.org/
+    types: [third-party]
+  - key: modbus-rtu
+    name: Modbus RTU
+    description: Industrial connectivity protocol supported by AWS IoT Greengrass connectors.
+    url: https://www.modbus.org/
+    types: [third-party]
+  - key: ethernet-ip
+    name: EtherNet/IP
+    description: Industrial connectivity protocol supported by AWS IoT Greengrass connectors.
+    vendor: ODVA
+    url: https://www.odva.org/technology-standards/key-technologies/ethernet-ip/
+    types: [third-party]
+  - key: mtconnect
+    name: MTConnect
+    description: Industrial data connectivity standard shown for Tulip's on-premises connector host.
+    vendor: MTConnect Institute
+    url: https://www.mtconnect.org/
+    types: [third-party]
+  - key: aws-iot-greengrass
+    name: AWS IoT Greengrass
+    description: Edge runtime whose connectors provide industrial protocol connectivity.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/greengrass/v2/developerguide/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-iot-greengrass-connectors
+    name: AWS IoT Greengrass connectors
+    description: Edge connectors for OPC UA, Modbus TCP/RTU, and EtherNet/IP.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/greengrass/v2/developerguide/
+    types: [library]
+  - key: aws-datasync
+    name: AWS DataSync
+    description: Data transfer option for ingesting data from file shares.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/datasync/latest/userguide/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-kinesis
+    name: Amazon Kinesis
+    description: Streaming-data ingestion option selected according to the source.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/kinesis/latest/dev/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-msk
+    name: Amazon Managed Streaming for Apache Kafka
+    description: Streaming-data ingestion option selected according to the source.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/msk/latest/developerguide/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Streaming-data ingestion option for device and industrial data.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot/latest/developerguide/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-transfer-family
+    name: AWS Transfer Family
+    description: Streaming-data ingestion option shown as AWS SFTP in the architecture diagram.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/transfer/latest/userguide/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Key-value data store for workloads that use this access pattern.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage for workloads that use this access pattern.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/AmazonS3/latest/userguide/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-neptune
+    name: Amazon Neptune
+    description: Graph data store for workloads that use this access pattern.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/neptune/latest/userguide/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Data warehouse for workloads that use this access pattern.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/redshift/latest/dg/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-timestream
+    name: Amazon Timestream
+    description: Time-series data store for workloads that use this access pattern.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/timestream/latest/developerguide/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-iot-sitewise
+    name: AWS IoT SiteWise
+    description: Industrial equipment data store for workloads that use this access pattern.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot-sitewise/latest/userguide/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-rds
+    name: Amazon Relational Database Service
+    description: Relational database service shown in the architecture diagram; engine and use are unspecified.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-forecast
+    name: Amazon Forecast
+    description: AI and machine learning service for building, training, and deploying models.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/forecast/latest/dg/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: AI and machine learning service for building, training, and deploying models.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/sagemaker/latest/dg/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-lookout-for-vision
+    name: Amazon Lookout for Vision
+    description: Computer vision service exposed through REST methods in the API architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lookout-for-vision/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-emr
+    name: Amazon EMR
+    description: Analytics service for processing manufacturing data.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/emr/latest/ManagementGuide/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-glue
+    name: AWS Glue
+    description: Analytics service for processing manufacturing data.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/glue/latest/dg/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Analytics service for processing and querying manufacturing data.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/athena/latest/ug/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-data-firehose
+    name: Amazon Data Firehose
+    description: Data processing and delivery service in the analytics choices.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/firehose/latest/dev/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-kinesis-data-analytics
+    name: Amazon Kinesis Data Analytics
+    description: Analytics service shown in the AWS diagram; the page does not specify its workload.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-analytics/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-opensearch-service
+    name: Amazon OpenSearch Service
+    description: Search and analytics service for data processing.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/opensearch-service/latest/developerguide/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-waf
+    name: AWS WAF
+    description: Web application firewall that provides protection for the API path.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/waf/latest/developerguide/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: REST API service for methods that expose AWS data and AI capabilities.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/apigateway/latest/developerguide/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Function service shown in the APIs section of the AWS diagram; its function is not described.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/lambda/latest/dg/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-textract
+    name: Amazon Textract
+    description: Document analysis capability exposed through API Gateway REST methods.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/textract/latest/dg/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-rekognition
+    name: Amazon Rekognition
+    description: Image and video analysis capability exposed through API Gateway REST methods.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/rekognition/latest/dg/
+    types: [managed-service]
+    platform: aws
+    hosts: []
