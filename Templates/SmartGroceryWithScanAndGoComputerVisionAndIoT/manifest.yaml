@@ -1,0 +1,7 @@
+PackageId: OpenArch.SmartGroceryWithScanAndGoComputerVisionAndIoT
+Name: Smart Grocery with Scan-and-Go, Computer Vision, and IoT
+Description: Smart grocery architecture combining Scan-and-Go, in-store IoT and computer vision, serverless order workflows, streaming data, and customer and operations notifications.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, retail, grocery, iot, computer-vision, scan-and-go]

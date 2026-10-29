@@ -1,0 +1,194 @@
+// Smart Grocery with Scan-and-Go, Computer Vision, and IoT.
+// Source: https://docs.aws.amazon.com/reference-architecture-diagrams/latest/smart-grocery-scan-and-go/smart-grocery-scan-and-go.html
+model {
+  shopper = user 'Shopper' {
+    description 'Uses Scan-and-Go, traditional point of sale, or self-checkout.'
+  }
+  associate = user 'Store associate' {
+    description 'Uses the order-picking application to fulfill customer orders.'
+  }
+  operationsUser = user 'Store operations user' {
+    description 'Uses the real-time dashboard to monitor store operations.'
+  }
+
+  scanAndGo = system 'Scan-and-Go application' {
+    description 'Customer-facing digital ordering application; its implementation is not specified by the source.'
+  }
+  pickingApp = system 'Associate order-picking application' {
+    description 'Associate-facing application for picking and fulfillment workflows.'
+  }
+  traditionalPos = system 'Traditional point-of-sale' {
+    description 'In-store conventional POS channel. The source does not specify its implementation or integration path.'
+  }
+  selfCheckout = system 'Self-checkout' {
+    description 'In-store self-checkout channel. The source does not specify its implementation or integration path.'
+  }
+  operationsDashboard = system 'Store operations dashboard' {
+    description 'Real-time dashboard for store operations, supported by AWS AppSync.'
+  }
+  storeDevices = system 'In-store sensors and smart devices' {
+    description 'Sensors and smart retail devices, including freezer, storage, shelf, traffic, and queue monitoring.'
+  }
+  ipCameras = system 'In-store IP cameras' {
+    description 'Existing IP-camera feeds used for computer vision, picking, and store intelligence.'
+  }
+  paymentGateway = system 'Third-party payment gateway' {
+    description 'External payment provider shown in the source diagram; provider and integration details are unspecified.'
+    technology 'Payment gateway'
+  }
+  thirdPartyIoT = system 'Third-party IoT event provider' {
+    description 'External IoT event source shown in the source diagram; provider and event contract are unspecified.'
+    technology 'Third-party IoT event provider'
+  }
+
+  inStore = zone 'In-store' {
+    metadata {
+      platform 'other'
+    }
+
+    greengrass = platform 'AWS IoT Greengrass' {
+      description 'Manages connections and aggregates MQTT data from in-store sensors and smart devices.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+    }
+    panorama = platform 'AWS Panorama appliance' {
+      description 'Applies machine-learning models to existing IP-camera feeds for store intelligence and picking workflows.'
+      metadata {
+        uses 'aws-panorama'
+      }
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      description 'Cloud IoT services connect store devices and route their events.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Integration endpoint for customer ordering and associate picking applications.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    eventBridge = platform 'Amazon EventBridge' {
+      description 'Integrates events from smart grocery services and external providers.'
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    appSync = platform 'AWS AppSync' {
+      description 'Integration service and real-time data layer for the operations dashboard.'
+      metadata {
+        uses 'aws-appsync'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs serverless smart grocery business logic.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      groceryApplication = system 'Smart grocery application' {
+        description 'Order-management business logic coordinating customer, transaction, and inventory workflows.'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Orchestrates serverless order-management workflows.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    kinesisDataStreams = platform 'Amazon Kinesis Data Streams' {
+      description 'Streams data from in-store smart devices and IoT sources.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    dataFirehose = platform 'Amazon Kinesis Data Firehose' {
+      description 'Delivers streaming device and IoT data to the data lake.'
+      metadata {
+        uses 'amazon-kinesis-data-firehose'
+      }
+    }
+    kinesisVideo = platform 'Amazon Kinesis Video Streams' {
+      description 'Optimizes IP-camera video feeds for computer-vision processing.'
+      metadata {
+        uses 'amazon-kinesis-video-streams'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Stores events and transactional state and connects to smart grocery services.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      transactionalState = database 'Events and transactional state' {
+        description 'Event and transactional state used by smart grocery services.'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Scalable data lake for store and digital data.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Smart grocery data lake' {
+        description 'In-store and digital transactions, sensor data, and telemetry.'
+      }
+    }
+    pinpoint = platform 'Amazon Pinpoint' {
+      description 'Sends targeted, location-based messages across customer channels.'
+      metadata {
+        uses 'amazon-pinpoint'
+      }
+    }
+    locationService = platform 'Amazon Location Service' {
+      description 'Location and geofence service shown for curbside pickup in the source diagram.'
+      metadata {
+        uses 'amazon-location-service'
+      }
+    }
+  }
+
+  shopper -> scanAndGo 'Places and tracks orders with'
+  shopper -> traditionalPos 'Checks out at'
+  shopper -> selfCheckout 'Checks out at'
+  associate -> pickingApp 'Picks and fulfills orders with'
+  operationsUser -> operationsDashboard 'Monitors store operations with'
+
+  scanAndGo -> aws.apiGateway 'Submits digital ordering requests through'
+  pickingApp -> aws.apiGateway 'Submits picking workflow requests through'
+  aws.apiGateway -> aws.lambda 'Routes requests to business logic on'
+  aws.appSync -> aws.lambda 'Connects application data to'
+  aws.eventBridge -> aws.lambda 'Routes business events to'
+  aws.lambda -> aws.stepFunctions 'Coordinates order workflows with'
+
+  storeDevices -> inStore.greengrass 'Sends sensor and device data through MQTT to'
+  inStore.greengrass -> aws.iotCore 'Connects to cloud IoT services'
+  inStore.greengrass -> aws.kinesisDataStreams 'Streams device and IoT data to'
+  thirdPartyIoT -> aws.eventBridge 'Integrates IoT events through'
+  ipCameras -> inStore.panorama 'Supplies existing camera feeds to'
+  ipCameras -> aws.kinesisVideo 'Streams video feeds to'
+  inStore.panorama -> aws.lambda 'Provides computer-vision results to'
+
+  aws.kinesisDataStreams -> aws.dataFirehose 'Delivers streaming data through'
+  aws.dataFirehose -> aws.s3.dataLake 'Stores sensor data and telemetry in'
+  aws.lambda -> aws.dynamodb.transactionalState 'Reads and writes events and transactional state'
+  aws.lambda -> aws.s3.dataLake 'Stores digital and transaction data in'
+  aws.dynamodb -> aws.appSync 'Provides event and transaction updates to'
+  aws.appSync -> operationsDashboard 'Supports real-time operations data for'
+  aws.lambda -> aws.pinpoint 'Requests targeted customer messaging from'
+  aws.lambda -> aws.locationService 'Uses location and geofence capabilities for curbside pickup'
+  paymentGateway -> aws.apiGateway 'Integrates with the application layer through'
+}
+
+views {
+  view index {
+    title 'Smart Grocery with Scan-and-Go, Computer Vision, and IoT'
+    include *, inStore.*, aws.*
+  }
+}
