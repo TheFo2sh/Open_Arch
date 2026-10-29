@@ -145,6 +145,7 @@ model {
   imageFiles -> aws.storageGateway 'Synchronizes image files through'
   aws.storageGateway -> aws.s3.synchronizedImages 'Stores synchronized files in'
   cameras -> aws.panorama 'Provides IP-camera imagery to'
+  aws.panorama -> aws.s3.synchronizedImages 'Transfers camera images to'
 
   manufacturingApps -> aws.kinesis.manufacturingStream 'Streams manufacturing data to'
   aws.kinesis.manufacturingStream -> aws.s3.dataLake 'Loads streamed data into'
