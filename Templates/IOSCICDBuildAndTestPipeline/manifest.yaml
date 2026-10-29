@@ -1,0 +1,7 @@
+PackageId: OpenArch.IOSCICDBuildAndTestPipeline
+Name: iOS CI/CD Build and Test Pipeline
+Description: Automates iOS application builds on Amazon EC2 Mac instances and tests build artifacts with AWS Device Farm.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, ios, ci-cd, build, testing]

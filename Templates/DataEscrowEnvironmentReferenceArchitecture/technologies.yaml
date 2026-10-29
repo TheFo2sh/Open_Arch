@@ -1,0 +1,115 @@
+technologies:
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage for encrypted advertiser data, transformed data, local advertiser inputs, and final joined datasets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-emr
+    name: Amazon EMR
+    description: Managed data-processing service shown as an option for publisher and advertiser transformations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/emr/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-glue
+    name: AWS Glue
+    description: Managed data integration service shown as an option for publisher and advertiser transformations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-glue-data-catalog
+    name: AWS Glue Data Catalog
+    description: Metadata catalog used to catalog and govern the data escrow S3 buckets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/features/data-catalog/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-lake-formation
+    name: AWS Lake Formation
+    description: Data lake governance service shown with the local and central governance systems.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lake-formation/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-cloudtrail
+    name: AWS CloudTrail
+    description: Audit and governance service used by the local governance and monitoring system.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudtrail/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Monitoring service used by the local governance and monitoring system.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-mwaa
+    name: Amazon Managed Workflows for Apache Airflow
+    description: Managed Airflow service that creates DAGs for advertiser data transformations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/managed-workflows-for-apache-airflow/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: apache-airflow
+    name: Apache Airflow
+    description: Open-source workflow technology used by Amazon Managed Workflows for Apache Airflow.
+    vendor: Apache Software Foundation
+    url: https://airflow.apache.org/
+    types: [library]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Data warehouse destination for exporting final Amazon S3 datasets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-redshift-spectrum
+    name: Amazon Redshift Spectrum
+    description: Redshift capability named by the source text for querying Amazon S3 data directly.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/features/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Query service labeled in the diagram for accessing the final Amazon S3 datasets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Business intelligence service used by analysts to access dashboards and insights.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]

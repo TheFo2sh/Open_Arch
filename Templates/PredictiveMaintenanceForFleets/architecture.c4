@@ -1,0 +1,105 @@
+// Predictive Maintenance for Fleets, after the AWS reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/predictive-maintenance-for-fleets/predictive-maintenance-for-fleets.html
+// Read together with the repository's specification.c4. Systems and users are slots.
+model {
+  fleetManager = user 'Driver and fleet manager' {
+    description 'Receives a warning so a controlled maintenance event can be scheduled before a predicted battery failure.'
+  }
+
+  fleetManagement = system 'Fleet Management system' {
+    description 'External source of vehicle data and historical sensor logs; the source does not name a product or API.'
+  }
+  vehicles = system 'Connected vehicles' {
+    description 'Send sensor telemetry and receive failure warnings; the vehicle hardware and connectivity provider are unspecified.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Stores the fleet export and historical sensor logs, and archives telemetry delivered by Firehose.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      historicalData = database 'Historical vehicle data and sensor logs'
+    }
+
+    sageMaker = platform 'Amazon SageMaker AI' {
+      description 'The source shows model training, a notebook instance, and a deployed battery-failure prediction model.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      description 'Receives connected-vehicle telemetry and routes it to Lambda and Firehose.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+
+    firehose = platform 'Amazon Data Firehose' {
+      description 'The source diagram labels this Amazon Kinesis Data Firehose; it delivers telemetry to S3.'
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the prediction function on live sensor logs using the trained model.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      predictionFunction = system 'Battery prediction function' {
+        description 'Analyzes vehicle telemetry and generates battery-failure predictions.'
+      }
+    }
+
+    aurora = platform 'Amazon Aurora' {
+      description 'Prediction storage; the source does not specify an Aurora database engine.'
+      metadata {
+        uses 'amazon-aurora'
+      }
+      predictions = database 'Vehicle battery predictions' {
+        description 'Completed predictions retained for record-keeping and future model improvements.'
+      }
+    }
+
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Dashboard for viewing stored battery-failure predictions.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+
+    sns = platform 'Amazon Simple Notification Service' {
+      description 'Sends real-time failure warnings through connected vehicles.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+  }
+
+  fleetManagement -> aws.s3.historicalData 'Exports vehicle data and historical sensor logs to'
+  aws.s3.historicalData -> aws.sageMaker 'Supplies historical data for model training'
+  aws.sageMaker -> aws.lambda.predictionFunction 'Provides the deployed model for inference'
+  vehicles -> aws.iotCore 'Sends live sensor telemetry to'
+  vehicles -> aws.lambda.predictionFunction 'Sends sensor logs through the unspecified HTTP interface to'
+  aws.iotCore -> aws.lambda.predictionFunction 'Routes telemetry messages to'
+  aws.iotCore -> aws.firehose 'Streams telemetry to'
+  aws.firehose -> aws.s3.historicalData 'Archives telemetry in'
+  aws.lambda.predictionFunction -> aws.aurora.predictions 'Stores completed predictions in'
+  aws.aurora.predictions -> aws.quickSight 'Supplies data for the dashboard'
+  aws.lambda.predictionFunction -> aws.sns 'Publishes real-time failure warnings through'
+  aws.sns -> vehicles 'Sends warnings to'
+  fleetManager -> vehicles 'Receives vehicle warnings through'
+}
+
+views {
+  view index {
+    title 'Predictive Maintenance for Fleets'
+    include *, aws.*
+  }
+}

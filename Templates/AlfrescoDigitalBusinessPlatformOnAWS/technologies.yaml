@@ -1,0 +1,331 @@
+# The technologies used by the blueprint, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Private network boundary containing the architecture's application and data tiers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2-auto-scaling
+    name: Amazon EC2 Auto Scaling
+    description: Auto Scaling groups that keep Alfresco application tiers available across two Availability Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/autoscaling/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Virtual machine compute shown for the Alfresco application and Solr search deployment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system, database]
+  - key: amazon-eks
+    name: Amazon Elastic Kubernetes Service
+    description: Kubernetes deployment option shown in the diagram's deployment-model legend; the diagram does not select it over EC2.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eks/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Application Load Balancers distribute requests to the highly available Alfresco application tiers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-internet-gateway
+    name: Internet Gateway
+    description: Connects the VPC to the internet as shown in the network diagram.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-nat-gateway
+    name: NAT Gateway
+    description: Provides outbound internet access from the private subnets shown in the diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Extended Alfresco content store reached through the Alfresco Content Connector.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-s3-glacier
+    name: Amazon S3 Glacier
+    description: Optional extended content store reached through the Alfresco Content Connector.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/storage-classes/glacier/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-efs
+    name: Amazon Elastic File System
+    description: Elastic file storage with Intelligent-Tiering shown as an option for shared Alfresco content.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/efs/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-mq
+    name: Amazon MQ
+    description: Active and standby message brokers shown alongside the Alfresco application tiers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/amazon-mq/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-rds
+    name: Amazon Relational Database Service
+    description: Active and standby relational database option for Alfresco Process Services; supported engines include MySQL, Oracle, PostgreSQL, and Microsoft SQL Server.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-aurora
+    name: Amazon Aurora
+    description: Relational database option supported by Alfresco Process Services; the source does not specify an engine.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-ebs
+    name: Amazon Elastic Block Store
+    description: Block storage shown for the EC2-hosted Solr search deployment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ebs/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-opensearch-service
+    name: Amazon OpenSearch Service
+    description: Alternative search backend for Alfresco Search Enterprise.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/opensearch-service/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-kendra
+    name: Amazon Kendra
+    description: Intelligent enterprise search used with the Alfresco data source connector.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kendra/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-textract
+    name: Amazon Textract
+    description: Document text and data extraction integrated with Alfresco Intelligence Services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/textract/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-rekognition
+    name: Amazon Rekognition
+    description: Image analysis integrated with Alfresco Intelligence Services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rekognition/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-comprehend
+    name: Amazon Comprehend
+    description: Text analysis integrated with Alfresco Intelligence Services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/comprehend/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iam
+    name: AWS Identity and Access Management
+    description: Identity and access service shown as a cross-cutting AWS capability.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iam/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-kms
+    name: AWS Key Management Service
+    description: Key management service shown as a cross-cutting AWS capability.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kms/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-certificate-manager
+    name: AWS Certificate Manager
+    description: Certificate service shown as a cross-cutting AWS capability.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/certificate-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Monitoring service shown as a cross-cutting AWS capability.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-cloudtrail
+    name: AWS CloudTrail
+    description: Audit service shown as a cross-cutting AWS capability.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudtrail/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-cloudformation
+    name: AWS CloudFormation
+    description: Infrastructure provisioning service shown in the diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudformation/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-directory-service
+    name: AWS Directory Service
+    description: Directory service shown as a cross-cutting AWS capability.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directoryservice/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: alfresco-content-services
+    name: Alfresco Content Services
+    description: Enterprise content management with information governance.
+    vendor: Hyland
+    url: https://www.alfresco.com/products/content-services
+    types: [library]
+  - key: alfresco-content-connector
+    name: Alfresco Content Connector
+    description: Connects Alfresco to extended content stores such as Amazon S3 and Amazon S3 Glacier.
+    vendor: Hyland
+    url: https://www.alfresco.com/
+    types: [library]
+  - key: alfresco-content-center
+    name: Alfresco Content Center
+    description: Content management user interface shown with administrative access.
+    vendor: Hyland
+    url: https://www.alfresco.com/
+    types: [library]
+  - key: alfresco-digital-workspace
+    name: Alfresco Digital Workspace
+    description: Browser-based Alfresco application for knowledge workers.
+    vendor: Hyland
+    url: https://www.alfresco.com/
+    types: [library]
+  - key: alfresco-identity-services
+    name: Alfresco Identity Services
+    description: Identity services shown as part of the application tier.
+    vendor: Hyland
+    url: https://www.alfresco.com/
+    types: [library]
+  - key: alfresco-microsoft-365-connector
+    name: Alfresco Microsoft 365 Connector
+    description: Connector shown for Microsoft 365 integrations.
+    vendor: Hyland
+    url: https://www.alfresco.com/
+    types: [library]
+  - key: alfresco-business-connectors
+    name: Alfresco Business Connectors
+    description: Business connectors for external productivity and enterprise applications.
+    vendor: Hyland
+    url: https://www.alfresco.com/
+    types: [library]
+  - key: alfresco-intelligence-services
+    name: Alfresco Intelligence Services
+    description: Add-on to the Alfresco Transform engine for machine-learning based metadata and image/text analysis.
+    vendor: Hyland
+    url: https://www.alfresco.com/
+    types: [library]
+  - key: alfresco-transformation-engine
+    name: Alfresco Transform Engine
+    description: Document transformation engine extended by Alfresco Intelligence Services.
+    vendor: Hyland
+    url: https://www.alfresco.com/
+    types: [library]
+  - key: alfresco-governance-services
+    name: Alfresco Governance Services
+    description: Information governance capabilities for Alfresco Content Services.
+    vendor: Hyland
+    url: https://www.alfresco.com/products/governance
+    types: [library]
+  - key: alfresco-search-and-insight-engine
+    name: Alfresco Search and Insight Engine
+    description: Search engine based on Solr, shown on Amazon EC2 and Amazon EBS.
+    vendor: Hyland
+    url: https://www.alfresco.com/
+    types: [library]
+  - key: alfresco-search-enterprise
+    name: Alfresco Search Enterprise
+    description: Alternative Alfresco search offering that uses Amazon OpenSearch Service.
+    vendor: Hyland
+    url: https://www.alfresco.com/
+    types: [library]
+  - key: alfresco-process-services
+    name: Alfresco Process Services
+    description: Business process management for creating, publishing, and using business operations.
+    vendor: Hyland
+    url: https://www.alfresco.com/products/process-services
+    types: [library]
+  - key: alfresco-kendra-connector
+    name: Alfresco Amazon Kendra data source connector
+    description: Alfresco data source connector for Amazon Kendra enterprise search.
+    vendor: Hyland
+    url: https://www.alfresco.com/
+    types: [library]
+  - key: apache-solr
+    name: Apache Solr
+    description: Search engine used by Alfresco Search and Insight Engine.
+    vendor: Apache Software Foundation
+    url: https://solr.apache.org/
+    types: [library]
+  - key: microsoft-365
+    name: Microsoft 365
+    description: External business application suite integrated through Alfresco connectors, including Microsoft Teams, Outlook, and Office.
+    vendor: Microsoft
+    url: https://www.microsoft.com/microsoft-365
+    types: [third-party]
+  - key: google-docs
+    name: Google Docs
+    description: External document application integrated through Alfresco business connectors.
+    vendor: Google
+    url: https://docs.google.com/
+    types: [third-party]
+  - key: salesforce
+    name: Salesforce
+    description: External CRM application integrated through Alfresco business connectors.
+    vendor: Salesforce
+    url: https://www.salesforce.com/
+    types: [third-party]
+  - key: sap
+    name: SAP
+    description: External business application integrated through Alfresco business connectors.
+    vendor: SAP
+    url: https://www.sap.com/
+    types: [third-party]
+  - key: sap-cloud
+    name: SAP Cloud
+    description: External SAP cloud service integrated through Alfresco business connectors.
+    vendor: SAP
+    url: https://www.sap.com/
+    types: [third-party]

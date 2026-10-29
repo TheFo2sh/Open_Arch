@@ -1,0 +1,198 @@
+// Data Mesh Reference Architecture with Amazon DataZone, after AWS's
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/data-mesh-datazone/data-mesh-datazone.html.
+// Systems and users are slots; the account zones show the documented roles, not deployment detail.
+model {
+  dataProducers = user 'Data producers' {
+    description 'Publish data products and review consumer subscription requests.'
+  }
+  dataConsumers = user 'Data consumers' {
+    description 'Discover assets, request subscriptions, and use approved data.'
+  }
+
+  externalSources = system 'Enterprise and third-party data sources' {
+    description 'Source systems such as databases, file shares, edge devices, logs, social networks, SaaS applications, and streaming media. Specific providers are not named.'
+  }
+
+  central = zone 'Central governance AWS account' {
+    metadata {
+      platform 'aws'
+    }
+
+    datazone = platform 'Amazon DataZone' {
+      description 'Central domain for data catalog, portal, projects, and subscription workflows.'
+      metadata {
+        uses 'amazon-datazone'
+      }
+
+      portal = system 'Amazon DataZone data portal' {
+        description 'Portal where users discover assets and request subscriptions.'
+      }
+      assetCatalog = database 'DataZone asset catalog' {
+        description 'Catalog entries for producer assets, with business, technical, and data-quality metadata.'
+      }
+    }
+
+    iam = platform 'AWS Identity and Access Management' {
+      metadata {
+        uses 'aws-iam'
+      }
+    }
+    identityCenter = platform 'AWS IAM Identity Center' {
+      metadata {
+        uses 'aws-iam-identity-center'
+      }
+    }
+  }
+
+  producer = zone 'Producer AWS account(s)' {
+    metadata {
+      platform 'aws'
+    }
+
+    appflow = platform 'Amazon AppFlow' {
+      metadata {
+        uses 'amazon-appflow'
+      }
+    }
+    dms = platform 'AWS Database Migration Service' {
+      metadata {
+        uses 'aws-dms'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis' {
+      metadata {
+        uses 'amazon-kinesis'
+      }
+    }
+    iotCore = platform 'AWS IoT Core' {
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    msk = platform 'Amazon Managed Streaming for Apache Kafka' {
+      metadata {
+        uses 'amazon-msk'
+      }
+    }
+
+    glue = platform 'AWS Glue' {
+      description 'Transforms raw data into producer data products.'
+      metadata {
+        uses 'aws-glue'
+      }
+      dataPreparation = system 'Producer data preparation' {
+        description 'Data transformation jobs; implementation details are not specified by the reference.'
+      }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      technicalCatalog = database 'Producer technical metadata catalog'
+    }
+    dataQuality = platform 'AWS Glue Data Quality' {
+      metadata {
+        uses 'aws-glue-data-quality'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      lake = database 'Amazon S3 data assets' {
+        description 'Producer object data registered as assets in the DataZone catalog.'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      metadata {
+        uses 'amazon-redshift'
+      }
+      warehouse = database 'Producer Redshift data assets'
+    }
+    rds = platform 'Amazon RDS' {
+      metadata {
+        uses 'amazon-rds'
+      }
+      relationalData = database 'Producer RDS data assets'
+    }
+  }
+
+  consumer = zone 'Consumer AWS account(s)' {
+    metadata {
+      platform 'aws'
+    }
+
+    analytics = system 'Consumer analytics and reporting' {
+      description 'Consumer workloads use subscribed data for analytics and reporting.'
+    }
+    sageMaker = platform 'Amazon SageMaker AI' {
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+      modelDevelopment = system 'AI/ML model development' {
+        description 'Consumer model-development workload using subscribed data.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      metadata {
+        uses 'amazon-redshift'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+  }
+
+  dataProducers -> central.datazone.portal 'Publishes and governs data products through'
+  dataConsumers -> central.datazone.portal 'Discovers assets and requests subscriptions through'
+  dataConsumers -> consumer.analytics 'Uses approved data for analytics and reporting'
+  dataConsumers -> consumer.sageMaker.modelDevelopment 'Uses approved data for AI/ML development'
+  central.iam -> central.datazone.portal 'Supports access with IAM credentials'
+  central.identityCenter -> central.datazone.portal 'Provides single sign-on'
+  central.datazone.portal -> central.datazone.assetCatalog 'Searches and displays assets from'
+
+  externalSources -> producer.appflow 'Supplies SaaS application data to'
+  externalSources -> producer.dms 'Supplies database data to'
+  externalSources -> producer.kinesis 'Supplies streaming data to'
+  externalSources -> producer.iotCore 'Supplies edge-device data to'
+  externalSources -> producer.msk 'Supplies streaming data to'
+
+  producer.appflow -> producer.glue 'Ingests raw data for transformation by'
+  producer.dms -> producer.glue 'Ingests raw data for transformation by'
+  producer.kinesis -> producer.glue 'Ingests raw data for transformation by'
+  producer.iotCore -> producer.glue 'Ingests raw data for transformation by'
+  producer.msk -> producer.glue 'Ingests raw data for transformation by'
+  producer.glue -> producer.s3.lake 'Transforms and stores data in'
+  producer.glue -> producer.redshift.warehouse 'Transforms and stores data in'
+  producer.glue -> producer.rds.relationalData 'Transforms and stores data in'
+  producer.glue -> producer.glueCatalog.technicalCatalog 'Stores technical metadata in'
+  producer.glue -> producer.dataQuality 'Measures data quality with'
+
+  producer.s3.lake -> central.datazone.assetCatalog 'Registers as an asset through DataZone data source jobs'
+  producer.redshift.warehouse -> central.datazone.assetCatalog 'Registers as an asset through DataZone data source jobs'
+  producer.rds.relationalData -> central.datazone.assetCatalog 'Registers as an asset through DataZone data source jobs'
+  producer.glueCatalog.technicalCatalog -> central.datazone.assetCatalog 'Supplies producer metadata for cataloging'
+  externalSources -> central.datazone.assetCatalog 'Can be registered as third-party data assets'
+  producer.dataQuality -> central.datazone.assetCatalog 'Provides data-quality information for assets'
+
+  central.datazone.assetCatalog -> consumer.analytics 'Enables approved asset subscriptions for'
+  central.datazone.assetCatalog -> consumer.sageMaker.modelDevelopment 'Enables approved asset subscriptions for'
+  central.datazone.assetCatalog -> consumer.athena 'Enables approved asset subscriptions for'
+  central.datazone.assetCatalog -> consumer.redshift 'Enables approved asset subscriptions for'
+  central.datazone.assetCatalog -> consumer.quickSight 'Enables approved asset subscriptions for'
+}
+
+views {
+  view index {
+    title 'Data Mesh Reference Architecture with Amazon DataZone'
+    include *, central.*, producer.*, consumer.*
+  }
+}

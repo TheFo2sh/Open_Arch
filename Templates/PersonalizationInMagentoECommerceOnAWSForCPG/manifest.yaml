@@ -1,0 +1,7 @@
+PackageId: OpenArch.PersonalizationInMagentoECommerceOnAWSForCPG
+Name: Personalization in Magento eCommerce on AWS for CPG
+Description: Containerized Magento on Amazon EKS with Amazon Personalize recommendations for consumer packaged goods e-commerce.
+Version: 1.0.0
+Icon: logos:magento
+Publisher: Open_Arch
+Tags: [aws, cpg, e-commerce, magento, personalization, kubernetes]

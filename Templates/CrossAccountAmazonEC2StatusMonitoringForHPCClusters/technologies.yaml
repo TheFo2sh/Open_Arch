@@ -1,0 +1,43 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: EC2 instances that run the HPC clusters and emit state-change events.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-eventbridge
+    name: Amazon EventBridge
+    description: Receives EC2 instance state-change events in each HPC cluster account.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eventbridge/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Processes EC2 state-change events and filters them by the required HPC tag.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-cloudwatch-logs
+    name: Amazon CloudWatch Logs
+    description: Stores tagged EC2 state-change events in the HPC cluster and centralized monitoring accounts.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/features/#Amazon_CloudWatch_Logs
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Provides the preconfigured dashboard for current HPC cluster and EC2 instance status.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
