@@ -1,0 +1,67 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: Public and private hosted zones resolve client requests to the corresponding load balancer.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Public and private Elastic Load Balancers forward requests to EKS applications.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-eks
+    name: Amazon Elastic Kubernetes Service
+    description: Kubernetes service hosting the microservices and AWS Load Balancer Controller in private subnets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eks/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-load-balancer-controller
+    name: AWS Load Balancer Controller
+    description: AWS-maintained Kubernetes controller that manages Elastic Load Balancers for Kubernetes services and ingresses.
+    vendor: Amazon Web Services
+    url: https://github.com/kubernetes-sigs/aws-load-balancer-controller
+    types: [library]
+    platform: kubernetes
+  - key: aws-nat-gateway
+    name: AWS NAT Gateway
+    description: NAT gateways in public subnets provide outbound internet connectivity for workloads in private subnets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+  - key: aws-internet-gateway
+    name: AWS Internet Gateway
+    description: Internet gateway provides the public-subnet route from NAT gateways to the internet.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+    types: [managed-service]
+    platform: aws
+  - key: aws-virtual-private-gateway
+    name: AWS Virtual Private Gateway
+    description: Virtual private gateway connects the VPC to on-premises networks.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html
+    types: [managed-service]
+    platform: aws
+  - key: aws-site-to-site-vpn
+    name: AWS Site-to-Site VPN
+    description: VPN connection shown as an option for reaching the on-premises network.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/site-to-site-vpn/
+    types: [managed-service]
+    platform: aws
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Direct Connect is shown as an option for reaching the on-premises network.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws

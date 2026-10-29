@@ -1,0 +1,227 @@
+// Aircraft Predictive Maintenance, after AWS's reference architecture.
+// Systems are slots to map to the project's own systems when applying the template.
+model {
+  acars = system 'SITA/ARINC ACARS source' {
+    description 'External source of real-time aircraft fault logs and pilot reports.'
+  }
+  qarProcessor = system 'QAR processor' {
+    description 'External processor that uploads QAR events and batch files as aircraft connectivity permits.'
+  }
+  maintenance = system 'Maintenance and engineering systems' {
+    description 'External systems providing maintenance history, part removals, and repair history periodically.'
+  }
+  flightOperations = system 'Flight operations system' {
+    description 'External system providing scheduled and actual flight information.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    faultLogs = platform 'Amazon Kinesis Fault Logs' {
+      description 'Streams real-time ACARS fault logs and pilot reports.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    rawQarEvents = platform 'Amazon Kinesis QAR Events' {
+      description 'Receives QAR events before identifying information is removed.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    qarFunctions = platform 'AWS Lambda' {
+      description 'Runs event-based QAR identity-removal processing and predictive maintenance API functions.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      qarDeidentification = system 'QAR event identity removal' {
+        description 'Removes identifying information from QAR events before they are used.'
+      }
+      predictiveApi = system 'Predictive maintenance API functions' {
+        description 'Handles application API requests and access to aircraft data.'
+      }
+    }
+    deidentifiedQarEvents = platform 'Amazon Kinesis QAR Events (de-identified)' {
+      description 'Streams QAR events after identifying information has been removed.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    flightEvents = platform 'Amazon Kinesis Flight Events' {
+      description 'Streams scheduled and actual flight events from flight operations.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    predictiveEvents = platform 'Amazon Kinesis Predictive Maintenance Events' {
+      description 'Carries events used by the predictive maintenance flow.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    firehose = platform 'Amazon Kinesis Data Firehose' {
+      description 'Delivers streamed data into Amazon S3 staging storage.'
+      metadata {
+        uses 'amazon-kinesis-data-firehose'
+      }
+    }
+
+    restrictedStorage = platform 'Amazon S3' {
+      description 'Restricted staging area for QAR batch files before identity removal.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      restrictedQarFiles = database 'Restricted QAR staging data' {
+        description 'QAR batch files awaiting removal of identifying information.'
+      }
+    }
+    stagingStorage = platform 'Amazon S3' {
+      description 'Staging area for data after the documented identity-removal step.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      stagingData = database 'Staging data' {
+        description 'De-identified QAR data and staged maintenance and flight data.'
+      }
+    }
+    aircraftStorage = platform 'Amazon S3' {
+      description 'Stores processed aircraft data for analytics and model training.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      aircraftData = database 'Aircraft data' {
+        description 'Processed aircraft data, including fault, QAR, and maintenance information.'
+      }
+    }
+    predictionStorage = platform 'Amazon S3' {
+      description 'Stores predictive maintenance data produced for the model workflow.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      predictionData = database 'Prediction data' {
+        description 'Predictive maintenance data used by the model workflow.'
+      }
+    }
+
+    glue = platform 'AWS Glue' {
+      description 'Removes identifying information from staged QAR batch files and transforms staged data.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    dataCatalog = platform 'AWS Glue Data Catalog' {
+      description 'Catalogs data used by the analytics services.'
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      aircraftCatalog = database 'Aircraft data catalog' {
+        description 'Catalog metadata for aircraft and turn data.'
+      }
+    }
+    aircraftDatabase = platform 'Amazon DynamoDB' {
+      description 'Stores aircraft data accessed by the predictive maintenance application.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      aircraftRecords = database 'Aircraft data' {
+        description 'Aircraft data served to the predictive maintenance application.'
+      }
+    }
+    emr = platform 'Amazon EMR' {
+      description 'Processes aircraft and flight data for turn analytics.'
+      metadata {
+        uses 'amazon-emr'
+      }
+      turnProcessing = system 'Turn data processing' {
+        description 'Processes flight and aircraft data for turn analytics.'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      description 'Stores turn data for analytics.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+      turnData = database 'Turn data' {
+        description 'Turn data used for analytics and reporting.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Queries data for analytics and model tuning.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Trains and periodically tunes predictive maintenance models.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+      training = system 'Predictive maintenance model training' {
+        description 'Correlates aircraft fault, QAR, maintenance, and flight data with delays and cancellations to train a component failure model.'
+      }
+      model = system 'Predictive maintenance model' {
+        description 'Predicts component failures from aircraft data.'
+      }
+      tuning = system 'Predictive maintenance model tuning' {
+        description 'Periodically tunes the model to improve predictions and reduce false positives.'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Provides the API entry point for the predictive maintenance application and dashboard.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight Turn Analytics' {
+      description 'Provides turn analytics as shown in the AWS diagram.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+
+    application = system 'Predictive maintenance application' {
+      description 'Application shown in the reference diagram; its implementation and hosting are not specified.'
+    }
+    dashboard = system 'Predictive maintenance dashboard' {
+      description 'Dashboard shown in the reference diagram; its implementation and hosting are not specified.'
+    }
+  }
+
+  acars -> aws.faultLogs 'Supplies real-time fault logs and pilot reports'
+  qarProcessor -> aws.rawQarEvents 'Uploads QAR events'
+  aws.rawQarEvents -> aws.qarFunctions.qarDeidentification 'Sends QAR events for identity removal'
+  aws.qarFunctions.qarDeidentification -> aws.deidentifiedQarEvents 'Publishes events after identity removal'
+  qarProcessor -> aws.restrictedStorage.restrictedQarFiles 'Uploads QAR batch files'
+  aws.restrictedStorage.restrictedQarFiles -> aws.glue 'Provides batch data for identity removal'
+  aws.glue -> aws.firehose 'Delivers processed batch data'
+  aws.deidentifiedQarEvents -> aws.firehose 'Delivers de-identified QAR events'
+  maintenance -> aws.stagingStorage.stagingData 'Supplies maintenance history, part removals, and repair history'
+  flightOperations -> aws.flightEvents 'Supplies scheduled and actual flight information'
+  aws.flightEvents -> aws.firehose 'Delivers flight events'
+  aws.firehose -> aws.stagingStorage.stagingData 'Writes staged data'
+  aws.faultLogs -> aws.aircraftDatabase.aircraftRecords 'Stores aircraft fault data'
+  aws.faultLogs -> aws.predictiveEvents 'Feeds predictive maintenance events'
+  aws.deidentifiedQarEvents -> aws.predictiveEvents 'Feeds predictive maintenance events'
+  aws.stagingStorage.stagingData -> aws.glue 'Provides staged data for transformation'
+  aws.glue -> aws.aircraftStorage.aircraftData 'Writes processed aircraft data'
+  aws.glue -> aws.dataCatalog.aircraftCatalog 'Catalogs processed aircraft data'
+  aws.aircraftStorage.aircraftData -> aws.emr.turnProcessing 'Provides aircraft data for processing'
+  aws.emr.turnProcessing -> aws.redshift.turnData 'Writes turn analytics data'
+  aws.dataCatalog.aircraftCatalog -> aws.athena 'Provides catalog metadata for queries'
+  aws.athena -> aws.aircraftStorage.aircraftData 'Queries aircraft data'
+  aws.redshift.turnData -> aws.athena 'Provides turn data for analysis'
+  aws.athena -> aws.sagemaker.tuning 'Provides data for model tuning'
+  aws.aircraftStorage.aircraftData -> aws.sagemaker.training 'Provides aircraft and maintenance data for training'
+  aws.redshift.turnData -> aws.sagemaker.training 'Provides turn outcomes for training'
+  aws.sagemaker.training -> aws.sagemaker.model 'Produces'
+  aws.sagemaker.model -> aws.sagemaker.tuning 'Is periodically tuned by'
+  aws.sagemaker.tuning -> aws.sagemaker.model 'Improves'
+  aws.sagemaker.model -> aws.predictionStorage.predictionData 'Stores prediction data'
+  aws.application -> aws.apiGateway 'Calls'
+  aws.dashboard -> aws.apiGateway 'Calls'
+  aws.apiGateway -> aws.qarFunctions.predictiveApi 'Routes application requests to'
+  aws.qarFunctions.predictiveApi -> aws.aircraftDatabase.aircraftRecords 'Reads aircraft data from'
+  aws.quickSight -> aws.redshift.turnData 'Provides analytics from'
+}

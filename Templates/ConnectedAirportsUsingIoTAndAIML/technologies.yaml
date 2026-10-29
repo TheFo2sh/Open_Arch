@@ -1,0 +1,190 @@
+# Technologies named by the AWS reference architecture, keyed as architecture.c4 metadata uses them.
+technologies:
+  - key: aws-iot-greengrass
+    name: AWS IoT Greengrass
+    description: Edge runtime that connects IoT devices, supports MQTT messaging, and can host local processing and inference.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/greengrass/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system, database]
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Connects and manages devices, maintains device shadows, and supports over-the-air updates and device security.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+  - key: aws-iot-device-defender
+    name: AWS IoT Device Defender
+    description: Audits and monitors the security of connected IoT devices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-device-defender/
+    types: [managed-service]
+    platform: aws
+  - key: aws-iot-device-management
+    name: AWS IoT Device Management
+    description: Manages connected IoT devices and supports fleet operations and over-the-air updates.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-device-management/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-kinesis-video-streams
+    name: Amazon Kinesis Video Streams
+    description: Streams video used for inference training.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/video-streams/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Streams IoT data for near-real-time processing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-kinesis-data-firehose
+    name: Amazon Kinesis Data Firehose
+    description: Delivers streaming data to destinations such as the Amazon S3 data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/data-firehose/
+    types: [managed-service]
+    platform: aws
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs serverless microservices and local processing functions shown in the architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Purpose-built database for events, microservices, and operational data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Provides APIs for the serverless microservices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+  - key: aws-appsync
+    name: AWS AppSync
+    description: Supports a real-time operational dashboard.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/appsync/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-pinpoint
+    name: Amazon Pinpoint
+    description: Delivers operational alerts.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/pinpoint/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-s3
+    name: Amazon S3
+    description: Data lake for raw, cleaned, and refined airport data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-s3-glacier
+    name: Amazon S3 Glacier
+    description: Long-term archive storage for airport data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/storage-classes/glacier/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-glue
+    name: AWS Glue
+    description: Crawls and catalogs data and runs jobs to transform and enrich data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+  - key: aws-lake-formation
+    name: AWS Lake Formation
+    description: Discovers and governs data in the Amazon S3 data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lake-formation/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-macie
+    name: Amazon Macie
+    description: Detects sensitive data in the Amazon S3 data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/macie/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-emr
+    name: Amazon EMR
+    description: Processes and enriches data for the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/emr/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Orchestrates the data-processing workflow shown in the diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Analytics platform for data marts used by frequently run analyses.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Queries data lake content for analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service, data-platform]
+    platform: aws
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Visualizes analytics from Amazon Redshift and Amazon Athena.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-sagemaker-ground-truth
+    name: Amazon SageMaker Ground Truth
+    description: Supports labeling data for machine learning.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/groundtruth/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Builds, trains, and deploys inference models, including optional models for Greengrass Core.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/ai/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: freertos
+    name: FreeRTOS
+    description: Operating system named for airport IoT devices; the diagram also allows other operating systems.
+    vendor: The FreeRTOS Project
+    url: https://www.freertos.org/
+    types: [library]
+  - key: mqtt
+    name: MQTT
+    description: Messaging protocol used between IoT devices and Greengrass Core.
+    vendor: OASIS
+    url: https://mqtt.org/
+    types: [library]

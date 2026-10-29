@@ -1,0 +1,60 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Third-party tools are listed here but not attached with metadata { uses } unless they are libraries.
+technologies:
+  - key: aws-codecommit
+    name: AWS CodeCommit
+    description: Source repository receiving the developer's code changes.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codecommit/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-codepipeline
+    name: AWS CodePipeline
+    description: Pipeline service that connects source changes, Jenkins build jobs, artifact storage, and the Device Farm test stage.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codepipeline/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Mac instance hosting Jenkins and the iOS build project.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores compressed iOS build artifacts for AWS CodePipeline and Device Farm.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-device-farm
+    name: AWS Device Farm
+    description: Runs the iOS app test stage on multiple real devices and records the results.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/device-farm/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: jenkins
+    name: Jenkins
+    description: Third-party automation server running on the Amazon EC2 Mac instance.
+    vendor: Jenkins project
+    url: https://www.jenkins.io/
+    types: [third-party]
+  - key: aws-codepipeline-plugin-for-jenkins
+    name: AWS CodePipeline Plugin for Jenkins
+    description: Jenkins plugin used to poll AWS CodePipeline and transfer compressed build artifacts.
+    vendor: Amazon Web Services
+    url: https://plugins.jenkins.io/aws-codepipeline/
+    types: [library]

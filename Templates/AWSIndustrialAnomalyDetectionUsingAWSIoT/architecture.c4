@@ -1,0 +1,179 @@
+// AWS Industrial Anomaly Detection Using AWS IoT, after the AWS reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/industrial-anomaly-detection-iot/industrial-anomaly-detection-iot.html
+// Systems and users are slots mapped onto the project's own when the template is applied.
+model {
+  otTeam = user 'OT team' {
+    description 'Receives equipment anomaly alerts and reviews real-time and historical performance.'
+  }
+
+  factory = zone 'OT network' {
+    metadata {
+      platform 'other'
+    }
+
+    assets = system 'Industrial assets and OT data sources' {
+      description 'Project system slot for industrial assets, sensors, historians, PCs, and PLCs shown as telemetry sources.'
+    }
+
+    greengrass = platform 'AWS IoT Greengrass' {
+      description 'Edge runtime with connectors, stream analytics, and ML inference.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+
+      edgeDetection = system 'Edge anomaly detection' {
+        description 'Project system slot for edge connectors, hot-path stream analytics, and ML inference; AWS does not identify their implementations.'
+      }
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      description 'Edge-to-cloud interface for industrial telemetry.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    sitewise = platform 'AWS IoT SiteWise' {
+      description 'Edge-to-cloud interface for industrial telemetry and equipment monitoring.'
+      metadata {
+        uses 'aws-iot-sitewise'
+      }
+    }
+    firehoseIn = platform 'Amazon Kinesis Data Firehose (warm-path input)' {
+      description 'Forwards telemetry into the warm-path anomaly analysis.'
+      metadata {
+        uses 'amazon-kinesis-data-firehose'
+      }
+    }
+    flink = platform 'Amazon Managed Service for Apache Flink' {
+      description 'Runs warm-path anomaly queries; the diagram labels this Amazon Kinesis Data Analytics.'
+      metadata {
+        uses 'amazon-managed-service-for-apache-flink'
+      }
+      warmAnalysis = system 'Warm-path anomaly queries' {
+        description 'Project system slot for the streaming queries that detect warm-path anomalies; query details are unspecified.'
+      }
+    }
+    firehoseOut = platform 'Amazon Kinesis Data Firehose (warm-path output)' {
+      description 'Forwards warm-path output to the data lake.'
+      metadata {
+        uses 'amazon-kinesis-data-firehose'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores raw and processed telemetry, trained ML models, and inference results.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Industrial telemetry data lake' {
+        description 'Raw and processed telemetry, trained ML models, and inference results.'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'An AWS-documented option for cold-path ML model training and batch inference.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+      coldAnalysis = system 'Cold-path model training and batch inference' {
+        description 'Project system slot for the SageMaker AI training and batch-inference path.'
+      }
+    }
+    lookout = platform 'Amazon Lookout for Equipment' {
+      description 'Alternative AWS-documented service for cold-path ML model training and batch inference.'
+      metadata {
+        uses 'amazon-lookout-for-equipment'
+      }
+      coldAnalysis = system 'Cold-path model training and batch inference' {
+        description 'Project system slot for the Lookout for Equipment training and batch-inference alternative.'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs functions to analyze batch inference results.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      resultAnalysis = system 'Batch inference result analysis' {
+        description 'Project system slot for Lambda functions that analyze cold-path batch inference results.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Database service depicted in the cold-analysis path; the source does not specify its role.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      coldStore = database 'Cold-path DynamoDB store' {
+        description 'DynamoDB store shown in the diagram; table contents and data flow are not specified.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Query service depicted in the cold-analysis path; the source does not specify its queries.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    sns = platform 'Amazon SNS' {
+      description 'Delivers anomaly alerts to OT teams.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    sitewiseMonitor = platform 'AWS IoT SiteWise Monitor' {
+      description 'Provides no-code dashboards for real-time and historical equipment performance.'
+      metadata {
+        uses 'aws-iot-sitewise-monitor'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Evaluates anomaly history and fleet performance.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+
+    alertDelivery = system 'OT anomaly alert delivery' {
+      description 'Project system slot for the email, text, or optional ticketing-integration channel selected by the OT team.'
+    }
+    sitewiseDashboards = system 'Equipment performance dashboards' {
+      description 'Project system slot for no-code SiteWise Monitor dashboards.'
+    }
+    fleetAnalysis = system 'Anomaly and fleet performance analysis' {
+      description 'Project system slot for QuickSight analysis of anomaly history and fleet performance.'
+    }
+  }
+
+  factory.assets -> factory.greengrass.edgeDetection 'Provides industrial telemetry to'
+  factory.greengrass.edgeDetection -> aws.iotCore 'Publishes edge telemetry through'
+  factory.greengrass.edgeDetection -> aws.sitewise 'Ingests edge telemetry through'
+  factory.greengrass.edgeDetection -> aws.sns 'Sends hot-path anomaly alerts through'
+  aws.iotCore -> aws.firehoseIn 'Forwards telemetry to'
+  aws.firehoseIn -> aws.flink.warmAnalysis 'Feeds streaming telemetry to'
+  aws.flink.warmAnalysis -> aws.firehoseOut 'Forwards warm-path analysis results to'
+  aws.firehoseOut -> aws.s3.dataLake 'Stores warm-path output in'
+  aws.s3.dataLake -> aws.sagemaker.coldAnalysis 'Provides data for cold-path training and batch inference to'
+  aws.s3.dataLake -> aws.lookout.coldAnalysis 'Provides data for cold-path training and batch inference to'
+  aws.sagemaker.coldAnalysis -> aws.s3.dataLake 'Stores trained models and inference results in'
+  aws.lookout.coldAnalysis -> aws.s3.dataLake 'Stores trained models and inference results in'
+  aws.s3.dataLake -> aws.lambda.resultAnalysis 'Provides batch inference results for analysis to'
+  aws.lambda.resultAnalysis -> aws.sns 'Publishes anomaly alerts through'
+  aws.sitewise -> aws.sitewiseMonitor 'Provides telemetry for dashboards to'
+  aws.sitewiseMonitor -> aws.sitewiseDashboards 'Provides no-code dashboards to'
+  aws.s3.dataLake -> aws.athena 'Provides historical data for queries to'
+  aws.athena -> aws.quickSight 'Supports historical anomaly and fleet analysis in'
+  aws.quickSight -> aws.fleetAnalysis 'Provides fleet performance analysis to'
+  aws.sns -> aws.alertDelivery 'Delivers alerts through'
+  aws.alertDelivery -> otTeam 'Notifies'
+  aws.sitewiseDashboards -> otTeam 'Shows equipment performance to'
+  aws.fleetAnalysis -> otTeam 'Shows historical anomaly and fleet analysis to'
+}
+
+views {
+  view index {
+    title 'AWS Industrial Anomaly Detection Using AWS IoT'
+    include *, factory.*, factory.greengrass.*, aws.*, aws.s3.*, aws.lambda.*
+  }
+}

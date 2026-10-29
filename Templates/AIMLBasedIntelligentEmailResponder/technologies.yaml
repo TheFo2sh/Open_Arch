@@ -1,0 +1,138 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+technologies:
+  - key: amazon-ses
+    name: Amazon Simple Email Service
+    description: Receives corporate email and sends automated responses.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ses/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores raw email payloads and data lake objects.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: Notifies the responder workflow when incoming email is received.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the email responder workflow and event-handling functions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-comprehend
+    name: Amazon Comprehend
+    description: Extracts language, sentiment, and keywords from email messages.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/comprehend/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-translate
+    name: Amazon Translate
+    description: Translates email text between languages.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/translate/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Hosts intent-extraction and next-best-action model endpoints and supports model training.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Provides an API path for message enrichment and data lookups.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores transactional message or workflow data accessed through the API.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-kinesis-data-firehose
+    name: Amazon Kinesis Data Firehose
+    description: Delivers collected workflow data to the enterprise data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sqs
+    name: Amazon Simple Queue Service
+    description: Holds escalated messages in high- and normal-priority agent queues.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sqs/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-elasticache
+    name: Amazon ElastiCache
+    description: Provides customer preference and topic-modeling data to the enterprise data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticache/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Provides the enterprise data warehouse in the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-sagemaker-ground-truth
+    name: Amazon SageMaker Ground Truth
+    description: Labels collected data for continuous model improvement.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/groundtruth/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-pinpoint
+    name: Amazon Pinpoint
+    description: Supports optional personalized email campaigns.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/pinpoint/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Supports optional analytics queries over data lake data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Supports optional reporting and dashboards.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []

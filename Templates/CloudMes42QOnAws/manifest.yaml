@@ -1,0 +1,7 @@
+PackageId: OpenArch.CloudMes42QOnAws
+Name: 42Q Cloud MES on AWS
+Description: Reference architecture for connecting factory data, AWS services, and the 42Q cloud manufacturing execution system.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, manufacturing, mes, iot, industrial]

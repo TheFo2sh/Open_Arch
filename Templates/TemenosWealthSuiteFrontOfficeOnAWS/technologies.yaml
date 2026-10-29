@@ -1,0 +1,185 @@
+technologies:
+  - key: amazon-vpc
+    name: Amazon VPC
+    description: Isolated network boundary for the application and its private resources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-eks
+    name: Amazon Elastic Kubernetes Service
+    description: Hosts the containerized UXP, API, Finance Services, and Integration layers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eks/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-fargate
+    name: AWS Fargate
+    description: One of the optional compute choices for the Amazon EKS containers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fargate/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: One of the optional compute choices for the Amazon EKS containers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: API management and the entry point for external interfaces; the networking design uses private endpoints.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-api-gateway-vpc-link
+    name: Amazon API Gateway VPC Link
+    description: VPC Link resource that restricts access to the VPC through API Gateway.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/apigateway/latest/developerguide/http-api-vpc-links.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Application Load Balancer shown between the API Gateway VPC Link and Amazon EKS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-vpc-endpoints
+    name: Amazon VPC endpoints
+    description: Private access path from the VPC to AWS services without requiring internet access.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-rds-oracle
+    name: Amazon RDS for Oracle
+    description: Managed Oracle relational database; the diagrams show primary and secondary instances and a Multi-AZ option.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/oracle/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-mq
+    name: Amazon MQ
+    description: AWS integration service shown as a source or target for integration data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/amazon-mq/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: AWS integration service shown as a source or target for integration data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Internet-facing content delivery service in the VPC and networking design.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-waf
+    name: AWS WAF
+    description: Web application firewall shown with CloudFront for internet usage.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/waf/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-shield
+    name: AWS Shield
+    description: DDoS protection shown with CloudFront for internet usage.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/shield/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-certificate-manager
+    name: AWS Certificate Manager
+    description: Certificate service shown with the API Gateway entry point.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/certificate-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: On-premises connectivity option shown for private access to the architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-secrets-manager
+    name: AWS Secrets Manager
+    description: Service shown in the overview diagram; AWS does not specify its role in the accompanying steps.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/secrets-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ecr
+    name: Amazon Elastic Container Registry
+    description: Service shown in the overview diagram; AWS does not specify its role in the accompanying steps.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecr/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Service shown in the overview diagram; AWS does not specify its role in the accompanying steps.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: temenos-wealthsuite-front-office
+    name: Temenos WealthSuite Front Office
+    description: Third-party wealth management application represented by the application system slot.
+    vendor: Temenos
+    types: [third-party]
+  - key: apache-kafka
+    name: Apache Kafka
+    description: Integration transport named by AWS; the Kafka distribution and deployment are not specified.
+    types: [third-party]
+  - key: enterprise-service-bus
+    name: Enterprise Service Bus
+    description: Integration transport named by AWS without a specific product or provider.
+    types: [third-party]

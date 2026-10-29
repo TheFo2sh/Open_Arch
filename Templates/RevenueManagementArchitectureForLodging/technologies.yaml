@@ -1,0 +1,206 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-kinesis
+    name: Amazon Kinesis
+    description: Streams near real-time lodging events and configuration updates into the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage for the tiered revenue management data lake, from staging through processed, optimized, and configuration data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-transfer-family
+    name: AWS Transfer Family
+    description: Batch file ingestion into the data lake and transfer of booking and pricing controls to the central reservations system.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/aws-transfer-family/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-data-exchange
+    name: AWS Data Exchange
+    description: Ingests subscribed external market and competitive data for the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/data-exchange/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-appflow
+    name: Amazon AppFlow
+    description: Ingests external shopping and other data feeds into the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/appflow/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-emr
+    name: Amazon EMR
+    description: Processes and transforms data for the tiered data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/emr/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-glue
+    name: AWS Glue
+    description: Transforms and catalogs data used by revenue management analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-glue-data-catalog
+    name: AWS Glue Data Catalog
+    description: Catalogs the data lake datasets for discovery and query.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-efs
+    name: Amazon Elastic File System
+    description: Replicates the file structure required by the existing revenue management modules.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/efs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-batch
+    name: AWS Batch
+    description: Runs revenue management modules on an EC2 Spot fleet for cost-efficient batch processing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/batch/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-fargate
+    name: AWS Fargate
+    description: Runs near real-time booking and pricing control processing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fargate/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Stores revenue data marts for reporting and analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Queries raw, processed, and optimized data in the data lake for on-demand reporting.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-forecast
+    name: Amazon Forecast
+    description: Builds regional demand forecasting models from revenue management data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/forecast/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sagemaker
+    name: Amazon SageMaker AI
+    description: Supports advanced revenue analytics using the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Provides revenue analytics reporting to the revenue management dashboard.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Provides the dashboard API entry point for revenue management microservices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Orchestrates the revenue management dashboard microservices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores revenue management configurations consumed by dashboard microservices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: keydata-dashboard
+    name: KeyData Dashboard
+    description: Named market and competitive data provider shown in the AWS reference diagram.
+    types: [third-party]
+  - key: phocuswright
+    name: Phocuswright
+    description: Named market and competitive data provider shown in the AWS reference diagram.
+    types: [third-party]
+  - key: smith-travel-research
+    name: Smith Travel Research (STR)
+    description: Named market and competitive data provider shown in the AWS reference diagram.
+    types: [third-party]
+  - key: bluetent
+    name: BlueTent
+    description: Named shopping data provider shown in the AWS reference diagram.
+    types: [third-party]
+  - key: intercontinental-net-designs
+    name: InterContinental Net Designs (ICND)
+    description: Named shopping data provider shown in the AWS reference diagram.
+    types: [third-party]
+  - key: q4launch
+    name: Q4Launch
+    description: Named shopping data provider shown in the AWS reference diagram.
+    types: [third-party]
+  - key: scurto-marketing
+    name: Scurto Marketing
+    description: Named shopping data provider shown in the AWS reference diagram.
+    types: [third-party]
+  - key: travelclick
+    name: TravelClick
+    description: Named shopping data provider shown in the AWS reference diagram.
+    types: [third-party]

@@ -1,0 +1,95 @@
+// Cross-Account Amazon EC2 Status Monitoring for HPC Clusters, after AWS's reference architecture.
+// Read together with the repository's specification.c4. Systems and users are slots:
+// applying the template maps them onto the project's own.
+model {
+  clusterOperator = user 'HPC cluster operator' {
+    description 'Operates workloads in an HPC cluster account.'
+  }
+  monitoringOperator = user 'Central monitoring operator' {
+    description 'Reviews current cluster and EC2 instance status in the centralized account.'
+  }
+  partner = user 'HPC service partner' {
+    description 'An optional third-party partner managing HPC deployments for a customer.'
+  }
+
+  hpcAccount = zone 'HPC cluster account(s)' {
+    metadata {
+      platform 'aws'
+    }
+
+    ec2 = platform 'Amazon EC2' {
+      description 'EC2 instances that run HPC clusters and emit state-change events.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+      cluster = system 'HPC cluster' {
+        description 'HPC workloads running on EC2 instances tagged for monitoring (the default tag is HPC).'
+      }
+    }
+
+    eventBridge = platform 'Amazon EventBridge' {
+      description 'Receives EC2 instance state-change events.'
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Processes events and filters them to those matching the HPC EC2 tag.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      eventProcessor = system 'EC2 status event processor' {
+        description 'Processes instance start, stop, and termination events and emits matching events as CloudWatch logs.'
+      }
+    }
+    clusterLogs = platform 'Amazon CloudWatch Logs' {
+      metadata {
+        uses 'amazon-cloudwatch-logs'
+      }
+      eventLog = database 'Tagged EC2 state-change logs' {
+        description 'CloudWatch log data for state changes from EC2 instances matching the HPC tag.'
+      }
+    }
+  }
+
+  monitoringAccount = zone 'Centralized monitoring account' {
+    metadata {
+      platform 'aws'
+    }
+
+    monitoringLogs = platform 'Amazon CloudWatch Logs' {
+      description 'Provides centralized visibility into logs shared from the HPC cluster accounts.'
+      metadata {
+        uses 'amazon-cloudwatch-logs'
+      }
+      sharedEventLog = database 'Shared HPC cluster logs' {
+        description 'HPC-tagged EC2 state-change logs visible through CloudWatch cross-account observability.'
+      }
+    }
+    cloudWatch = platform 'Amazon CloudWatch' {
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+      dashboard = system 'Cluster status dashboard' {
+        description 'Preconfigured dashboard for monitoring cluster and individual EC2 instance status.'
+      }
+    }
+  }
+
+  clusterOperator -> hpcAccount.ec2.cluster 'Operates'
+  partner -> hpcAccount.ec2.cluster 'Manages deployments for'
+  monitoringOperator -> monitoringAccount.cloudWatch.dashboard 'Reviews status in'
+  partner -> monitoringAccount.cloudWatch.dashboard 'Monitors customer usage in'
+  hpcAccount.ec2.cluster -> hpcAccount.eventBridge 'Emits instance state changes to'
+  hpcAccount.eventBridge -> hpcAccount.lambda.eventProcessor 'Triggers processing by'
+  hpcAccount.lambda.eventProcessor -> hpcAccount.clusterLogs.eventLog 'Writes matching events to'
+  hpcAccount.clusterLogs.eventLog -> monitoringAccount.monitoringLogs.sharedEventLog 'Shares logs through cross-account observability'
+  monitoringAccount.cloudWatch.dashboard -> monitoringAccount.monitoringLogs.sharedEventLog 'Displays status from'
+}
+
+views {
+  view index {
+    title 'Cross-Account Amazon EC2 Status Monitoring for HPC Clusters'
+    include *, hpcAccount.*, hpcAccount.ec2.*, hpcAccount.lambda.*, hpcAccount.clusterLogs.*, monitoringAccount.*, monitoringAccount.monitoringLogs.*, monitoringAccount.cloudWatch.*
+  }
+}

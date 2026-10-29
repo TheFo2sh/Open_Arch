@@ -1,0 +1,98 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+technologies:
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Managed streams for incoming telemetry and asynchronous shard, registration, and dataset events.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-managed-service-for-apache-flink
+    name: Amazon Managed Service for Apache Flink
+    description: Detects unregistered device-group shards, buffers telemetry, routes it to registered channels, and detects new devices. The diagram's historical label is Kinesis Data Analytics for Java.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/managed-service-apache-flink/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: AWS monitoring service shown alongside the stream-processing workflow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the shard/account registration and dataset registration functions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-organizations
+    name: AWS Organizations
+    description: Creates a new AWS account when the current account does not have enough capacity for a device group.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/organizations/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores shard metadata and registrations for IoT Analytics resources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-iot-analytics
+    name: AWS IoT Analytics
+    description: Provides per-account channels, pipelines, and per-device datasets for telemetry processing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-analytics/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service (Amazon S3)
+    description: Provides the bucket created for a newly provisioned account and backs each AWS IoT Analytics data store.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-glue
+    name: AWS Glue
+    description: Queries device data in the analytics data store.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-redshift-spectrum
+    name: Amazon Redshift Spectrum
+    description: Alternative to AWS Glue for querying device data in the analytics data store.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/features/spectrum/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-sdk
+    name: AWS SDK
+    description: Calls AWS APIs to create IoT Analytics channels, pipelines, data stores, and datasets; the source does not specify a language or SDK version.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/developer/tools/
+    types: [library]
