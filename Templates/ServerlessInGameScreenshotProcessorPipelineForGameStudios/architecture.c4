@@ -1,0 +1,124 @@
+// Serverless In-Game Screenshot Processor Pipeline for Game Studios, after AWS's
+// reference architecture. Systems and users are slots mapped onto the project's.
+model {
+  player = user 'Player' {
+    description 'Captures in-game screenshots and views the resulting gallery.'
+  }
+
+  gameClient = system 'Game client' {
+    description 'Uploads player screenshots and metadata, and retrieves gallery data and images.'
+  }
+  communitySite = system 'Community site' {
+    description 'Retrieves gallery data and images for players.'
+  }
+  identityProvider = system 'External identity provider (optional)' {
+    description 'An identity provider used only if the team chooses API Gateway custom authorization instead of Cognito.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'REST API for screenshot uploads and gallery retrieval requests.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    cognito = platform 'Amazon Cognito' {
+      description 'Recommended authentication method for API requests.'
+      metadata {
+        uses 'amazon-cognito'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the image processing and image retrieval functions.'
+      metadata {
+        uses 'aws-lambda'
+      }
+
+      screenshotService = system 'Screenshot processing service' {
+        description 'Processes uploaded screenshots and retrieves screenshot metadata for galleries.'
+
+        uploadProcessor = container 'Image processor function' {
+          description 'Pre-processes uploads, checks moderation, optionally retains raw images, transforms images, stores processed images, and records metadata.'
+        }
+        imageRetrieval = container 'Image retrieval function' {
+          description 'Looks up the associated DynamoDB item for gallery metadata and its S3 key.'
+        }
+        customAuthorizer = container 'Custom authorizer function (optional)' {
+          description 'Authenticates API requests with an external identity provider when custom authorization is used.'
+        }
+      }
+    }
+    rekognition = platform 'Amazon Rekognition' {
+      description 'Applies DetectModerationLabels to uploaded screenshots.'
+      metadata {
+        uses 'amazon-rekognition'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      description 'Optional delivery path for a screenshot filtering result notification.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Stores raw uploads optionally and processed screenshots for gallery delivery.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Persists the in-game metadata associated with each processed screenshot.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+
+      screenshotMetadata = database 'Screenshot metadata' {
+        description 'Stores fields such as player ID, timestamp, in-game location, and the screenshot S3 key.'
+      }
+    }
+    dax = platform 'Amazon DynamoDB Accelerator' {
+      description 'Optional cache for screenshot metadata read requests.'
+      metadata {
+        uses 'amazon-dynamodb-accelerator'
+      }
+    }
+    cloudfront = platform 'Amazon CloudFront' {
+      description 'Serves processed screenshot objects from the S3 bucket to gallery clients.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+  }
+
+  player -> gameClient 'Captures screenshots and views the gallery in'
+  player -> communitySite 'Views the screenshot gallery on'
+  gameClient -> aws.apiGateway 'Uploads screenshots with player metadata and requests gallery data from'
+  communitySite -> aws.apiGateway 'Requests gallery data from'
+  aws.apiGateway -> aws.cognito 'Authenticates requests with'
+  aws.apiGateway -> aws.lambda.screenshotService.uploadProcessor 'Invokes for screenshot uploads'
+  aws.apiGateway -> aws.lambda.screenshotService.imageRetrieval 'Invokes for gallery retrieval'
+  aws.apiGateway -> aws.lambda.screenshotService.customAuthorizer 'Can invoke for custom authorization'
+  aws.lambda.screenshotService.customAuthorizer -> identityProvider 'Authenticates with'
+  aws.lambda.screenshotService.uploadProcessor -> aws.rekognition 'Checks screenshots with DetectModerationLabels'
+  aws.lambda.screenshotService.uploadProcessor -> aws.sns 'Can publish a filtering-result notification to'
+  aws.sns -> gameClient 'Can deliver the filtering-result notification to'
+  aws.lambda.screenshotService.uploadProcessor -> aws.s3 'Can optionally store raw images and uploads processed screenshots to separate buckets in'
+  aws.lambda.screenshotService.uploadProcessor -> aws.dynamodb.screenshotMetadata 'Stores player metadata and the S3 key in'
+  aws.lambda.screenshotService.imageRetrieval -> aws.dynamodb.screenshotMetadata 'Retrieves gallery metadata and the S3 key from'
+  aws.lambda.screenshotService.imageRetrieval -> aws.dax 'Can optionally cache metadata reads through'
+  aws.dax -> aws.dynamodb.screenshotMetadata 'Caches reads from'
+  gameClient -> aws.cloudfront 'Requests processed screenshot images from'
+  communitySite -> aws.cloudfront 'Requests processed screenshot images from'
+  aws.cloudfront -> aws.s3 'Serves processed screenshot objects from its processed-screenshots bucket'
+}
+
+views {
+  view index {
+    title 'Serverless In-Game Screenshot Processor Pipeline for Game Studios'
+    include *, aws.*
+  }
+}

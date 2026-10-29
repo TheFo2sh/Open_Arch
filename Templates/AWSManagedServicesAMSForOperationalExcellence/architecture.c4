@@ -1,0 +1,334 @@
+// AWS Managed Services (AMS) for Operational Excellence, based on AWS's six-part reference architecture.
+// The AWS source page and consolidated PDF are linked in this template's README.
+model {
+  customer = user 'Customer / Cloud Center of Excellence' {
+    description 'Defines high-level operational, security, logging, patching, and backup policies.'
+  }
+  partner = user 'Customer or partner' {
+    description 'Raises incidents and service requests and coordinates with AMS.'
+  }
+  itsmTeam = user 'ITSM team' {
+    description 'Defines service-level requirements, integrations, and ITSM tooling.'
+  }
+  appOps = user 'Application and Operations / DevOps teams' {
+    description 'Implements application, OS, infrastructure, monitoring, logging, patching, and backup practices.'
+  }
+  amsOps = user 'AMS Operations' {
+    description 'Monitors customer environments 24x7 and handles incident triage, consultation, escalation, and problem management.'
+  }
+  amsSecurity = user 'AMS security engineers' {
+    description 'Support AMS security operations and incident response.'
+  }
+  cloudArchitect = user 'Named cloud architect'
+  deliveryManager = user 'Named service delivery manager'
+
+  customerItsm = system 'Customer / partner ITSM tooling' {
+    description 'Slot for the customer or partner service desk; AWS names ServiceNow and Jira SD integrations or AWS Support APIs.'
+    integration = container 'AWS Service Management Connector' {
+      description 'Optional connector for ITSM integration; named AWS Service Catalog Management Connectors in the helpdesk diagram.'
+      metadata {
+        uses 'aws-service-management-connector'
+      }
+    }
+  }
+  thirdPartySecurity = system 'Third-party security tools' {
+    description 'Optional security-event sources; AWS does not name specific products or vendors.'
+  }
+
+  customerAccounts = zone 'AWS application accounts (AMS managed)' {
+    metadata {
+      platform 'aws'
+    }
+
+    customerWorkloads = system 'Customer application and infrastructure workloads' {
+      description 'Slot for the customer systems and resources AMS monitors and operates.'
+      cloudwatchAgent = container 'CloudWatch OS and application agent' {
+        metadata {
+          uses 'amazon-cloudwatch-agent'
+        }
+      }
+    }
+
+    ec2 = platform 'Amazon EC2' {
+      metadata {
+        uses 'amazon-ec2'
+      }
+      instances = system 'EC2 instances and OS workloads'
+    }
+    rds = platform 'Amazon RDS' {
+      metadata {
+        uses 'amazon-rds'
+      }
+      databases = database 'Monitored RDS databases'
+    }
+    elb = platform 'Elastic Load Balancing' {
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+    vpn = platform 'AWS VPN' {
+      metadata {
+        uses 'aws-vpn'
+      }
+    }
+    natGateway = platform 'NAT Gateway' {
+      metadata {
+        uses 'amazon-vpc-nat-gateway'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    iam = platform 'AWS IAM' {
+      metadata {
+        uses 'aws-iam'
+      }
+    }
+    eks = platform 'Amazon EKS' {
+      metadata {
+        uses 'amazon-eks'
+      }
+      workloads = system 'EKS workloads'
+    }
+    ebs = platform 'Amazon EBS' {
+      metadata {
+        uses 'amazon-ebs'
+      }
+    }
+    efs = platform 'Amazon EFS' {
+      metadata {
+        uses 'amazon-efs'
+      }
+    }
+
+    cloudwatch = platform 'Amazon CloudWatch' {
+      description 'AMS baseline metrics, alarms, rules, dashboards, local log search, and log groups.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+      localLogs = database 'Local CloudWatch log groups' {
+        description 'Application, OS, API, network, and security logs available for local search and troubleshooting.'
+      }
+    }
+    cloudtrail = platform 'AWS CloudTrail' {
+      metadata {
+        uses 'aws-cloudtrail'
+      }
+    }
+    flowLogs = platform 'Amazon VPC Flow Logs' {
+      metadata {
+        uses 'vpc-flow-logs'
+      }
+    }
+    route53 = platform 'Amazon Route 53' {
+      description 'DNS query logs are shown as an input to local logging.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    config = platform 'AWS Config' {
+      description 'Evaluates custom compliance rules and produces configuration findings.'
+      metadata {
+        uses 'aws-config'
+      }
+    }
+    guardDuty = platform 'Amazon GuardDuty' {
+      description 'Threat monitoring and guardrails for services including EC2, S3, IAM, and EKS.'
+      metadata {
+        uses 'amazon-guardduty'
+      }
+    }
+    systemsManager = platform 'AWS Systems Manager' {
+      description 'Runs AMS patching and incident-remediation runbooks against managed resources.'
+      metadata {
+        uses 'aws-systems-manager'
+      }
+    }
+    backup = platform 'AWS Backup' {
+      description 'Backs up and restores supported resources, with backup plans, vaults, and coverage reports.'
+      metadata {
+        uses 'aws-backup'
+      }
+    }
+    macie = platform 'Amazon Macie' {
+      description 'Optional sensitive-data monitoring.'
+      metadata {
+        uses 'amazon-macie'
+      }
+    }
+  }
+
+  amsAccount = zone 'AMS service account' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Amazon VPC (AMS orchestrator)' {
+      description 'An AMS orchestrator VPC boundary is shown; network topology is not specified.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+    managedServices = platform 'AWS Managed Services (AMS)' {
+      description 'Provides the AMS Console, Alarm Manager, 24x7 helpdesk, and operational service.'
+      metadata {
+        uses 'aws-managed-services'
+      }
+    }
+    eventBridge = platform 'Amazon EventBridge' {
+      description 'Receives monitoring, security, patching, and backup events for AMS workflows.'
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions Express Workflows' {
+      metadata {
+        uses 'aws-step-functions'
+      }
+      automation = system 'AMS operational automation' {
+        description 'Investigates alarms, reduces noise, manages cases, remediates issues, and aggregates and reports operational events.'
+      }
+    }
+    sns = platform 'Amazon SNS' {
+      description 'Notification service shown in AMS monitoring and security operations.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Shown alongside AMS patch coverage reporting; the source does not specify the query design.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+  }
+
+  securityAccount = zone 'Centralized AWS security account' {
+    metadata {
+      platform 'aws'
+    }
+    guardDutyAdmin = platform 'Amazon GuardDuty' {
+      description 'Central security-account GuardDuty administration and findings.'
+      metadata {
+        uses 'amazon-guardduty'
+      }
+    }
+    configAggregator = platform 'AWS Config aggregator' {
+      description 'Aggregates account configuration and compliance findings.'
+      metadata {
+        uses 'aws-config'
+      }
+    }
+    securityHub = platform 'AWS Security Hub' {
+      description 'Aggregates security events from AWS and optional third-party security tools.'
+      metadata {
+        uses 'aws-security-hub'
+      }
+    }
+    eventBridge = platform 'Amazon EventBridge' {
+      description 'Routes centralized security events.'
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+  }
+
+  loggingAccount = zone 'Centralized AWS logging account' {
+    metadata {
+      platform 'aws'
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      description 'The source diagram labels this Amazon Kinesis Data Firehose.'
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+    openSearch = platform 'Amazon OpenSearch Service' {
+      metadata {
+        uses 'amazon-opensearch-service'
+      }
+      operationalIndex = database 'Operational log and event index' {
+        description 'Indexed logs and events for operational alerting, reporting, and dashboards.'
+      }
+    }
+  }
+
+  supportServices = zone 'AWS Support' {
+    metadata {
+      platform 'aws'
+    }
+    support = platform 'AWS Support' {
+      description 'The standard AWS Support console and APIs receive incidents and service requests and carry AMS updates and resolutions.'
+      metadata {
+        uses 'aws-support'
+      }
+    }
+  }
+
+  customer -> customerItsm 'Uses'
+  partner -> customerItsm 'Raises incidents and service requests through'
+  itsmTeam -> customerItsm 'Owns integration and service-level tooling for'
+  appOps -> customerWorkloads 'Implements application, OS, and infrastructure practices for'
+  customer -> customerWorkloads 'Defines governance and operational policies for'
+  amsOps -> customerWorkloads 'Monitors and operates 24x7'
+  amsSecurity -> customerWorkloads 'Supports security operations for'
+  cloudArchitect -> customerWorkloads 'Provides named architecture support for'
+  deliveryManager -> customerWorkloads 'Provides named service delivery support for'
+
+  customerItsm -> supportServices.support 'Submits incidents and service requests through the connector or AWS Support APIs'
+  supportServices.support -> customerItsm 'Returns AMS updates and resolutions through the AWS Support portal'
+  amsAccount.managedServices -> supportServices.support 'Provides AMS helpdesk and incident management through'
+  amsAccount.managedServices -> customerWorkloads 'Provides managed operational services for'
+
+  customerAccounts.customerWorkloads -> customerAccounts.cloudwatch 'Publishes application and OS metrics and logs to'
+  customerAccounts.ec2.instances -> customerAccounts.cloudwatch 'Sends metrics and OS telemetry to'
+  customerAccounts.rds.databases -> customerAccounts.cloudwatch 'Publishes database metrics to'
+  customerAccounts.elb -> customerAccounts.cloudwatch 'Publishes service metrics to'
+  customerAccounts.vpn -> customerAccounts.cloudwatch 'Publishes service metrics to'
+  customerAccounts.natGateway -> customerAccounts.cloudwatch 'Publishes service metrics to'
+  customerAccounts.cloudtrail -> customerAccounts.cloudwatch.localLogs 'Sends AWS API logs to'
+  customerAccounts.flowLogs -> customerAccounts.cloudwatch.localLogs 'Sends network flow logs to'
+  customerAccounts.route53 -> customerAccounts.cloudwatch.localLogs 'Sends DNS query logs to'
+  customerAccounts.cloudwatch.localLogs -> loggingAccount.firehose 'Streams consolidated local logs to'
+  securityAccount.eventBridge -> loggingAccount.firehose 'Streams centralized security events to'
+  loggingAccount.firehose -> loggingAccount.openSearch.operationalIndex 'Collects, filters, transforms, and indexes events in'
+
+  customerAccounts.cloudwatch -> amsAccount.eventBridge 'Sends monitoring alarms and events to'
+  customerAccounts.config -> amsAccount.eventBridge 'Sends compliance findings to'
+  customerAccounts.guardDuty -> amsAccount.eventBridge 'Sends threat findings and guardrail events to'
+  customerAccounts.systemsManager -> amsAccount.eventBridge 'Sends patch and remediation events to'
+  customerAccounts.backup -> amsAccount.eventBridge 'Sends backup events to'
+  amsAccount.eventBridge -> amsAccount.stepFunctions.automation 'Routes events to'
+  amsAccount.stepFunctions.automation -> customerAccounts.systemsManager 'Runs patching and remediation workflows through'
+  amsAccount.stepFunctions.automation -> customerAccounts.backup 'Orchestrates backup, restore, and pre-patch backup workflows through'
+  amsAccount.eventBridge -> amsAccount.sns 'Triggers operational notifications through'
+  amsAccount.stepFunctions.automation -> supportServices.support 'Creates and updates incidents through AWS Support APIs'
+  amsAccount.athena -> amsAccount.managedServices 'Supports AMS patch coverage reporting in'
+
+  customerAccounts.config -> securityAccount.configAggregator 'Aggregates account configuration and compliance findings to'
+  customerAccounts.guardDuty -> securityAccount.guardDutyAdmin 'Centralizes threat findings to'
+  thirdPartySecurity -> securityAccount.securityHub 'Provides optional security events to'
+  securityAccount.securityHub -> securityAccount.eventBridge 'Routes security findings to'
+  securityAccount.configAggregator -> securityAccount.eventBridge 'Routes compliance findings to'
+  securityAccount.guardDutyAdmin -> securityAccount.eventBridge 'Routes threat findings to'
+
+  customerAccounts.config -> customerAccounts.customerWorkloads 'Evaluates compliance rules for'
+  customerAccounts.guardDuty -> customerAccounts.ec2.instances 'Monitors for threats and guardrails on'
+  customerAccounts.guardDuty -> customerAccounts.s3 'Monitors for threats and guardrails on'
+  customerAccounts.guardDuty -> customerAccounts.iam 'Monitors for threats and guardrails on'
+  customerAccounts.guardDuty -> customerAccounts.eks.workloads 'Monitors for threats and guardrails on'
+  customerAccounts.systemsManager -> customerAccounts.customerWorkloads 'Patches operating systems and remediates incidents on'
+  customerAccounts.backup -> customerAccounts.customerWorkloads 'Backs up and restores supported resources for'
+  customerAccounts.backup -> customerAccounts.ebs 'Backs up and restores'
+  customerAccounts.backup -> customerAccounts.efs 'Backs up and restores'
+  customerAccounts.macie -> customerAccounts.s3 'Optionally monitors sensitive data in'
+}
+
+views {
+  view index {
+    title 'AWS Managed Services (AMS) for Operational Excellence'
+    include *, customerAccounts.*, amsAccount.*, securityAccount.*, loggingAccount.*, supportServices.*
+  }
+}

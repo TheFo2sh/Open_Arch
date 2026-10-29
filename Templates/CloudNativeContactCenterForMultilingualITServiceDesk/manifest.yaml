@@ -1,0 +1,7 @@
+PackageId: OpenArch.CloudNativeContactCenterForMultilingualITServiceDesk
+Name: Cloud-native Contact Center for Multilingual IT Service Desk
+Description: An omnichannel Amazon Connect IT service desk with conversational self-service, multilingual recording analysis, and contact analytics.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, contact-center, it-service-desk, multilingual]

@@ -1,0 +1,161 @@
+# Technologies named in the AWS reference architecture, keyed as architecture.c4 metadata uses them.
+technologies:
+  - key: aws-iot-greengrass
+    name: AWS IoT Greengrass
+    description: Runs Greengrass Core at the property edge to connect, publish, and subscribe to device data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/greengrass/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: freertos
+    name: FreeRTOS
+    description: Operating system named for the lodging IoT devices; the reference also permits other operating systems.
+    vendor: The FreeRTOS Project
+    url: https://www.freertos.org/
+    types: [library]
+  - key: mqtt
+    name: MQTT
+    description: Messaging protocol used by IoT devices to communicate with Greengrass Core.
+    vendor: OASIS
+    url: https://mqtt.org/
+    types: [library]
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Connects and manages devices, maintains device shadows, supports OTA updates, and secures devices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+  - key: aws-iot-device-defender
+    name: AWS IoT Device Defender
+    description: IoT device security service shown alongside AWS IoT Core.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-device-defender/
+    types: [managed-service]
+    platform: aws
+  - key: aws-iot-device-management
+    name: AWS IoT Device Management
+    description: IoT device management service shown alongside AWS IoT Core.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-device-management/
+    types: [managed-service]
+    platform: aws
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Orchestrates the serverless workflows shown around the lodging Lambda functions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the IoT Core pass-through, Alexa event handler, and authentication functions shown in the diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: API service shown between Alexa Voice Service and the lodging microservices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+  - key: alexa-voice-service
+    name: Alexa Voice Service
+    description: Voice service used for voice-enabled guest room controls; the diagram does not specify account ownership or tenancy.
+    vendor: Amazon
+    url: https://developer.amazon.com/en-US/alexa/alexa-voice-service
+    types: [managed-service, third-party]
+    platform: aws
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Streaming service shown for IoT data and published operational events.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service, data-platform]
+    platform: aws
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Purpose-built database used to store events and operational data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-kinesis-data-firehose
+    name: Amazon Kinesis Data Firehose
+    description: Delivers streaming data to the raw-data store in the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firehose/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-pinpoint
+    name: Amazon Pinpoint
+    description: Delivers operational and property-management alerts through multiple channels.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/pinpoint/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores raw and processed data for the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-glue
+    name: AWS Glue
+    description: Provides the Data Catalog and data-processing services shown for the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-emr
+    name: Amazon EMR
+    description: Processes data in the analytics pipeline.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/emr/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-sagemaker-ground-truth
+    name: Amazon SageMaker Ground Truth
+    description: Ground Truth service shown in the AI/ML section of the diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/groundtruth/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Builds, trains, and deploys inference models; edge model deployment to Greengrass Core is optional.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/ai/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Analytics warehouse with optional data marts for heavily used analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Analytics query service shown for the lodging data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service, data-platform]
+    platform: aws
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Analytics service shown with Amazon Redshift and Amazon Athena.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
