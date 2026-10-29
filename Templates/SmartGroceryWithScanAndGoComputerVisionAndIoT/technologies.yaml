@@ -1,0 +1,130 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+technologies:
+  - key: aws-iot-greengrass
+    name: AWS IoT Greengrass
+    description: Connects and aggregates data from in-store sensors and smart retail devices using MQTT.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/greengrass/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-panorama
+    name: AWS Panorama
+    description: On-premises appliance that applies machine-learning models to existing IP-camera feeds for store intelligence and picking workflows.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/panorama/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Cloud IoT services that securely connect and route data from store devices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: API integration service for customer-facing ordering and associate-facing picking applications.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-eventbridge
+    name: Amazon EventBridge
+    description: Event integration service for smart grocery applications and external event sources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eventbridge/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-appsync
+    name: AWS AppSync
+    description: API integration service that also supports the real-time store operations dashboard.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/appsync/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Serverless compute for smart grocery business logic and order management.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Orchestrates serverless order-management workflows.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Streams in-store smart-device and IoT data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-kinesis-data-firehose
+    name: Amazon Kinesis Data Firehose
+    description: Delivers streaming IoT and device data to data destinations such as the S3 data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/data-firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-kinesis-video-streams
+    name: Amazon Kinesis Video Streams
+    description: Optimizes IP-camera video feeds for computer-vision processing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/video-streams/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores events and transactional state and connects smart grocery services to transactional data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service (Amazon S3)
+    description: Scalable data lake for in-store and digital transactions, sensor data, and telemetry.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-pinpoint
+    name: Amazon Pinpoint
+    description: Delivers targeted, location-based customer messages across channels.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/pinpoint/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-location-service
+    name: Amazon Location Service
+    description: Location and geofence service shown for curbside-pickup use cases in the source diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/location/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: third-party-payment-gateway
+    name: Payment gateway
+    description: External payment service shown in the source diagram; vendor and integration details are unspecified.
+    types: [third-party]
+  - key: third-party-iot-event-provider
+    name: Third-party IoT event provider
+    description: External IoT event source shown in the source diagram; provider and event contract are unspecified.
+    types: [third-party]
