@@ -1,0 +1,132 @@
+// Multi-Model Inference Workflow Orchestration, based on AWS's reference architecture.
+// The users and systems are slots to map onto a project's own architecture.
+model {
+  users = user 'Users and administrators' {
+    description 'Submit inference jobs, monitor their status, and retrieve results.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    cognito = platform 'Amazon Cognito' {
+      description 'User pools authenticate access to the REST API.'
+      metadata {
+        uses 'amazon-cognito'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'REST interface for creating jobs, monitoring them, and retrieving results.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the API functions.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      jobApi = system 'Inference job API' {
+        description 'API functions that create, cancel, monitor, and retrieve inference jobs.'
+
+        createJob = container 'Create job function' {
+          description 'Handles POST /create-job, uploads the supplied input data, and records the job.'
+        }
+        cancelJob = container 'Cancel job function' {
+          description 'Handles requests to cancel an inference job.'
+        }
+        getJobStatus = container 'Get job status function' {
+          description 'Monitors the status of an inference job.'
+        }
+        getJobResults = container 'Get job results function' {
+          description 'Handles GET /get-job-results and reads the aggregated results.'
+        }
+      }
+    }
+
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Stores job status and model endpoint metadata.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      jobsTable = database 'Job status table' {
+        description 'Tracks inference jobs; a new item change is published to the stream.'
+      }
+      endpointMetadata = database 'Endpoint metadata table' {
+        description 'Stores metadata about the SageMaker endpoints used by the workflow.'
+      }
+      streams = platform 'DynamoDB Streams' {
+        description 'Publishes changes from the job status table to trigger inference.'
+        metadata {
+          uses 'amazon-dynamodb-streams'
+        }
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Object storage for submitted job data and final insight results.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      inputData = database 'Inference input objects' {
+        description 'Stores the data objects submitted with inference jobs.'
+      }
+      results = database 'Aggregated inference results' {
+        description 'Stores the final insights collected by the workflow.'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Orchestrates inference after a new job is detected.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    inferenceWorkflow = system 'Inference workflow' {
+      description 'Runs model inference for a job and aggregates the endpoint outputs.'
+
+      stateMachine = container 'Inference state machine' {
+        description 'Coordinates input retrieval, endpoint calls, and final result storage.'
+
+        mapState = component 'Parallel category inference Map state' {
+          description 'Invokes the category-specific model endpoints concurrently and collects their outputs.'
+        }
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Hosts model endpoints invoked by category.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+      modelEndpoints = system 'Model inference endpoints' {
+        description 'Category-specific endpoints; optional multi-model endpoints can further specialize inference, such as by language.'
+
+        categoryEndpoints = container 'Category-specific model endpoints' {
+          description 'Serves model inference for the categories selected by the workflow.'
+        }
+      }
+    }
+  }
+
+  users -> aws.lambda.jobApi 'Uses the REST API through API Gateway'
+  aws.cognito -> aws.apiGateway 'Authenticates API requests'
+  aws.apiGateway -> aws.lambda.jobApi 'Routes REST methods to'
+  aws.lambda.jobApi.createJob -> aws.s3.inputData 'Stores submitted input data in'
+  aws.lambda.jobApi.createJob -> aws.dynamodb.jobsTable 'Creates job tracking records in'
+  aws.lambda.jobApi.getJobStatus -> aws.dynamodb.jobsTable 'Reads job status from'
+  aws.dynamodb.jobsTable -> aws.dynamodb.streams 'Publishes item changes to'
+  aws.dynamodb.streams -> aws.inferenceWorkflow 'Triggers for new job items'
+  aws.stepFunctions -> aws.inferenceWorkflow 'Executes'
+  aws.inferenceWorkflow.stateMachine -> aws.dynamodb.endpointMetadata 'Reads endpoint metadata from'
+  aws.inferenceWorkflow.stateMachine -> aws.s3.inputData 'Reads the job input object from'
+  aws.s3.inputData -> aws.sagemaker.modelEndpoints.categoryEndpoints 'Supplies the job input object for inference'
+  aws.inferenceWorkflow.stateMachine.mapState -> aws.sagemaker.modelEndpoints.categoryEndpoints 'Invokes endpoints in parallel'
+  aws.inferenceWorkflow.stateMachine -> aws.s3.results 'Stores aggregated insights in'
+  aws.lambda.jobApi.getJobResults -> aws.s3.results 'Reads final results from'
+}
+
+views {
+  view index {
+    title 'Multi-Model Inference Workflow Orchestration'
+    include *, aws.*
+  }
+}
