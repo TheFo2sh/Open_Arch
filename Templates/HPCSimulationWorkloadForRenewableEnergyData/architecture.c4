@@ -1,0 +1,178 @@
+// HPC Simulation Workload for Renewable Energy Data, based on AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/hpc-simulation-renewable-energy/hpc-simulation-renewable-energy.html
+// Read together with the repository's specification.c4. Systems and users are slots.
+model {
+  engineer = user 'Renewable energy engineer' {
+    description 'Accesses the HPC cluster and uses simulation and reporting results.'
+  }
+  assets = system 'Renewable energy assets' {
+    description 'On-premises solar panels, wind turbines, and weather stations produce operational telemetry.'
+  }
+  provisioning = system 'HPC cluster provisioning workflow' {
+    description 'Uses AWS ParallelCluster and CloudFormation templates; the source does not specify where the provisioning tool runs.'
+    parallelCluster = container 'AWS ParallelCluster' {
+      metadata {
+        uses 'aws-parallelcluster'
+      }
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      description 'Connects renewable-energy devices and routes messages using IoT rules.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    sitewise = platform 'AWS IoT SiteWise' {
+      description 'Collects and models industrial equipment telemetry.'
+      metadata {
+        uses 'aws-iot-sitewise'
+      }
+      assetModels = database 'Asset models and telemetry' {
+        description 'Industrial equipment models and collected asset data.'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Processes incoming telemetry records in real time.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      description 'Delivers processed stream records to the data lake.'
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+
+    s3 = platform 'Amazon Simple Storage Service (Amazon S3)' {
+      description 'Central data lake for workload, telemetry, and simulation data.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      workloadData = database 'Workload data buckets' {
+        description 'S3 buckets for telemetry and simulation workload inputs and outputs; the exact bucket layout is unspecified.'
+      }
+    }
+    glacier = platform 'Amazon S3 Glacier Deep Archive' {
+      description 'Long-term archive storage tier shown with the S3 data lake.'
+      metadata {
+        uses 'amazon-s3-glacier-deep-archive'
+      }
+      archivedData = database 'Archived workload data' {
+        description 'Workload data retained in the S3 Glacier Deep Archive storage tier.'
+      }
+    }
+
+    cloudformation = platform 'AWS CloudFormation' {
+      description 'Creates cluster infrastructure from templates.'
+      metadata {
+        uses 'aws-cloudformation'
+      }
+    }
+    ec2 = platform 'Amazon EC2' {
+      description 'Runs the HPC cluster head node.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+      headNode = system 'HPC cluster head node' {
+        description 'Cluster entry and management node for simulation jobs.'
+      }
+    }
+    autoScaling = platform 'Amazon EC2 Auto Scaling' {
+      description 'Manages the HPC compute fleet.'
+      metadata {
+        uses 'amazon-ec2-auto-scaling'
+      }
+      simulationWorkload = system 'HPC simulation workload' {
+        description 'Simulation jobs run across the EC2 compute fleet.'
+      }
+    }
+    ebs = platform 'Amazon Elastic Block Store (Amazon EBS)' {
+      description 'Block storage shown for the cluster head node.'
+      metadata {
+        uses 'amazon-ebs'
+      }
+      headNodeVolume = database 'Head node block volume' {
+        description 'Block storage associated with the HPC head node.'
+      }
+    }
+    fsx = platform 'Amazon FSx for Lustre' {
+      description 'Shared high-performance parallel filesystem for HPC compute nodes, integrated with S3.'
+      metadata {
+        uses 'amazon-fsx-for-lustre'
+      }
+      sharedFilesystem = database 'Shared HPC filesystem' {
+        description 'Shared simulation workspace and high-performance storage for cluster nodes.'
+      }
+    }
+
+    athena = platform 'Amazon Athena' {
+      description 'Prepares report data and builds views for analysis.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Runs crawlers to discover JSON and CSV schemas in S3.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      description 'Stores schemas discovered by AWS Glue crawlers.'
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      schemas = database 'Discovered data schemas' {
+        description 'Catalog entries for schemas discovered in JSON and CSV data.'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Queries report data and visualizes results in dashboards.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    cloudWatch = platform 'Amazon CloudWatch' {
+      description 'Monitoring service shown alongside the HPC cluster.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+  }
+
+  assets -> aws.iotCore 'Sends device telemetry through'
+  aws.iotCore -> aws.sitewise.assetModels 'Routes equipment data for modeling in'
+  aws.iotCore -> aws.kinesis 'Routes messages through IoT rules to'
+  aws.kinesis -> aws.firehose 'Delivers stream records through'
+  aws.firehose -> aws.s3.workloadData 'Writes processed records to'
+  aws.s3.workloadData -> aws.glue 'Provides JSON and CSV data for crawling'
+  aws.glue -> aws.glueCatalog.schemas 'Registers discovered schemas in'
+  aws.s3.workloadData -> aws.athena 'Provides data for report preparation'
+  aws.athena -> aws.quickSight 'Provides prepared report views for dashboards in'
+  aws.s3.workloadData -> aws.glacier.archivedData 'Archives long-term workload data in'
+
+  provisioning.parallelCluster -> aws.cloudformation 'Uses templates to provision infrastructure with'
+  aws.cloudformation -> aws.ec2.headNode 'Creates the cluster head-node infrastructure'
+  aws.cloudformation -> aws.autoScaling 'Creates the scalable compute fleet'
+  aws.ec2.headNode -> aws.ebs.headNodeVolume 'Uses block storage from'
+  aws.ec2.headNode -> aws.autoScaling.simulationWorkload 'Coordinates simulation jobs on'
+  engineer -> aws.ec2.headNode 'Accesses the cluster with NICE DCV or Secure Shell (SSH)'
+  aws.autoScaling.simulationWorkload -> aws.fsx.sharedFilesystem 'Uses shared high-performance storage on'
+  aws.s3.workloadData -> aws.fsx.sharedFilesystem 'Provides simulation inputs through S3 integration'
+  aws.fsx.sharedFilesystem -> aws.s3.workloadData 'Returns simulation outputs through S3 integration'
+  aws.cloudWatch -> aws.autoScaling.simulationWorkload 'Monitors the HPC compute workload'
+}
+
+views {
+  view index {
+    title 'HPC Simulation Workload for Renewable Energy Data'
+    include *, aws.*
+  }
+}

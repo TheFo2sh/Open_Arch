@@ -1,0 +1,146 @@
+# The technologies used by the blueprint, by the key its metadata { uses } names.
+technologies:
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Connects renewable-energy devices and routes their messages to AWS services, including through IoT rules.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-sitewise
+    name: AWS IoT SiteWise
+    description: Collects, organizes, and models industrial equipment data from renewable-energy assets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-sitewise/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Collects and processes renewable-energy telemetry records in real time.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: amazon-data-firehose
+    name: Amazon Data Firehose
+    description: Delivers the processed telemetry stream to Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service (Amazon S3)
+    description: Stores the central workload data lake, including telemetry and simulation input and output data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-s3-glacier-deep-archive
+    name: Amazon S3 Glacier Deep Archive
+    description: Provides the long-term archival storage tier shown alongside the workload data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/storage-classes/glacier/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-parallelcluster
+    name: AWS ParallelCluster
+    description: Open-source cluster management tool used with CloudFormation templates to create HPC infrastructure.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/hpc/parallelcluster/
+    types: [library]
+  - key: aws-cloudformation
+    name: AWS CloudFormation
+    description: Uses templates to provision the HPC cluster infrastructure.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudformation/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform for the HPC cluster head node and compute instances.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ec2-auto-scaling
+    name: Amazon EC2 Auto Scaling
+    description: Manages the scalable fleet of EC2 instances used for HPC computations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/autoscaling/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ebs
+    name: Amazon Elastic Block Store (Amazon EBS)
+    description: Block storage shown for the HPC cluster head node.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ebs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-fsx-for-lustre
+    name: Amazon FSx for Lustre
+    description: High-performance parallel file system shared by HPC compute nodes and integrated with S3 simulation data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fsx/lustre/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Prepares report data and builds views for analysis.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-glue
+    name: AWS Glue
+    description: Runs crawlers that discover JSON and CSV schemas in the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-glue-data-catalog
+    name: AWS Glue Data Catalog
+    description: Stores schemas discovered by AWS Glue crawlers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Queries report data and builds dashboards and visualizations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Monitoring service shown alongside the HPC cluster.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: nice-dcv
+    name: NICE DCV
+    description: Remote desktop client option shown for engineers accessing the cluster.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/hpc/dcv/
+    types: [library]
+  - key: secure-shell-ssh
+    name: Secure Shell (SSH)
+    description: Remote-access protocol shown as an option for engineers connecting to the cluster.
+    types: [third-party]

@@ -1,0 +1,7 @@
+PackageId: OpenArch.HPCSimulationWorkloadForRenewableEnergyData
+Name: HPC Simulation Workload for Renewable Energy Data
+Description: Ingest renewable-energy telemetry into an S3 data lake, run HPC simulations with shared Lustre storage, and analyze results with AWS reporting services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, hpc, simulation, renewable-energy, data-lake]
