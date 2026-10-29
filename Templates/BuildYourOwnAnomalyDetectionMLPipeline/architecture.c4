@@ -1,0 +1,91 @@
+// Build Your Own Anomaly Detection ML Pipeline.
+// AWS source page and diagram links are in README.md.
+model {
+  analyst = user 'ML engineer' {
+    description 'Configures and reviews the anomaly detection workflow.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Accepts incoming observations as a stream.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+      observations = database 'Observation stream'
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores source and prepared observations and model artifacts.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      sourceData = database 'Source observations'
+      preparedData = database 'Prepared training data'
+      modelArtifacts = database 'Model artifacts'
+    }
+    glue = platform 'AWS Glue' {
+      description 'Prepares stored observations for model training.'
+      metadata {
+        uses 'aws-glue'
+      }
+      preparation = system 'Data preparation' {
+        description 'Transforms source observations into training data.'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker' {
+      description 'Trains and serves the anomaly detection model.'
+      metadata {
+        uses 'amazon-sagemaker'
+      }
+      training = system 'Model training' {
+        description 'Builds the anomaly detection model from prepared observations.'
+      }
+      scoring = system 'Anomaly scoring' {
+        description 'Scores new observations with the trained model.'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Processes scored observations and routes anomaly events.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      resultProcessor = system 'Scoring result processor' {
+        description 'Handles model scores and forwards anomaly events.'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      description 'Delivers notifications for detected anomalies.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    cloudwatch = platform 'Amazon CloudWatch' {
+      description 'Collects pipeline metrics and supports operational alarms.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+  }
+
+  analyst -> aws.sagemaker.training 'Builds and reviews the model with'
+  aws.kinesis.observations -> aws.s3.sourceData 'Archives incoming observations to'
+  aws.s3.sourceData -> aws.glue.preparation 'Supplies observations for preparation to'
+  aws.glue.preparation -> aws.s3.preparedData 'Writes prepared training data to'
+  aws.s3.preparedData -> aws.sagemaker.training 'Trains on'
+  aws.sagemaker.training -> aws.s3.modelArtifacts 'Stores model artifacts in'
+  aws.kinesis.observations -> aws.sagemaker.scoring 'Provides observations for scoring to'
+  aws.s3.modelArtifacts -> aws.sagemaker.scoring 'Loads the trained model from'
+  aws.sagemaker.scoring -> aws.lambda.resultProcessor 'Sends scores to'
+  aws.lambda.resultProcessor -> aws.sns 'Publishes anomaly notifications through'
+  aws.lambda.resultProcessor -> aws.cloudwatch 'Publishes operational metrics to'
+}
+
+views {
+  view index {
+    title 'Build Your Own Anomaly Detection ML Pipeline'
+    include *, aws.*
+  }
+}

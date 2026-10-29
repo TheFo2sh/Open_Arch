@@ -1,0 +1,108 @@
+// Cloud Bursting EDA with Amazon FSx for NetApp ONTAP.
+// Based on the AWS reference architecture and its linked diagram.
+// Systems and users are slots mapped onto the project's own.
+model {
+  engineers = user 'Engineers' {
+    description 'Access EDA data from the on-premises data center.'
+  }
+
+  onPremises = zone 'On-premises data center' {
+    metadata {
+      platform 'other'
+    }
+
+    netapp = platform 'On-premises NetApp system' {
+      description 'NetApp storage shown in the source; its model and ONTAP version are not specified.'
+      metadata {
+        uses 'on-premises-netapp-system'
+      }
+
+      jobInputOrigin = database 'Job input origin volume' {
+        description 'On-premises origin for the job input data cached in AWS.'
+      }
+      jobResultsCache = database 'Job results FlexCache volume' {
+        description 'On-premises FlexCache paired with the job results origin volume in AWS.'
+      }
+    }
+
+    edaEnvironment = system 'On-premises EDA environment' {
+      description 'The source diagram shows on-premises servers and engineers; the server software and exact roles are not specified.'
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Production connectivity option between the on-premises data center and AWS.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    siteToSiteVpn = platform 'AWS Site-to-Site VPN' {
+      description 'Initial testing or proof-of-concept connectivity option instead of Direct Connect.'
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+
+    vpc = platform 'Amazon VPC' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      ec2 = platform 'Amazon EC2' {
+        description 'EC2 instances run the EDA jobs; the source does not specify their sizing or scaling configuration.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+
+        cloudEda = system 'Cloud EDA workload' {
+          description 'EDA jobs burst from the on-premises environment to Amazon EC2.'
+
+          jobs = container 'EDA job execution' {
+            description 'Runs EDA jobs using input data from the local FSx FlexCache volume and writes results to the cloud origin volume. The EDA software is not identified by AWS.'
+          }
+        }
+      }
+
+      fsx = platform 'Amazon FSx for NetApp ONTAP' {
+        description 'Multi-Availability Zone file system; the diagram depicts two Availability Zones.'
+        metadata {
+          uses 'amazon-fsx-for-netapp-ontap'
+        }
+
+        jobInputCache = database 'Job input FlexCache volume' {
+          description 'Cloud FlexCache paired with the on-premises job input origin volume; required blocks are cached on demand.'
+        }
+        jobResultsOrigin = database 'Job results origin volume' {
+          description 'Cloud origin volume where EDA jobs write results for access from the on-premises FlexCache.'
+        }
+      }
+    }
+  }
+
+  engineers -> onPremises.edaEnvironment 'Accesses EDA data from'
+  onPremises.edaEnvironment -> onPremises.netapp.jobInputOrigin 'Uses as the job input origin'
+  onPremises.edaEnvironment -> onPremises.netapp.jobResultsCache 'Reads requested job results from'
+
+  aws.directConnect -> aws.vpc 'Provides production connectivity to'
+  aws.directConnect -> onPremises.netapp 'Connects AWS to'
+  aws.siteToSiteVpn -> aws.vpc 'Provides testing connectivity to'
+  aws.siteToSiteVpn -> onPremises.netapp 'Connects AWS to'
+  aws.vpc.fsx -> onPremises.netapp 'Cluster peered with'
+
+  aws.vpc.fsx.jobInputCache -> onPremises.netapp.jobInputOrigin 'FlexCache paired with; reads required blocks on demand from'
+  aws.vpc.ec2.cloudEda.jobs -> aws.vpc.fsx.jobInputCache 'Reads job input over NFS from'
+  aws.vpc.ec2.cloudEda.jobs -> aws.vpc.fsx.jobResultsOrigin 'Writes job results to'
+  onPremises.netapp.jobResultsCache -> aws.vpc.fsx.jobResultsOrigin 'FlexCache paired with; fetches only data users read from'
+}
+
+views {
+  view index {
+    title 'Cloud Bursting EDA with Amazon FSx for NetApp ONTAP'
+    include *, onPremises.*, onPremises.netapp.*, aws.*, aws.vpc.*, aws.vpc.ec2.*, aws.vpc.ec2.cloudEda.*, aws.vpc.fsx.*
+  }
+}

@@ -1,0 +1,7 @@
+PackageId: OpenArch.AmazonEKSOnAWSOutpostsRack
+Name: Amazon Elastic Kubernetes Service on AWS Outposts Rack
+Description: A private Amazon EKS control plane in an AWS Region manages self-managed EC2 nodes on an AWS Outposts rack, with private service endpoints and local gateway connectivity.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, kubernetes, eks, outposts, hybrid-cloud]

@@ -1,0 +1,202 @@
+// Electric Vehicle Charging Station Management System with AWS IoT, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/electric-vehicle-charging-station-management-software/electric-vehicle-charging-station-management-software.html
+// The AWS source page's IoT diagram is linked from that page. Systems and users are slots.
+model {
+  chargePoint = system 'EV charge point (EVSE)' {
+    description 'Field charge point, domestic or fast-charging, with sensors, charging actuators, internet connectivity, and an X.509 device certificate.'
+    mqttClient = container 'MQTT client' {
+      description 'Connects to AWS IoT Core with mutual TLS.'
+    }
+    httpClient = container 'HTTP client' {
+      description 'The source diagram shows an HTTP client using mutual TLS; its specific purpose is not described.'
+    }
+  }
+  operator = user 'Charge point operator' {
+    description 'Uses fleet management tools and dashboards.'
+  }
+  mobilityProvider = user 'Mobility solution provider' {
+    description 'External partner persona shown for payment, billing, reservations, and transactions.'
+  }
+  ecosystemPartner = user 'Utilities and vehicle OEMs' {
+    description 'External consumers shown for routing and energy-demand services.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    privateCa = platform 'AWS Private Certificate Authority' {
+      description 'Issues X.509 certificates used in charge-point provisioning and authentication.'
+      metadata {
+        uses 'aws-private-ca'
+      }
+    }
+    iotCore = platform 'AWS IoT Core' {
+      description 'MQTT entry point and rules engine; also provides device shadows and fleet indexing.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+      deviceShadows = database 'Charge point device shadows' {
+        description 'Device state that remains available to applications and other services while a charge point is disconnected.'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Compute platform for provisioning, certificate rotation, and the serverless business-logic areas shown in the diagram.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      jitp = system 'Just-in-time provisioning' {
+        description 'Lambda-based workflow that provisions an AWS IoT thing with its policy and certificate.'
+      }
+      certificateRotation = system 'Certificate rotation handler' {
+        description 'Handles certificate generation and rotation after AWS IoT Device Defender identifies certificates nearing expiration.'
+      }
+      paymentBilling = system 'Payment and billing application' {
+        description 'Lambda-based business-logic area shown with DynamoDB and API Gateway; implementation and data model are unspecified.'
+      }
+      reservationsTransactions = system 'Reservations and transactions application' {
+        description 'Lambda-based business-logic area shown with SQS and DynamoDB; message sequencing and data model are unspecified.'
+      }
+      routingForecasting = system 'EV routing and energy demand application' {
+        description 'Lambda-based business-logic area shown with SageMaker AI and API Gateway.'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      description 'Notification service in the device certificate rotation workflow.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    deviceDefender = platform 'AWS IoT Device Defender' {
+      description 'Identifies certificates close to expiration and provides IoT fleet security monitoring.'
+      metadata {
+        uses 'aws-iot-device-defender'
+      }
+    }
+    timestream = platform 'Amazon Timestream' {
+      description 'One of the source architecture’s optional destinations for charge-point telemetry.'
+      metadata {
+        uses 'amazon-timestream'
+      }
+      telemetry = database 'Telemetry time series' {
+        description 'Charge-point telemetry stored for analysis and fleet management.'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Stores charge-point logs, cold metrics, and firmware; the source also names S3 as an alternative telemetry store.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    deviceManagement = platform 'AWS IoT Device Management' {
+      description 'Uses IoT jobs to manage over-the-air charge-point firmware updates.'
+      metadata {
+        uses 'aws-iot-device-management'
+      }
+    }
+    cloudwatch = platform 'Amazon CloudWatch' {
+      description 'Used to analyze IoT logs and troubleshoot the device fleet.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Stores the EVSE registry and the application records represented in the diagram.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      evseRegistry = database 'EVSE registry' {
+        description 'Device registry with credentials stored in encrypted form.'
+      }
+      billingRecords = database 'Payment and billing records' {
+        description 'DynamoDB store shown in the payment and billing application area; record schema is not supplied.'
+      }
+      reservationRecords = database 'Reservation and transaction records' {
+        description 'DynamoDB store shown in the reservations and transactions application area; record schema is not supplied.'
+      }
+    }
+    cloudfront = platform 'Amazon CloudFront' {
+      description 'Serves the charge point fleet management application.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    cognito = platform 'Amazon Cognito' {
+      description 'Stores charge point operator user identities.'
+      metadata {
+        uses 'amazon-cognito'
+      }
+    }
+    quicksight = platform 'Amazon QuickSight' {
+      description 'Builds fleet management dashboards.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Provides API access to application data for partners, customers, and external consumers.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    sqs = platform 'Amazon Simple Queue Service' {
+      description 'Message queue shown in the reservations and transactions application area.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Supports energy demand forecasting and EV routing algorithms.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+    fleetManagement = system 'Charge point fleet management application' {
+      description 'Operator-facing application shown with CloudFront, Cognito, and QuickSight; its hosting and implementation are not specified.'
+    }
+  }
+
+  chargePoint -> aws.iotCore 'Connects over MQTT using mutual TLS'
+  chargePoint -> aws.iotCore 'The diagram also shows an HTTP client using mutual TLS'
+  aws.privateCa -> aws.iotCore 'Issues certificates used for charge-point authentication'
+  aws.lambda.jitp -> aws.iotCore 'Uses just-in-time provisioning to register the thing and its IoT policy'
+  aws.lambda.jitp -> aws.privateCa 'Uses X.509 certificates for device provisioning'
+  aws.lambda.jitp -> aws.dynamodb.evseRegistry 'Maintains the EVSE registry and encrypted credentials'
+
+  aws.deviceDefender -> aws.sns 'Identifies certificates nearing expiration for rotation'
+  aws.sns -> aws.lambda.certificateRotation 'Notifies the certificate rotation handler'
+  aws.lambda.certificateRotation -> aws.privateCa 'Generates replacement certificates'
+  aws.lambda.certificateRotation -> chargePoint 'Coordinates regular device certificate rotation'
+
+  aws.iotCore -> aws.timestream.telemetry 'IoT rules route telemetry for time-series analysis'
+  aws.iotCore -> aws.s3 'Stores device logs and cold metrics; S3 is also an optional telemetry destination'
+  aws.iotCore -> aws.cloudwatch 'IoT logs are analyzed for monitoring and troubleshooting'
+  aws.iotCore.deviceShadows -> aws.fleetManagement 'Makes charge point state available to the application layer'
+
+  aws.deviceManagement -> chargePoint 'Manages over-the-air updates through IoT jobs'
+  chargePoint -> aws.s3 'Downloads firmware files for over-the-air updates'
+
+  operator -> aws.fleetManagement 'Manages the charge point fleet'
+  aws.cloudfront -> aws.fleetManagement 'Serves the fleet management application'
+  aws.cognito -> aws.fleetManagement 'Provides operator identity management'
+  aws.quicksight -> aws.fleetManagement 'Provides fleet management dashboards'
+
+  mobilityProvider -> aws.lambda.paymentBilling 'Uses payment and billing capabilities'
+  aws.apiGateway -> aws.lambda.paymentBilling 'Exposes the application API'
+  aws.lambda.paymentBilling -> aws.dynamodb.billingRecords 'Uses the payment and billing data store'
+  mobilityProvider -> aws.lambda.reservationsTransactions 'Uses reservations and transaction capabilities'
+  aws.sqs -> aws.lambda.reservationsTransactions 'Supports the reservations and transactions application area'
+  aws.lambda.reservationsTransactions -> aws.dynamodb.reservationRecords 'Uses the reservations and transactions data store'
+
+  ecosystemPartner -> aws.lambda.routingForecasting 'Uses routing and energy-demand capabilities'
+  aws.apiGateway -> aws.lambda.routingForecasting 'Exposes data access APIs'
+  aws.sagemaker -> aws.lambda.routingForecasting 'Supports EV routing and energy demand forecasting'
+}
+
+views {
+  view index {
+    title 'Electric Vehicle Charging Station Management System with AWS IoT'
+    include *
+  }
+}

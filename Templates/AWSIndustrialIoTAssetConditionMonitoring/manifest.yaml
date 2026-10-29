@@ -1,0 +1,7 @@
+PackageId: OpenArch.AWSIndustrialIoTAssetConditionMonitoring
+Name: AWS Industrial IoT Asset Condition Monitoring
+Description: Monitor factory equipment health with AWS IoT edge collection, telemetry analytics, event detection, operator dashboards, and mitigation commands.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, industrial-iot, manufacturing, condition-monitoring]

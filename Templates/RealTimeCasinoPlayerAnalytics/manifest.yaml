@@ -1,0 +1,7 @@
+PackageId: OpenArch.RealTimeCasinoPlayerAnalytics
+Name: Real-Time Casino Player Analytics
+Description: A real-time casino telemetry pipeline that calculates player ratings, personalizes in-game offers, and predicts shuffler failures.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, gaming, analytics, machine-learning, real-time]

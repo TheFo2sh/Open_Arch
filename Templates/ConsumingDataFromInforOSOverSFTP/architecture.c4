@@ -1,0 +1,121 @@
+// Consuming Data from InforOS over SFTP, after AWS's reference architecture
+// (https://docs.aws.amazon.com/reference-architecture-diagrams/latest/consuming-data-from-inforos/consuming-data-from-inforos.html).
+// Read together with specification.c4. Systems and users are slots mapped onto the project's own.
+model {
+  administrator = user 'Administrator' {
+    description 'Creates an SFTP user and provides its credentials to Infor ION.'
+  }
+
+  inforApplications = system 'Infor CloudSuite applications' {
+    description 'Infor M3, Infor WMS, Infor EAM, and other Infor applications that produce data.'
+  }
+  inforIon = system 'Infor ION' {
+    description 'Infor service that acts as an SFTP client and polls for new data.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    transferFamily = platform 'AWS Transfer Family' {
+      description 'Managed SFTP service that accepts files from Infor ION.'
+      metadata {
+        uses 'aws-transfer-family'
+      }
+      sftpServer = system 'SFTP server' {
+        description 'The SFTP endpoint polled by Infor ION.'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Stores files transferred from InforOS.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataBucket = database 'Data bucket' {
+        description 'Object storage for transferred BOD/XML, delimiter-separated, JSON, or schema-free files.'
+      }
+    }
+
+    sqs = platform 'Amazon SQS' {
+      description 'An optional destination for Amazon S3 object-created event notifications.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'An optional destination for Amazon S3 object-created event notifications.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      notificationFunction = system 'Notification function' {
+        description 'Example Lambda target for notifications when new objects are written; its processing behavior is not specified.'
+      }
+    }
+    sns = platform 'Amazon SNS' {
+      description 'An optional destination for Amazon S3 object-created event notifications.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Example data consumer reading from Amazon S3.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+
+    vpc = platform 'Amazon VPC' {
+      description 'Contains the example Amazon EC2 and Amazon EMR consumers and AWS PrivateLink endpoint.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+      privateLink = platform 'AWS PrivateLink' {
+        description 'Private connectivity between the VPC example consumer and Amazon S3.'
+        metadata {
+          uses 'aws-privatelink'
+        }
+      }
+      ec2 = platform 'Amazon EC2' {
+        description 'Example data consumer in the VPC; the diagram shows it accessing Amazon S3 through AWS PrivateLink.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        ec2Consumer = system 'EC2 data consumer' {
+          description 'Example application on Amazon EC2 that reads data from Amazon S3 through AWS PrivateLink.'
+        }
+      }
+      emr = platform 'Amazon EMR' {
+        description 'Example data consumer shown in the VPC.'
+        metadata {
+          uses 'amazon-emr'
+        }
+        emrConsumer = system 'EMR data consumer' {
+          description 'Example Amazon EMR workload that reads data from Amazon S3.'
+        }
+      }
+    }
+  }
+
+  inforApplications -> inforIon '1. Produces data for'
+  administrator -> aws.transferFamily.sftpServer '3. Creates an SFTP user'
+  administrator -> inforIon '3. Provides the SFTP credentials'
+  inforIon -> aws.transferFamily.sftpServer '2, 4. Polls and transfers files over SFTP'
+  aws.transferFamily.sftpServer -> aws.s3.dataBucket '4. Writes transferred files to'
+  aws.s3.dataBucket -> aws.sqs '5. Sends object-created event notifications to'
+  aws.s3.dataBucket -> aws.lambda.notificationFunction '5. Sends object-created event notifications to'
+  aws.s3.dataBucket -> aws.sns '5. Sends object-created event notifications to'
+  aws.apiGateway -> aws.s3.dataBucket '6. Example consumer reads data from'
+  aws.vpc.emr.emrConsumer -> aws.s3.dataBucket '6. Example consumer reads data from'
+  aws.vpc.ec2.ec2Consumer -> aws.vpc.privateLink '6. Reads Amazon S3 data through'
+  aws.vpc.privateLink -> aws.s3.dataBucket 'Provides private connectivity to'
+}
+
+views {
+  view index {
+    title 'Consuming Data from InforOS over SFTP'
+    include *, aws.*
+  }
+}

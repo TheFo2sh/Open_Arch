@@ -1,0 +1,7 @@
+PackageId: OpenArch.Deploying5GORANRICOnAWS
+Name: Deploying 5G O-RAN RIC on AWS
+Description: Near-real-time and non-real-time O-RAN RIC workloads on AWS, connected to the radio network over E2, A1, and O1 interfaces and supported by machine-learning services and a data lake.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, telecommunications, 5g, o-ran, ric, machine-learning]
