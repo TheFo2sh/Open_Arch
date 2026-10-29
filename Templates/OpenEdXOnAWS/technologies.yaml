@@ -1,0 +1,153 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: Routes students toward nearby CloudFront edge locations for static Open edX content.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-certificate-manager
+    name: AWS Certificate Manager
+    description: Manages TLS certificates for secure communication with public and private resources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/certificate-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Delivers static Open edX mobile frontend assets from S3 at edge locations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores Open edX mobile frontend assets, learning assets, server logs, and archived material.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Application Load Balancer distributes HTTPS student traffic across the Open edX application tiers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform for Open edX instances, the bastion host, and the self-managed MongoDB cluster.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system, database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2-auto-scaling
+    name: Amazon EC2 Auto Scaling
+    description: Scales the user-facing backend apps, API backend services, and ProxySQL instances.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/autoscaling/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-nat-gateway
+    name: Amazon VPC NAT gateway
+    description: Provides outbound network access from private subnets to Open edX code repositories.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-network-load-balancer
+    name: Network Load Balancer
+    description: Routes TCP connections to the MongoDB target group.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/network-load-balancer/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: mongodb
+    name: MongoDB
+    description: Self-managed document database deployed as a replicated primary and two-secondary cluster on EC2.
+    vendor: MongoDB
+    url: https://www.mongodb.com/
+    types: [data-platform]
+    platform: aws
+    hosts: [database]
+  - key: open-edx
+    name: Open edX
+    description: Open-source learning platform used by the CMS, LMS, Insights, Notes, Forums, and Blockstore applications.
+    vendor: Axim Collaborative
+    url: https://openedx.org/
+    types: [library]
+  - key: proxysql
+    name: ProxySQL
+    description: MySQL-compatible proxy that routes writes to the Aurora cluster endpoint and reads to its reader endpoint.
+    vendor: ProxySQL
+    url: https://proxysql.com/
+    types: [library]
+  - key: amazon-elasticache-redis
+    name: Amazon ElastiCache for Redis
+    description: Managed Redis cache nodes deployed across Availability Zones for Open edX cache and transaction state.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticache/redis/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-elasticache-memcached
+    name: Amazon ElastiCache for Memcached
+    description: Managed Memcached cache nodes deployed across Availability Zones for Open edX cache and transaction state.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticache/memcached/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-aurora-mysql
+    name: Amazon Aurora MySQL
+    description: MySQL-compatible relational database with a cluster endpoint and reader endpoint for ProxySQL routing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-opensearch-service
+    name: Amazon OpenSearch Service
+    description: Managed search service for Open edX search workloads.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/opensearch-service/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ses
+    name: Amazon Simple Email Service
+    description: Sends student email through Open edX SMTP integration.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ses/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: open-edx-code-repositories
+    name: Open edX code repositories
+    description: External Open edX source repositories reached through the NAT gateway; the source does not identify a hosting provider.
+    types: [third-party]

@@ -1,0 +1,7 @@
+PackageId: OpenArch.OpenEdXOnAWS
+Name: Open edX on AWS
+Description: A highly available Open edX learning platform on AWS, with scaled application tiers, replicated data services, static frontend delivery, and student email.
+Version: 1.0.0
+Icon: logos:openedx
+Publisher: Open_Arch
+Tags: [aws, education, open-edx, high-availability, e-learning]
