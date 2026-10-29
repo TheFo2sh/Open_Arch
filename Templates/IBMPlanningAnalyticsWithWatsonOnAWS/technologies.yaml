@@ -1,0 +1,113 @@
+technologies:
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Private network connection from the corporate office to AWS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-transit-gateway
+    name: AWS Transit Gateway
+    description: Connects the corporate private connection to the AWS network.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Private AWS network containing the architecture's application and data tiers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Application Load Balancer shown distributing private application traffic.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: Private Hosted Zone resolves application requests to the active TM1 server and redirects to standby during failover.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: red-hat-openshift-service-on-aws
+    name: Red Hat OpenShift Service on AWS
+    description: Managed OpenShift platform hosting IBM Planning Analytics Workspace.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rosa/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: EC2 instances host the TM1 Web tier and active/passive TM1 data tier across Availability Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ebs
+    name: Amazon Elastic Block Store
+    description: Block volumes hold TM1 binaries, data, transaction and application logs, and dumps; snapshots restore volumes on standby.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ebs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-fsx-windows-file-server
+    name: Amazon FSx for Windows File Server
+    description: Replicates saved TM1 data between Availability Zones for standby recovery.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fsx/windows/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Receives TM1 server logs and metrics and evaluates alerts for failures.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: Sends CloudWatch failure alerts to site reliability engineers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: ibm-planning-analytics-workspace
+    name: IBM Planning Analytics Workspace
+    description: Web-based interface for Planning Analytics modeling, reporting, and administration.
+    vendor: IBM
+    url: https://www.ibm.com/products/planning-analytics
+    types: [library]
+  - key: ibm-tm1-web
+    name: IBM TM1 Web
+    description: Web tier through which users access TM1 server cubes and websheets.
+    vendor: IBM
+    url: https://www.ibm.com/products/planning-analytics
+    types: [library]
+  - key: ibm-tm1-server
+    name: IBM TM1 Server
+    description: TM1 data-tier server that manages client access to the data directory and loads cubes into memory.
+    vendor: IBM
+    url: https://www.ibm.com/products/planning-analytics
+    types: [library]
+  - key: ibm-tm1-admin-server
+    name: IBM TM1 Admin Server
+    description: Tracks active TM1 servers for the active/passive data tier.
+    vendor: IBM
+    url: https://www.ibm.com/products/planning-analytics
+    types: [library]

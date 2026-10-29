@@ -1,0 +1,151 @@
+// IBM Planning Analytics with Watson on AWS, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/ibm-planning-analytics-with-watson/ibm-planning-analytics-with-watson.html
+model {
+  corporateUsers = user 'Corporate users' {
+    description 'Access Planning Analytics from the corporate office over a private, secure connection.'
+  }
+  sre = user 'Site reliability engineers' {
+    description 'Receive SNS failure notifications and initiate TM1 server failover.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    directConnect = platform 'AWS Direct Connect' {
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    transitGateway = platform 'AWS Transit Gateway' {
+      metadata {
+        uses 'amazon-transit-gateway'
+      }
+    }
+    vpc = platform 'Amazon Virtual Private Cloud' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+    alb = platform 'Application Load Balancer' {
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+    privateDns = platform 'Amazon Route 53 Private Hosted Zone' {
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+
+    rosa = platform 'Red Hat OpenShift Service on AWS' {
+      metadata {
+        uses 'red-hat-openshift-service-on-aws'
+      }
+      workspace = system 'Planning Analytics Workspace' {
+        description 'IBM web interface for Planning Analytics modeling, reporting, and administration.'
+        app = container 'Planning Analytics Workspace' {
+          metadata {
+            uses 'ibm-planning-analytics-workspace'
+          }
+        }
+      }
+    }
+
+    webEc2 = platform 'Amazon EC2' {
+      description 'TM1 Web instances deployed across multiple Availability Zones.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+      tm1Web = system 'TM1 Web tier' {
+        description 'Provides browser access to TM1 server cubes and websheets.'
+        app = container 'IBM TM1 Web' {
+          metadata {
+            uses 'ibm-tm1-web'
+          }
+        }
+      }
+    }
+    dataEc2 = platform 'Amazon EC2' {
+      description 'Primary and standby instances in separate Availability Zones, configured for active/passive failover.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+      dataTier = system 'TM1 data tier' {
+        description 'The TM1 Server and TM1 Admin Server run on the same EC2 instance; the standby instance takes over after an engineer initiates failover.'
+        server = container 'IBM TM1 Server' {
+          description 'Manages client access to the data directory and loads TM1 cubes into memory.'
+          metadata {
+            uses 'ibm-tm1-server'
+          }
+        }
+        admin = container 'IBM TM1 Admin Server' {
+          description 'Tracks active TM1 servers.'
+          metadata {
+            uses 'ibm-tm1-admin-server'
+          }
+        }
+      }
+    }
+
+    ebs = platform 'Amazon Elastic Block Store' {
+      metadata {
+        uses 'amazon-ebs'
+      }
+      primaryVolumes = database 'Primary TM1 EBS volumes' {
+        description 'TM1 binaries, data directory, transaction and application logs, and dumps. Cube data is loaded into memory; changes are recorded in memory and the transaction log.'
+      }
+      standbyVolumes = database 'Standby TM1 EBS volumes' {
+        description 'Volumes restored on the standby EC2 instance from snapshots of the primary binaries, data, and transaction-log volumes.'
+      }
+    }
+    fsx = platform 'Amazon FSx for Windows File Server' {
+      metadata {
+        uses 'amazon-fsx-windows-file-server'
+      }
+      primaryFiles = database 'Primary TM1 file system' {
+        description 'Stores saved TM1 data for replication to the other Availability Zone.'
+      }
+      standbyFiles = database 'Standby TM1 file system' {
+        description 'Replicated TM1 data used to rebuild in-memory cubes when the standby server starts.'
+      }
+    }
+    cloudwatch = platform 'Amazon CloudWatch' {
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+  }
+
+  corporateUsers -> aws.workspace 'Uses privately'
+  corporateUsers -> aws.tm1Web 'Uses privately'
+  aws.directConnect -> aws.transitGateway 'Carries the corporate connection to'
+  aws.transitGateway -> aws.vpc 'Connects the private network to'
+  aws.vpc -> aws.alb 'Contains private application ingress'
+  aws.alb -> aws.workspace 'Routes private application traffic to'
+  aws.alb -> aws.tm1Web 'Routes private application traffic to'
+  aws.workspace -> aws.privateDns 'Resolves the active TM1 server through'
+  aws.tm1Web -> aws.privateDns 'Resolves the active TM1 server through'
+  aws.privateDns -> aws.dataTier 'Resolves to the active server and redirects to standby on failover'
+  aws.dataTier -> aws.ebs.primaryVolumes 'Reads and writes TM1 binaries, data, and logs on'
+  aws.ebs.primaryVolumes -> aws.ebs.standbyVolumes 'Snapshots are used to restore volumes on standby'
+  aws.dataTier -> aws.fsx.primaryFiles 'Saves TM1 data to'
+  aws.fsx.primaryFiles -> aws.fsx.standbyFiles 'Replicates saved TM1 data across Availability Zones to'
+  aws.dataTier -> aws.fsx.standbyFiles 'Rebuilds in-memory cubes from replicated data on standby'
+  aws.dataTier -> aws.cloudwatch 'Publishes logs and metrics to'
+  aws.cloudwatch -> aws.sns 'Sends failure alerts through'
+  sre -> aws.dataTier 'Initiates failover after receiving an SNS notification'
+}
+
+views {
+  view index {
+    title 'IBM Planning Analytics with Watson on AWS'
+    include *, aws.*
+  }
+}
