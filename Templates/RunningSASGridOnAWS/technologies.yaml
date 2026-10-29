@@ -1,0 +1,43 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Private network boundary containing the SAS Grid EC2 tiers and FSx for Lustre network interface.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute instances for SAS Grid mid-tier, metadata servers, and compute nodes.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system, database]
+  - key: amazon-fsx-for-lustre
+    name: Amazon FSx for Lustre
+    description: Persistent shared file system for SASDATA, SASWORK, and UTILLOC, accessed through a VPC elastic network interface.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fsx/lustre/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores automatic, incremental, file-system-consistent backups of standalone FSx for Lustre file systems.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: sas-platform-web-services
+    name: SAS Platform Web Services
+    description: SAS software that runs on the Grid mid-tier servers; version and configuration are not specified by the reference.
+    types: [third-party]
+  - key: load-sharing-facility
+    name: Load Sharing Facility (LSF)
+    description: Third-party workload-management software; the mid-tier runs its client and compute nodes run its platform.
+    types: [third-party]

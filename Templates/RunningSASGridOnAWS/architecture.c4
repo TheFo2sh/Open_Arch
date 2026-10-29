@@ -1,0 +1,107 @@
+// Running SAS Grid on AWS, after the AWS reference architecture.
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/sas-grid-on-aws/sas-grid-on-aws.html
+// Systems and users are slots; the SAS software labels are third-party technologies.
+model {
+  clients = user 'SAS clients' {
+    description 'Users of the SAS Grid environment.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Amazon VPC' {
+      description 'Network boundary for the EC2 tiers and the FSx for Lustre elastic network interface; security groups control file-system access.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      midTierEc2 = platform 'Amazon EC2 mid-tier instances' {
+        description 'The source suggests r5 instances; add instances for high availability when required.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        midTier = system 'SAS Grid mid-tier' {
+          description 'Mid-tier server slot running Platform Web Services and the LSF client.'
+          pws = container 'Platform Web Services (PWS)' {
+            description 'SAS web services hosted on the mid-tier.'
+            technology 'SAS Platform Web Services'
+          }
+          lsfClient = container 'LSF client' {
+            description 'Load Sharing Facility client used by the mid-tier.'
+            technology 'Load Sharing Facility (LSF)'
+          }
+        }
+      }
+
+      metadataEc2 = platform 'Amazon EC2 metadata instances' {
+        description 'The source suggests r5 instances and additional instances for high availability when required.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        metadataTier = system 'SAS Grid metadata tier' {
+          description 'Metadata-server tier; the source does not specify the server software version or configuration.'
+        }
+      }
+
+      computeEc2 = platform 'Amazon EC2 compute nodes' {
+        description 'Compute tier running the LSF platform; m5n or r5n are suggested with FSx for Lustre, and i3en when SASWORK uses local instance storage.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        computeTier = system 'SAS Grid compute tier' {
+          description 'Grid compute-node slot running SAS workloads under LSF.'
+          lsfPlatform = container 'LSF platform' {
+            description 'Load Sharing Facility workload-management platform on the compute nodes.'
+            technology 'Load Sharing Facility (LSF)'
+          }
+        }
+        localSaswork = database 'Optional local SASWORK' {
+          description 'Optional instance-store location for /SASWORK when it is offloaded from shared FSx storage.'
+        }
+      }
+
+      fsx = platform 'Amazon FSx for Lustre persistent file system' {
+        description 'Shared persistent storage, reached through its VPC elastic network interface and protected by security groups.'
+        metadata {
+          uses 'amazon-fsx-for-lustre'
+        }
+        sasdata = database 'SASDATA' {
+          description 'Shared SAS data library.'
+        }
+        saswork = database 'SASWORK' {
+          description 'Shared SAS work library when it is not offloaded to local instance storage.'
+        }
+        utilloc = database 'UTILLOC' {
+          description 'Shared SAS utility library.'
+        }
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Durable destination for automatic backups of standalone FSx for Lustre file systems.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      fsxBackups = database 'FSx for Lustre backups' {
+        description 'Incremental, file-system-consistent backups stored in Amazon S3.'
+      }
+    }
+  }
+
+  clients -> aws.vpc.midTierEc2.midTier 'Accesses'
+  aws.vpc.midTierEc2.midTier.lsfClient -> aws.vpc.computeEc2.computeTier.lsfPlatform 'Uses to submit grid work'
+  aws.vpc.computeEc2.computeTier -> aws.vpc.fsx.sasdata 'Reads and writes'
+  aws.vpc.computeEc2.computeTier -> aws.vpc.fsx.saswork 'Uses shared work storage'
+  aws.vpc.computeEc2.computeTier -> aws.vpc.fsx.utilloc 'Uses utility storage'
+  aws.vpc.computeEc2.computeTier -> aws.vpc.computeEc2.localSaswork 'Uses when SASWORK is offloaded locally'
+  aws.vpc.fsx -> aws.s3 'Creates automatic backups of standalone file systems in'
+}
+
+views {
+  view index {
+    title 'Running SAS Grid on AWS'
+    include *, aws.*
+  }
+}
