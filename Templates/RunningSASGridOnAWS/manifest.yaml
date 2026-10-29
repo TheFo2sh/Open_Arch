@@ -1,0 +1,7 @@
+PackageId: OpenArch.RunningSASGridOnAWS
+Name: Running SAS Grid on AWS
+Description: A SAS Grid architecture on Amazon EC2 with FSx for Lustre shared libraries and optional S3 backups.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, analytics, high-performance-computing, sas]
