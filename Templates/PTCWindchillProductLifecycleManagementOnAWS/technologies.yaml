@@ -1,0 +1,88 @@
+# Technologies named by the blueprint and source architecture.
+technologies:
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: VPC containing the Windchill application, load balancers, and RDS deployment across two Availability Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: EC2 instances host the Windchill web, method, background, worker, and Solr roles, as well as PTC Solution Monitor.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Load balancers route user traffic to Windchill web servers and client transactions to foreground Method Servers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-rds
+    name: Amazon Relational Database Service
+    description: RDS stores Windchill application metadata with synchronous replication between Availability Zones; the database engine is not specified.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: S3 stores Windchill application content and generated PDF versions of CAD and Office documents.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-directory-service
+    name: AWS Directory Service
+    description: Directory integration service used for corporate LDAP authentication and account management.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directoryservice/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-vpn
+    name: AWS VPN
+    description: VPN connectivity shown between the on-premises environment and AWS; configuration details are not specified.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc-peering
+    name: Amazon VPC Peering
+    description: VPC peering provides connectivity between Windchill deployments for content replication.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: apache-solr
+    name: Apache Solr
+    description: Solr index server on EC2 supports keyword searches, including searches across metadata stored in RDS.
+    vendor: Apache Software Foundation
+    url: https://solr.apache.org/
+    types: [library]
+  - key: ptc-windchill
+    name: PTC Windchill
+    description: Third-party product lifecycle management application represented by the Windchill system and its server roles.
+    vendor: PTC
+    url: https://www.ptc.com/en/products/windchill
+    types: [third-party]
+  - key: ptc-solution-monitor
+    name: PTC Solution Monitor
+    description: Third-party real-time performance monitoring tool for the Windchill system, application, and database.
+    vendor: PTC
+    url: https://www.ptc.com/
+    types: [third-party]
+  - key: corporate-ldap
+    name: Corporate LDAP
+    description: Customer-provided LDAP directory integrated for Windchill authentication and account management; product and vendor are unspecified.
+    types: [third-party]

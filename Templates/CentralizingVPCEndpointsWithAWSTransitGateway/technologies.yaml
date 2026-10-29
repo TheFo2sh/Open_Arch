@@ -1,0 +1,82 @@
+technologies:
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud (Amazon VPC)
+    description: Isolated virtual networks for the two spoke workloads and the shared services endpoints.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon Elastic Compute Cloud (Amazon EC2)
+    description: EC2 instances in the spoke VPC workload subnets that consume the centralized service endpoints.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-transit-gateway
+    name: AWS Transit Gateway
+    description: Connects the spoke VPCs to the shared services VPC and routes endpoint traffic in both directions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-vpc-interface-endpoints
+    name: Amazon VPC interface endpoints
+    description: Endpoint network interfaces in the shared services VPC for Amazon S3 and Amazon Kinesis Data Streams.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/privatelink/vpce-interface.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-privatelink
+    name: AWS PrivateLink
+    description: Private connectivity used by the interface endpoints to reach AWS services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/privatelink/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-route-53-private-hosted-zones
+    name: Amazon Route 53 private hosted zones
+    description: Custom private DNS zones for the S3 and Kinesis service names, associated with consuming VPCs.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/hosted-zones-private.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-route-53-resolver
+    name: Amazon Route 53 Resolver
+    description: VPC+2 DNS resolver queried by EC2 workloads to resolve service domain names using associated private hosted zones.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/resolver.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service (Amazon S3)
+    description: AWS service reached through its centralized interface endpoint.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: AWS service reached through its centralized interface endpoint.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]

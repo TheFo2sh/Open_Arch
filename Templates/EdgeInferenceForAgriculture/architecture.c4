@@ -1,0 +1,102 @@
+// Edge Inference for Agriculture, based on AWS's reference architecture.
+// The AWS IoT Greengrass service and the edge runtime are shown separately to make the OTA path clear.
+model {
+  sensors = system 'Agriculture sensors' {
+    description 'Temperature, precipitation, and wind-speed sensors provide the readings used for edge inference; AWS does not name vendors or protocols.'
+  }
+  externalRegistry = system 'Public or private container registry' {
+    description 'Optional external image source; AWS does not specify a provider.'
+  }
+  dockerHub = system 'Docker Hub' {
+    description 'Optional container image source listed by AWS.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    greengrassService = platform 'AWS IoT Greengrass' {
+      description 'AWS IoT Greengrass deployment service used to deliver optimized models to the edge over the air.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+    }
+    neo = platform 'Amazon SageMaker AI Neo' {
+      description 'Compiles machine-learning models for inference on the edge device.'
+      metadata {
+        uses 'amazon-sagemaker-ai-neo'
+      }
+    }
+    ecr = platform 'Amazon Elastic Container Registry' {
+      description 'Optional AWS container image source; AWS also lists public or private registries and Docker Hub.'
+      metadata {
+        uses 'amazon-ecr'
+      }
+    }
+    sns = platform 'Amazon SNS' {
+      description 'Receives inference responses through an AWS IoT Greengrass connector.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+
+    snowball = platform 'AWS Snowball Edge' {
+      description 'Edge device platform used for inference where connectivity may be intermittent.'
+      metadata {
+        uses 'aws-snowball-edge'
+      }
+
+      greengrassRuntime = platform 'AWS IoT Greengrass edge runtime' {
+        description 'Runs the local agriculture workload on AWS Snowball Edge.'
+        metadata {
+          uses 'aws-iot-greengrass'
+        }
+
+        edgeInference = system 'Agriculture edge inference' {
+          description 'Edge software system slot for collecting sensor data and running the compiled model.'
+
+          producer = container 'Sensor-data producer function' {
+            description 'AWS Lambda function running on the edge to collect sensor data.'
+            metadata {
+              uses 'aws-iot-greengrass-lambda-connector'
+            }
+          }
+          inference = container 'Model inference container' {
+            description 'Container shown in the AWS diagram for the optimized model and inference response function.'
+            metadata {
+              uses 'aws-iot-greengrass-lambda-connector'
+            }
+
+            model = component 'SageMaker AI Neo-optimized model' {
+              description 'Model compiled for edge inference; AWS does not specify its algorithm or model format.'
+            }
+            response = component 'Inference response Lambda function' {
+              description 'AWS Lambda function that coordinates inference and triggers responses on the edge.'
+              metadata {
+                uses 'aws-iot-greengrass-lambda-connector'
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  sensors -> aws.snowball.greengrassRuntime.edgeInference.producer 'Sends sensor readings to'
+  aws.snowball.greengrassRuntime.edgeInference.producer -> aws.snowball.greengrassRuntime.edgeInference.inference.model 'Supplies readings for inference by'
+  aws.snowball.greengrassRuntime.edgeInference.inference.model -> aws.snowball.greengrassRuntime.edgeInference.inference.response 'Provides inference results to'
+  aws.snowball.greengrassRuntime.edgeInference.inference.response -> aws.sns 'Publishes inference responses to'
+  aws.neo -> aws.greengrassService 'Provides optimized models for over-the-air deployment through'
+  aws.greengrassService -> aws.snowball.greengrassRuntime.edgeInference 'Delivers optimized models over the air to'
+  aws.ecr -> aws.snowball.greengrassRuntime.edgeInference.inference 'Can supply an optional container image to'
+  externalRegistry -> aws.snowball.greengrassRuntime.edgeInference.inference 'Can supply an optional container image to'
+  dockerHub -> aws.snowball.greengrassRuntime.edgeInference.inference 'Can supply an optional container image to'
+}
+
+views {
+  view index {
+    title 'Edge Inference for Agriculture'
+    include *, aws.*, aws.snowball.*, aws.snowball.greengrassRuntime.*, aws.snowball.greengrassRuntime.edgeInference.*
+  }
+}

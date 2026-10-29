@@ -1,0 +1,7 @@
+PackageId: OpenArch.BackendForFrontendUsingAPIGateway
+Name: Backend for Frontend Using API Gateway
+Description: A serverless Backend for Frontend pattern that serves UI-ready data projections and pushes real-time change notifications through API Gateway WebSockets.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, api, serverless, backend-for-frontend]
