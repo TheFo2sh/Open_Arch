@@ -1,0 +1,7 @@
+PackageId: OpenArch.OracleCommerceLiftAndShiftToAWS
+Name: Oracle Commerce Lift-and-Shift to AWS
+Description: A multi-AZ Oracle Commerce architecture with partner-supported Oracle RAC, Elastic Load Balancing, CloudFront, WAF, Redis caching, shared EFS storage, and CloudWatch.
+Version: 1.0.0
+Icon: logos:oracle
+Publisher: Open_Arch
+Tags: [aws, e-commerce, oracle, retail, lift-and-shift]

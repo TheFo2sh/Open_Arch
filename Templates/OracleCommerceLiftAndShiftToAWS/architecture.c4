@@ -1,0 +1,126 @@
+// Oracle Commerce Lift-and-Shift to AWS, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/oracle-commerce-lift-shift/oracle-commerce-lift-shift-chapter.html
+// Read together with specification.c4. The commerce system and shopper are slots.
+model {
+  shopper = user 'Shopper' {
+    description 'Browses the Oracle Commerce ecommerce website.'
+  }
+
+  aws = zone 'AWS Region and VPC' {
+    description 'One Region and VPC across multiple Availability Zones; the source diagram depicts two zones.'
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Amazon VPC' {
+      description 'The single virtual private cloud containing the multi-AZ deployment.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+    route53 = platform 'Amazon Route 53' {
+      description 'Provides DNS configuration for the ecommerce website.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    waf = platform 'AWS WAF' {
+      description 'Protects the ecommerce website against common web exploits.'
+      metadata {
+        uses 'aws-waf'
+      }
+    }
+    cloudfront = platform 'Amazon CloudFront' {
+      description 'Provides the secure and programmable content delivery network.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    internetGateway = platform 'Internet Gateway' {
+      description 'Shown at the VPC boundary; the source does not detail its routing configuration.'
+      metadata {
+        uses 'amazon-internet-gateway'
+      }
+    }
+    loadBalancer = platform 'Elastic Load Balancing' {
+      description 'Distributes network traffic across the Availability Zones.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+    ec2 = platform 'Amazon EC2' {
+      description 'Hosts the Oracle Commerce clusters and the partner-supported Oracle RAC production database.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+
+      commerce = system 'Oracle Commerce' {
+        description 'Slot for the project ecommerce system running the Oracle Commerce deployment.'
+        technology 'Oracle Commerce'
+
+        commerceCluster = container 'Oracle Commerce cluster' {
+          description 'Oracle Commerce application instances distributed across Availability Zones.'
+          technology 'Oracle Commerce'
+        }
+        endecaCluster = container 'Oracle Endeca cluster' {
+          description 'Oracle Endeca cluster depicted alongside Oracle Commerce; its responsibilities are not detailed in the source.'
+          technology 'Oracle Endeca'
+        }
+      }
+      racDatabase = database 'Oracle RAC production database' {
+        description 'Production Oracle RAC database supplied through an AWS Partner solution, not an AWS-managed RDS database.'
+        technology 'Oracle Real Application Clusters (RAC)'
+        metadata {
+          uses 'oracle-rac'
+        }
+      }
+    }
+    redis = platform 'Amazon ElastiCache for Redis' {
+      description 'Provides the application caching mechanism for performance.'
+      metadata {
+        uses 'amazon-elasticache-redis'
+      }
+      cache = database 'Application cache' {
+        description 'Redis cache used by the Oracle Commerce application.'
+      }
+    }
+    efs = platform 'Amazon Elastic File System' {
+      description 'Shared file storage mounted by every Oracle Commerce instance.'
+      metadata {
+        uses 'amazon-efs'
+      }
+    }
+    cloudwatch = platform 'Amazon CloudWatch' {
+      description 'Provides application logging, monitoring, and alarms.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    natGateways = platform 'NAT Gateways' {
+      description 'The diagram depicts NAT gateways in the public subnets; their consumers and routing are unspecified.'
+      metadata {
+        uses 'amazon-nat-gateway'
+      }
+    }
+  }
+
+  shopper -> aws.ec2.commerce 'Shops on'
+  aws.route53 -> aws.cloudfront 'Provides DNS for'
+  aws.waf -> aws.cloudfront 'Protects ecommerce traffic served by'
+  aws.cloudfront -> aws.internetGateway 'Forwards origin traffic through'
+  aws.internetGateway -> aws.loadBalancer 'Carries traffic to'
+  aws.loadBalancer -> aws.ec2.commerce.commerceCluster 'Distributes traffic across'
+  aws.ec2.commerce.commerceCluster -> aws.ec2.commerce.endecaCluster 'Connects to; behavior is not specified'
+  aws.ec2.commerce.commerceCluster -> aws.ec2.racDatabase 'Uses the production database'
+  aws.ec2.commerce.endecaCluster -> aws.ec2.racDatabase 'Connects to the RAC database'
+  aws.ec2.commerce.commerceCluster -> aws.redis.cache 'Uses the application cache'
+  aws.ec2.commerce.commerceCluster -> aws.efs 'Mounts shared files from'
+  aws.ec2.commerce.commerceCluster -> aws.cloudwatch 'Sends application logs and monitoring data to'
+}
+
+views {
+  view index {
+    title 'Oracle Commerce Lift-and-Shift to AWS'
+    include *, aws.*
+  }
+}
