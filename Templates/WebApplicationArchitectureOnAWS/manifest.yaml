@@ -1,0 +1,7 @@
+PackageId: OpenArch.WebApplicationArchitectureOnAWS
+Name: Web Application Architecture on AWS
+Description: A highly available AWS web application with edge-delivered static content, multi-AZ web and application tiers, and managed database, cache, and shared storage services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, web-application, reference-architecture]
