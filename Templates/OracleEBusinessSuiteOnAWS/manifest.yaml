@@ -1,0 +1,7 @@
+PackageId: OpenArch.OracleEBusinessSuiteOnAWS
+Name: Oracle E-Business Suite on AWS
+Description: A highly available Oracle E-Business Suite architecture across AWS Availability Zones, with EC2 application and database tiers.
+Version: 1.0.0
+Icon: logos:oracle
+Publisher: Open_Arch
+Tags: [aws, oracle, enterprise, database]

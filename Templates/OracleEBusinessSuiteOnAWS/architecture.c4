@@ -1,0 +1,152 @@
+// Oracle E-Business Suite on AWS. See README.md for source links and assumptions.
+model {
+  users = user 'Users' {
+    description 'Access Oracle E-Business Suite through Amazon WorkSpaces.'
+  }
+
+  aws = zone 'AWS Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    waf = platform 'AWS WAF' {
+      metadata {
+        uses 'aws-waf'
+      }
+    }
+    workspaces = platform 'Amazon WorkSpaces' {
+      metadata {
+        uses 'amazon-workspaces'
+      }
+    }
+    directory = platform 'AWS Directory Service' {
+      metadata {
+        uses 'aws-directory-service'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    cloudwatch = platform 'Amazon CloudWatch' {
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    systemsManager = platform 'AWS Systems Manager' {
+      metadata {
+        uses 'aws-systems-manager'
+      }
+    }
+    backup = platform 'AWS Backup' {
+      metadata {
+        uses 'aws-backup'
+      }
+    }
+    cloudformation = platform 'AWS CloudFormation' {
+      description 'Shown in the diagram; its role is not described in the source text.'
+      metadata {
+        uses 'aws-cloudformation'
+      }
+    }
+
+    vpc = platform 'Amazon VPC' {
+      description 'One VPC in one Region, spanning the Availability Zones shown in the diagram.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      internetGateway = platform 'Internet Gateway' {
+        metadata {
+          uses 'internet-gateway'
+        }
+      }
+      natGateways = platform 'NAT Gateways' {
+        description 'A NAT gateway is shown in each Availability Zone public subnet.'
+        metadata {
+          uses 'nat-gateway'
+        }
+      }
+      externalAlb = platform 'External Application Load Balancer' {
+        metadata {
+          uses 'application-load-balancer'
+        }
+      }
+      internalAlb = platform 'Internal Application Load Balancer' {
+        metadata {
+          uses 'application-load-balancer'
+        }
+      }
+
+      ec2 = platform 'Amazon EC2' {
+        description 'Hosts the application and Oracle database tiers in private and public subnets across Availability Zones.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+
+        ebs = system 'Oracle E-Business Suite' {
+          description 'The application system, deployed in DMZ and application tiers.'
+
+          dmz = container 'DMZ application tier' {
+            description 'EC2 APPL_TOP instances in public subnets across Availability Zones.'
+            technology 'Oracle E-Business Suite'
+            metadata {
+              uses 'oracle-ebusiness-suite'
+            }
+          }
+          application = container 'Application tier' {
+            description 'EC2 APPL_TOP instances in private subnets across Availability Zones.'
+            technology 'Oracle E-Business Suite'
+            metadata {
+              uses 'oracle-ebusiness-suite'
+            }
+          }
+        }
+
+        primaryDatabase = database 'Primary Oracle database' {
+          description 'Oracle database instance in a private subnet.'
+          metadata {
+            uses 'oracle-database, oracle-data-guard'
+          }
+        }
+        standbyDatabase = database 'Standby Oracle database' {
+          description 'Oracle database instance in another Availability Zone.'
+          metadata {
+            uses 'oracle-database, oracle-data-guard'
+          }
+        }
+      }
+    }
+  }
+
+  users -> aws.vpc.ec2.ebs 'Use through Amazon WorkSpaces'
+  aws.directory -> aws.workspaces 'Authenticates users for'
+  aws.workspaces -> aws.vpc.ec2.ebs 'Provides cloud desktops for'
+
+  aws.route53 -> aws.vpc.externalAlb 'Resolves application DNS to'
+  aws.waf -> aws.vpc.externalAlb 'Protects the application endpoint on'
+  aws.vpc.internetGateway -> aws.vpc.externalAlb 'Connects internet traffic to'
+  aws.vpc.externalAlb -> aws.vpc.ec2.ebs.dmz 'Balances requests across'
+  aws.vpc.ec2.ebs.dmz -> aws.vpc.internalAlb 'Forwards application requests to'
+  aws.vpc.internalAlb -> aws.vpc.ec2.ebs.application 'Balances requests across'
+  aws.vpc.ec2.ebs.application -> aws.vpc.ec2.primaryDatabase 'Uses'
+  aws.vpc.ec2.primaryDatabase -> aws.vpc.ec2.standbyDatabase 'Replicates synchronously with Oracle Data Guard to'
+
+  aws.cloudwatch -> aws.vpc.ec2.ebs 'Collects application logs and monitors'
+  aws.systemsManager -> aws.vpc.ec2.ebs 'Provides bastion-less access and management for'
+  aws.systemsManager -> aws.vpc.ec2.primaryDatabase 'Provides bastion-less access and management for'
+  aws.systemsManager -> aws.vpc.ec2.standbyDatabase 'Provides bastion-less access and management for'
+}
+
+views {
+  view index {
+    title 'Oracle E-Business Suite on AWS'
+    include *, aws.*, aws.vpc.*, aws.vpc.ec2.*, aws.vpc.ec2.ebs.*
+  }
+}
