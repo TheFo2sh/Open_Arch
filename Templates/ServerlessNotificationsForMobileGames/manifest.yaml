@@ -1,0 +1,7 @@
+PackageId: OpenArch.ServerlessNotificationsForMobileGames
+Name: Serverless Notifications for Mobile Games
+Description: Serverless mobile game notification processing with API Gateway, Step Functions, SNS, and AWS messaging services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, mobile-games, notifications, serverless]

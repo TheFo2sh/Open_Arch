@@ -1,0 +1,7 @@
+PackageId: OpenArch.ComputerVisionForQualityInsightsWithIBMMaximoOnAWS
+Name: Computer Vision for Quality Insights with IBM Maximo on AWS
+Description: Manufacturing quality inspection with IBM Maximo Visual Inspection on Red Hat OpenShift on AWS, using edge inference, MQTT messaging, AWS storage, and Amazon DocumentDB.
+Version: 1.0.0
+Icon: logos:ibm
+Publisher: Open_Arch
+Tags: [aws, manufacturing, computer-vision, quality-inspection, ibm-maximo]

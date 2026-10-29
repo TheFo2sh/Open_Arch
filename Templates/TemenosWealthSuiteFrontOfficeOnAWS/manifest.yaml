@@ -1,0 +1,7 @@
+PackageId: OpenArch.TemenosWealthSuiteFrontOfficeOnAWS
+Name: Temenos WealthSuite Front Office on AWS
+Description: Temenos WealthSuite Front Office on Amazon EKS, with API Gateway, Oracle on Amazon RDS, and AWS integration services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, financial-services, wealth-management, temenos]

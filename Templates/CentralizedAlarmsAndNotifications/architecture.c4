@@ -1,0 +1,93 @@
+// Centralized Alarms and Notifications, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/centralized-alarms-notifications/centralized-alarms-notifications.html
+// Systems are slots that map onto the project's own systems when applied.
+model {
+  centralMonitoring = zone 'Central monitoring account' {
+    metadata {
+      platform 'aws'
+    }
+
+    cloudWatch = platform 'Amazon CloudWatch alarms' {
+      description 'Cross-account alarms are created in the central monitoring account; alarms can be tagged with resource identifiers.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    centralTopic = platform 'Central Amazon SNS topic' {
+      description 'Receives alarm events for centralized routing.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    invocationBuffer = platform 'Optional Amazon SQS invocation buffer' {
+      description 'Optional intermediary queue that buffers Lambda invocations if concurrency issues occur.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    router = platform 'AWS Lambda central router' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      alarmRouter = system 'Alarm notification router' {
+        description 'Queries central configuration, validates workload topics, and routes alarm payloads.'
+      }
+    }
+    parameterStore = platform 'AWS Systems Manager Parameter Store' {
+      description 'Holds workload-specific configuration, including connected workload SNS topic details.'
+      metadata {
+        uses 'aws-systems-manager-parameter-store'
+      }
+    }
+    deadLetterQueue = platform 'Amazon SQS monitoring dead-letter queue' {
+      description 'Receives messages for which no workload configuration exists.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+  }
+
+  workloadAccounts = zone 'Workload AWS accounts' {
+    metadata {
+      platform 'aws'
+    }
+
+    workloadTopics = platform 'Workload Amazon SNS delivery topics' {
+      description 'Configured account and workload topics receive routed alarm payloads.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    workloadQueues = platform 'Workload Amazon SQS queues' {
+      description 'Queues shown between workload SNS topics and their associated Lambda functions in the AWS diagram.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    workloadFunctions = platform 'AWS Lambda workload handlers' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      notificationHandler = system 'Workload notification handler' {
+        description 'Performs the unique action configured for a workload; AWS gives email as one example.'
+      }
+    }
+  }
+
+  centralMonitoring.cloudWatch -> centralMonitoring.centralTopic 'Publishes alarm events to'
+  centralMonitoring.centralTopic -> centralMonitoring.invocationBuffer 'Optionally buffers invocations through'
+  centralMonitoring.invocationBuffer -> centralMonitoring.router.alarmRouter 'Delivers buffered events to'
+  centralMonitoring.centralTopic -> centralMonitoring.router.alarmRouter 'Invokes directly when the optional buffer is not used'
+  centralMonitoring.router.alarmRouter -> centralMonitoring.parameterStore 'Queries for account and workload SNS topic configuration'
+  centralMonitoring.router.alarmRouter -> workloadAccounts.workloadTopics 'Publishes payloads to validated configured topics'
+  centralMonitoring.router.alarmRouter -> centralMonitoring.deadLetterQueue 'Sends messages with no workload configuration to'
+  workloadAccounts.workloadTopics -> workloadAccounts.workloadQueues 'Delivers messages to queues shown in the diagram'
+  workloadAccounts.workloadQueues -> workloadAccounts.workloadFunctions.notificationHandler 'Triggers'
+}
+
+views {
+  view index {
+    title 'Centralized Alarms and Notifications'
+    include *, centralMonitoring.*, centralMonitoring.router.*, workloadAccounts.*
+  }
+}

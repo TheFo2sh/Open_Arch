@@ -1,0 +1,7 @@
+PackageId: OpenArch.AsynchronousOnlineGaming
+Name: Asynchronous Online Gaming
+Description: A highly available, multi-AZ online game backend using Amazon EC2, Elastic Load Balancing, Redis, Aurora, DynamoDB, S3, CloudFront, and SNS.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, gaming, mobile, online-games]
