@@ -1,0 +1,82 @@
+technologies:
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage for batch and real-time staging and processed schedule data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-glue
+    name: AWS Glue
+    description: Discovers, catalogs, and processes schedule and flight data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-emr
+    name: Amazon EMR
+    description: Distributed processing for batch and real-time schedule inputs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/emr/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores individual flight data and connection rules for fast lookups.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-dynamodb-accelerator
+    name: Amazon DynamoDB Accelerator (DAX)
+    description: In-memory cache for low-latency DynamoDB flight lookups.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/dax/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs flight lookups and ingests and serves flight information events.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-neptune
+    name: Amazon Neptune
+    description: Graph database for route lookups by origin and destination.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/neptune/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-elasticache-redis
+    name: Amazon ElastiCache for Redis
+    description: In-memory cache used to improve schedule generation performance.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticache/redis/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Machine learning service used to improve route building and schedule lookup performance.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]

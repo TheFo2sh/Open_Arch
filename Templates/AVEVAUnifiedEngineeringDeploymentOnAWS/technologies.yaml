@@ -1,0 +1,88 @@
+technologies:
+  - key: amazon-workspaces
+    name: Amazon WorkSpaces
+    description: Managed virtual desktops for GPU-powered and CPU-based AVEVA Unified Engineering applications across two Availability Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/workspaces/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-directory-service
+    name: AWS Directory Service
+    description: Managed domain access control for engineers using AVEVA Unified Engineering through Amazon WorkSpaces.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directoryservice/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute instances for the bastion, administration, integration, and AIS servers and for primary and secondary SQL Server deployments across two Availability Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system, database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Load balances Amazon EC2 instances hosting the integration and AIS servers for resilience; the source does not specify a load balancer type.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-fsx-windows-file-server
+    name: Amazon FSx for Windows File Server
+    description: Managed SMB file storage replicated between two Availability Zones for AVEVA Dabacon databases and project files.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fsx/windows/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-backup
+    name: AWS Backup
+    description: Backs up the AIS, administration, and SQL Server EC2 instances, along with Amazon EBS and Amazon FSx.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/backup/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ebs
+    name: Amazon Elastic Block Store
+    description: EC2 block storage included in the documented AWS Backup scope; the source does not specify volumes or their attachment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ebs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aveva-unified-engineering
+    name: AVEVA Unified Engineering
+    description: Windows desktop authoring applications for process simulation and 1D, 2D, and 3D engineering and design.
+    vendor: AVEVA
+    url: https://www.aveva.com/en/products/unified-engineering/
+    types: [library, third-party]
+  - key: aveva-middleware
+    name: AVEVA middleware
+    description: AVEVA middleware hosted by the integration server; the source does not identify its specific products or components.
+    vendor: AVEVA
+    url: https://www.aveva.com/
+    types: [library, third-party]
+  - key: microsoft-windows
+    name: Microsoft Windows
+    description: Windows operating system required by the AVEVA desktop authoring applications; the source does not specify a version or edition.
+    vendor: Microsoft
+    url: https://www.microsoft.com/windows
+    types: [library, third-party]
+  - key: microsoft-sql-server
+    name: Microsoft SQL Server
+    description: Third-party database software used for AVEVA data on EC2; the source does not specify a version, edition, or database configuration.
+    vendor: Microsoft
+    url: https://www.microsoft.com/sql-server
+    types: [third-party]

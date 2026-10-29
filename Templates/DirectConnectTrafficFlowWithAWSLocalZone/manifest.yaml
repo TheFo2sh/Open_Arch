@@ -1,0 +1,7 @@
+PackageId: OpenArch.DirectConnectTrafficFlowWithAWSLocalZone
+Name: Direct Connect Traffic Flow with AWS Local Zone
+Description: Dual AWS Direct Connect paths route on-premises traffic to parent-Region and Local Zone subnets in a VPC.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, networking, hybrid-cloud, direct-connect, local-zone]

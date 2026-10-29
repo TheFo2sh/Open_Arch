@@ -1,0 +1,75 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Regional virtual network containing the private subnets selected for the EKS control-plane ENIs and Outposts subnet.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-eks
+    name: Amazon Elastic Kubernetes Service
+    description: Regional managed Kubernetes control plane with private access and managed network interfaces in selected VPC subnets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eks/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-outposts
+    name: AWS Outposts
+    description: Outposts rack extending AWS infrastructure to the on-premises location; its local gateway connects nodes to the local network.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/outposts/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform for the self-managed Amazon EKS node group running on the Outposts rack.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ecr
+    name: Amazon Elastic Container Registry
+    description: Container image registry reachable from private subnets through a VPC endpoint when there is no internet path.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecr/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: AWS object storage reachable from private subnets through a VPC endpoint when there is no internet path.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-iam
+    name: AWS Identity and Access Management
+    description: Manages user and role access to the Amazon EKS cluster.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iam/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Receives the CloudWatch metrics supported by AWS Outposts.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]

@@ -1,0 +1,7 @@
+PackageId: OpenArch.DistributedInspectionArchitecturesWithGatewayLoadBalancer
+Name: Distributed Inspection Architectures with Gateway Load Balancer
+Description: Distributed inbound, outbound, and east-west traffic inspection using AWS Gateway Load Balancer and shared third-party security appliances.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, networking, security, traffic-inspection, gateway-load-balancer]
