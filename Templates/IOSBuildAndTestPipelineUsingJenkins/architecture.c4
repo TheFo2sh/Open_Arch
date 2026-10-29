@@ -1,0 +1,81 @@
+// iOS Build and Test Pipeline Using Jenkins.
+// AWS source: https://docs.aws.amazon.com/reference-architecture-diagrams/latest/ios-build-test-pipeline-jenkins/ios-build-test-pipeline-jenkins.html
+// Systems and users are slots. API Gateway is named in the prose, but the link and diagram identify CodePipeline.
+model {
+  developer = user 'Developer' {
+    description 'Pushes iOS app code changes to the source repository.'
+  }
+  manager = user 'Manager' {
+    description 'Reviews test results, logs, and recordings.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    codeCommit = platform 'AWS CodeCommit' {
+      metadata {
+        uses 'aws-codecommit'
+      }
+    }
+    sourceRepository = system 'iOS app source repository' {
+      description 'Repository receiving the developer code changes.'
+    }
+    codePipeline = platform 'AWS CodePipeline' {
+      metadata {
+        uses 'aws-codepipeline'
+      }
+    }
+    ec2Mac = platform 'Amazon EC2 Mac' {
+      description 'Mac instance that hosts Jenkins and builds the iOS app.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+
+      jenkins = system 'Jenkins build server' {
+        description 'Jenkins polls AWS CodePipeline for jobs, downloads source, and starts the build project.'
+        iosBuild = container 'iOS build project' {
+          description 'Builds the app into .ipa artifacts; the Jenkins CodePipeline plugin compresses and uploads them.'
+          metadata {
+            uses 'aws-codepipeline-plugin-for-jenkins'
+          }
+        }
+      }
+    }
+    artifacts = platform 'Amazon S3' {
+      description 'Stores build artifacts managed by AWS CodePipeline.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    deviceFarm = platform 'AWS Device Farm' {
+      metadata {
+        uses 'aws-device-farm'
+      }
+    }
+    resultsReview = system 'Test results review' {
+      description 'Review access through the Device Farm console or Amazon S3 pre-signed URLs; no separate review application is specified.'
+    }
+  }
+
+  developer -> aws.sourceRepository 'Pushes code changes to'
+  aws.sourceRepository -> aws.codeCommit 'Is stored in'
+  aws.codeCommit -> aws.codePipeline 'Triggers a pipeline run for'
+  aws.codePipeline -> aws.ec2Mac.jenkins 'Creates a Jenkins job on'
+  aws.ec2Mac.jenkins -> aws.codePipeline 'Polls for jobs from'
+  aws.ec2Mac.jenkins -> aws.codeCommit 'Downloads source from'
+  aws.ec2Mac.jenkins.iosBuild -> aws.artifacts 'Uploads compressed .ipa artifacts to'
+  aws.codePipeline -> aws.artifacts 'Manages build artifact storage in'
+  aws.codePipeline -> aws.deviceFarm 'Runs the test stage on'
+  aws.deviceFarm -> aws.artifacts 'Fetches build artifacts from'
+  aws.deviceFarm -> aws.resultsReview 'Makes test results, logs, and recordings available through'
+  manager -> aws.resultsReview 'Reviews'
+}
+
+views {
+  view index {
+    title 'iOS Build and Test Pipeline Using Jenkins'
+    include *, aws.*
+  }
+}

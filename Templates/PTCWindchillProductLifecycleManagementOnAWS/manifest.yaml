@@ -1,0 +1,7 @@
+PackageId: OpenArch.PTCWindchillProductLifecycleManagementOnAWS
+Name: PTC Windchill Product Lifecycle Management on AWS
+Description: A highly available Windchill deployment on AWS with load-balanced web and method servers, EC2 background and worker roles, RDS metadata, S3 content, Solr search, monitoring, and directory integration.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, manufacturing, plm, ptc, windchill]

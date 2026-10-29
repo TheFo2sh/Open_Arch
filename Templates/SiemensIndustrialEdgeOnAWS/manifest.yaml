@@ -1,0 +1,7 @@
+PackageId: OpenArch.SiemensIndustrialEdgeOnAWS
+Name: Siemens Industrial Edge on AWS
+Description: Industrial edge data acquisition and AI/ML architecture connecting Siemens Industrial Edge devices with AWS IoT SiteWise, visualization, analytics, and cloud-based model training.
+Version: 1.0.0
+Icon: simple-icons:siemens
+Publisher: Open_Arch
+Tags: [aws, industrial-iot, manufacturing, siemens, edge]

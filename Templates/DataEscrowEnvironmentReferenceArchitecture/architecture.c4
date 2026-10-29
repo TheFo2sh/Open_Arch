@@ -1,0 +1,214 @@
+// Data Escrow Environment Reference Architecture, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/data-escrow-environment/data-escrow-environment.html
+// Its linked diagram and PDF are available from the source page. Accounts are logical AWS zones;
+// systems and users are slots to map onto a project's own.
+model {
+  analyst = user 'Analyst' {
+    description 'Accesses dashboards and insights from the integrated advertiser data.'
+  }
+
+  publisher = zone 'Publisher AWS account' {
+    metadata {
+      platform 'aws'
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Stores encrypted advertiser-specific data and its transformed data.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      encryptedData = database 'Encrypted advertiser data' {
+        description 'Advertiser-specific source data stored in Amazon S3; encryption details are not specified.'
+      }
+      transformedData = database 'Transformed advertiser data' {
+        description 'Publisher data transformed for sharing with advertiser accounts.'
+      }
+    }
+    emr = platform 'Amazon EMR' {
+      metadata {
+        uses 'amazon-emr'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    lakeFormation = platform 'AWS Lake Formation' {
+      metadata {
+        uses 'aws-lake-formation'
+      }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      advertiserMetadata = database 'Publisher advertiser data catalog' {
+        description 'Metadata catalog for the publisher account data.'
+      }
+    }
+    cloudTrail = platform 'AWS CloudTrail' {
+      metadata {
+        uses 'aws-cloudtrail'
+      }
+    }
+    cloudWatch = platform 'Amazon CloudWatch' {
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    transformation = system 'Publisher data transformation' {
+      description 'Transforms publisher-held Amazon S3 objects for different advertiser accounts.'
+    }
+  }
+
+  governance = zone 'Central governance AWS account (controlled by publisher)' {
+    metadata {
+      platform 'aws'
+    }
+
+    lakeFormation = platform 'AWS Lake Formation' {
+      metadata {
+        uses 'aws-lake-formation'
+      }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      advertiserCatalog = database 'Advertiser data catalog' {
+        description 'Central metadata catalog used by advertiser transformations to access related publisher data.'
+      }
+    }
+  }
+
+  advertiser = zone 'Advertiser AWS account' {
+    metadata {
+      platform 'aws'
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Stores local advertiser input and the final joined datasets.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      inputData = database 'Advertiser input data' {
+        description 'Local advertiser data extracted for integration.'
+      }
+      finalData = database 'Final joined dataset' {
+        description 'Transformed and joined data from the advertiser and publisher accounts.'
+      }
+    }
+    lakeFormation = platform 'AWS Lake Formation' {
+      metadata {
+        uses 'aws-lake-formation'
+      }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      localCatalog = database 'Local advertiser data catalog' {
+        description 'Metadata catalog for local advertiser data.'
+      }
+    }
+    cloudTrail = platform 'AWS CloudTrail' {
+      metadata {
+        uses 'aws-cloudtrail'
+      }
+    }
+    cloudWatch = platform 'Amazon CloudWatch' {
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    emr = platform 'Amazon EMR' {
+      metadata {
+        uses 'amazon-emr'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    client = system 'Advertiser client application' {
+      description 'Starts the advertiser process to integrate data from publishers.'
+    }
+    mwaa = platform 'Amazon Managed Workflows for Apache Airflow' {
+      metadata {
+        uses 'amazon-mwaa'
+      }
+      integration = system 'Advertiser data integration workflow' {
+        description 'Runs the Airflow DAGs that orchestrate advertiser data transformations.'
+        dags = container 'Airflow DAGs' {
+          metadata {
+            uses 'apache-airflow'
+          }
+        }
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      metadata {
+        uses 'amazon-redshift'
+      }
+      finalTables = database 'Redshift tables' {
+        description 'Tables populated from the final Amazon S3 dataset.'
+      }
+      spectrum = platform 'Amazon Redshift Spectrum' {
+        description 'The source text names Spectrum as a direct-query option for Amazon S3 data.'
+        metadata {
+          uses 'amazon-redshift-spectrum'
+        }
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'The diagram labels Athena as a query path for the final Amazon S3 dataset.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+      dashboards = system 'Advertiser analytics dashboards' {
+        description 'Dashboards and insights accessed by analysts.'
+      }
+    }
+  }
+
+  publisher.s3.encryptedData -> publisher.transformation 'Supplies advertiser-specific source data to'
+  publisher.transformation -> publisher.emr 'Can use'
+  publisher.transformation -> publisher.glue 'Can use'
+  publisher.transformation -> publisher.s3.transformedData 'Stores transformed data in'
+  publisher.glueCatalog -> publisher.s3.encryptedData 'Catalogs'
+  publisher.glueCatalog -> publisher.s3.transformedData 'Catalogs'
+  publisher.lakeFormation -> publisher.s3 'Governs access to'
+  publisher.cloudTrail -> publisher.lakeFormation 'Supports local governance and monitoring'
+  publisher.cloudWatch -> publisher.lakeFormation 'Supports local governance and monitoring'
+
+  governance.lakeFormation -> publisher.lakeFormation 'Shares governed resources with'
+  governance.lakeFormation -> publisher.s3.transformedData 'Provides governed access to'
+
+  advertiser.client -> advertiser.mwaa 'Starts an integration process with'
+  advertiser.s3.inputData -> advertiser.mwaa.integration 'Supplies local advertiser data to'
+  advertiser.mwaa.integration -> advertiser.emr 'Can use'
+  advertiser.mwaa.integration -> advertiser.glue 'Can use'
+  advertiser.mwaa.integration -> governance.lakeFormation 'Uses central governance to access related data'
+  advertiser.mwaa.integration -> governance.glueCatalog.advertiserCatalog 'Uses the metadata access layer in'
+  publisher.s3.transformedData -> advertiser.mwaa.integration 'Provides publisher data for'
+  advertiser.mwaa.integration -> advertiser.s3.finalData 'Stores transformed and joined data in'
+  advertiser.glueCatalog -> advertiser.s3.inputData 'Catalogs'
+  advertiser.glueCatalog -> advertiser.s3.finalData 'Catalogs'
+  advertiser.lakeFormation -> advertiser.s3 'Governs access to'
+  advertiser.cloudTrail -> advertiser.lakeFormation 'Supports local governance and monitoring'
+  advertiser.cloudWatch -> advertiser.lakeFormation 'Supports local governance and monitoring'
+
+  advertiser.s3.finalData -> advertiser.redshift 'Exports data to'
+  advertiser.s3.finalData -> advertiser.redshift.spectrum 'Can be queried directly with'
+  advertiser.s3.finalData -> advertiser.athena 'Can be queried with'
+  advertiser.redshift.finalTables -> advertiser.quickSight 'Provides tables to'
+  advertiser.athena -> advertiser.quickSight 'Provides query results to'
+  analyst -> advertiser.quickSight.dashboards 'Accesses'
+}

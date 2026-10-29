@@ -1,0 +1,236 @@
+// Connected Airports Using IoT and AI/ML, after AWS's reference architecture.
+// Systems and users are slots, mapped onto the project's own when the template is applied.
+model {
+  airportOperator = user 'Airport operations team' {
+    description 'Uses operational dashboards, apps, and alerts.'
+  }
+
+  airportEdge = zone 'Airport edge' {
+    metadata {
+      platform 'other'
+    }
+
+    devices = system 'Airport IoT device fleet' {
+      description 'Devices across concourses, restrooms, lobbies, security and gates, taxiways, ramps, aprons, and baggage systems. The diagram shows thermostats, lights, sensors, cameras, and RFID equipment.'
+      deviceSoftware = container 'IoT device software' {
+        description 'Uses FreeRTOS or another device operating system and communicates over MQTT.'
+        metadata {
+          uses 'freertos, mqtt'
+        }
+      }
+    }
+
+    greengrass = platform 'AWS IoT Greengrass Core' {
+      description 'Connects, publishes, and subscribes to device data; the diagram also shows local shadows, airport metadata, Lambda, and deployed models.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+      airportMetadata = database 'Airport metadata' {
+        description 'Local airport metadata shown in the source diagram; its contents and schema are unspecified.'
+      }
+      edgeLambda = platform 'AWS Lambda' {
+        description 'Local Lambda function shown running with Greengrass Core.'
+        metadata {
+          uses 'aws-lambda'
+        }
+        edgeInference = system 'Airport edge inference' {
+          description 'Slot for edge inference workloads; AWS does not specify their implementation.'
+        }
+      }
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      description 'Maintains device shadows, connects and manages devices, supports OTA updates, and secures devices.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    deviceDefender = platform 'AWS IoT Device Defender' {
+      metadata {
+        uses 'aws-iot-device-defender'
+      }
+    }
+    deviceManagement = platform 'AWS IoT Device Management' {
+      metadata {
+        uses 'aws-iot-device-management'
+      }
+    }
+    kinesisVideo = platform 'Amazon Kinesis Video Streams' {
+      description 'Video streams used for inference training.'
+      metadata {
+        uses 'amazon-kinesis-video-streams'
+      }
+    }
+    kinesisStreams = platform 'Amazon Kinesis Data Streams' {
+      description 'Streams data for near-real-time processing.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    firehose = platform 'Amazon Kinesis Data Firehose' {
+      metadata {
+        uses 'amazon-kinesis-data-firehose'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the serverless microservices shown in the architecture.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      operations = system 'Airport operational microservices' {
+        description 'Slot for event-processing microservices; AWS does not specify their boundaries or implementation.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      operationalData = database 'Airport operational data' {
+        description 'Stores events and operational data.'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    appSync = platform 'AWS AppSync' {
+      description 'Supports a real-time operational dashboard.'
+      metadata {
+        uses 'aws-appsync'
+      }
+    }
+    pinpoint = platform 'Amazon Pinpoint' {
+      description 'Delivers operational alerts.'
+      metadata {
+        uses 'amazon-pinpoint'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Airport data lake containing raw, cleaned, and refined data.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      rawData = database 'Raw airport data'
+      cleanedData = database 'Cleaned airport data'
+      refinedData = database 'Refined airport data'
+    }
+    s3Glacier = platform 'Amazon S3 Glacier' {
+      description 'Archive storage shown as part of the airport data lake.'
+      metadata {
+        uses 'amazon-s3-glacier'
+      }
+      archiveData = database 'Archived airport data'
+    }
+    glue = platform 'AWS Glue' {
+      description 'Crawlers and the Data Catalog discover and catalog data; Glue jobs transform and enrich it.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    lakeFormation = platform 'AWS Lake Formation' {
+      metadata {
+        uses 'aws-lake-formation'
+      }
+    }
+    macie = platform 'Amazon Macie' {
+      metadata {
+        uses 'amazon-macie'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Orchestrates data processing in the source diagram.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    emr = platform 'Amazon EMR' {
+      metadata {
+        uses 'amazon-emr'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      description 'Supports analytics data marts for frequently used analysis.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+      dataMart = database 'Airport analytics data mart' {
+        description 'Data mart for heavily used analytics; the source does not specify its schema.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    groundTruth = platform 'Amazon SageMaker Ground Truth' {
+      metadata {
+        uses 'amazon-sagemaker-ground-truth'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Builds, trains, and deploys inference models.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+      modelLifecycle = system 'Airport ML model lifecycle' {
+        description 'Slot for airport model development and inference; model details are not specified.'
+      }
+    }
+  }
+
+  airportApps = system 'Airport operations dashboard and apps' {
+    description 'Client applications for operations staff; their implementation and hosting are unspecified.'
+  }
+
+  airportEdge.devices.deviceSoftware -> airportEdge.greengrass 'Communicates over MQTT with'
+  airportEdge.greengrass -> aws.iotCore 'Connects edge devices to'
+  aws.deviceDefender -> aws.iotCore 'Secures and monitors devices managed by'
+  aws.deviceManagement -> aws.iotCore 'Manages device fleet connected through'
+  aws.iotCore -> aws.kinesisStreams 'Streams device events to'
+  aws.iotCore -> aws.kinesisVideo 'Sends video streams to'
+  aws.iotCore -> aws.lambda.operations 'Routes events to'
+  aws.kinesisStreams -> aws.firehose 'Delivers streaming data through'
+  aws.firehose -> aws.s3.rawData 'Loads raw data into'
+  aws.kinesisVideo -> aws.s3.rawData 'Stores video in'
+  aws.apiGateway -> aws.lambda.operations 'Exposes APIs for'
+  aws.lambda.operations -> aws.dynamodb.operationalData 'Stores events and operational data in'
+  aws.lambda.operations -> aws.appSync 'Builds the real-time dashboard with'
+  aws.lambda.operations -> aws.pinpoint 'Delivers alerts through'
+  airportOperator -> airportApps 'Uses'
+  aws.appSync -> airportApps 'Delivers the real-time dashboard to'
+  aws.pinpoint -> airportApps 'Sends alerts to'
+  aws.stepFunctions -> aws.glue 'Orchestrates'
+  aws.stepFunctions -> aws.emr 'Orchestrates'
+  aws.glue -> aws.s3.cleanedData 'Transforms and enriches data into'
+  aws.emr -> aws.s3.refinedData 'Processes and enriches data into'
+  aws.lakeFormation -> aws.s3 'Governs'
+  aws.macie -> aws.s3 'Detects sensitive data in'
+  aws.s3.refinedData -> aws.s3Glacier.archiveData 'Archives data in'
+  aws.groundTruth -> aws.s3.rawData 'Labels data from'
+  aws.s3.refinedData -> aws.sagemaker.modelLifecycle 'Provides model training data to'
+  aws.groundTruth -> aws.sagemaker.modelLifecycle 'Supplies labeled data to'
+  aws.sagemaker.modelLifecycle -> airportEdge.greengrass 'Deploys inference models to'
+  aws.s3.refinedData -> aws.redshift.dataMart 'Supplies data for'
+  aws.athena -> aws.s3 'Queries data in'
+  aws.quickSight -> aws.redshift.dataMart 'Visualizes analytics from'
+  aws.quickSight -> aws.athena 'Uses for data lake analytics'
+}
+
+views {
+  view index {
+    title 'Connected Airports Using IoT and AI/ML'
+    include *
+  }
+}

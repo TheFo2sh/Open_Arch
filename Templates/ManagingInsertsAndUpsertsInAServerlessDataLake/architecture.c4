@@ -1,0 +1,170 @@
+// Managing Inserts and Upserts in a Serverless Data Lake, after AWS's reference architecture.
+// Source systems, consumer systems, and people are slots mapped onto the project's own elements.
+model {
+  sourceSystems = system 'Source systems' {
+    description 'Systems of record and demographic or address data sources; AWS does not identify their products or hosting.'
+  }
+
+  dataConsumer = user 'Data consumer' {
+    description 'A person using the query, business intelligence, or data-science outputs.'
+  }
+
+  consumerTools = system 'Consumer tools and resources' {
+    description 'A project-owned slot for the generic consumer tools shown in the AWS diagram.'
+
+    sqlClient = container 'SQL Client' {
+      description 'Generic client shown consuming Amazon Athena query results.'
+    }
+    notebooks = container 'Jupyter Notebooks' {
+      description 'Notebook consumer shown for Amazon SageMaker data-science outputs.'
+    }
+    applicationSdk = container 'Application SDK' {
+      description 'Generic application development resource shown consuming data-science outputs.'
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    dms = platform 'AWS Database Migration Service' {
+      description 'Ingestion option for source database changes, including change data capture.'
+      metadata {
+        uses 'aws-dms'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Stores raw, processed, and reportable data lake datasets.'
+      metadata {
+        uses 'amazon-s3'
+      }
+
+      batchStaging = database 'Batch staging' {
+        description 'Raw demographic, address, loyalty transaction, shopping, and survey datasets.'
+      }
+      realtimeStaging = database 'Real-time staging' {
+        description 'Raw flight schedule, passenger name record, ticket, ancillary, loyalty membership, and baggage-sorting datasets.'
+      }
+      parquetData = database 'Parquet datasets' {
+        description 'Processed datasets persisted in Parquet format, including flight, ticket, loyalty, baggage, and survey data.'
+      }
+      reportableData = database 'Reportable data sets' {
+        description 'Analytics-ready market segment, loyalty value and revenue, customer service, and shopping insight datasets.'
+      }
+    }
+
+    glue = platform 'AWS Glue' {
+      description 'Crawls persisted Amazon S3 data and populates the Data Catalog.'
+      metadata {
+        uses 'aws-glue'
+      }
+
+      dataCatalog = database 'AWS Glue Data Catalog' {
+        description 'Metadata populated by a crawler for data persisted in the raw Amazon S3 layer.'
+      }
+    }
+
+    emr = platform 'Amazon EMR' {
+      description 'Runs Hive and Spark data cleaning and transformation, with Apache Hudi inserts and upserts.'
+      metadata {
+        uses 'amazon-emr'
+      }
+
+      lakeProcessing = system 'Data lake processing' {
+        description 'A project-owned processing workload hosted on Amazon EMR.'
+
+        hudiJobs = container 'Hive, Spark, and Hudi jobs' {
+          description 'Reads raw data, cleans and transforms it, and performs inserts and upserts on required datasets.'
+          metadata {
+            uses 'apache-hive, apache-spark, apache-hudi'
+          }
+        }
+      }
+    }
+
+    mwaa = platform 'Amazon Managed Workflows for Apache Airflow (MWAA)' {
+      description 'Orchestrates data movement, on-demand Amazon EMR clusters, and data loading.'
+      metadata {
+        uses 'amazon-mwaa'
+      }
+
+      workflows = system 'Data lake workflows' {
+        description 'A project-owned workflow slot hosted by Amazon MWAA.'
+
+        dags = container 'Apache Airflow workflows' {
+          description 'Coordinates the end-to-end data movement and processing workflow.'
+          metadata {
+            uses 'apache-airflow'
+          }
+        }
+      }
+    }
+
+    athena = platform 'Amazon Athena' {
+      description 'Queries reportable data on demand.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+
+    redshift = platform 'Amazon Redshift' {
+      description 'Loads reportable data for enterprise data warehousing.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+
+      warehouse = database 'Enterprise data warehouse' {
+        description 'Data loaded from the reportable data sets; its schema and load configuration are not specified.'
+      }
+    }
+
+    sagemaker = platform 'Amazon SageMaker' {
+      description 'Data-science service shown consuming reportable datasets.'
+      metadata {
+        uses 'amazon-sagemaker'
+      }
+    }
+
+    quicksight = platform 'Amazon QuickSight' {
+      description 'Business intelligence service shown consuming Amazon Redshift data.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+  }
+
+  sourceSystems -> aws.s3.batchStaging 'Ingests batch data into'
+  sourceSystems -> aws.dms 'Provides source changes to'
+  aws.dms -> aws.s3.realtimeStaging 'Writes change data to'
+
+  aws.s3.batchStaging -> aws.glue.dataCatalog 'Crawler registers metadata in'
+  aws.s3.realtimeStaging -> aws.glue.dataCatalog 'Crawler registers metadata in'
+
+  aws.emr.lakeProcessing.hudiJobs -> aws.s3.batchStaging 'Reads raw data from'
+  aws.emr.lakeProcessing.hudiJobs -> aws.s3.realtimeStaging 'Reads raw data from'
+  aws.emr.lakeProcessing.hudiJobs -> aws.s3.parquetData 'Persists cleaned and transformed data to'
+  aws.emr.lakeProcessing.hudiJobs -> aws.s3.reportableData 'Persists reportable datasets to'
+
+  aws.mwaa -> aws.emr 'Orchestrates on-demand batch clusters on'
+  aws.mwaa -> aws.s3.parquetData 'Orchestrates data movement to'
+  aws.mwaa -> aws.s3.reportableData 'Orchestrates data loading to'
+
+  aws.s3.reportableData -> aws.athena 'Is queried on demand by'
+  aws.s3.reportableData -> aws.redshift 'Is loaded into'
+  aws.s3.reportableData -> aws.sagemaker 'Provides data-science datasets to'
+  aws.redshift.warehouse -> aws.quicksight 'Feeds business intelligence in'
+  aws.athena -> consumerTools.sqlClient 'Returns query results to'
+  aws.sagemaker -> consumerTools.notebooks 'Provides data-science outputs to'
+  aws.sagemaker -> consumerTools.applicationSdk 'Provides data-science outputs to'
+  aws.quicksight -> consumerTools 'Serves dashboards to'
+  dataConsumer -> consumerTools 'Uses'
+}
+
+views {
+  view index {
+    title 'Managing Inserts and Upserts in a Serverless Data Lake'
+    include *
+  }
+}

@@ -1,0 +1,7 @@
+PackageId: OpenArch.PlagiarismDetectionArchitecture
+Name: Plagiarism Detection Architecture
+Description: A document plagiarism-detection workflow using Amazon S3, AWS Step Functions, AWS Lambda, Amazon SageMaker AI, and Amazon OpenSearch Service.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, machine-learning, plagiarism-detection, search, serverless]

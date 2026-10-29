@@ -1,0 +1,150 @@
+// Real-Time Casino Player Analytics, after the AWS reference architecture.
+// Casino systems and the player are slots mapped onto the project's own.
+model {
+  player = user 'Casino player' {
+    description 'Plays casino games and receives offers during a game session.'
+  }
+  slotMachines = system 'Casino slot and gaming machines' {
+    description 'Send slot telemetry and retrieve customer profiles, ratings, and offers during play.'
+  }
+  shufflers = system 'Casino shuffler system' {
+    description 'Sends shuffler telemetry from the casino floor.'
+  }
+  ratingApplication = system 'Customer rating application' {
+    description 'Retrieves customer profiles and ratings for casino staff or applications.'
+  }
+  gamesAndApplications = system 'Games and applications' {
+    description 'Consume player profiles, ratings, and offers to promote offers during a game or session.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Private-network entry point for slot telemetry and a retrieval path for player data.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    iotCore = platform 'AWS IoT Core' {
+      description 'Ingests shuffler telemetry from the casino floor.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Carries separate slot-machine and shuffler telemetry streams.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+      slotStream = database 'Slot telemetry stream' {
+        description 'Casino slot-machine records awaiting real-time rating and raw-data processing.'
+      }
+      shufflerStream = database 'Shuffler telemetry stream' {
+        description 'Shuffler records awaiting raw retention and refinement.'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Processes slot telemetry in real time.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      slotAnalytics = system 'Slot analytics functions' {
+        description 'Calculate player ratings from slot telemetry and retain raw slot records.'
+        ratingFunction = container 'Player rating function' {
+          description 'Calculates customer ratings from slot-machine telemetry.'
+        }
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service (Amazon S3)' {
+      description 'Stores raw telemetry and refined records for analytics and machine learning.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      rawData = database 'Raw casino telemetry' {
+        description 'Raw slot and shuffler records retained for transformation and machine-learning use.'
+      }
+      refinedSlotData = database 'Refined slot data' {
+        description 'Unique, transformed slot records used by the player-offer model.'
+      }
+      refinedShufflerData = database 'Refined shuffler data' {
+        description 'Unique, transformed shuffler records used for aggregation and failure prediction.'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Transforms raw slot and shuffler records, identifies unique records, and writes refined data.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    sageMaker = platform 'Amazon SageMaker AI' {
+      description 'Trains and updates the player-offer and shuffler-failure prediction models.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+      playerOfferModel = system 'Player offer model' {
+        description 'Uses refined slot data to predict offers for individual customers.'
+      }
+      shufflerFailureModel = system 'Shuffler failure prediction model' {
+        description 'Uses refined shuffler data to predict failures and support proactive maintenance recommendations.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Provides fast retrieval of customer profiles, ratings, and offers.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      playerData = database 'Customer profiles, ratings, and offers' {
+        description 'Quick-read customer profiles, calculated ratings, and personalized offers.'
+      }
+    }
+    aurora = platform 'Amazon Aurora' {
+      description 'Stores refined shuffler records for aggregation and retrieval.'
+      metadata {
+        uses 'amazon-aurora'
+      }
+      shufflerAnalytics = database 'Shuffler analytics data' {
+        description 'Refined shuffler records for aggregation and retrieval; AWS does not specify the engine or schema.'
+      }
+    }
+    cloudWatch = platform 'Amazon CloudWatch' {
+      description 'Logging service shown in the reference diagram; its log sources and configuration are not specified.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+  }
+
+  player -> slotMachines 'Plays games on'
+  player -> gamesAndApplications 'Receives in-session offers from'
+  slotMachines -> aws.apiGateway 'Streams slot telemetry over the casino private network'
+  shufflers -> aws.iotCore 'Streams shuffler telemetry over the casino private network'
+  ratingApplication -> aws.apiGateway 'Requests customer profiles and ratings'
+  aws.apiGateway -> aws.kinesis.slotStream 'Forwards slot telemetry to'
+  aws.iotCore -> aws.kinesis.shufflerStream 'Forwards shuffler telemetry to'
+  aws.kinesis.slotStream -> aws.lambda.slotAnalytics.ratingFunction 'Feeds slot records to'
+  aws.lambda.slotAnalytics.ratingFunction -> aws.s3.rawData 'Retains raw slot records in'
+  aws.kinesis.shufflerStream -> aws.s3.rawData 'Retains raw shuffler records in'
+  aws.s3.rawData -> aws.glue 'Supplies raw records for transformation and deduplication'
+  aws.glue -> aws.s3.refinedSlotData 'Writes unique refined slot records to'
+  aws.glue -> aws.s3.refinedShufflerData 'Writes unique refined shuffler records to'
+  aws.s3.refinedSlotData -> aws.sageMaker.playerOfferModel 'Trains and updates'
+  aws.sageMaker.playerOfferModel -> aws.dynamodb.playerData 'Updates customer profiles and personalized offers in'
+  aws.lambda.slotAnalytics.ratingFunction -> aws.dynamodb.playerData 'Updates customer ratings in'
+  aws.s3.refinedShufflerData -> aws.aurora.shufflerAnalytics 'Stores refined records for aggregation and retrieval in'
+  aws.s3.refinedShufflerData -> aws.sageMaker.shufflerFailureModel 'Feeds data to develop and update'
+  aws.sageMaker.shufflerFailureModel -> aws.aurora.shufflerAnalytics 'Provides failure-prediction results toward'
+  aws.dynamodb.playerData -> aws.apiGateway 'Serves customer profiles, ratings, and offers through'
+  aws.apiGateway -> slotMachines 'Returns customer profiles, ratings, and offers to'
+  aws.apiGateway -> ratingApplication 'Returns customer profiles and ratings to'
+  aws.apiGateway -> gamesAndApplications 'Makes customer profiles, ratings, and offers available to'
+}
+
+views {
+  view index {
+    title 'Real-Time Casino Player Analytics'
+    include *, aws.*
+  }
+}

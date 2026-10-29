@@ -1,0 +1,251 @@
+// Customer Engagement Using AI/ML for Restaurants
+// Based on the AWS reference architecture and its linked diagram.
+model {
+  guest = user 'Restaurant guest' {
+    description 'Contacts the restaurant through digital and telephone channels.'
+  }
+  agent = user 'Restaurant service agent' {
+    description 'Uses the contact center portal to assist guests.'
+  }
+
+  channels = system 'Customer channels and service applications' {
+    description 'Website, mobile applications, SMS, social media, telephone, and customer service dashboard.'
+  }
+  contactCenterPortal = system 'Contact center portal' {
+    description 'Agent portal with the Amazon Connect Contact Control Panel.'
+  }
+  orderManagement = system 'Order management and POS' {
+    description 'Restaurant order management and point-of-sale systems; specific products are not named by AWS.'
+  }
+  loyalty = system 'Loyalty systems' {
+    description 'Restaurant loyalty systems and agent interface; specific products are not named by AWS.'
+  }
+  caseManagement = system 'Case management systems' {
+    description 'Restaurant case management and agent interface; specific products are not named by AWS.'
+  }
+  otherRecords = system 'Other restaurant systems of record' {
+    description 'Franchise and location relationship management, delivery management, and survey systems shown in the diagram.'
+  }
+  demographicSources = system 'Demographic and address data sources' {
+    description 'External sources for demographic and address data; providers are not specified.'
+  }
+  mdm = system 'Master Data Management' {
+    description 'Optional external MDM system and user interface; product and integration details are not specified.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Guest 360 data lake and customer interaction datasets.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      staging = database 'Staging data' {
+        description 'Staging bucket shown with demographic data.'
+      }
+      cases = database 'Cases dataset' {
+        description 'JSON cases dataset.'
+      }
+      restaurantData = database 'Restaurant datasets' {
+        description 'Parquet datasets for franchise and restaurant data, orders, loyalty membership and transactions, customers, and surveys.'
+      }
+      operationalData = database 'Operational datasets' {
+        description 'Parquet datasets for market segment revenue, customer lifetime value, customer revenue index, and customer service index.'
+      }
+      interactions = database 'Customer interactions dataset' {
+        description 'Dataset for Pinpoint interactions and Connect conversations and interactions.'
+      }
+    }
+
+    transferFamily = platform 'AWS Transfer Family' {
+      description 'Batch transfer of loyalty data, as indicated in the diagram.'
+      metadata {
+        uses 'aws-transfer-family'
+      }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    emr = platform 'Amazon EMR' {
+      metadata {
+        uses 'amazon-emr'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      metadata {
+        uses 'amazon-redshift'
+      }
+      customerMarts = database 'Customer data marts' {
+        description 'Customer data marts shown for analytics.'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Customer analytics workload.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    personalize = platform 'Amazon Personalize' {
+      metadata {
+        uses 'amazon-personalize'
+      }
+    }
+
+    connect = platform 'Amazon Connect' {
+      description 'Cloud contact center for guest conversations and agent workflows.'
+      metadata {
+        uses 'amazon-connect'
+      }
+      contactCenter = system 'Contact center operations' {
+        description 'Connect Customer Contact Control Panel (CCP), contact routing, and agent workflows.'
+      }
+    }
+    lex = platform 'Amazon Lex' {
+      metadata {
+        uses 'amazon-lex'
+      }
+      chatbot = system 'Guest chatbot' {
+        description 'Conversational chatbot that automates guest interactions.'
+      }
+    }
+    transcribe = platform 'Amazon Transcribe' {
+      metadata {
+        uses 'amazon-transcribe'
+      }
+    }
+    comprehend = platform 'Amazon Comprehend' {
+      metadata {
+        uses 'amazon-comprehend'
+      }
+    }
+    contactLens = platform 'Amazon Connect Contact Lens' {
+      metadata {
+        uses 'amazon-connect-contact-lens'
+      }
+    }
+    pinpoint = platform 'Amazon Pinpoint' {
+      metadata {
+        uses 'amazon-pinpoint'
+      }
+    }
+
+    dataEvents = platform 'Amazon Kinesis Data Streams - Data Events' {
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      metadata {
+        uses 'amazon-kinesis-data-firehose'
+      }
+    }
+    mdmEvents = platform 'Amazon Kinesis Data Streams - MDM Events' {
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      customerEventProcessing = system 'Customer event processing functions' {
+        description 'Serverless functions used with the operational data platform.'
+      }
+      complexEventProcessing = system 'Complex event processing functions' {
+        description 'Serverless functions shown for complex event processing.'
+      }
+      customer360Services = system 'Customer 360 microservices' {
+        description 'Microservices shown with the Customer 360 data store and API.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      customer360 = database 'Customer 360 data' {
+        description 'Customer 360 data store with DynamoDB Streams shown in the diagram.'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+  }
+
+  guest -> channels 'Uses'
+  channels -> aws.lex.chatbot 'Uses for automated conversations'
+  channels -> aws.connect.contactCenter 'Contacts the restaurant'
+  agent -> contactCenterPortal 'Uses'
+  contactCenterPortal -> aws.connect.contactCenter 'Provides the Connect CCP'
+  aws.connect.contactCenter -> orderManagement 'CCP integrates with'
+  aws.connect.contactCenter -> loyalty 'CCP integrates with'
+  aws.connect.contactCenter -> caseManagement 'CCP integrates with'
+
+  loyalty -> aws.transferFamily 'Batch loyalty data'
+  demographicSources -> aws.s3.staging 'Provides demographic and address data'
+  aws.transferFamily -> aws.s3.staging 'Transfers batch data to'
+  otherRecords -> aws.s3.restaurantData 'Contributes restaurant data to'
+  aws.glue -> aws.glueCatalog 'Uses the metadata catalog'
+  aws.s3.restaurantData -> aws.glue 'Provides datasets for data integration'
+  aws.s3.operationalData -> aws.emr 'Provides operational datasets for processing'
+  aws.s3.restaurantData -> aws.redshift.customerMarts 'Provides data for customer marts'
+  aws.s3.operationalData -> aws.redshift.customerMarts 'Provides data for customer marts'
+  aws.s3.restaurantData -> aws.athena 'Makes datasets available for queries'
+  aws.redshift.customerMarts -> aws.quickSight 'Supports customer analytics'
+  aws.redshift.customerMarts -> aws.sagemaker 'Supports customer analytics'
+  aws.s3.interactions -> aws.personalize 'Provides interaction data'
+
+  aws.connect.contactCenter -> aws.s3.interactions 'Stores conversation and interaction data'
+  aws.connect.contactCenter -> aws.transcribe 'Conversation transcription and analysis'
+  aws.transcribe -> aws.comprehend 'Provides conversation text for sentiment and intent analysis'
+  aws.connect.contactCenter -> aws.contactLens 'Analyzes conversations for sentiment, trends, and compliance'
+  aws.pinpoint -> channels 'Sends customer notifications to'
+  aws.s3.interactions -> aws.dataEvents 'Supplies interaction events'
+  aws.dataEvents -> aws.firehose 'Delivers stream data through'
+  aws.firehose -> aws.s3.staging 'Delivers data to'
+  aws.dataEvents -> aws.stepFunctions 'Triggers customer event processing'
+  aws.stepFunctions -> aws.lambda.customerEventProcessing 'Orchestrates'
+  aws.lambda.customerEventProcessing -> aws.dynamodb.customer360 'Updates'
+  aws.dynamodb.customer360 -> aws.mdmEvents 'DynamoDB Streams provide change events to'
+  aws.lambda.customerEventProcessing -> mdm 'Customer events for optional MDM'
+  mdm -> aws.mdmEvents 'Publishes MDM events to'
+  aws.mdmEvents -> aws.stepFunctions 'Triggers complex event processing'
+  aws.stepFunctions -> aws.lambda.complexEventProcessing 'Orchestrates'
+  aws.lambda.complexEventProcessing -> aws.dynamodb.customer360 'Updates'
+  aws.lambda.customer360Services -> aws.dynamodb.customer360 'Reads and writes'
+  aws.lambda.customer360Services -> aws.apiGateway 'Exposes services through'
+  aws.apiGateway -> channels 'Provides APIs to'
+}
+
+views {
+  view index {
+    title 'Customer Engagement Using AI/ML for Restaurants'
+    include *, aws.*
+  }
+}

@@ -1,0 +1,70 @@
+# Technologies named in the AWS reference architecture, keyed as architecture.c4 metadata uses them.
+technologies:
+  - key: aws-iot-greengrass
+    name: AWS IoT Greengrass
+    description: Edge runtime and cloud service that runs components on the camera and orchestrates deployments.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/greengrass/v2/developerguide/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Receives training data published by the Greengrass-enabled camera.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot/latest/developerguide/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-rule
+    name: AWS IoT Core Rules Engine
+    description: Routes camera messages from AWS IoT Core to Amazon Kinesis Data Firehose.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot/latest/developerguide/iot-rules.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-kinesis-data-firehose
+    name: Amazon Kinesis Data Firehose
+    description: Delivers camera data to Amazon S3 for model training; the AWS diagram uses this service name.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores incoming training data and trained model artifacts for delivery to the camera.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Trains and optimizes models for resource-constrained cameras and outputs trained model artifacts to Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/ai/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-lambda-function
+    name: AWS Lambda function
+    description: Function component deployed with Greengrass to perform inference locally on the camera.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/lambda/latest/dg/
+    types: [library]
+  - key: amazon-kinesis-video-streams
+    name: Amazon Kinesis Video Streams
+    description: Carries the camera video stream for viewing through the mobile application.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/video-streams/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: docker
+    name: Docker
+    description: Optional alternative application payload named by AWS; the diagram shows the Lambda function path.
+    vendor: Docker
+    url: https://www.docker.com/
+    types: [third-party]

@@ -1,0 +1,168 @@
+// Architecture for Unified Communications, after AWS's reference architecture
+// (https://docs.aws.amazon.com/reference-architecture-diagrams/latest/architecture-unified-communications/architecture-unified-communications.html).
+// The source diagram is published as a PNG and in the linked PDF. Networks and
+// users are slots; the AWS drawing's Availability Zones and subnets are described
+// in element descriptions because the template schema has no subnet or AZ kind.
+model {
+  corporateUsers = user 'Corporate users' {
+    description 'Use unified communications applications and devices from the corporate network.'
+  }
+  remoteWorkers = user 'Remote workers' {
+    description 'Connect unified communications applications and devices through the public internet.'
+  }
+  administrators = user 'UC administrators' {
+    description 'Use the management workstation for Avaya Aura management activities.'
+  }
+  corporateNetwork = system 'Corporate network' {
+    description 'The enterprise network from which users can access AWS through Direct Connect or Site-to-Site VPN.'
+  }
+  publicInternet = system 'Public internet' {
+    description 'Network path for remote workers and the VPC internet gateway.'
+  }
+  pstn = system 'Public switched telephone network' {
+    description 'External telephone network depicted in the diagram; the numbered flow does not describe its connection.'
+  }
+  ucClients = system 'Unified communications applications and devices' {
+    description 'User applications, devices, and soft clients that retrieve configuration and establish sessions.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      description 'DNS service shown in the diagram; the source does not describe its routing behavior.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Corporate-network connectivity option shown in the diagram.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    siteToSiteVpn = platform 'AWS Site-to-Site VPN' {
+      description 'Alternative corporate-network connection shown in the diagram.'
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    workspaces = platform 'Amazon WorkSpaces' {
+      description 'Provides a simplified bastion host for management activities.'
+      metadata {
+        uses 'amazon-workspaces'
+      }
+      managementWorkstation = system 'Management workstation' {
+        description 'WorkSpaces desktop used as a bastion for management activities.'
+      }
+    }
+    directoryService = platform 'AWS Directory Service' {
+      description 'Provides the unified directory used for user creation.'
+      metadata {
+        uses 'aws-directory-service'
+      }
+    }
+
+    vpc = platform 'Amazon VPC' {
+      description 'Contains control, public, and private subnets in two Availability Zones.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      internetGateway = platform 'Internet Gateway' {
+        description 'Connects the VPC with the public internet.'
+        metadata {
+          uses 'aws-internet-gateway'
+        }
+      }
+      ec2 = platform 'Amazon EC2' {
+        description 'Hosts Avaya Aura roles distributed across the two Availability Zones for high availability.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+
+        avaya = system 'Avaya Aura Unified Communications' {
+          description 'Third-party UC platform deployed on EC2; the source does not specify instance sizes or detailed configuration.'
+
+          deviceServices = container 'Avaya Aura Device Services (AADS)' {
+            description 'Provides configuration to UC devices and soft clients.'
+            technology 'Avaya Aura'
+            metadata {
+              uses 'avaya-aura'
+            }
+          }
+          borderControllers = container 'Session Border Controllers (SBCs)' {
+            description 'Session entry points managed by EMS and deployed in the public subnets.'
+            technology 'Avaya Aura'
+            metadata {
+              uses 'avaya-aura'
+            }
+          }
+          elementManagement = container 'Element Management System (EMS)' {
+            description 'Manages the SBC entry points; the diagram shows an active instance and a standby instance in separate Availability Zones.'
+            technology 'Avaya Aura'
+            metadata {
+              uses 'avaya-aura'
+            }
+          }
+          sessionManagers = container 'Session Managers' {
+            description 'Handle user authentication and session management in the private subnets.'
+            technology 'Avaya Aura'
+            metadata {
+              uses 'avaya-aura'
+            }
+          }
+          systemManager = container 'Avaya Aura System Manager' {
+            description 'Controls the Session Managers; this is the Avaya Aura role shown on EC2, not AWS Systems Manager.'
+            technology 'Avaya Aura'
+            metadata {
+              uses 'avaya-aura'
+            }
+          }
+          communicationManager = container 'Communication Manager' {
+            description 'Provides telephony features.'
+            technology 'Avaya Aura'
+            metadata {
+              uses 'avaya-aura'
+            }
+          }
+          mediaServers = container 'Media Servers' {
+            description 'Provide digital signal processing (DSP) resources for Communication Manager.'
+            technology 'Avaya Aura'
+            metadata {
+              uses 'avaya-aura'
+            }
+          }
+        }
+      }
+    }
+  }
+
+  corporateUsers -> ucClients 'Use'
+  remoteWorkers -> ucClients 'Use'
+  corporateNetwork -> aws.directConnect 'Connects to AWS through'
+  corporateNetwork -> aws.siteToSiteVpn 'Can instead connect through'
+  aws.directConnect -> aws.vpc 'Connects the corporate network to'
+  aws.siteToSiteVpn -> aws.vpc 'Provides VPN connectivity to'
+  remoteWorkers -> publicInternet 'Connect through'
+  publicInternet -> aws.vpc.internetGateway 'Reaches the VPC through'
+  aws.vpc.internetGateway -> aws.vpc.ec2.avaya.borderControllers 'Carries internet-facing sessions to'
+  ucClients -> aws.vpc.ec2.avaya.deviceServices 'Pull configuration from'
+  ucClients -> aws.vpc.ec2.avaya.borderControllers 'Establish sessions with'
+  aws.vpc.ec2.avaya.elementManagement -> aws.vpc.ec2.avaya.borderControllers 'Manages'
+  aws.vpc.ec2.avaya.borderControllers -> aws.vpc.ec2.avaya.sessionManagers 'Establish sessions with'
+  aws.vpc.ec2.avaya.sessionManagers -> aws.vpc.ec2.avaya.systemManager 'Are controlled by'
+  aws.vpc.ec2.avaya.communicationManager -> aws.vpc.ec2.avaya.mediaServers 'Uses DSP resources from'
+  administrators -> aws.workspaces.managementWorkstation 'Manage the platform through'
+  aws.workspaces.managementWorkstation -> aws.vpc.ec2.avaya 'Provides bastion access to'
+
+}
+
+views {
+  view index {
+    title 'Architecture for Unified Communications'
+    include *, aws.*, aws.vpc.*, aws.vpc.ec2.*, aws.vpc.ec2.avaya.*
+  }
+}
