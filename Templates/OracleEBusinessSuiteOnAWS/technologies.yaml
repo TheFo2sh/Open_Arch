@@ -1,0 +1,132 @@
+# Technologies used by the blueprint, keyed by metadata { uses }.
+technologies:
+  - key: amazon-vpc
+    name: Amazon VPC
+    description: Single virtual network for the Oracle E-Business Suite workload in one AWS Region.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: internet-gateway
+    name: Internet Gateway
+    description: Internet connectivity shown for the VPC.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: nat-gateway
+    name: NAT Gateway
+    description: One NAT gateway is shown in each Availability Zone's public subnet.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: application-load-balancer
+    name: Application Load Balancer
+    description: External and internal load balancers distribute traffic across the application tiers in multiple Availability Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/application-load-balancer/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-waf
+    name: AWS WAF
+    description: Web application firewall protecting the Oracle E-Business Suite application endpoint.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/waf/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: DNS service for the application endpoint.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform for the E-Business Suite application tiers and Oracle database instances across Availability Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system, database]
+  - key: oracle-ebusiness-suite
+    name: Oracle E-Business Suite
+    description: Oracle enterprise application running in the DMZ and application tiers.
+    vendor: Oracle
+    url: https://www.oracle.com/applications/ebusiness/
+    types: [library]
+  - key: oracle-database
+    name: Oracle Database
+    description: Self-managed Oracle database software shown on Amazon EC2.
+    vendor: Oracle
+    url: https://www.oracle.com/database/
+    types: [library]
+  - key: oracle-data-guard
+    name: Oracle Data Guard
+    description: Synchronous replication between the Oracle database instances shown across Availability Zones.
+    vendor: Oracle
+    url: https://www.oracle.com/database/technologies/high-availability/data-guard.html
+    types: [library]
+  - key: amazon-workspaces
+    name: Amazon WorkSpaces
+    description: Cloud desktop service used by Oracle E-Business Suite users.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/workspaces/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-directory-service
+    name: AWS Directory Service
+    description: Directory service used to authenticate Amazon WorkSpaces users.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directoryservice/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Object storage for backups, files, and objects.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Application logging, monitoring, and alarms.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-systems-manager
+    name: AWS Systems Manager
+    description: Management, monitoring, and bastion-less access to instances in private subnets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/systems-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-backup
+    name: AWS Backup
+    description: Centralized data protection for AWS and on-premises workloads.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/backup/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-cloudformation
+    name: AWS CloudFormation
+    description: Service icon shown in the AWS diagram; the source page does not describe its role.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudformation/
+    types: [managed-service]
+    platform: aws
+    hosts: []
