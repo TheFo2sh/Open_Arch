@@ -1,0 +1,386 @@
+// Traffic Segmentation Options in Direct Connect
+// Source: https://docs.aws.amazon.com/reference-architecture-diagrams/latest/traffic-segmentation-aws-direct-connect/traffic-segmentation-aws-direct-connect.html
+// Each numbered pattern is an alternative; the customer and destination elements are slots.
+model {
+  corporate = zone 'Corporate network' {
+    metadata {
+      platform 'other'
+    }
+
+    vrfA = system 'Corporate network — VRF A' {
+      description 'Customer-managed routing domain A. The customer router, vendor, addressing, and BGP policy are not specified.'
+      technology 'Border Gateway Protocol (BGP)'
+    }
+    vrfB = system 'Corporate network — VRF B' {
+      description 'Customer-managed routing domain B, isolated from VRF A. The customer router, vendor, addressing, and BGP policy are not specified.'
+      technology 'Border Gateway Protocol (BGP)'
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    destinationA = system 'Destination servers — VPC A' {
+      description 'Workload destination for traffic segment A; compute, application, and server details are not specified.'
+    }
+    destinationB = system 'Destination servers — VPC B' {
+      description 'Workload destination for traffic segment B; compute, application, and server details are not specified.'
+    }
+
+    // Pattern 1: one private VIF and VLAN per VRF, through a Direct Connect gateway and VPC virtual private gateways.
+    p1VifA = platform 'Private VIF / VLAN — Pattern 1, VRF A' {
+      description 'Private Direct Connect virtual interface and VLAN dedicated to corporate VRF A.'
+      technology 'IEEE 802.1Q VLAN'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    p1VifB = platform 'Private VIF / VLAN — Pattern 1, VRF B' {
+      description 'Private Direct Connect virtual interface and VLAN dedicated to corporate VRF B.'
+      technology 'IEEE 802.1Q VLAN'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    p1Dxgw = platform 'Direct Connect gateway — Pattern 1' {
+      metadata {
+        uses 'aws-direct-connect-gateway'
+      }
+    }
+    p1VgwA = platform 'Virtual private gateway — Pattern 1, VPC A' {
+      metadata {
+        uses 'aws-virtual-private-gateway'
+      }
+    }
+    p1VgwB = platform 'Virtual private gateway — Pattern 1, VPC B' {
+      metadata {
+        uses 'aws-virtual-private-gateway'
+      }
+    }
+    p1VpcRouteA = platform 'VPC A route table — Pattern 1' {
+      description 'Route table for segment A; it does not route to the VPC B destination.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+    p1VpcRouteB = platform 'VPC B route table — Pattern 1' {
+      description 'Route table for segment B; it does not route to the VPC A destination.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+
+    // Pattern 2: separate transit VIFs and Direct Connect gateways, with separate Transit Gateway segment tables.
+    p2VifA = platform 'Transit VIF — Pattern 2, VRF A' {
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    p2VifB = platform 'Transit VIF — Pattern 2, VRF B' {
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    p2DxgwA = platform 'Direct Connect gateway — Pattern 2, VRF A' {
+      metadata {
+        uses 'aws-direct-connect-gateway'
+      }
+    }
+    p2DxgwB = platform 'Direct Connect gateway — Pattern 2, VRF B' {
+      metadata {
+        uses 'aws-direct-connect-gateway'
+      }
+    }
+    p2Tgw = platform 'Transit Gateway — Pattern 2' {
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    p2TgwRouteA = platform 'Transit Gateway segment route table A — Pattern 2' {
+      description 'Associated with the A-side attachment; routes only to VPC A.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    p2TgwRouteB = platform 'Transit Gateway segment route table B — Pattern 2' {
+      description 'Associated with the B-side attachment; routes only to VPC B.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    p2VpcAttachmentA = platform 'Transit Gateway VPC attachment A — Pattern 2' {
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    p2VpcAttachmentB = platform 'Transit Gateway VPC attachment B — Pattern 2' {
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    p2VpcRouteA = platform 'VPC A route table — Pattern 2' {
+      description 'Route table for segment A; it does not route to the VPC B destination.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+    p2VpcRouteB = platform 'VPC B route table — Pattern 2' {
+      description 'Route table for segment B; it does not route to the VPC A destination.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+
+    // Pattern 3: one transit VIF/DX transport with a separate GRE/BGP Connect attachment per VRF.
+    p3TransitVif = platform 'Transit VIF — Pattern 3' {
+      description 'Shared Direct Connect transit VIF used as transport because the available VIF count is insufficient for separate transit VIFs.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    p3Dxgw = platform 'Direct Connect gateway — Pattern 3' {
+      metadata {
+        uses 'aws-direct-connect-gateway'
+      }
+    }
+    p3Tgw = platform 'Transit Gateway — Pattern 3' {
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    p3ConnectA = platform 'Transit Gateway Connect attachment — Pattern 3, VRF A' {
+      description 'Dedicated Connect attachment and GRE/BGP tunnel for corporate VRF A.'
+      technology 'Generic Routing Encapsulation (GRE), Border Gateway Protocol (BGP)'
+      metadata {
+        uses 'aws-transit-gateway-connect'
+      }
+    }
+    p3ConnectB = platform 'Transit Gateway Connect attachment — Pattern 3, VRF B' {
+      description 'Dedicated Connect attachment and GRE/BGP tunnel for corporate VRF B.'
+      technology 'Generic Routing Encapsulation (GRE), Border Gateway Protocol (BGP)'
+      metadata {
+        uses 'aws-transit-gateway-connect'
+      }
+    }
+    p3TgwRouteA = platform 'Transit Gateway segment route table A — Pattern 3' {
+      description 'Associated with the A-side Connect attachment; routes only to VPC A.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    p3TgwRouteB = platform 'Transit Gateway segment route table B — Pattern 3' {
+      description 'Associated with the B-side Connect attachment; routes only to VPC B.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    p3VpcAttachmentA = platform 'Transit Gateway VPC attachment A — Pattern 3' {
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    p3VpcAttachmentB = platform 'Transit Gateway VPC attachment B — Pattern 3' {
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    p3VpcRouteA = platform 'VPC A route table — Pattern 3' {
+      description 'Route table for segment A; it does not route to the VPC B destination.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+    p3VpcRouteB = platform 'VPC B route table — Pattern 3' {
+      description 'Route table for segment B; it does not route to the VPC A destination.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+
+    // Pattern 4: a Site-to-Site VPN per VRF over a public VIF, where GRE is unavailable.
+    p4PublicVifA = platform 'Public VIF — Pattern 4, VRF A' {
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    p4PublicVifB = platform 'Public VIF — Pattern 4, VRF B' {
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    p4VpnA = platform 'Site-to-Site VPN — Pattern 4, VRF A' {
+      description 'VPN over the public VIF for VRF A; its AWS gateway attachment is not specified in the supplied source notes.'
+      technology 'IPsec'
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    p4VpnB = platform 'Site-to-Site VPN — Pattern 4, VRF B' {
+      description 'VPN over the public VIF for VRF B; its AWS gateway attachment is not specified in the supplied source notes.'
+      technology 'IPsec'
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    p4VpcRouteA = platform 'VPC A route table — Pattern 4' {
+      description 'Route table for segment A; it does not route to the VPC B destination.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+    p4VpcRouteB = platform 'VPC B route table — Pattern 4' {
+      description 'Route table for segment B; it does not route to the VPC A destination.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+
+    // Pattern 5: private-IP Site-to-Site VPN attachments, each with two IPsec tunnels, over transit VIF and DX gateway.
+    p5TransitVif = platform 'Transit VIF — Pattern 5' {
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    p5Dxgw = platform 'Direct Connect gateway — Pattern 5' {
+      metadata {
+        uses 'aws-direct-connect-gateway'
+      }
+    }
+    p5Tgw = platform 'Transit Gateway — Pattern 5' {
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    p5VpnA = platform 'Private-IP Site-to-Site VPN attachment — Pattern 5, VRF A' {
+      description 'Private-IP VPN attachment with two IPsec tunnels for VRF A.'
+      technology 'IPsec'
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    p5VpnB = platform 'Private-IP Site-to-Site VPN attachment — Pattern 5, VRF B' {
+      description 'Private-IP VPN attachment with two IPsec tunnels for VRF B.'
+      technology 'IPsec'
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    p5TgwRouteA = platform 'Transit Gateway segment route table A — Pattern 5' {
+      description 'Associated with the A-side VPN attachment; routes only to VPC A.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    p5TgwRouteB = platform 'Transit Gateway segment route table B — Pattern 5' {
+      description 'Associated with the B-side VPN attachment; routes only to VPC B.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    p5VpcAttachmentA = platform 'Transit Gateway VPC attachment A — Pattern 5' {
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    p5VpcAttachmentB = platform 'Transit Gateway VPC attachment B — Pattern 5' {
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    p5VpcRouteA = platform 'VPC A route table — Pattern 5' {
+      description 'Route table for segment A; it does not route to the VPC B destination.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+    p5VpcRouteB = platform 'VPC B route table — Pattern 5' {
+      description 'Route table for segment B; it does not route to the VPC A destination.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+  }
+
+  // Pattern 1: dedicated private VIF/VLAN and virtual private gateway paths remain separated.
+  corporate.vrfA -> aws.p1VifA 'Uses its private VIF and VLAN'
+  corporate.vrfB -> aws.p1VifB 'Uses its private VIF and VLAN'
+  aws.p1VifA -> aws.p1Dxgw 'Routes through'
+  aws.p1VifB -> aws.p1Dxgw 'Routes through'
+  aws.p1Dxgw -> aws.p1VgwA 'Associates with'
+  aws.p1Dxgw -> aws.p1VgwB 'Associates with'
+  aws.p1VgwA -> aws.p1VpcRouteA 'Routes to VPC A'
+  aws.p1VgwB -> aws.p1VpcRouteB 'Routes to VPC B'
+  aws.p1VpcRouteA -> aws.destinationA 'Forwards segment A traffic to'
+  aws.p1VpcRouteB -> aws.destinationB 'Forwards segment B traffic to'
+
+  // Pattern 2: separate transit VIFs and DX gateways feed the isolated TGW route tables.
+  corporate.vrfA -> aws.p2VifA 'Uses its transit VIF'
+  corporate.vrfB -> aws.p2VifB 'Uses its transit VIF'
+  aws.p2VifA -> aws.p2DxgwA 'Routes through'
+  aws.p2VifB -> aws.p2DxgwB 'Routes through'
+  aws.p2DxgwA -> aws.p2Tgw 'Associates with'
+  aws.p2DxgwB -> aws.p2Tgw 'Associates with'
+  aws.p2Tgw -> aws.p2TgwRouteA 'Routes VRF A through'
+  aws.p2Tgw -> aws.p2TgwRouteB 'Routes VRF B through'
+  aws.p2TgwRouteA -> aws.p2VpcAttachmentA 'Routes only segment A through'
+  aws.p2TgwRouteB -> aws.p2VpcAttachmentB 'Routes only segment B through'
+  aws.p2VpcAttachmentA -> aws.p2VpcRouteA 'Connects to'
+  aws.p2VpcAttachmentB -> aws.p2VpcRouteB 'Connects to'
+  aws.p2VpcRouteA -> aws.destinationA 'Forwards segment A traffic to'
+  aws.p2VpcRouteB -> aws.destinationB 'Forwards segment B traffic to'
+
+  // Pattern 3: distinct GRE/BGP Connect tunnels share a transit VIF when VIF quotas are insufficient.
+  corporate.vrfA -> aws.p3ConnectA 'Establishes its GRE/BGP tunnel through'
+  corporate.vrfB -> aws.p3ConnectB 'Establishes its GRE/BGP tunnel through'
+  aws.p3ConnectA -> aws.p3TransitVif 'Uses the shared transit VIF transport'
+  aws.p3ConnectB -> aws.p3TransitVif 'Uses the shared transit VIF transport'
+  aws.p3TransitVif -> aws.p3Dxgw 'Routes through'
+  aws.p3Dxgw -> aws.p3Tgw 'Associates with'
+  aws.p3ConnectA -> aws.p3Tgw 'Attaches to'
+  aws.p3ConnectB -> aws.p3Tgw 'Attaches to'
+  aws.p3Tgw -> aws.p3TgwRouteA 'Routes VRF A through'
+  aws.p3Tgw -> aws.p3TgwRouteB 'Routes VRF B through'
+  aws.p3TgwRouteA -> aws.p3VpcAttachmentA 'Routes only segment A through'
+  aws.p3TgwRouteB -> aws.p3VpcAttachmentB 'Routes only segment B through'
+  aws.p3VpcAttachmentA -> aws.p3VpcRouteA 'Connects to'
+  aws.p3VpcAttachmentB -> aws.p3VpcRouteB 'Connects to'
+  aws.p3VpcRouteA -> aws.destinationA 'Forwards segment A traffic to'
+  aws.p3VpcRouteB -> aws.destinationB 'Forwards segment B traffic to'
+
+  // Pattern 4: use a public VIF and a separate Site-to-Site VPN for each VRF when GRE is unavailable.
+  corporate.vrfA -> aws.p4PublicVifA 'Uses its public VIF'
+  corporate.vrfB -> aws.p4PublicVifB 'Uses its public VIF'
+  aws.p4PublicVifA -> aws.p4VpnA 'Carries traffic to'
+  aws.p4PublicVifB -> aws.p4VpnB 'Carries traffic to'
+  aws.p4VpnA -> aws.p4VpcRouteA 'Routes only segment A to'
+  aws.p4VpnB -> aws.p4VpcRouteB 'Routes only segment B to'
+  aws.p4VpcRouteA -> aws.destinationA 'Forwards segment A traffic to'
+  aws.p4VpcRouteB -> aws.destinationB 'Forwards segment B traffic to'
+
+  // Pattern 5: private-IP VPN attachments use two IPsec tunnels apiece over Direct Connect transport.
+  corporate.vrfA -> aws.p5VpnA 'Uses its private-IP VPN attachment and two IPsec tunnels'
+  corporate.vrfB -> aws.p5VpnB 'Uses its private-IP VPN attachment and two IPsec tunnels'
+  aws.p5VpnA -> aws.p5TransitVif 'Uses the transit VIF transport'
+  aws.p5VpnB -> aws.p5TransitVif 'Uses the transit VIF transport'
+  aws.p5TransitVif -> aws.p5Dxgw 'Routes through'
+  aws.p5Dxgw -> aws.p5Tgw 'Associates with'
+  aws.p5VpnA -> aws.p5Tgw 'Attaches to'
+  aws.p5VpnB -> aws.p5Tgw 'Attaches to'
+  aws.p5Tgw -> aws.p5TgwRouteA 'Routes VRF A through'
+  aws.p5Tgw -> aws.p5TgwRouteB 'Routes VRF B through'
+  aws.p5TgwRouteA -> aws.p5VpcAttachmentA 'Routes only segment A through'
+  aws.p5TgwRouteB -> aws.p5VpcAttachmentB 'Routes only segment B through'
+  aws.p5VpcAttachmentA -> aws.p5VpcRouteA 'Connects to'
+  aws.p5VpcAttachmentB -> aws.p5VpcRouteB 'Connects to'
+  aws.p5VpcRouteA -> aws.destinationA 'Forwards segment A traffic to'
+  aws.p5VpcRouteB -> aws.destinationB 'Forwards segment B traffic to'
+}
+
+views {
+  view index {
+    title 'Traffic Segmentation Options in Direct Connect'
+    include *
+  }
+}

@@ -1,0 +1,7 @@
+PackageId: OpenArch.TrafficSegmentationOptionsInDirectConnect
+Name: Traffic Segmentation Options in Direct Connect
+Description: Five alternative patterns for isolating traffic between on-premises VRFs and AWS VPCs using Direct Connect, Transit Gateway, and Site-to-Site VPN.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, networking, direct-connect, traffic-segmentation]
