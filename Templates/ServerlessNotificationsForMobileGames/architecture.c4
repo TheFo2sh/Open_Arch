@@ -1,0 +1,97 @@
+// Serverless Notifications for Mobile Games, following the Step Functions
+// diagram linked from AWS's reference architecture page.
+// Systems and users are slots; map them to the project's own on application.
+model {
+  marketingEmployee = user 'Marketing employee' {
+    description 'Requests campaigns or one-off notifications.'
+  }
+
+  mobileGame = system 'Mobile game client' {
+    description 'Registers devices and can submit direct notification information.'
+  }
+  gameServer = system 'Game server' {
+    description 'Triggers notification processing when it receives game-client information.'
+  }
+  marketingClient = system 'Marketing request client' {
+    description 'Unspecified client used to submit marketing requests through the REST API.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'REST endpoints for registration, direct notifications, and marketing requests.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    cognito = platform 'Amazon Cognito' {
+      description 'Authorizes marketing requests made through API Gateway.'
+      metadata {
+        uses 'amazon-cognito'
+      }
+    }
+    registrationWorkflow = platform 'AWS Step Functions - registration workflow' {
+      description 'Coordinates device registration and storage of notification endpoint data.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    notificationWorkflow = platform 'AWS Step Functions - notification workflow' {
+      description 'Processes game-server, campaign, and direct notification requests.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs registration and notification logic invoked by the workflows.'
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Stores device endpoints and data used to select direct recipients or segments.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      endpointRegistry = database 'Notification endpoint registry'
+    }
+    sns = platform 'Amazon SNS' {
+      description 'Sends notifications to topic subscribers using mobile device tokens and provider credentials.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    translate = platform 'Amazon Translate' {
+      description 'Translates notification content when requested by the workflow.'
+      metadata {
+        uses 'amazon-translate'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores raw data for cold-data analytics.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      rawData = database 'Raw notification data'
+    }
+  }
+
+  mobileGame -> aws.apiGateway 'Registers devices or submits direct notifications (1)'
+  aws.apiGateway -> aws.registrationWorkflow 'Starts registration flow (2)'
+  aws.registrationWorkflow -> aws.lambda 'Runs registration logic (2)'
+  aws.registrationWorkflow -> aws.dynamodb.endpointRegistry 'Stores SNS endpoint data (2)'
+  gameServer -> aws.notificationWorkflow 'Starts message processing (3)'
+  marketingEmployee -> marketingClient 'Submits campaign or single-notification requests (4)'
+  marketingClient -> aws.apiGateway 'Sends marketing requests to the REST API (4)'
+  aws.cognito -> aws.apiGateway 'Authorizes marketing requests (4)'
+  aws.apiGateway -> aws.notificationWorkflow 'Starts campaign or notification flow (4)'
+  aws.notificationWorkflow -> aws.lambda 'Enriches and processes notification payloads (5)'
+  aws.notificationWorkflow -> aws.dynamodb.endpointRegistry 'Looks up endpoint and recipient data (5)'
+  aws.notificationWorkflow -> aws.translate 'Translates notification content (5, 6)'
+  aws.notificationWorkflow -> aws.sns 'Sends messages to selected endpoints (5, 7)'
+  aws.sns -> mobileGame 'Delivers push notifications through Firebase Cloud Messaging or APNs (7)'
+  aws.notificationWorkflow -> aws.s3.rawData 'Sends raw data for cold analytics (8)'
+}

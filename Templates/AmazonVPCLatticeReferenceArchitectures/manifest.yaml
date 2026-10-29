@@ -1,0 +1,7 @@
+PackageId: OpenArch.AmazonVPCLatticeReferenceArchitectures
+Name: Amazon VPC Lattice Reference Architectures
+Description: Multi-account service connectivity patterns using Amazon VPC Lattice service networks, service associations, policies, and shared services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, networking, service-connectivity, multi-account]

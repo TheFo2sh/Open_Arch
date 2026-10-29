@@ -1,0 +1,7 @@
+PackageId: OpenArch.ManagingInsertsAndUpsertsInAServerlessDataLake
+Name: Managing Inserts and Upserts in a Serverless Data Lake
+Description: Processes batch, change-data-capture, and streaming data with Apache Hudi on Amazon EMR, stores data lake layers in Amazon S3, and enables on-demand analytics.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, data-lake, data-engineering, analytics]

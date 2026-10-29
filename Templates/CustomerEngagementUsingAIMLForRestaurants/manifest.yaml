@@ -1,0 +1,7 @@
+PackageId: OpenArch.CustomerEngagementUsingAIMLForRestaurants
+Name: Customer Engagement Using AI/ML for Restaurants
+Description: Personalize restaurant guest interactions and improve contact center operations with Amazon Connect, conversational AI, and a Guest 360 data platform.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, hospitality, restaurants, customer-engagement, ai-ml]

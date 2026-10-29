@@ -1,0 +1,58 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+technologies:
+  - key: amazon-kinesis-game-analytics-pipeline
+    name: Amazon Kinesis Game Analytics Pipeline
+    description: Collects mobile game player events and sends them into the analytics data flow shown in the AWS diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores analytics events and the transformed machine-learning dataset and model artifacts.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-glue
+    name: AWS Glue
+    description: Transforms player data and runs the periodic batch inference workflow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Provides the notebook, model training, batch transformation, and real-time inference resources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Receives mobile-client requests for player retention actions and routes them to AWS Lambda.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Checks player profiles or a SageMaker AI endpoint and selects a retention action.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Holds player profiles and batch churn predictions used by the retention function.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]

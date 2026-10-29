@@ -1,0 +1,220 @@
+# Technologies named in AWS's connected-vehicle diagrams, keyed by metadata { uses }.
+technologies:
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Connects vehicle devices to AWS, routes MQTT messages, and provides device shadows, lifecycle events, and request topics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-private-link
+    name: AWS PrivateLink
+    description: Connects a private cellular network and customer IoT endpoint to AWS IoT Core.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/privatelink/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ecs
+    name: Amazon Elastic Container Service
+    description: Runs scalable client workers that decode, process, and persist vehicle telemetry.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecs/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores telemetry descriptor files and selected AWS IoT FleetWise campaign data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-amplify
+    name: AWS Amplify
+    description: Client framework used to build the vehicle companion applications.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/amplify/
+    types: [library]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Receives authenticated remote-command requests for connected vehicles.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Persists remote commands, connected-state data, and IoT registration policy information.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: Uses DNS and device location or latency to select an AWS IoT endpoint region.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Implements vehicle registration, command handling, telemetry decryption, and lifecycle workflows.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-iot-fleetwise
+    name: AWS IoT FleetWise
+    description: Defines vehicle data campaigns and sends selected vehicle data to cloud destinations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-fleetwise/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-fleetwise-edge-agent
+    name: AWS IoT FleetWise Edge Agent
+    description: Decodes vehicle network signals and collects data according to AWS IoT FleetWise campaigns.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iotfleetwise/latest/developerguide/iot-fleetwise-edge-agent.html
+    types: [library]
+  - key: amazon-timestream
+    name: Amazon Timestream
+    description: Stores selected time- and event-based vehicle campaign data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/timestream/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Supports ADAS and autonomous-vehicle model improvement and vehicle-design optimization.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Visualizes near-real-time AWS IoT FleetWise data for vehicle quality, safety, and autonomy analysis.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-device-management
+    name: AWS IoT Device Management
+    description: Uses IoT jobs and fleet indexing to manage, organize, and troubleshoot connected devices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-device-management/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-private-ca
+    name: AWS Private Certificate Authority
+    description: Issues and revokes operational vehicle certificates and provides an OCSP responder.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/private-ca/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-device-defender
+    name: AWS IoT Device Defender
+    description: Audits and monitors connected devices and publishes certificate and behavior findings.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-device-defender/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-security-hub
+    name: AWS Security Hub CSPM
+    description: Aggregates and normalizes security findings from AWS services and partner products.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/security-hub/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-eventbridge
+    name: Amazon EventBridge
+    description: Routes security findings to certificate remediation workflows and vehicle security operations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eventbridge/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Orchestrates operational certificate rotation and device remediation workflows.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-kms
+    name: AWS Key Management Service
+    description: Manages cryptographic keys used for server-side and optional client-side encryption.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kms/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-device-sdk
+    name: AWS IoT Device SDK
+    description: Optional vehicle-side client library for connecting to AWS IoT Core.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot/latest/developerguide/iot-sdks.html
+    types: [library]
+  - key: aws-encryption-sdk
+    name: AWS Encryption SDK
+    description: Optional client-side library for encrypting vehicle payloads and for Lambda decryption.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/encryption-sdk/latest/developer-guide/introduction.html
+    types: [library]
+  - key: aws-appsync
+    name: AWS AppSync
+    description: Processes companion-application mutations and subscriptions and fans out vehicle-state updates.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/appsync/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sqs
+    name: Amazon Simple Queue Service
+    description: Delays offline checks and buffers vehicle command responses for downstream processing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sqs/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: Sends an SMS notification when a remote command is waiting for a disconnected vehicle.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Distributes static assets for the companion applications.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: mqtt
+    name: MQTT
+    description: Vehicle messaging protocol used to publish telemetry and exchange commands with AWS IoT Core.
+    vendor: OASIS Open
+    url: https://mqtt.org/
+    types: [third-party]
+  - key: vehicle-network-provider
+    name: Private cellular network provider
+    description: Unnamed third-party provider for the private cellular network and vehicle SIM connectivity shown in the AWS diagrams.
+    types: [third-party]

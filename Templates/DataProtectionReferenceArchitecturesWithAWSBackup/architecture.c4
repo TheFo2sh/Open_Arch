@@ -1,0 +1,351 @@
+// Data Protection Reference Architectures with AWS Backup.
+// Source: https://docs.aws.amazon.com/reference-architecture-diagrams/latest/data-protection-aws-backup/
+// This blueprint combines the four documented patterns; systems and users are slots.
+model {
+  operator = user 'Backup operator' {
+    description 'Administers backup policies and uses approved self-service backup configurations.'
+  }
+  recoveryUser = user 'Recovery operator' {
+    description 'Uses the documented break-glass workflow and MFA to access the backup data bunker.'
+  }
+
+  cloudNative = zone 'Cloud-native AWS account' {
+    metadata {
+      platform 'aws'
+    }
+
+    protectedResources = system 'Protected AWS resources' {
+      description 'Compute, database, and storage services selected by the backup plan; AWS does not specify their individual products.'
+    }
+    administration = system 'Backup administration' {
+      description 'Administrative access to configure and monitor AWS Backup.'
+    }
+
+    cloudFormation = platform 'AWS CloudFormation' {
+      metadata {
+        uses 'aws-cloudformation'
+      }
+    }
+    iam = platform 'AWS Identity and Access Management' {
+      metadata {
+        uses 'aws-iam'
+      }
+    }
+    backup = platform 'AWS Backup' {
+      description 'Backup plan defines schedule, retention, lifecycle, copy destination, protected resources, and backup window.'
+      metadata {
+        uses 'aws-backup'
+      }
+      vault = database 'AWS Backup vault and recovery points' {
+        description 'Logical container for backups; completed backup jobs create recovery points that can be restored.'
+      }
+    }
+    kms = platform 'AWS Key Management Service' {
+      description 'The defined KMS key enforces encryption for the backup vault.'
+      metadata {
+        uses 'aws-kms'
+      }
+    }
+    cloudTrail = platform 'AWS CloudTrail' {
+      metadata {
+        uses 'aws-cloudtrail'
+      }
+    }
+    cloudWatch = platform 'Amazon CloudWatch' {
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    eventBridge = platform 'Amazon EventBridge' {
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    auditManager = platform 'AWS Backup Audit Manager' {
+      description 'Tracks backup resources, applies a governance framework, and creates compliance reports.'
+      metadata {
+        uses 'aws-backup-audit-manager'
+      }
+    }
+  }
+
+  managementAccount = zone 'AWS Organizations management account' {
+    metadata {
+      platform 'aws'
+    }
+
+    administrators = system 'Organization backup administrators' {
+      description 'Administrators manage organization-wide backup policies and monitor member accounts.'
+    }
+    organizations = platform 'AWS Organizations' {
+      description 'Applies backup policies and service control policies to organizational units or selected accounts.'
+      metadata {
+        uses 'aws-organizations'
+      }
+    }
+    controlTower = platform 'AWS Control Tower' {
+      description 'Landing zone customized with the AWS Backup resource template.'
+      metadata {
+        uses 'aws-control-tower'
+      }
+    }
+    stackSets = platform 'AWS CloudFormation StackSets' {
+      description 'Centrally deploys AWS Backup resources across accounts in the organization.'
+      metadata {
+        uses 'aws-cloudformation'
+      }
+    }
+    serviceCatalog = platform 'AWS Service Catalog' {
+      description 'Publishes predefined backup configuration for end-user self-service.'
+      metadata {
+        uses 'aws-service-catalog'
+      }
+    }
+    organizationBackup = platform 'AWS Backup' {
+      description 'Enables cross-account management and monitoring and manages organization backup policies.'
+      metadata {
+        uses 'aws-backup'
+      }
+    }
+    organizationCloudWatch = platform 'Amazon CloudWatch' {
+      description 'Supports centralized monitoring of backup metrics and activities.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    organizationAudit = platform 'AWS Backup Audit Manager' {
+      description 'Monitors backup compliance in organization member accounts.'
+      metadata {
+        uses 'aws-backup-audit-manager'
+      }
+    }
+    eventBus = platform 'Central Amazon EventBridge event bus' {
+      description 'Receives forwarded backup events for centralized monitoring.'
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    notifications = platform 'Amazon Simple Notification Service' {
+      description 'Triggers email notifications from centrally monitored backup events.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+  }
+
+  memberAccounts = zone 'AWS Organization member accounts' {
+    metadata {
+      platform 'aws'
+    }
+
+    workloads = system 'Member account resources' {
+      description 'Resources selected by organization backup policies and resource-assignment tags.'
+    }
+    memberBackup = platform 'AWS Backup' {
+      description 'Organization policy creates a backup plan; scheduled jobs create recovery points in member-account vaults. Vault policies limit copy-out to the approved bunker account.'
+      metadata {
+        uses 'aws-backup'
+      }
+      memberVault = database 'Member account backup vault' {
+        description 'Stores recovery points protected by vault access policies.'
+      }
+    }
+    memberIam = platform 'AWS Identity and Access Management' {
+      description 'Roles and policies authorize backup operations and protect vault contents.'
+      metadata {
+        uses 'aws-iam'
+      }
+    }
+    memberKms = platform 'AWS Key Management Service' {
+      description 'Customer-managed key for originating resources and source backup vaults.'
+      metadata {
+        uses 'aws-kms'
+      }
+    }
+    memberCloudTrail = platform 'AWS CloudTrail' {
+      metadata {
+        uses 'aws-cloudtrail'
+      }
+    }
+    memberConfig = platform 'AWS Config' {
+      metadata {
+        uses 'aws-config'
+      }
+    }
+    memberEvents = platform 'Amazon EventBridge' {
+      description 'Forwards backup events to the central custom event bus.'
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+  }
+
+  destinationRegion = zone 'Cross-Region backup destination' {
+    metadata {
+      platform 'aws'
+    }
+
+    regionalBackup = platform 'AWS Backup' {
+      description 'Receives cross-Region backup copies in the configured destination vault; AWS does not specify whether this is the same or a different account.'
+      metadata {
+        uses 'aws-backup'
+      }
+      regionalVault = database 'Cross-Region backup vault' {
+        description 'Stores recovery points copied to the destination Region.'
+      }
+    }
+  }
+
+  logArchive = zone 'Log Archive account' {
+    metadata {
+      platform 'aws'
+    }
+
+    archive = platform 'Amazon Simple Storage Service' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      auditLogs = database 'Centralized audit logs' {
+        description 'Stores AWS Backup CloudTrail events and AWS Config logs.'
+      }
+    }
+  }
+
+  centralBackup = zone 'Central backup account' {
+    metadata {
+      platform 'aws'
+    }
+
+    centralService = platform 'AWS Backup' {
+      description 'Receives centralized backup copies from organization accounts.'
+      metadata {
+        uses 'aws-backup'
+      }
+      centralVault = database 'Central backup vault' {
+        description 'Stores centralized backup copies.'
+      }
+    }
+    centralAudit = platform 'AWS Backup Audit Manager' {
+      description 'Centralizes AWS Backup Audit Manager reports across the organization.'
+      metadata {
+        uses 'aws-backup-audit-manager'
+      }
+    }
+  }
+
+  bunker = zone 'Backup Data Bunker account' {
+    metadata {
+      platform 'aws'
+    }
+
+    breakGlassAccess = system 'Bunker break-glass access' {
+      description 'Federated users authenticate with MFA and follow the documented break-glass workflow.'
+    }
+    bunkerBackup = platform 'AWS Backup' {
+      description 'Central vault account with Vault Lock and a resource policy restricting copy-in to approved organizational units or accounts.'
+      metadata {
+        uses 'aws-backup'
+      }
+      immutableVault = database 'Vault Lock backup vault' {
+        description 'Immutable backup data bunker containing copied recovery points.'
+      }
+    }
+    bunkerIam = platform 'AWS Identity and Access Management' {
+      description 'Restricts backup operations to the IAM roles allowed by the service control policy.'
+      metadata {
+        uses 'aws-iam'
+      }
+    }
+    bunkerSts = platform 'AWS Security Token Service' {
+      description 'Issues the authenticated federated user temporary credentials scoped to approved bunker roles.'
+      metadata {
+        uses 'aws-security-token-service'
+      }
+    }
+    bunkerOrganizations = platform 'AWS Organizations' {
+      description 'Service control policy protects the data bunker against unauthorized access or modification.'
+      metadata {
+        uses 'aws-organizations'
+      }
+    }
+    bunkerAudit = platform 'AWS Backup Audit Manager' {
+      description 'Creates audit reports for the immutable backup architecture.'
+      metadata {
+        uses 'aws-backup-audit-manager'
+      }
+    }
+    bunkerCloudTrail = platform 'AWS CloudTrail' {
+      description 'Organizational trail records policy changes and central vault access patterns.'
+      metadata {
+        uses 'aws-cloudtrail'
+      }
+    }
+  }
+
+  keyVault = zone 'Key Vault account' {
+    metadata {
+      platform 'aws'
+    }
+
+    sharedKms = platform 'AWS Key Management Service' {
+      description 'Customer-managed key shared with the central vault account; critical key API calls have additional controls such as MFA.'
+      metadata {
+        uses 'aws-kms'
+      }
+    }
+  }
+
+  operator -> cloudNative.administration 'Administers backup configuration'
+  operator -> managementAccount.administrators 'Manages organization backup policies'
+  recoveryUser -> bunker.breakGlassAccess 'Authenticates through federation and MFA for the break-glass workflow'
+  managementAccount.administrators -> managementAccount.organizations 'Attaches backup policies and service control policies'
+  managementAccount.controlTower -> managementAccount.organizations 'Integrates AWS Backup with the landing zone'
+  managementAccount.stackSets -> memberAccounts.memberBackup 'Deploys backup resources to'
+  managementAccount.organizations -> memberAccounts.memberBackup 'Creates backup plans in'
+  managementAccount.organizations -> memberAccounts.workloads 'Assigns protected resources by policy and tags'
+  memberAccounts.memberBackup -> memberAccounts.workloads 'Runs scheduled backup jobs for'
+  memberAccounts.memberBackup -> memberAccounts.memberKms 'Encrypts source backups with'
+  memberAccounts.memberIam -> memberAccounts.memberBackup 'Authorizes backup operations and protects vault access'
+  managementAccount.stackSets -> memberAccounts.memberIam 'Deploys backup roles and access policies to'
+  managementAccount.stackSets -> memberAccounts.memberKms 'Deploys backup encryption resources to'
+  memberAccounts.memberCloudTrail -> logArchive.archive 'Sends AWS Backup events to'
+  memberAccounts.memberConfig -> logArchive.archive 'Sends AWS Config logs to'
+  memberAccounts.memberEvents -> managementAccount.eventBus 'Forwards backup events to'
+  managementAccount.eventBus -> managementAccount.notifications 'Triggers email notifications through'
+  managementAccount.organizationBackup -> memberAccounts.memberBackup 'Monitors and manages across accounts'
+  managementAccount.organizationAudit -> memberAccounts.memberBackup 'Audits backup compliance for'
+  centralBackup.centralAudit -> managementAccount.organizationAudit 'Centralizes audit reports from'
+  memberAccounts.memberBackup -> centralBackup.centralService 'Copies recovery points to the central backup account'
+  memberAccounts.memberBackup -> destinationRegion.regionalBackup 'Copies recovery points to the configured destination Region'
+  memberAccounts.memberBackup -> bunker.bunkerBackup 'Copies recovery points to the immutable data bunker'
+  memberAccounts.memberKms -> bunker.bunkerBackup 'Authorizes cross-account copy encryption for'
+  keyVault.sharedKms -> bunker.bunkerBackup 'Shares the central vault encryption key with'
+  bunker.bunkerOrganizations -> bunker.bunkerBackup 'Restricts access and modification of'
+  bunker.bunkerIam -> bunker.bunkerBackup 'Limits backup operations to approved roles in'
+  bunker.breakGlassAccess -> bunker.bunkerSts 'Federates the authenticated user for'
+  bunker.bunkerSts -> bunker.bunkerIam 'Issues temporary credentials scoped to roles in'
+  bunker.bunkerCloudTrail -> bunker.bunkerBackup 'Records policy changes and access patterns for'
+  bunker.bunkerAudit -> bunker.bunkerBackup 'Audits the immutable backup vault'
+  managementAccount.serviceCatalog -> managementAccount.administrators 'Offers predefined backup configuration for self-service'
+  cloudNative.cloudFormation -> cloudNative.backup 'Creates AWS Backup resources'
+  cloudNative.iam -> cloudNative.backup 'Authorizes access and protects vault contents'
+  cloudNative.backup -> cloudNative.protectedResources 'Protects selected compute, database, and storage services'
+  cloudNative.kms -> cloudNative.backup 'Encrypts backup vault contents'
+  cloudNative.cloudTrail -> cloudNative.backup 'Records backup actions as events'
+  cloudNative.cloudWatch -> cloudNative.backup 'Monitors service metrics'
+  cloudNative.eventBridge -> cloudNative.backup 'Monitors backup failure and deletion events'
+  cloudNative.auditManager -> cloudNative.backup 'Tracks resources and audits backup compliance'
+  cloudNative.administration -> cloudNative.backup 'Configures and monitors'
+  cloudNative.administration -> cloudNative.iam 'Uses IAM for authentication and authorization'
+  managementAccount.administrators -> managementAccount.serviceCatalog 'Publishes approved self-service backup configuration'
+  managementAccount.organizationCloudWatch -> managementAccount.organizationBackup 'Monitors organization backup metrics'
+  cloudNative.backup -> cloudNative.auditManager 'Provides backup data for compliance monitoring'
+  memberAccounts.memberBackup -> managementAccount.eventBus 'Emits backup events for centralized monitoring'
+}
+
+views {
+  view index {
+    title 'Data Protection Reference Architectures with AWS Backup'
+    include *
+  }
+}

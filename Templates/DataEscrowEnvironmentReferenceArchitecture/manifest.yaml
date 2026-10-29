@@ -1,0 +1,7 @@
+PackageId: OpenArch.DataEscrowEnvironmentReferenceArchitecture
+Name: Data Escrow Environment Reference Architecture
+Description: A publisher-controlled, cross-account AWS data escrow environment for governed sharing and advertiser data integration.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, data-sharing, data-governance, analytics]
