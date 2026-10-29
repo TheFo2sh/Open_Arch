@@ -1,0 +1,7 @@
+PackageId: OpenArch.IndustrialDataPlatformOnAWS
+Name: Industrial Data Platform on AWS
+Description: Industrial data platform for edge telemetry, images, manufacturing streams and files, enterprise data, machine learning, and operational feedback on AWS.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, industrial-iot, manufacturing, data-platform]

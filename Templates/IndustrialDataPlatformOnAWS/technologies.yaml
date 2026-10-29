@@ -1,0 +1,129 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-iot-greengrass
+    name: AWS IoT Greengrass
+    description: Edge runtime that hosts connectors and Lambda functions for machine and PLC telemetry.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/greengrass/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-iot-greengrass-connectors
+    name: AWS IoT Greengrass connectors and Lambda functions
+    description: Edge components that ingest and transform machine and PLC telemetry.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/greengrass/v2/developerguide/
+    types: [library]
+  - key: aws-iot-sitewise
+    name: AWS IoT SiteWise
+    description: Organizes industrial IoT assets and their equipment data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-sitewise/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Routes industrial IoT data between connected services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-data-firehose
+    name: Amazon Data Firehose
+    description: Delivers IoT Core data into the Amazon S3 data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon S3
+    description: Data lake and image-file storage for industrial and enterprise datasets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-storage-gateway
+    name: AWS Storage Gateway
+    description: Synchronizes image files into AWS storage.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/storagegateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-panorama
+    name: AWS Panorama
+    description: Handles imagery from industrial IP cameras.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/panorama/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Ingests streaming data from manufacturing applications.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-transfer-family
+    name: AWS Transfer Family
+    description: Transfers manufacturing files into the data platform.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/aws-transfer-family/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores enterprise reference data separately from historical data in S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-glue
+    name: AWS Glue
+    description: Engineers datasets and catalogs them for downstream use.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Builds machine-learning models from industrial datasets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/ai/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-lookout-for-equipment
+    name: Amazon Lookout for Equipment
+    description: Detects anomalies in industrial equipment data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lookout-for-equipment/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Initiates inference workflows and returns prediction results to industrial enterprise systems.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-appsync
+    name: AWS AppSync
+    description: Provides application and dashboard access to industrial datasets and inference results.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/appsync/
+    types: [managed-service]
+    platform: aws
+    hosts: []
