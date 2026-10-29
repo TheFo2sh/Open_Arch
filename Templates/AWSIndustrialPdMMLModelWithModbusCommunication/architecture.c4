@@ -1,0 +1,109 @@
+// AWS Industrial PdM ML Model with Modbus Communication.
+// Source: https://docs.aws.amazon.com/reference-architecture-diagrams/latest/industrial-pdm-ml-modbus/industrial-pdm-ml-modbus.html
+model {
+  factory = zone 'Factory' {
+    metadata {
+      platform 'other'
+    }
+
+    machines = system 'Factory machines' {
+      description 'Machines expose OPC-UA servers and Modbus data for predictive-maintenance monitoring.'
+    }
+    greengrass = platform 'AWS IoT Greengrass' {
+      description 'Edge runtime on the industrial gateway that runs the Modbus connector.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+
+      gateway = system 'Industrial gateway' {
+        description 'Connects factory machine data to AWS IoT services.'
+
+        modbusConnector = container 'Greengrass Modbus Connector' {
+          description 'Sends machine Modbus data to AWS IoT Core.'
+          technology 'AWS IoT Greengrass Modbus Connector; Modbus'
+          metadata {
+            uses 'aws-iot-greengrass-modbus-connector'
+          }
+        }
+        sitewiseConnector = container 'AWS IoT SiteWise Connector' {
+          description 'Connects factory OPC-UA servers to AWS IoT SiteWise.'
+          technology 'AWS IoT SiteWise Gateway; OPC Unified Architecture'
+          metadata {
+            uses 'aws-iot-sitewise-gateway'
+          }
+        }
+      }
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      description 'Routes Modbus messages from the Greengrass connector using an IoT Core rule.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    sitewise = platform 'AWS IoT SiteWise' {
+      description 'Models factory assets and collects their metrics.'
+      metadata {
+        uses 'aws-iot-sitewise'
+      }
+      assetStore = database 'SiteWise asset model and data store' {
+        description 'Factory assets and the SiteWise data store used as the analytics source.'
+      }
+    }
+    iotAnalytics = platform 'AWS IoT Analytics' {
+      description 'Creates the container data set and supports predictive-maintenance analysis.'
+      metadata {
+        uses 'aws-iot-analytics'
+      }
+      containerDataset = database 'Container data set' {
+        description 'Analytics data set sourced from SiteWise and linked to the Docker image.'
+      }
+      modelDevelopment = system 'Predictive maintenance model development' {
+        description 'Builds the PdM ML model in a Jupyter Notebook using the container data set.'
+        technology 'Jupyter Notebook'
+      }
+    }
+    ecr = platform 'Amazon Elastic Container Registry' {
+      description 'Stores the Docker image used by the IoT Analytics container data set.'
+      metadata {
+        uses 'amazon-ecr'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Visualizes analysis from the AWS IoT Analytics data source.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    sns = platform 'Amazon SNS' {
+      description 'Sends anomaly-detection notifications when the configured trigger fires.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+  }
+
+  factory.machines -> factory.greengrass.gateway.modbusConnector 'Sends Modbus data to'
+  factory.machines -> factory.greengrass.gateway.sitewiseConnector 'Exposes OPC-UA data to'
+  factory.greengrass.gateway.modbusConnector -> aws.iotCore 'Publishes Modbus data to'
+  factory.greengrass.gateway.sitewiseConnector -> aws.sitewise 'Sends factory metrics to'
+  aws.iotCore -> aws.iotAnalytics 'Routes messages to'
+  aws.sitewise.assetStore -> aws.iotAnalytics.containerDataset 'Provides source data to'
+  aws.ecr -> aws.iotAnalytics.containerDataset 'Supplies the Docker image for'
+  aws.iotAnalytics.containerDataset -> aws.iotAnalytics.modelDevelopment 'Provides data to'
+  aws.iotAnalytics -> aws.quickSight 'Provides an analysis data source to'
+  aws.iotAnalytics -> aws.sns 'Publishes anomaly notifications to'
+}
+
+views {
+  view index {
+    title 'AWS Industrial PdM ML Model with Modbus Communication'
+    include *, factory.*, factory.greengrass.*, factory.greengrass.gateway.*, aws.*
+  }
+}

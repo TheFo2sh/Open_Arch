@@ -1,0 +1,7 @@
+PackageId: OpenArch.AWSDistributedPerforceArchitecture
+Name: AWS Distributed Perforce Architecture
+Description: Hybrid, multi-Region Perforce Helix Core with commit-edge servers, remote access, depot storage and backups on AWS.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, perforce, source-control, multi-region, hybrid-cloud]

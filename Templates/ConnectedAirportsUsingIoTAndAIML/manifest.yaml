@@ -1,0 +1,7 @@
+PackageId: OpenArch.ConnectedAirportsUsingIoTAndAIML
+Name: Connected Airports Using IoT and AI/ML
+Description: Near-real-time airport operations visibility using edge IoT, data lake analytics, and AI/ML.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, airport, iot, ai-ml, analytics, travel]

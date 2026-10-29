@@ -1,0 +1,7 @@
+PackageId: OpenArch.DataPlatformForPortsAndInlandLogisticsFacilities
+Name: Data Platform for Ports and Inland Logistics Facilities
+Description: AWS reference architecture for unified port and inland logistics data ingestion, analytics, workflow automation, and partner data sharing.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, data-platform, ports, logistics, analytics]

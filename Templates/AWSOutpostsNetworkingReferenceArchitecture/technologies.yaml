@@ -1,0 +1,90 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-outposts
+    name: AWS Outposts
+    description: AWS-managed Outposts Rack installed at a customer site and connected to a home AWS Region.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/outposts/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Regional virtual network that can associate with an Outpost and contain Outpost subnets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform for instances in regional and Outpost subnets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-outposts-local-gateway
+    name: AWS Outposts local gateway
+    description: Connects Outpost subnets to customer networks, using a Customer-owned IP address range and NAT for eligible instance connectivity.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/outposts/latest/userguide/what-is-outposts.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Optional dedicated connectivity from customer routers to AWS, including a public virtual interface for the service-link route shown here.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect-public-vif
+    name: AWS Direct Connect public virtual interface
+    description: Public VIF that connects to the Outposts service-link anchor IPs and advertises Amazon public IP ranges to the customer router.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/directconnect/latest/UserGuide/working-with-virtual-interfaces.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-internet-gateway
+    name: AWS Internet Gateway
+    description: VPC gateway depicted in the reference diagram; its specific traffic flows are not described.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-vpc-endpoints
+    name: AWS VPC endpoints
+    description: VPC endpoints depicted in the reference diagram; their endpoint services and traffic flows are not specified.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/privatelink/vpc-endpoints.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Regional service shown as an example alongside Amazon Redshift; the source does not specify its workload or data flow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Regional service shown as an example alongside Amazon S3; the source does not specify its workload or data flow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: customer-network-infrastructure
+    name: Customer-provided network infrastructure (vendor unspecified)
+    description: Customer or connectivity-partner routers, devices, physical fiber, and optional internet connectivity; the source does not specify vendors or providers.
+    vendor: Customer or connectivity partner
+    types: [data-platform, third-party]
+    platform: other
+    hosts: []

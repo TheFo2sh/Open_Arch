@@ -1,0 +1,7 @@
+PackageId: OpenArch.AutoscalingAsynchronousJobQueues
+Name: Autoscaling Asynchronous Job Queues
+Description: An AWS pattern for submitting, tracking, and canceling asynchronous jobs while scaling container workers from queue depth.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, asynchronous, job-queues, background-processing, containers]

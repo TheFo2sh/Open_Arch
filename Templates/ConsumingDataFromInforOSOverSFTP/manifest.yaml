@@ -1,0 +1,7 @@
+PackageId: OpenArch.ConsumingDataFromInforOSOverSFTP
+Name: Consuming Data from InforOS over SFTP
+Description: Integrates Infor CloudSuite data with AWS consumers through AWS Transfer Family, Amazon S3, and optional S3 event notifications.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, infor, sftp, data-integration]

@@ -1,0 +1,149 @@
+// Consumer Review Sentiment Analysis for CPG, from AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/consumer-review-sentiment-cpg/consumer-review-sentiment-cpg.html
+// The AWS diagram shows more ingestion detail than its numbered prose; unspecified behavior is documented in README.md.
+model {
+  reviewChannels = system 'Review source channels' {
+    description 'E-commerce and product websites and social-media webhook sources that provide consumer reviews.'
+  }
+  saasSources = system 'SaaS review sources' {
+    description 'Optional SaaS applications that provide review-related data; AWS gives Salesforce, Marketo, Slack, and ServiceNow as examples.'
+  }
+  analyst = user 'Insights analyst' {
+    description 'Reviews consumer insight dashboards.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Receives review submissions in the API-based ingestion path shown in the diagram.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the ingestion function shown in the diagram and processes S3 review events.'
+      metadata {
+        uses 'aws-lambda'
+      }
+
+      reviewPipeline = system 'Consumer review analysis system' {
+        description 'Accepts incoming reviews and turns raw review data into language and sentiment insights.'
+
+        ingestFunction = container 'Review ingestion function' {
+          description 'Handles submissions routed through API Gateway and forwards reviews to Firehose.'
+        }
+        analysisFunction = container 'Review analysis function' {
+          description 'Runs when raw reviews arrive in S3, uses translation and text analysis services, and sends results to Firehose.'
+        }
+      }
+    }
+    firehose = platform 'Amazon Kinesis Data Firehose' {
+      description 'Delivers incoming reviews and analysis outputs to S3.'
+      metadata {
+        uses 'amazon-kinesis-data-firehose'
+      }
+    }
+    appflow = platform 'Amazon AppFlow' {
+      description 'Securely ingests data from selected SaaS sources into S3.'
+      metadata {
+        uses 'amazon-appflow'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores raw reviews and the analysis datasets shown in the diagram.'
+      metadata {
+        uses 'amazon-s3'
+      }
+
+      rawReviews = database 'Raw reviews' {
+        description 'Raw consumer review data ingested through Firehose or AppFlow.'
+      }
+      sentiment = database 'Sentiment results' {
+        description 'Review sentiment analysis results stored in S3.'
+      }
+      keyPhrases = database 'Key phrase results' {
+        description 'Review key-phrase extraction results stored in S3.'
+      }
+      entities = database 'Entity results' {
+        description 'Review entity extraction results stored in S3.'
+      }
+    }
+    translate = platform 'Amazon Translate' {
+      description 'Translates reviews for analysis.'
+      metadata {
+        uses 'amazon-translate'
+      }
+    }
+    comprehend = platform 'Amazon Comprehend' {
+      description 'Extracts sentiment, key phrases, and entities from reviews.'
+      metadata {
+        uses 'amazon-comprehend'
+      }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      description 'Organizes S3 review data with a logical database and table definitions.'
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+
+      reviewCatalog = database 'Review data catalog' {
+        description 'Logical catalog database containing table definitions for review data in S3.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Queries review data in S3 using Glue Data Catalog table definitions.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Presents query results in a dashboard.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+
+      insightsDashboard = system 'Consumer review insights dashboard' {
+        description 'Shows consumer review insights to CPG analysts.'
+      }
+    }
+  }
+
+  reviewChannels -> aws.apiGateway 'Submits reviews through'
+  aws.apiGateway -> aws.lambda.reviewPipeline.ingestFunction 'Routes submissions to'
+  aws.lambda.reviewPipeline.ingestFunction -> aws.firehose 'Delivers review data through'
+  aws.firehose -> aws.s3.rawReviews 'Loads raw reviews into'
+  saasSources -> aws.appflow 'Provides SaaS data to'
+  aws.appflow -> aws.s3.rawReviews 'Ingests data into'
+
+  aws.s3.rawReviews -> aws.lambda.reviewPipeline.analysisFunction 'An S3 event invokes'
+  aws.lambda.reviewPipeline.analysisFunction -> aws.translate 'Requests language translation from'
+  aws.translate -> aws.lambda.reviewPipeline.analysisFunction 'Returns translated text to'
+  aws.lambda.reviewPipeline.analysisFunction -> aws.comprehend 'Requests sentiment, key-phrase, and entity analysis from'
+  aws.comprehend -> aws.lambda.reviewPipeline.analysisFunction 'Returns analysis to'
+  aws.lambda.reviewPipeline.analysisFunction -> aws.firehose 'Sends analysis outputs through'
+  aws.firehose -> aws.s3.sentiment 'Stores sentiment results in'
+  aws.firehose -> aws.s3.keyPhrases 'Stores key-phrase results in'
+  aws.firehose -> aws.s3.entities 'Stores entity results in'
+
+  aws.s3.rawReviews -> aws.glueCatalog.reviewCatalog 'Has table definitions organized by'
+  aws.s3.sentiment -> aws.glueCatalog.reviewCatalog 'Has table definitions organized by'
+  aws.s3.keyPhrases -> aws.glueCatalog.reviewCatalog 'Has table definitions organized by'
+  aws.s3.entities -> aws.glueCatalog.reviewCatalog 'Has table definitions organized by'
+  aws.glueCatalog.reviewCatalog -> aws.athena 'Provides table definitions to'
+  aws.athena -> aws.s3.rawReviews 'Queries'
+  aws.athena -> aws.s3.sentiment 'Queries'
+  aws.athena -> aws.s3.keyPhrases 'Queries'
+  aws.athena -> aws.s3.entities 'Queries'
+  aws.athena -> aws.quickSight.insightsDashboard 'Returns query results to'
+  analyst -> aws.quickSight.insightsDashboard 'Uses'
+}
+
+views {
+  view index {
+    title 'Consumer Review Sentiment Analysis for CPG'
+    include *, aws.*, aws.lambda.*, aws.lambda.reviewPipeline.*, aws.s3.*, aws.glueCatalog.*
+  }
+}
