@@ -1,0 +1,198 @@
+// Telecom Charging (OCS/CHF) on AWS Outposts, based on AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/telecom-charging-ocs-chf-on-aws-outposts/telecom-charging-ocs-chf-on-aws-outposts.html
+// The systems are slots for a project's network, charging, and regional application systems.
+model {
+  cspNetwork = zone 'CSP network' {
+    metadata {
+      platform 'other'
+    }
+
+    devices = system '4G/5G network devices' {
+      description 'Network endpoints that reach the operator core through the Radio Access Network.'
+    }
+    ran = system 'Radio Access Network (RAN)' {
+      description 'Radio sites that connect 4G/5G devices to the CSP data centers.'
+    }
+    internet = system 'Existing customer internet connection' {
+      description 'An optional customer-provided transport path for the Outposts service link; provider and configuration are unspecified.'
+    }
+  }
+
+  dc1 = zone 'CSP data center 1' {
+    metadata {
+      platform 'other'
+    }
+
+    core = system '5G Core - data center 1' {
+      description 'Operator core network slot that integrates with local OCS/CHF through the Outposts Local Gateway.'
+    }
+
+    outposts = platform 'AWS Outposts - site 1' {
+      description 'Outposts rack at the first physically isolated site, homed to one Availability Zone in the parent Region.'
+      metadata {
+        uses 'aws-outposts'
+      }
+
+      localGateway = platform 'AWS Outposts Local Gateway' {
+        description 'Connects the Outposts VPC to the local network.'
+        metadata {
+          uses 'aws-outposts-local-gateway'
+        }
+      }
+      eks = platform 'Amazon EKS on AWS Outposts' {
+        description 'Runs the containerized charging workload at site 1.'
+        metadata {
+          uses 'amazon-eks'
+        }
+
+        charging = system 'OCS/CHF charging workload on EKS - site 1' {
+          description 'Deployment slot for the online charging system or charging function running on EKS.'
+        }
+      }
+      ec2 = platform 'Amazon EC2 on AWS Outposts' {
+        description 'Runs charging workloads and the vendor-supported database at site 1.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+
+        charging = system 'OCS/CHF charging workload on EC2 - site 1' {
+          description 'Deployment slot for the online charging system or charging function running on EC2.'
+        }
+        database = database 'Charging database - site 1' {
+          description 'Vendor-supported database; AWS does not name the product, engine, or vendor.'
+          technology 'Vendor-supported database software (unspecified)'
+        }
+      }
+    }
+  }
+
+  dc2 = zone 'CSP data center 2' {
+    metadata {
+      platform 'other'
+    }
+
+    core = system '5G Core - data center 2' {
+      description 'Operator core network slot that integrates with local OCS/CHF through the Outposts Local Gateway.'
+    }
+
+    outposts = platform 'AWS Outposts - site 2' {
+      description 'Outposts rack at the second physically isolated site, homed to a different Availability Zone in the parent Region.'
+      metadata {
+        uses 'aws-outposts'
+      }
+
+      localGateway = platform 'AWS Outposts Local Gateway' {
+        description 'Connects the Outposts VPC to the local network.'
+        metadata {
+          uses 'aws-outposts-local-gateway'
+        }
+      }
+      eks = platform 'Amazon EKS on AWS Outposts' {
+        description 'Runs the containerized charging workload at site 2.'
+        metadata {
+          uses 'amazon-eks'
+        }
+
+        charging = system 'OCS/CHF charging workload on EKS - site 2' {
+          description 'Deployment slot for the online charging system or charging function running on EKS.'
+        }
+      }
+      ec2 = platform 'Amazon EC2 on AWS Outposts' {
+        description 'Runs charging workloads and the vendor-supported database at site 2.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+
+        charging = system 'OCS/CHF charging workload on EC2 - site 2' {
+          description 'Deployment slot for the online charging system or charging function running on EC2.'
+        }
+        database = database 'Charging database - site 2' {
+          description 'Vendor-supported database; AWS does not name the product, engine, or vendor.'
+          technology 'Vendor-supported database software (unspecified)'
+        }
+      }
+    }
+  }
+
+  aws = zone 'AWS Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Amazon VPC' {
+      description 'Regional VPC with subnets in two Availability Zones and connectivity to the Outposts subnets.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      bss = system 'Business Support System (BSS)' {
+        description 'Regional BSS application shown in the Region subnets; its product and implementation are unspecified.'
+      }
+    }
+    directConnect = platform 'AWS Direct Connect' {
+      description 'One optional customer network path for the Outposts service link; the source also allows the existing internet connection.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    cloudwatch = platform 'Amazon CloudWatch' {
+      description 'Regional service available to applications running on AWS Outposts.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    codecommit = platform 'AWS CodeCommit' {
+      description 'Regional service available to applications running on AWS Outposts.'
+      metadata {
+        uses 'aws-codecommit'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Shown in the regional observability, deployment, and DevOps area; the reference does not describe its charging use.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+  }
+
+  cspNetwork.devices -> cspNetwork.ran 'Connects through'
+  cspNetwork.ran -> dc1.core 'Reaches the CSP data center'
+  cspNetwork.ran -> dc2.core 'Reaches the CSP data center'
+
+  dc1.core -> dc1.outposts.localGateway 'Integrates with local charging through'
+  dc2.core -> dc2.outposts.localGateway 'Integrates with local charging through'
+  dc1.outposts.localGateway -> dc1.outposts.eks.charging 'Routes charging traffic to'
+  dc1.outposts.localGateway -> dc1.outposts.ec2.charging 'Routes charging traffic to'
+  dc2.outposts.localGateway -> dc2.outposts.eks.charging 'Routes charging traffic to'
+  dc2.outposts.localGateway -> dc2.outposts.ec2.charging 'Routes charging traffic to'
+
+  dc1.outposts -> aws.vpc 'Uses the service link for management and intra-VPC traffic'
+  dc2.outposts -> aws.vpc 'Uses the service link for management and intra-VPC traffic'
+  dc1.outposts -> aws.directConnect 'May use as service-link transport'
+  dc2.outposts -> aws.directConnect 'May use as service-link transport'
+  aws.directConnect -> aws.vpc 'Connects the customer network to the Region when selected'
+  dc1.outposts -> cspNetwork.internet 'May use as alternative service-link transport'
+  dc2.outposts -> cspNetwork.internet 'May use as alternative service-link transport'
+
+  dc1.outposts.ec2.database -> dc2.outposts.ec2.database 'Near-real-time replication; direction and topology are unspecified'
+
+  dc1.outposts.eks.charging -> aws.vpc.bss 'Securely integrates with the regional BSS'
+  dc1.outposts.ec2.charging -> aws.vpc.bss 'Securely integrates with the regional BSS'
+  dc2.outposts.eks.charging -> aws.vpc.bss 'Securely integrates with the regional BSS'
+  dc2.outposts.ec2.charging -> aws.vpc.bss 'Securely integrates with the regional BSS'
+  dc1.outposts.eks.charging -> aws.cloudwatch 'Uses a regional service; details are unspecified'
+  dc1.outposts.ec2.charging -> aws.cloudwatch 'Uses a regional service; details are unspecified'
+  dc2.outposts.eks.charging -> aws.cloudwatch 'Uses a regional service; details are unspecified'
+  dc2.outposts.ec2.charging -> aws.cloudwatch 'Uses a regional service; details are unspecified'
+  dc1.outposts.eks.charging -> aws.codecommit 'Uses a regional service; details are unspecified'
+  dc1.outposts.ec2.charging -> aws.codecommit 'Uses a regional service; details are unspecified'
+  dc2.outposts.eks.charging -> aws.codecommit 'Uses a regional service; details are unspecified'
+  dc2.outposts.ec2.charging -> aws.codecommit 'Uses a regional service; details are unspecified'
+}
+
+views {
+  view index {
+    title 'Telecom Charging (OCS/CHF) on AWS Outposts'
+    include *, cspNetwork.*, dc1.*, dc1.outposts.*, dc1.outposts.eks.*, dc1.outposts.ec2.*, dc2.*, dc2.outposts.*, dc2.outposts.eks.*, dc2.outposts.ec2.*, aws.*, aws.vpc.*
+  }
+}

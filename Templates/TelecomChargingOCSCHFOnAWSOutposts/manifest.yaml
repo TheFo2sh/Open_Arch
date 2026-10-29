@@ -1,0 +1,7 @@
+PackageId: OpenArch.TelecomChargingOCSCHFOnAWSOutposts
+Name: Telecom Charging (OCS/CHF) on AWS Outposts
+Description: Active-active telecom online charging and charging functions on two AWS Outposts sites, integrated with the operator core network and regional AWS services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, telecommunications, outposts, 4g, 5g, charging]

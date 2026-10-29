@@ -1,0 +1,80 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-outposts
+    name: AWS Outposts
+    description: AWS infrastructure deployed at customer sites for workloads that need to run locally near the operator core network.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/outposts/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: []
+  - key: aws-outposts-local-gateway
+    name: AWS Outposts Local Gateway
+    description: Connects the Outposts VPC to the local customer network for charging traffic.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/outposts/latest/userguide/outposts-local-gateways.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Regional VPC connecting Outposts subnets and regional Availability Zone subnets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: amazon-eks
+    name: Amazon Elastic Kubernetes Service
+    description: Runs containerized online charging workloads on AWS Outposts.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eks/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ec2
+    name: Amazon Elastic Compute Cloud
+    description: Runs charging workloads and vendor-supported database software on AWS Outposts.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system, database]
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Optional customer network path for the Outposts service link to the parent Region.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Regional service available to applications running on AWS Outposts.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-codecommit
+    name: AWS CodeCommit
+    description: Regional source-control service available to applications running on AWS Outposts.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codecommit/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Regional service shown alongside CloudWatch and CodeCommit; the reference does not specify its role in the charging flow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: vendor-supported-database
+    name: Vendor-supported database software (unspecified)
+    description: The reference specifies vendor-supported databases on EC2 but does not name a product, engine, or vendor.
+    vendor: Not specified by AWS
+    types: [third-party]
