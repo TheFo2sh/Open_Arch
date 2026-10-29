@@ -1,0 +1,105 @@
+// DT4o Faktory Vision: Quality Insights on AWS, after the AWS reference architecture.
+// Sources and assumptions are documented in README.md. Systems and users are slots.
+model {
+  operator = user 'Plant operator' {
+    description 'Provides feedback for model fine-tuning and views product quality insights.'
+  }
+
+  factory = zone 'Manufacturing plant' {
+    description 'Factory production line and edge inference environment.'
+    metadata {
+      platform 'other'
+    }
+
+    greengrass = platform 'AWS IoT Greengrass' {
+      description 'Initiates camera capture and inference events at the factory edge.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+    }
+    cameras = system 'Plant cameras' {
+      description 'Capture production images synchronized with the production controller.'
+    }
+    plc = system 'Production controller (PLC)' {
+      description 'Synchronizes the plant cameras with production.'
+    }
+    mqttMiddleware = system 'MQTT connector middleware' {
+      description 'Carries low-latency edge image messages; the broker product is not specified by AWS.'
+      technology 'Message Queuing Telemetry Transport (MQTT)'
+    }
+    faktoryInference = system 'Faktory Inference' {
+      description 'Downloads models to local disk and loads models according to the plant hierarchy.'
+      technology 'DT4o Faktory Inference'
+    }
+    faktoryEdge = system 'Faktory Edge' {
+      description 'Uses loaded models for runtime quality inference at the factory.'
+      technology 'DT4o Faktory Edge'
+    }
+    display = system 'Quality insights display' {
+      description 'Presents quality insights alongside raw and processed images.'
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    description 'AWS services in the reference architecture.'
+    metadata {
+      platform 'aws'
+    }
+
+    ec2 = platform 'Amazon EC2' {
+      description 'Runs the DT4o Faktory Vision container.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+      faktoryVision = system 'DT4o Faktory Vision' {
+        description 'Configures the plant hierarchy, starts machine-learning modeling, and incorporates operator feedback.'
+        technology 'DT4o Faktory Vision'
+        visionContainer = container 'DT4o Faktory Vision container' {
+          description 'Containerized application for plant hierarchy configuration and model workflow.'
+          technology 'DT4o Faktory Vision'
+        }
+      }
+    }
+    ecr = platform 'Amazon Elastic Container Registry' {
+      description 'Supporting container registry shown in the AWS architecture diagram.'
+      metadata {
+        uses 'amazon-ecr'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores factory images and versioned machine-learning models.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Trains machine-learning models for each product type.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+  }
+
+  plc -> cameras 'Synchronizes camera capture with production'
+  greengrass -> cameras 'Initiates camera capture and inference events'
+  cameras -> mqttMiddleware 'Acquire low-latency images over MQTT'
+  mqttMiddleware -> greengrass 'Delivers edge images'
+  greengrass -> aws.s3 'Transfers captured images to'
+  aws.s3 -> aws.ec2.faktoryVision.visionContainer 'Provides images for modeling'
+  operator -> aws.ec2.faktoryVision 'Provides feedback for model fine-tuning'
+  aws.ec2.faktoryVision -> aws.sagemaker 'Initiates model training for each product type'
+  aws.s3 -> aws.sagemaker 'Provides image datasets for training'
+  aws.sagemaker -> aws.s3 'Saves versioned models to'
+  aws.s3 -> faktoryInference 'Faktory Inference downloads models to local disk'
+  faktoryInference -> faktoryEdge 'Loads models by plant hierarchy for runtime inference'
+  faktoryEdge -> display 'Displays quality insights with raw and processed images'
+  operator -> display 'Views product quality insights'
+  aws.ecr -> aws.ec2.faktoryVision.visionContainer 'Provides the container image for'
+}
+
+views {
+  view index {
+    title 'DT4o Faktory Vision: Quality Insights on AWS'
+    include *, factory.*, aws.*, aws.ec2.*, aws.ec2.faktoryVision.*
+  }
+}
