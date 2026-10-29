@@ -1,0 +1,197 @@
+// Lodging Data Platform with Master Data Management, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/lodging-data-platform-mdm/lodging-data-platform-mdm.html
+// Systems and users are slots to map to the adopting project's own domain.
+model {
+  lodgingSystems = system 'Lodging systems of record' {
+    description 'Property, reservation, property management, point-of-sale, loyalty, booking, and survey systems that provide operational and guest data.'
+  }
+  externalData = system 'External demographic and address data' {
+    description 'External data sources; AWS does not name their providers or integration protocols.'
+  }
+  mdmService = system 'Third-party MDM service' {
+    description 'Vendor-neutral slot for the MDM tool that enriches customer data and creates unified guest records.'
+    technology 'Third-party master data management tool'
+  }
+  apiClients = system 'Lodging API client applications' {
+    description 'Customer-service apps and dashboards, customer websites, and mobile customer apps that call the platform APIs.'
+  }
+  eventSubscribers = system 'Property systems and other event subscribers' {
+    description 'Property systems and other external consumers of published customer-centric events.'
+  }
+  analyticsExperience = system 'Lodging analytics experience' {
+    description 'The adopting project’s dashboard or analytics application; AWS does not name a specific consumer application.'
+  }
+  dashboardUsers = user 'Dashboard users' {
+    description 'People who use customer analytics dashboards.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Ingests lodging events and distributes MDM-enriched customer events.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Data lake for staging, raw and curated data, and customer-centric reportable datasets.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Lodging customer-centric data lake' {
+        description 'Staging, raw, curated, and reportable lodging datasets, including customer segmentation, lifetime value, revenue index, and service index.'
+      }
+    }
+    transferFamily = platform 'AWS Transfer Family' {
+      description 'Batch file-ingestion path shown in the reference architecture.'
+      metadata {
+        uses 'aws-transfer-family'
+      }
+    }
+    dataExchange = platform 'AWS Data Exchange' {
+      description 'External data ingestion path shown in the reference architecture.'
+      metadata {
+        uses 'aws-data-exchange'
+      }
+    }
+    appFlow = platform 'Amazon AppFlow' {
+      description 'Connected-source data ingestion path shown in the reference architecture.'
+      metadata {
+        uses 'amazon-appflow'
+      }
+    }
+    emr = platform 'Amazon EMR' {
+      description 'Processes and transforms data lake datasets.'
+      metadata {
+        uses 'amazon-emr'
+      }
+      transformationJobs = system 'Data lake transformation jobs' {
+        description 'Jobs that process and transform lodging datasets.'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Runs ML Transforms for guest record matching and catalogs data lake datasets.'
+      metadata {
+        uses 'aws-glue'
+      }
+      dataCatalog = database 'AWS Glue Data Catalog' {
+        description 'Catalog of data lake tables and schemas.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Operational customer 360 store for unified guest records and customer insights.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      customerProfiles = database 'Unified guest profiles' {
+        description 'Customer-centric operational records enriched and deduplicated by MDM and AWS Glue ML Transforms.'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Orchestrates customer-centric microservices and customer event processing.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Serverless compute for versioned customer-centric services and event processing.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      customerServices = system 'Customer-centric microservices and events' {
+        description 'Versioned services that consume and publish customer-centric data.'
+      }
+    }
+    fargate = platform 'AWS Fargate' {
+      description 'Serverless container compute used alongside Lambda in customer event processing.'
+      metadata {
+        uses 'aws-fargate'
+      }
+      eventTasks = system 'Customer event processing tasks' {
+        description 'Container tasks used in customer event processing.'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'API entry point for the client applications shown in the reference.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      description 'Enterprise data warehouse extended with customer-domain schemas and data marts.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+      customerMarts = database 'Customer data marts' {
+        description 'Customer-centric domain schemas and data marts in the enterprise warehouse.'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Builds customer analysis models from existing raw and curated data and new customer records.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+      customerModels = system 'Customer analysis models' {
+        description 'Models built using existing data lake data and newly unified guest records.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Queries data lake datasets for customer-centric analysis.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Provides customer analytics for lodging dashboard users.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+  }
+
+  lodgingSystems -> aws.kinesis 'Publishes lodging events to'
+  lodgingSystems -> aws.transferFamily 'Supplies batch files through'
+  externalData -> aws.dataExchange 'Provides external data through'
+  externalData -> aws.appFlow 'Supplies connected-source data through'
+  aws.kinesis -> aws.s3.dataLake 'Stages lodging and customer events in'
+  aws.transferFamily -> aws.s3.dataLake 'Stages batch data in'
+  aws.dataExchange -> aws.s3.dataLake 'Stages exchanged data in'
+  aws.appFlow -> aws.s3.dataLake 'Stages connected-source data in'
+
+  aws.kinesis -> mdmService 'Supplies customer events for enrichment and matching to'
+  mdmService -> aws.kinesis 'Publishes unified guest records and MDM events to'
+  aws.s3.dataLake -> aws.glue 'Provides data for ML Transform deduplication in'
+  aws.glue -> aws.dynamodb.customerProfiles 'Writes unified and deduplicated guest records to'
+  aws.glue -> aws.s3.dataLake 'Publishes customer-centric and reportable datasets to'
+  aws.s3.dataLake -> aws.dynamodb.customerProfiles 'Loads customer insights into'
+  aws.s3.dataLake -> aws.emr.transformationJobs 'Provides datasets for processing to'
+  aws.emr.transformationJobs -> aws.s3.dataLake 'Writes transformed datasets to'
+
+  apiClients -> aws.apiGateway 'Calls customer-facing APIs through'
+  aws.apiGateway -> aws.stepFunctions 'Routes requests to customer-centric microservices in'
+  aws.stepFunctions -> aws.lambda.customerServices 'Orchestrates versioned services in'
+  aws.stepFunctions -> aws.fargate.eventTasks 'Orchestrates customer event processing with'
+  aws.stepFunctions -> aws.dynamodb.customerProfiles 'Reads and updates customer records in'
+  aws.dynamodb.customerProfiles -> aws.stepFunctions 'Publishes customer record changes to'
+  aws.lambda.customerServices -> aws.dynamodb.customerProfiles 'Consumes and publishes customer-centric data to'
+  aws.lambda.customerServices -> eventSubscribers 'Publishes customer-centric events to'
+
+  aws.s3.dataLake -> aws.redshift.customerMarts 'Loads customer-domain schemas and data marts in'
+  aws.s3.dataLake -> aws.sagemaker.customerModels 'Provides raw and curated data for modeling to'
+  aws.dynamodb.customerProfiles -> aws.sagemaker.customerModels 'Provides newly unified customer records to'
+  aws.s3.dataLake -> aws.athena 'Provides data for customer analysis with'
+  aws.redshift.customerMarts -> aws.quickSight 'Provides customer analytics data to'
+  aws.athena -> aws.quickSight 'Provides queried lake data for analytics to'
+  dashboardUsers -> analyticsExperience 'Views lodging customer analytics in'
+  analyticsExperience -> aws.quickSight 'Uses customer analytics from'
+}
+
+views {
+  view index {
+    title 'Lodging Data Platform with Master Data Management'
+    include *
+  }
+}
