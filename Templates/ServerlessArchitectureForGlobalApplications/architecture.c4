@@ -1,0 +1,285 @@
+// Serverless Architecture for Global Applications, based on AWS's reference page and diagram.
+// The AWS source page, diagram, PDF, and assumptions are documented in README.md.
+model {
+  users = user 'Users' {
+    description 'Call the global API.'
+  }
+  globalApi = system 'Global API' {
+    description 'User-facing API backed by the regional API Gateway endpoints.'
+  }
+  legacyApi = system 'Legacy API operations' {
+    description 'Existing API paths retained during incremental migration; the implementation is unspecified.'
+  }
+  fileSystem = system 'Existing file system' {
+    description 'External file-system system of record that sends file changes through AWS Storage Gateway.'
+  }
+  databaseSystem = system 'Existing database system of record' {
+    description 'External relational system of record whose changes are captured by AWS DMS.'
+  }
+  externalEventSources = system 'External event sources' {
+    description 'Unspecified external systems that publish events to the application.'
+  }
+  systemsOfRecord = system 'External systems of record' {
+    description 'Unspecified external systems that receive application writes or events.'
+  }
+
+  edgeZone = zone 'AWS global edge' {
+    metadata {
+      platform 'aws'
+    }
+
+    cloudfront = platform 'Amazon CloudFront' {
+      description 'Routes API requests by path to support incremental migration of legacy operations.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    route53 = platform 'Amazon Route 53' {
+      description 'Selects the lowest-latency Region for regional API requests.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+  }
+
+  primaryRegion = zone 'Primary AWS Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Regional REST or SOAP entry point implementing CQRS.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    eventBridge = platform 'Amazon EventBridge' {
+      description 'Receives asynchronous commands, external events, and application logic and data-change events.'
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs regional transactional and event-driven application logic.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      applicationLogic = system 'Regional application logic' {
+        description 'The application logic slot for synchronous commands, queries, and event-driven functions.'
+        queryHandlers = container 'CQRS query handlers' {
+          description 'Read application data from the regional data layer.'
+        }
+        commandHandlers = container 'Synchronous command handlers' {
+          description 'Process synchronous API commands and transactions.'
+        }
+        eventHandlers = container 'Logic and data-change event handlers' {
+          description 'Emit logic events and events after canonical-data changes.'
+        }
+      }
+    }
+    fargate = platform 'Amazon ECS on AWS Fargate' {
+      description 'Runs the long-running container workloads.'
+      metadata {
+        uses 'amazon-ecs-fargate'
+      }
+      longRunningWork = system 'Long-running container work' {
+        description 'The application slot for work that runs longer than a Lambda transaction.'
+        tasks = container 'Long-running tasks' {
+          description 'Containerized work invoked by application workflows or events.'
+        }
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Orchestrates saga workflows for distributed transactions and eventual consistency.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    augmentedAi = platform 'Amazon Augmented AI (Amazon A2I)' {
+      description 'Machine-learning service shown in the AWS diagram; the specific workflow is not detailed.'
+      metadata {
+        uses 'amazon-augmented-ai'
+      }
+    }
+
+    storageGateway = platform 'AWS Storage Gateway' {
+      description 'Connects file-system changes from the external system of record to S3 ingestion.'
+      metadata {
+        uses 'aws-storage-gateway'
+      }
+    }
+    databaseMigration = platform 'AWS Database Migration Service' {
+      description 'Captures database changes from an external system of record.'
+      metadata {
+        uses 'aws-database-migration-service'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis' {
+      description 'Carries the database change event stream to S3 ingestion.'
+      metadata {
+        uses 'amazon-kinesis'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores ingestion data and the data lake.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      ingestion = database 'Ingestion data' {
+        description 'File-system changes and database change events received by the ingestion layer.'
+      }
+      dataLake = database 'Data lake' {
+        description 'S3 data lake for analytics and machine-learning access patterns.'
+      }
+    }
+    s3AccessPoints = platform 'Amazon S3 Access Points' {
+      description 'Access interface shown for the S3 data lake.'
+      metadata {
+        uses 'amazon-s3-access-points'
+      }
+    }
+    lakeFormation = platform 'AWS Lake Formation' {
+      description 'Data-lake service shown with the S3 analytics and machine-learning layer.'
+      metadata {
+        uses 'aws-lake-formation'
+      }
+    }
+
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Regional key-value store; DynamoDB Global Tables replicate it across Regions.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      singleView = database 'Single-view data' {
+        description 'Key-value data used by the single-view access pattern.'
+      }
+    }
+    dax = platform 'Amazon DynamoDB Accelerator (DAX)' {
+      description 'In-memory cache in front of the single-view DynamoDB data.'
+      metadata {
+        uses 'amazon-dax'
+      }
+      cache = database 'DynamoDB cache' {
+        description 'Cached single-view data for low-latency reads.'
+      }
+    }
+    rdsProxy = platform 'Amazon RDS Proxy' {
+      description 'Database proxy in front of the regional Aurora report database.'
+      metadata {
+        uses 'amazon-rds-proxy'
+      }
+    }
+    aurora = platform 'Amazon Aurora Global Database' {
+      description 'Primary relational cluster in the Global Database.'
+      metadata {
+        uses 'amazon-aurora-global-database'
+      }
+      reportDatabase = database 'Report database' {
+        description 'Relational data accessed through Amazon RDS Proxy.'
+      }
+    }
+  }
+
+  secondaryRegion = zone 'Secondary AWS Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Regional REST or SOAP entry point implementing CQRS.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the regional query logic in this read-focused profile.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      queryLogic = system 'Regional query logic' {
+        description 'The application slot that serves queries from replicated regional data.'
+        queryHandlers = container 'CQRS query handlers' {
+          description 'Read the local replicated data layer.'
+        }
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Regional replica of the single-view data, kept in sync by DynamoDB Global Tables.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      singleView = database 'Single-view data replica' {
+        description 'Regional copy of the key-value data; Global Tables can also accept multi-Region writes.'
+      }
+    }
+    aurora = platform 'Amazon Aurora Global Database' {
+      description 'Secondary read-only cluster; writes remain on the primary cluster.'
+      metadata {
+        uses 'amazon-aurora-global-database'
+      }
+      reportDatabase = database 'Report database replica' {
+        description 'Relational replica of the primary Aurora cluster.'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Regional data lake replica kept by S3 Cross-Region Replication.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Data lake replica' {
+        description 'Regional copy of the primary S3 data lake.'
+      }
+    }
+  }
+
+  users -> globalApi 'Calls'
+  globalApi -> edgeZone.cloudfront 'Sends requests through'
+  edgeZone.cloudfront -> legacyApi 'Routes legacy paths to during migration'
+  edgeZone.cloudfront -> edgeZone.route53 'Routes regional paths through'
+  edgeZone.route53 -> primaryRegion.apiGateway 'Selects when this is the lowest-latency Region'
+  edgeZone.route53 -> secondaryRegion.apiGateway 'Selects when this is the lowest-latency Region'
+
+  primaryRegion.apiGateway -> primaryRegion.lambda.applicationLogic.queryHandlers 'Routes query requests to'
+  primaryRegion.apiGateway -> primaryRegion.lambda.applicationLogic.commandHandlers 'Invokes for synchronous commands'
+  primaryRegion.apiGateway -> primaryRegion.eventBridge 'Publishes asynchronous commands to'
+  externalEventSources -> primaryRegion.eventBridge 'Publishes external events to'
+  primaryRegion.eventBridge -> primaryRegion.lambda.applicationLogic.eventHandlers 'Delivers events to'
+  primaryRegion.eventBridge -> primaryRegion.fargate.longRunningWork 'Invokes long-running work on'
+  primaryRegion.stepFunctions -> primaryRegion.lambda.applicationLogic 'Orchestrates saga steps with'
+  primaryRegion.stepFunctions -> primaryRegion.fargate.longRunningWork 'Orchestrates long-running saga work on'
+  primaryRegion.lambda.applicationLogic.eventHandlers -> primaryRegion.eventBridge 'Publishes logic and canonical-data change events to'
+  primaryRegion.eventBridge -> systemsOfRecord 'Sends application events or writes to'
+  primaryRegion.lambda.applicationLogic -> primaryRegion.augmentedAi 'Uses the machine-learning service shown in the diagram'
+
+  fileSystem -> primaryRegion.storageGateway 'Sends file changes through'
+  primaryRegion.storageGateway -> primaryRegion.s3.ingestion 'Ingests file changes into'
+  databaseSystem -> primaryRegion.databaseMigration 'Sends database changes to'
+  primaryRegion.databaseMigration -> primaryRegion.kinesis 'Publishes change events to'
+  primaryRegion.kinesis -> primaryRegion.s3.ingestion 'Delivers change events to'
+
+  primaryRegion.lambda.applicationLogic.queryHandlers -> primaryRegion.dax.cache 'Reads cached key-value data from'
+  primaryRegion.dax.cache -> primaryRegion.dynamodb.singleView 'Caches data from'
+  primaryRegion.lambda.applicationLogic -> primaryRegion.rdsProxy 'Accesses relational data through'
+  primaryRegion.rdsProxy -> primaryRegion.aurora.reportDatabase 'Connects to'
+  primaryRegion.lambda.applicationLogic -> primaryRegion.s3AccessPoints 'Accesses the data lake through'
+  primaryRegion.s3AccessPoints -> primaryRegion.s3.dataLake 'Provides access to'
+  primaryRegion.lakeFormation -> primaryRegion.s3.dataLake 'Governs data-lake access to'
+  primaryRegion.lambda.applicationLogic -> primaryRegion.s3.dataLake 'Uses analytics and machine-learning data from'
+
+  secondaryRegion.apiGateway -> secondaryRegion.lambda.queryLogic.queryHandlers 'Routes query requests to'
+  secondaryRegion.apiGateway -> primaryRegion.apiGateway 'Routes writes to the primary Region in the read-focused profile'
+  secondaryRegion.lambda.queryLogic -> secondaryRegion.dynamodb.singleView 'Reads local key-value data from'
+  secondaryRegion.lambda.queryLogic -> secondaryRegion.aurora.reportDatabase 'Reads local relational data from'
+  secondaryRegion.lambda.queryLogic -> secondaryRegion.s3.dataLake 'Reads local analytics data from'
+
+  primaryRegion.dynamodb.singleView -> secondaryRegion.dynamodb.singleView 'Replicates in both directions through DynamoDB Global Tables'
+  primaryRegion.aurora.reportDatabase -> secondaryRegion.aurora.reportDatabase 'Replicates to the secondary cluster through Aurora Global Database'
+  primaryRegion.s3.dataLake -> secondaryRegion.s3.dataLake 'Replicates objects to through S3 Cross-Region Replication'
+}
+
+views {
+  view index {
+    title 'Serverless Architecture for Global Applications'
+    include *
+  }
+}

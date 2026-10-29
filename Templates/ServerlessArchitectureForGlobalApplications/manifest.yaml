@@ -1,0 +1,7 @@
+PackageId: OpenArch.ServerlessArchitectureForGlobalApplications
+Name: Serverless Architecture for Global Applications
+Description: A multi-Region serverless application pattern using CQRS, event-driven workflows, and replicated data stores.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, serverless, multi-region, event-driven]
