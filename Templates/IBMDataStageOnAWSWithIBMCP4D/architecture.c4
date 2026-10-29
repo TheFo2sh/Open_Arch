@@ -1,0 +1,115 @@
+// IBM DataStage on AWS with IBM CP4D, after AWS's reference architecture
+// (https://docs.aws.amazon.com/reference-architecture-diagrams/latest/ibm-datastage-on-aws-with-ibm-cp4d/ibm-datastage-on-aws-with-ibm-cp4d.html).
+// Systems and users are slots mapped onto the project's own.
+model {
+  marketing = user 'Marketing user' {
+    description 'Uses data marts to build analytics, dashboards, and reports.'
+  }
+  finance = user 'Finance user' {
+    description 'Uses data marts for analytics and reporting.'
+  }
+
+  enterprise = zone 'Enterprise data sources' {
+    metadata {
+      platform 'other'
+    }
+    sourcePlatform = platform 'Unspecified enterprise data sources' {
+      description 'Represents the on-premises SQL and non-SQL databases grouped in the reference; the actual systems are not specified.'
+      metadata {
+        uses 'unspecified-enterprise-data-sources'
+      }
+      enterpriseDatabases = database 'Enterprise SQL and non-SQL databases' {
+        description 'Existing enterprise data sources, including SAP as an example.'
+      }
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    rosa = platform 'Red Hat OpenShift Service on AWS (ROSA)' {
+      metadata {
+        uses 'red-hat-openshift-service-on-aws'
+      }
+      cp4d = platform 'IBM Cloud Pak for Data' {
+        description 'IBM CP4D runs as a container workload on OpenShift.'
+        metadata {
+          uses 'ibm-cloud-pak-for-data'
+        }
+        datastage = system 'IBM DataStage' {
+          description 'Data integration jobs that extract, transform, enrich, and deliver data across source systems and the warehouse.'
+        }
+      }
+    }
+
+    db2 = platform 'IBM Db2 Warehouse on Cloud' {
+      metadata {
+        uses 'ibm-db2-warehouse-on-cloud'
+      }
+      dataMarts = database 'Data marts' {
+        description 'Processed data organized for reporting and analytics.'
+      }
+    }
+
+    s3 = platform 'Amazon Simple Storage Service' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      s3Data = database 'Amazon S3 data' {
+        description 'Cloud data store used as an example source.'
+      }
+    }
+    aurora = platform 'Amazon Aurora' {
+      metadata {
+        uses 'amazon-aurora'
+      }
+      auroraData = database 'Amazon Aurora data' {
+        description 'Relational database used as an example source.'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      metadata {
+        uses 'amazon-redshift'
+      }
+      redshiftData = database 'Amazon Redshift data' {
+        description 'Cloud data warehouse used as an example source.'
+      }
+    }
+    documentdb = platform 'Amazon DocumentDB (with MongoDB compatibility)' {
+      metadata {
+        uses 'amazon-documentdb'
+      }
+      documentData = database 'Amazon DocumentDB data' {
+        description 'Document database used as an example source.'
+      }
+    }
+
+    quicksight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+      quickSightAnalytics = system 'Analytics and dashboards' {
+        description 'Analytics and visualizations built from data marts; the reference also names IBM Cognos Analytics as an example tool.'
+      }
+    }
+  }
+
+  cognos = system 'IBM Cognos Analytics' {
+    description 'Example reporting and analytics tool; its hosting and integration details are not specified.'
+  }
+
+  aws.rosa.cp4d.datastage -> enterprise.sourcePlatform.enterpriseDatabases 'Reads data from'
+  aws.rosa.cp4d.datastage -> aws.s3.s3Data 'Reads data from'
+  aws.rosa.cp4d.datastage -> aws.aurora.auroraData 'Reads data from'
+  aws.rosa.cp4d.datastage -> aws.redshift.redshiftData 'Reads data from'
+  aws.rosa.cp4d.datastage -> aws.documentdb.documentData 'Reads data from'
+  aws.rosa.cp4d.datastage -> aws.db2.dataMarts 'Transforms and loads data into'
+  aws.db2.dataMarts -> aws.quicksight.quickSightAnalytics 'Provides data for analytics'
+  aws.db2.dataMarts -> cognos 'Provides data for analytics'
+  marketing -> aws.quicksight.quickSightAnalytics 'Uses'
+  finance -> aws.quicksight.quickSightAnalytics 'Uses'
+  marketing -> cognos 'Uses'
+  finance -> cognos 'Uses'
+}

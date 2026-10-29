@@ -1,0 +1,7 @@
+PackageId: OpenArch.AWSIndustrialAnomalyDetectionUsingAWSIoT
+Name: AWS Industrial Anomaly Detection Using AWS IoT
+Description: Detect industrial equipment anomalies through hot edge, warm streaming, and cold batch analysis using AWS IoT, analytics, and machine learning services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, industrial-iot, manufacturing, anomaly-detection, machine-learning]

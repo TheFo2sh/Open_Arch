@@ -1,0 +1,7 @@
+PackageId: OpenArch.CloudBurstingEDAWithFSxForNetAppONTAP
+Name: Cloud Bursting EDA with Amazon FSx for NetApp ONTAP
+Description: Burst electronic design automation jobs from an on-premises NetApp environment to Amazon EC2, using FSx for NetApp ONTAP FlexCache volumes to access inputs and return results.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, eda, electronic-design-automation, netapp, storage, hybrid-cloud]

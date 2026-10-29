@@ -1,0 +1,7 @@
+PackageId: OpenArch.AirportTerminalOptimizer
+Name: Airport Terminal Optimizer
+Description: Batch analytics pipeline for optimizing airport terminal and gate assignments using airline schedules, airport configurations, and operating costs.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, travel, airport, analytics, data-engineering]

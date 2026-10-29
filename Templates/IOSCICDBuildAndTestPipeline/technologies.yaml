@@ -1,0 +1,83 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-codepipeline
+    name: AWS CodePipeline
+    description: Labeled as the dashed workflow boundary in the AWS diagram; the source does not describe its role.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codepipeline/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-codecommit
+    name: AWS CodeCommit
+    description: Source control repository that receives the developer's iOS application code changes.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codecommit/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Detects CodeCommit changes and built artifacts, and invokes the documented build and test workflow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Starts the build process after the documented source change trigger.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Loads the required build scripts from Amazon S3 and triggers an AWS Systems Manager Run Command.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores the build scripts and the iOS build artifacts in separate logical buckets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-systems-manager
+    name: AWS Systems Manager
+    description: Uses Run Command to execute build scripts on an Amazon EC2 Mac instance and sends run logs to CloudWatch.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/systems-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Provides the Mac instance on which the iOS build scripts run.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Receives logs from the Systems Manager Run Command execution.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-device-farm
+    name: AWS Device Farm
+    description: Tests the iOS build on multiple real devices and generates test results, logs, and recordings.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/device-farm/
+    types: [managed-service]
+    platform: aws
+    hosts: []

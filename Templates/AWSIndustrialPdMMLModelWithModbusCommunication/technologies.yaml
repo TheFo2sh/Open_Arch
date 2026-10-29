@@ -1,0 +1,100 @@
+technologies:
+  - key: aws-iot-greengrass
+    name: AWS IoT Greengrass
+    description: Edge runtime used by the industrial gateway to run the Modbus connector.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/greengrass/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-iot-sitewise
+    name: AWS IoT SiteWise
+    description: Industrial data service for modeling factory assets and collecting their metrics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-sitewise/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: IoT message broker and rules engine that routes Modbus messages to AWS IoT Analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-iot-analytics
+    name: AWS IoT Analytics
+    description: IoT analytics service that stores the container data set and runs the predictive-maintenance analysis workflow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-analytics/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database, system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ecr
+    name: Amazon Elastic Container Registry
+    description: Container image registry that supplies the Docker image used by the IoT Analytics container data set.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecr/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Business intelligence service used to visualize analysis from the AWS IoT Analytics data source.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: Notification service used for anomaly-detection alerts.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-iot-greengrass-modbus-connector
+    name: AWS IoT Greengrass Modbus Connector
+    description: Greengrass connector that sends Modbus data through an AWS IoT Core rule.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/greengrass/v2/developerguide/
+    types: [library]
+  - key: aws-iot-sitewise-gateway
+    name: AWS IoT SiteWise Gateway
+    description: Gateway software that connects factory OPC-UA servers to AWS IoT SiteWise.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot-sitewise/latest/userguide/
+    types: [library]
+  - key: modbus
+    name: Modbus
+    description: Factory communication protocol shown between machines and the Greengrass connector; device mappings are not specified.
+    vendor: Modbus Organization
+    url: https://www.modbus.org/
+    types: [third-party]
+  - key: opc-ua
+    name: OPC Unified Architecture
+    description: Factory machine protocol served by OPC-UA servers and read through the SiteWise Gateway.
+    vendor: OPC Foundation
+    url: https://opcfoundation.org/about/opc-technologies/opc-ua/
+    types: [third-party]
+  - key: docker
+    name: Docker
+    description: Container image format/runtime referenced by the AWS architecture; image build details are not specified.
+    vendor: Docker, Inc.
+    url: https://www.docker.com/
+    types: [third-party]
+  - key: jupyter-notebook
+    name: Jupyter Notebook
+    description: Notebook environment used to build the predictive-maintenance model from the IoT Analytics data set.
+    vendor: Project Jupyter
+    url: https://jupyter.org/
+    types: [third-party]

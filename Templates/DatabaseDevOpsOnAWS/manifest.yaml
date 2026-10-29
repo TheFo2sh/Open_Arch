@@ -1,0 +1,7 @@
+PackageId: OpenArch.DatabaseDevOpsOnAWS
+Name: Database DevOps on AWS
+Description: Automate database changes alongside application code across development and production workflows using AWS source control, build, deployment, database, and notification services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, devops, database, ci-cd, database-migrations]

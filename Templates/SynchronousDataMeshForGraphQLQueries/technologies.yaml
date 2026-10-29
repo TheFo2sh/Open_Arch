@@ -1,0 +1,71 @@
+technologies:
+  - key: aws-appsync
+    name: AWS AppSync
+    description: Managed GraphQL API service that exposes a domain schema over HTTPS and composes resolver results.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/appsync/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Serverless functions used as AppSync resolvers for data sources and external HTTP APIs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: SQL query service used to retrieve data from the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: athena-express
+    name: athena-express
+    description: Node.js library used to run Athena queries asynchronously from Lambda resolvers.
+    url: https://aws.amazon.com/blogs/apn/using-athena-express-to-simplify-sql-queries-on-amazon-athena/
+    types: [library]
+    packages: [{manager: npm, name: athena-express}]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage holding data queried from the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-glue-data-catalog
+    name: AWS Glue Data Catalog
+    description: Data lake catalog providing table metadata to Athena.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-aurora
+    name: Amazon Aurora
+    description: Relational database source queried directly from AppSync or through Lambda proxy resolvers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Key-value database source queried directly from AppSync or through Lambda proxy resolvers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-data-exchange
+    name: AWS Data Exchange
+    description: Separate data-set sharing option for consumers who need large datasets instead of synchronous API queries.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/data-exchange/
+    types: [managed-service]
+    platform: aws
+    hosts: []
