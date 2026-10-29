@@ -1,0 +1,7 @@
+PackageId: OpenArch.ServerlessConsumerReviewInsightsForCPG
+Name: Consumer Review Sentiment Analysis for CPG
+Description: A serverless AWS architecture that ingests consumer reviews, analyzes sentiment and language, and presents insights for CPG teams.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, cpg, analytics, serverless, sentiment-analysis]

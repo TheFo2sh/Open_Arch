@@ -1,0 +1,248 @@
+// Inspection Deployment Models with AWS Network Firewall, based on AWS's reference diagrams.
+// The six alternatives are shown together for comparison, not as one deployed network.
+model {
+  internetClient = user 'Internet client' {
+    description 'An external client initiating inbound requests to a workload.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    singleVpc = platform 'Amazon VPC (single-VPC model)' {
+      metadata { uses 'amazon-vpc' }
+      singleFirewall = platform 'AWS Network Firewall' {
+        metadata { uses 'aws-network-firewall' }
+      }
+      singleAlb = platform 'Application Load Balancer' {
+        metadata { uses 'aws-application-load-balancer' }
+      }
+      singleNat = platform 'NAT Gateway' {
+        metadata { uses 'aws-nat-gateway' }
+      }
+      singleInternetGateway = platform 'Internet Gateway' {
+        metadata { uses 'aws-internet-gateway' }
+      }
+      singleCompute = platform 'Amazon EC2' {
+        metadata { uses 'amazon-ec2' }
+        singleWorkload = system 'Single-VPC workload' {
+          description 'EC2 instances registered with the Application Load Balancer target group.'
+        }
+      }
+    }
+
+    intraVpc = platform 'Amazon VPC (intra-VPC model)' {
+      metadata { uses 'amazon-vpc' }
+      intraFirewall = platform 'AWS Network Firewall' {
+        metadata { uses 'aws-network-firewall' }
+      }
+      intraAlb = platform 'Application Load Balancer' {
+        metadata { uses 'aws-application-load-balancer' }
+      }
+      intraNat = platform 'NAT Gateway' {
+        metadata { uses 'aws-nat-gateway' }
+      }
+      intraInternetGateway = platform 'Internet Gateway' {
+        metadata { uses 'aws-internet-gateway' }
+      }
+      intraCompute = platform 'Amazon EC2' {
+        metadata { uses 'amazon-ec2' }
+        publicWorkload = system 'Public workload' {
+          description 'Public web servers or a load balancer, as allowed by the AWS description.'
+        }
+        applicationWorkload = system 'Application servers' {
+          description 'Private application servers whose traffic to other subnets can be selected for inspection.'
+        }
+      }
+    }
+
+    eastWestInspectionVpc = platform 'Amazon VPC (east-west inspection)' {
+      metadata { uses 'amazon-vpc' }
+      eastWestFirewall = platform 'AWS Network Firewall' {
+        metadata { uses 'aws-network-firewall' }
+      }
+    }
+    eastWestSpokeA = platform 'Amazon VPC (east-west spoke A)' {
+      metadata { uses 'amazon-vpc' }
+      eastWestComputeA = platform 'Amazon EC2' {
+        metadata { uses 'amazon-ec2' }
+        eastWestWorkloadA = system 'Workload in spoke VPC A' {
+          description 'Source or destination workload in the east-west inspection pattern.'
+        }
+      }
+    }
+    eastWestSpokeB = platform 'Amazon VPC (east-west spoke B)' {
+      metadata { uses 'amazon-vpc' }
+      eastWestComputeB = platform 'Amazon EC2' {
+        metadata { uses 'amazon-ec2' }
+        eastWestWorkloadB = system 'Workload in spoke VPC B' {
+          description 'Source or destination workload in the east-west inspection pattern.'
+        }
+      }
+    }
+    transitGateway = platform 'AWS Transit Gateway' {
+      metadata { uses 'aws-transit-gateway' }
+    }
+
+    northSouthSpoke = platform 'Amazon VPC (north-south spoke)' {
+      metadata { uses 'amazon-vpc' }
+      northSouthCompute = platform 'Amazon EC2' {
+        metadata { uses 'amazon-ec2' }
+        northSouthWorkload = system 'Workload in spoke VPC A' {
+          description 'EC2 workload sending internet-bound traffic or receiving traffic from the central ingress VPC.'
+        }
+      }
+    }
+    northSouthInspectionVpc = platform 'Amazon VPC (north-south inspection)' {
+      metadata { uses 'amazon-vpc' }
+      northSouthFirewall = platform 'AWS Network Firewall' {
+        metadata { uses 'aws-network-firewall' }
+      }
+    }
+    centralIngressVpc = platform 'Amazon VPC (central ingress)' {
+      metadata { uses 'amazon-vpc' }
+      centralIngressInternetGateway = platform 'Internet Gateway' {
+        metadata { uses 'aws-internet-gateway' }
+      }
+      centralIngressAlb = platform 'Application Load Balancer' {
+        metadata { uses 'aws-application-load-balancer' }
+      }
+    }
+    centralEgressVpc = platform 'Amazon VPC (central egress)' {
+      metadata { uses 'amazon-vpc' }
+      centralEgressNat = platform 'NAT Gateway' {
+        metadata { uses 'aws-nat-gateway' }
+      }
+      centralEgressInternetGateway = platform 'Internet Gateway' {
+        metadata { uses 'aws-internet-gateway' }
+      }
+    }
+
+    combinedInspectionVpc = platform 'Amazon VPC (combined inspection)' {
+      metadata { uses 'amazon-vpc' }
+      combinedFirewall = platform 'AWS Network Firewall' {
+        metadata { uses 'aws-network-firewall' }
+      }
+      combinedNat = platform 'NAT Gateway' {
+        metadata { uses 'aws-nat-gateway' }
+      }
+      combinedInternetGateway = platform 'Internet Gateway' {
+        metadata { uses 'aws-internet-gateway' }
+      }
+    }
+    combinedSpokeA = platform 'Amazon VPC (combined spoke A)' {
+      metadata { uses 'amazon-vpc' }
+      combinedComputeA = platform 'Amazon EC2' {
+        metadata { uses 'amazon-ec2' }
+        combinedWorkloadA = system 'Workload in spoke VPC A' {
+          description 'Workload in the combined east-west and north-south inspection pattern.'
+        }
+      }
+    }
+    combinedSpokeB = platform 'Amazon VPC (combined spoke B)' {
+      metadata { uses 'amazon-vpc' }
+      combinedComputeB = platform 'Amazon EC2' {
+        metadata { uses 'amazon-ec2' }
+        combinedWorkloadB = system 'Workload in spoke VPC B' {
+          description 'Workload shown initiating inter-VPC and internet-bound traffic.'
+        }
+      }
+    }
+
+    multiRegionInspectionA = platform 'Amazon VPC (Region A inspection)' {
+      metadata { uses 'amazon-vpc' }
+      multiRegionFirewallA = platform 'AWS Network Firewall (Region A)' {
+        metadata { uses 'aws-network-firewall' }
+      }
+    }
+    multiRegionSpokeA = platform 'Amazon VPC (Region A spoke)' {
+      metadata { uses 'amazon-vpc' }
+      multiRegionComputeA = platform 'Amazon EC2' {
+        metadata { uses 'amazon-ec2' }
+        multiRegionWorkloadA = system 'Workload in Region A spoke VPC' {
+          description 'Source workload in the multi-Region east-west inspection pattern.'
+        }
+      }
+    }
+    multiRegionTransitGatewayA = platform 'AWS Transit Gateway (Region A)' {
+      metadata { uses 'aws-transit-gateway' }
+    }
+    multiRegionTransitGatewayB = platform 'AWS Transit Gateway (Region B)' {
+      metadata { uses 'aws-transit-gateway' }
+    }
+    multiRegionInspectionB = platform 'Amazon VPC (Region B inspection)' {
+      metadata { uses 'amazon-vpc' }
+      multiRegionFirewallB = platform 'AWS Network Firewall (Region B)' {
+        metadata { uses 'aws-network-firewall' }
+      }
+    }
+    multiRegionSpokeB = platform 'Amazon VPC (Region B spoke)' {
+      metadata { uses 'amazon-vpc' }
+      multiRegionComputeB = platform 'Amazon EC2' {
+        metadata { uses 'amazon-ec2' }
+        multiRegionWorkloadB = system 'Workload in Region B spoke VPC' {
+          description 'Destination workload in the multi-Region east-west inspection pattern.'
+        }
+      }
+    }
+  }
+
+  internetClient -> aws.singleVpc.singleWorkload 'Sends inbound requests to'
+  aws.singleVpc.singleInternetGateway -> aws.singleVpc.singleFirewall 'Routes inbound traffic through'
+  aws.singleVpc.singleFirewall -> aws.singleVpc.singleAlb 'Forwards inspected inbound traffic to'
+  aws.singleVpc.singleAlb -> aws.singleVpc.singleWorkload 'Forwards requests to'
+  aws.singleVpc.singleWorkload -> aws.singleVpc.singleAlb 'Returns responses to'
+  aws.singleVpc.singleAlb -> aws.singleVpc.singleFirewall 'Routes response traffic through'
+  aws.singleVpc.singleFirewall -> aws.singleVpc.singleInternetGateway 'Forwards inspected responses toward'
+  aws.singleVpc.singleWorkload -> aws.singleVpc.singleNat 'Sends internet-bound traffic through'
+  aws.singleVpc.singleNat -> aws.singleVpc.singleFirewall 'Routes translated traffic through'
+  aws.singleVpc.singleFirewall -> aws.singleVpc.singleInternetGateway 'Forwards inspected outbound traffic toward'
+
+  internetClient -> aws.intraVpc.publicWorkload 'Sends inbound traffic to'
+  aws.intraVpc.publicWorkload -> aws.intraVpc.intraFirewall 'Routes traffic to private subnets through'
+  aws.intraVpc.intraFirewall -> aws.intraVpc.applicationWorkload 'Forwards allowed traffic to'
+  aws.intraVpc.applicationWorkload -> aws.intraVpc.intraFirewall 'Routes selected intra-VPC and outbound traffic through'
+  aws.intraVpc.intraFirewall -> aws.intraVpc.intraAlb 'Forwards allowed traffic to'
+  aws.intraVpc.intraFirewall -> aws.intraVpc.intraNat 'Forwards allowed outbound traffic to'
+  aws.intraVpc.intraAlb -> aws.intraVpc.intraInternetGateway 'Connects public workload traffic to'
+  aws.intraVpc.intraNat -> aws.intraVpc.intraInternetGateway 'Forwards translated traffic to'
+
+  aws.eastWestSpokeA.eastWestWorkloadA -> aws.transitGateway 'Routes inter-VPC traffic through'
+  aws.transitGateway -> aws.eastWestInspectionVpc.eastWestFirewall 'Routes traffic to the inspection VPC for'
+  aws.eastWestInspectionVpc.eastWestFirewall -> aws.transitGateway 'Returns allowed traffic to'
+  aws.transitGateway -> aws.eastWestSpokeB.eastWestWorkloadB 'Forwards inspected traffic to'
+  aws.eastWestSpokeB.eastWestWorkloadB -> aws.transitGateway 'Routes reverse-direction traffic through'
+  aws.transitGateway -> aws.eastWestInspectionVpc.eastWestFirewall 'Routes reverse-direction traffic to'
+  aws.eastWestInspectionVpc.eastWestFirewall -> aws.transitGateway 'Returns re-inspected traffic to'
+  aws.transitGateway -> aws.eastWestSpokeA.eastWestWorkloadA 'Forwards inspected reverse-direction traffic to'
+
+  aws.northSouthWorkload -> aws.transitGateway 'Routes internet-bound traffic through'
+  aws.transitGateway -> aws.northSouthInspectionVpc.northSouthFirewall 'Forwards traffic to the inspection VPC for'
+  aws.northSouthInspectionVpc.northSouthFirewall -> aws.transitGateway 'Returns allowed traffic to'
+  aws.transitGateway -> aws.centralEgressVpc.centralEgressNat 'Routes internet-bound traffic to the central egress VPC'
+  aws.centralEgressVpc.centralEgressNat -> aws.centralEgressVpc.centralEgressInternetGateway 'Forwards translated traffic to'
+  internetClient -> aws.northSouthWorkload 'Sends inbound requests through the central ingress VPC'
+  aws.centralIngressVpc.centralIngressInternetGateway -> aws.centralIngressVpc.centralIngressAlb 'Routes inbound traffic to'
+  aws.centralIngressVpc.centralIngressAlb -> aws.transitGateway 'Forwards requests toward the inspection VPC through'
+  aws.transitGateway -> aws.northSouthInspectionVpc.northSouthFirewall 'Routes inbound traffic to the inspection VPC for'
+  aws.northSouthInspectionVpc.northSouthFirewall -> aws.transitGateway 'Returns allowed inbound traffic to'
+  aws.transitGateway -> aws.northSouthWorkload 'Forwards inspected inbound traffic to'
+
+  aws.combinedWorkloadA -> aws.transitGateway 'Routes east-west traffic through'
+  aws.transitGateway -> aws.combinedInspectionVpc.combinedFirewall 'Forwards traffic to the inspection VPC for'
+  aws.combinedInspectionVpc.combinedFirewall -> aws.transitGateway 'Returns allowed east-west traffic to'
+  aws.transitGateway -> aws.combinedWorkloadB 'Forwards inspected east-west traffic to'
+  aws.combinedWorkloadB -> aws.transitGateway 'Routes east-west and internet-bound traffic through'
+  aws.transitGateway -> aws.combinedInspectionVpc.combinedFirewall 'Routes internet-bound traffic to the inspection VPC for'
+  aws.combinedInspectionVpc.combinedFirewall -> aws.combinedInspectionVpc.combinedNat 'Forwards allowed internet-bound traffic to'
+  aws.combinedInspectionVpc.combinedNat -> aws.combinedInspectionVpc.combinedInternetGateway 'Forwards translated traffic to'
+
+  aws.multiRegionWorkloadA -> aws.multiRegionTransitGatewayA 'Routes inter-Region traffic through'
+  aws.multiRegionTransitGatewayA -> aws.multiRegionInspectionA.multiRegionFirewallA 'Routes traffic to the Region A inspection VPC for'
+  aws.multiRegionInspectionA.multiRegionFirewallA -> aws.multiRegionTransitGatewayA 'Returns allowed traffic to'
+  aws.multiRegionTransitGatewayA -> aws.multiRegionTransitGatewayB 'Routes traffic through the inter-Region peering connection'
+  aws.multiRegionTransitGatewayB -> aws.multiRegionInspectionB.multiRegionFirewallB 'Routes traffic to the Region B inspection VPC for'
+  aws.multiRegionInspectionB.multiRegionFirewallB -> aws.multiRegionTransitGatewayB 'Returns allowed traffic to'
+  aws.multiRegionTransitGatewayB -> aws.multiRegionWorkloadB 'Forwards inspected traffic to'
+}

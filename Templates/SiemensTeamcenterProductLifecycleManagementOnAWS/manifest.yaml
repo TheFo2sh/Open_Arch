@@ -1,0 +1,7 @@
+PackageId: OpenArch.SiemensTeamcenterProductLifecycleManagementOnAWS
+Name: Siemens Teamcenter Product Lifecycle Management on AWS
+Description: A high-availability Siemens Teamcenter deployment on AWS with separate test and production environments, shared file storage options, and connected customer data-center and management services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, manufacturing, plm, siemens, teamcenter]

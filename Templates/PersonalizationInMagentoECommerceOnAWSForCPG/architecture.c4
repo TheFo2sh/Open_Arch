@@ -1,0 +1,147 @@
+// Personalization in Magento eCommerce on AWS for CPG, based on AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/magento-personalization-cpg/magento-personalization-cpg.html
+// Systems and users are slots. The AWS source does not specify the Magento edition or many implementation details.
+model {
+  shopper = user 'Shopper' {
+    description 'Browses the CPG catalog and receives product recommendations.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      description 'Provides DNS configuration for the store.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    waf = platform 'AWS WAF' {
+      description 'Protects Magento against common web exploits.'
+      metadata {
+        uses 'aws-waf'
+      }
+    }
+    cloudfront = platform 'Amazon CloudFront' {
+      description 'Distributes static and dynamic web content as a CDN.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    loadBalancer = platform 'Elastic Load Balancing' {
+      description 'Application Load Balancer distributes requests across Varnish pods through Kubernetes ingress.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+
+    eks = platform 'Amazon Elastic Kubernetes Service' {
+      description 'Runs the Varnish and Magento pods across multiple Availability Zones.'
+      metadata {
+        uses 'amazon-eks'
+      }
+
+      store = system 'Magento e-commerce store' {
+        description 'The containerized Magento storefront and its full-page cache.'
+
+        varnish = container 'Varnish cache' {
+          description 'Varnish Cache Enterprise pods serve cached pages and forward cache misses to Magento.'
+          technology 'Varnish Cache Enterprise'
+          metadata {
+            uses 'varnish-cache-enterprise'
+          }
+        }
+        magento = container 'Magento application' {
+          description 'Magento pods, each including Magento, Nginx, and PHP.'
+          technology 'Magento Open Source or Adobe Commerce, Nginx, PHP'
+          metadata {
+            uses 'magento-commerce, nginx, php'
+          }
+
+          personalizeExtension = component 'Amazon Personalize extension' {
+            description 'Exports historical user data and exchanges recommendations and real-time interaction indicators with Amazon Personalize.'
+            technology 'Amazon Personalize extension for Magento'
+            metadata {
+              uses 'amazon-personalize-magento-extension'
+            }
+          }
+        }
+      }
+    }
+
+    ecr = platform 'Amazon Elastic Container Registry' {
+      description 'Hosts the Varnish and Magento container images.'
+      metadata {
+        uses 'amazon-ecr'
+      }
+    }
+    opensearch = platform 'Amazon OpenSearch Service' {
+      description 'Provides managed search for the Magento catalog.'
+      metadata {
+        uses 'amazon-opensearch-service'
+      }
+      catalogIndex = database 'Catalog search index'
+    }
+    elasticache = platform 'Amazon ElastiCache for Redis' {
+      description 'Provides a Redis caching layer for the database.'
+      metadata {
+        uses 'amazon-elasticache-redis'
+      }
+      cache = database 'Redis cache'
+    }
+    aurora = platform 'Amazon Aurora' {
+      description 'Relational database option, shown with a primary and replica across Availability Zones.'
+      metadata {
+        uses 'amazon-aurora'
+      }
+      storeData = database 'Magento relational data' {
+        description 'Store data held in the Aurora primary and replica; the database engine is not specified.'
+      }
+    }
+    efs = platform 'Amazon Elastic File System' {
+      description 'Provides shared configuration for Varnish and shared media assets for Magento pods.'
+      metadata {
+        uses 'amazon-efs'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Stores historical user data exported by the Magento extension for Amazon Personalize.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      history = database 'Historical user data'
+    }
+    personalize = platform 'Amazon Personalize' {
+      description 'Trains a private recommendation model and hosts its activated solution and campaign.'
+      metadata {
+        uses 'amazon-personalize'
+      }
+    }
+  }
+
+  shopper -> aws.eks.store 'Browses and shops at'
+  aws.route53 -> aws.cloudfront 'Provides DNS configuration for'
+  aws.waf -> aws.cloudfront 'Protects Magento traffic through'
+  aws.cloudfront -> aws.loadBalancer 'Forwards web traffic to'
+  aws.loadBalancer -> aws.eks.store.varnish 'Distributes requests across'
+  aws.eks.store.varnish -> aws.eks.store.magento 'Forwards cache misses to'
+  aws.ecr -> aws.eks.store.varnish 'Hosts the container image for'
+  aws.ecr -> aws.eks.store.magento 'Hosts the container image for'
+  aws.eks.store.magento -> aws.opensearch.catalogIndex 'Searches the product catalog in'
+  aws.eks.store.magento -> aws.elasticache.cache 'Uses Redis caching from'
+  aws.eks.store.magento -> aws.aurora.storeData 'Reads and writes store data in'
+  aws.eks.store.varnish -> aws.efs 'Reads shared configuration from'
+  aws.eks.store.magento -> aws.efs 'Accesses shared media assets on'
+  aws.eks.store.magento.personalizeExtension -> aws.s3.history 'Exports historical user data to'
+  aws.s3.history -> aws.personalize 'Provides historical training data to'
+  aws.eks.store.magento.personalizeExtension -> aws.personalize 'Sends real-time interaction indicators to'
+  aws.personalize -> aws.eks.store.magento.personalizeExtension 'Provides product recommendations to'
+}
+
+views {
+  view index {
+    title 'Personalization in Magento eCommerce on AWS for CPG'
+    include *
+  }
+}

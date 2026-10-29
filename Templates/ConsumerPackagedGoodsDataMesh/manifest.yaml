@@ -1,0 +1,7 @@
+PackageId: OpenArch.ConsumerPackagedGoodsDataMesh
+Name: Consumer Packaged Goods Data Mesh
+Description: A domain-owned CPG data mesh with AWS Lake Formation governance, AWS Glue cataloging, metadata services, and analytics.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, data-mesh, cpg, analytics]

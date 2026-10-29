@@ -1,0 +1,145 @@
+// Deploying 5G O-RAN RIC on AWS, based on AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/deploying-5g-o-ran-ric/deploying-5g-o-ran-ric.html
+// Systems are slots mapped onto a project's own systems when the template is applied.
+model {
+  cu = system 'Central Unit (CU)' {
+    description 'O-RAN radio network system controlled by the RIC; product and deployment details are not specified.'
+  }
+  du = system 'Distributed Unit (DU)' {
+    description 'O-RAN radio network system controlled by the RIC; product and deployment details are not specified.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    outposts = platform 'AWS Outposts' {
+      description 'One of the AWS locations shown for Amazon EKS nodes hosting RIC workloads.'
+      metadata {
+        uses 'aws-outposts'
+      }
+    }
+    localZones = platform 'AWS Local Zones' {
+      description 'An alternative AWS location shown for Amazon EKS nodes hosting RIC workloads.'
+      metadata {
+        uses 'aws-local-zones'
+      }
+    }
+    eks = platform 'Amazon Elastic Kubernetes Service' {
+      description 'Hosts near-real-time and non-real-time RIC workloads; its nodes run on AWS Outposts or in AWS Local Zones.'
+      metadata {
+        uses 'amazon-eks'
+      }
+
+      nearRtRic = system 'Near-real-time RIC' {
+        description 'Collects and controls CU and DU data in near-real-time loops from 10 ms to 1 s.'
+
+        controller = container 'Near-real-time RIC controller' {
+          description 'Coordinates the near-real-time control loop and exchanges A1 guidance with the non-real-time RIC.'
+        }
+        applications = container 'Near-real-time RIC applications' {
+          description 'RIC applications that use model inference and network data.'
+          qoe = component 'QoE prediction' {
+            description 'Predicts quality of experience from radio network data.'
+          }
+          optimization = component 'Proactive network optimization' {
+            description 'Runs proactive, closed-loop network optimization.'
+          }
+        }
+      }
+      nonRtRic = system 'Non-real-time RIC' {
+        description 'Manages control loops longer than 1 s, static RRM policies, policy guidance, enrichment, and ML lifecycle.'
+
+        controller = container 'Non-real-time RIC controller' {
+          description 'Provides A1 guidance and O1 control and coordinates the non-real-time control loop.'
+        }
+      }
+    }
+
+    ebs = platform 'Amazon Elastic Block Store' {
+      description 'Provides persistent storage attached to EKS nodes for NoSQL database instances.'
+      metadata {
+        uses 'amazon-ebs'
+      }
+      ricData = database 'RIC NoSQL data' {
+        description 'Persistent data held by NoSQL database instances; the database engine and vendor are not specified by AWS.'
+        metadata {
+          uses 'nosql-database'
+        }
+      }
+    }
+
+    ec2 = platform 'Amazon Elastic Compute Cloud' {
+      description 'Hosts model training, update, deployment, and inference endpoint workloads.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+
+      modelWorkloads = system 'ML model workloads and inference endpoints' {
+        description 'EC2-hosted model lifecycle and inference endpoints used by both RIC controller types.'
+        training = container 'Model training, update, and deployment' {
+          description 'Model lifecycle activities performed on Amazon EC2 for the RIC applications.'
+        }
+        inference = container 'ML inference endpoints' {
+          description 'EC2-hosted inference endpoints used by near-real-time and non-real-time RIC applications.'
+        }
+      }
+    }
+
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Develops, trains, and deploys models used by near-real-time and non-real-time RIC applications.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Object storage backing the non-real-time RIC data lake.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Non-real-time RIC data lake' {
+        description 'Stores raw and processed data, inference results, trained models, and Amazon EBS backup snapshots.'
+      }
+    }
+    lakeFormation = platform 'AWS Lake Formation' {
+      description 'Data-lake service used with the S3-backed store by the non-real-time RIC.'
+      metadata {
+        uses 'aws-lake-formation'
+      }
+    }
+  }
+
+  aws.outposts -> aws.eks 'Hosts EKS nodes for one deployment option'
+  aws.localZones -> aws.eks 'Hosts EKS nodes for the alternative deployment option'
+  aws.eks -> aws.ebs 'Attaches persistent block storage to its nodes'
+
+  cu -> aws.eks.nearRtRic 'E2 (SCTP/IP): provides data to the near-real-time control loop'
+  du -> aws.eks.nearRtRic 'E2 (SCTP/IP): provides data to the near-real-time control loop'
+  aws.eks.nearRtRic -> cu 'E2 (SCTP/IP): near-real-time control, 10 ms–1 s'
+  aws.eks.nearRtRic -> du 'E2 (SCTP/IP): near-real-time control, 10 ms–1 s'
+
+  aws.eks.nonRtRic -> aws.eks.nearRtRic 'A1 (REST over HTTP/TCP/IP): policy guidance and ML model management'
+  aws.eks.nonRtRic -> cu 'O1 (REST over HTTP/TCP/IP): non-real-time control and static RRM policies, over 1 s'
+  aws.eks.nonRtRic -> du 'O1 (REST over HTTP/TCP/IP): non-real-time control and static RRM policies, over 1 s'
+
+  aws.eks.nearRtRic -> aws.ebs.ricData 'Persists RIC data in'
+  aws.eks.nonRtRic -> aws.ebs.ricData 'Persists RIC data in'
+  aws.eks.nonRtRic -> aws.s3.dataLake 'Stores raw and processed data, inference results, models, and EBS snapshots in'
+  aws.lakeFormation -> aws.s3.dataLake 'Provides data-lake management for'
+  aws.ebs -> aws.s3.dataLake 'Backs up EBS snapshots to'
+
+  aws.sagemaker -> aws.eks.nearRtRic 'Develops, trains, and deploys models for'
+  aws.sagemaker -> aws.eks.nonRtRic 'Develops, trains, and deploys models for'
+  aws.eks.nearRtRic -> aws.ec2.modelWorkloads.inference 'Uses EC2-hosted inference endpoints from'
+  aws.eks.nonRtRic -> aws.ec2.modelWorkloads 'Trains, updates, and deploys models on'
+  aws.eks.nonRtRic -> aws.ec2.modelWorkloads.inference 'Uses EC2-hosted inference endpoints from'
+}
+
+views {
+  view index {
+    title 'Deploying 5G O-RAN RIC on AWS'
+    include *, aws.*, aws.eks.*, aws.eks.nearRtRic.*, aws.eks.nearRtRic.applications.*, aws.eks.nonRtRic.*, aws.ebs.*, aws.ec2.*, aws.ec2.modelWorkloads.*, aws.s3.*, aws.lakeFormation.*
+  }
+}

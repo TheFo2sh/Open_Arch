@@ -1,0 +1,59 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Dedicated network connectivity with private and transit virtual interfaces.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect-gateway
+    name: AWS Direct Connect gateway
+    description: Gateway X associates the private VIF with the virtual private gateway; gateway Y associates the transit VIF with Transit Gateway.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/directconnect/latest/UserGuide/direct-connect-gateways-intro.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-virtual-private-gateway
+    name: AWS Virtual Private Gateway
+    description: VPC attachment endpoint for the private-VIF Direct Connect gateway path.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-transit-gateway
+    name: AWS Transit Gateway
+    description: Transit endpoint for gateway Y and the parent-Region VPC route.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc
+    name: Amazon VPC
+    description: VPC A contains the parent-Region and Local Zone subnets and their separate route tables.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-local-zones
+    name: AWS Local Zones
+    description: AWS infrastructure extension where a VPC subnet can place latency-sensitive workloads closer to users.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/about-aws/global-infrastructure/localzones/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform for the parent-Region instance and the Local Zone workload.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
