@@ -1,0 +1,160 @@
+technologies:
+  - key: aws-iot-greengrass
+    name: AWS IoT Greengrass
+    description: Edge runtime and connectors used for industrial equipment connectivity and legacy printer support.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/greengrass/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: AWS ingestion option for device data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+  - key: aws-datasync
+    name: AWS DataSync
+    description: AWS data ingestion option for sources suited to managed data transfer.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/datasync/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-kinesis
+    name: Amazon Kinesis
+    description: AWS data ingestion option for streaming sources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-msk
+    name: Amazon Managed Streaming for Apache Kafka
+    description: Managed Kafka service listed as an AWS streaming ingestion option.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/msk/
+    types: [managed-service]
+    platform: aws
+  - key: aws-transfer-family
+    name: AWS Transfer Family
+    description: AWS ingestion option for file transfer sources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/aws-transfer-family/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage option for manufacturing data; the source identifies it as a source for the MES API integration.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Serverless service that sends data from Amazon S3 or another data store to the 42Q MES API.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: AI and machine learning service listed for building, training, and deploying models.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-forecast
+    name: Amazon Forecast
+    description: AI and machine learning service listed for building, training, and deploying models.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/forecast/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-emr
+    name: Amazon EMR
+    description: Analytics service listed as an option for manufacturing data workloads.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/emr/
+    types: [managed-service, compute-platform]
+    platform: aws
+  - key: aws-glue
+    name: AWS Glue
+    description: Analytics service listed as an option for manufacturing data workloads.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Analytics service listed as an option for manufacturing data workloads.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-data-firehose
+    name: Amazon Data Firehose
+    description: Analytics and data-delivery service listed as an option for manufacturing data workloads.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firehose/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-opensearch-service
+    name: Amazon OpenSearch Service
+    description: Analytics service and workload-specific data store listed by the source.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/opensearch-service/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Workload-specific data store listed by the source.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-neptune
+    name: Amazon Neptune
+    description: Workload-specific data store listed by the source.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/neptune/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Workload-specific data store listed by the source.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-timestream
+    name: Amazon Timestream
+    description: Workload-specific time-series data store listed by the source.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/timestream/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-iot-sitewise
+    name: AWS IoT SiteWise
+    description: Workload-specific industrial data store listed by the source.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-sitewise/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: 42q-cloud-mes
+    name: 42Q Cloud MES
+    description: Third-party cloud manufacturing execution system used for digital factory integration.
+    vendor: 42Q
+    types: [third-party]
+  - key: 42q-xchange
+    name: 42Q Xchange
+    description: Third-party SOAP-based APIs for connecting ERP and CRM systems to 42Q.
+    vendor: 42Q
+    types: [third-party]

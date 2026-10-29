@@ -1,0 +1,139 @@
+// LUMINAI Refinery Advisor on AWS, based on AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/luminai-refinery-advisor-on-aws/luminai-refinery-advisor-on-aws.html
+model {
+  refinerySites = system 'Refinery sites' {
+    description 'External refineries supplying operational data from processes, assets, data historians, and data streams; source protocols and formats are not specified.'
+  }
+  biTools = system 'BI tools' {
+    description 'Client BI tools used by authorized refinery personnel; AWS does not specify products or integration protocols.'
+  }
+  operators = user 'Refinery users' {
+    description 'Access refinery operational data and insights through a web browser.'
+  }
+  authorizedClients = user 'Authorized clients' {
+    description 'Plant and operations managers, maintenance teams, and data scientists and engineers who use BI tools.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    webAlb = platform 'Application Load Balancer — web' {
+      description 'Public-subnet load balancer for browser traffic to the LUMINAI web UI and API.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+    dataAlb = platform 'Application Load Balancer — refinery data' {
+      description 'Public-subnet load balancer that directs refinery data streams to the private sensor processing pipeline.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+    reportingAlb = platform 'Application Load Balancer — reporting data' {
+      description 'Load balancer that directs authorized BI client traffic to LUMINAI reporting APIs.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+
+    ecs = platform 'Amazon Elastic Container Service' {
+      description 'Hosts the LUMINAI web/API, sensor ingestion and processing, business services, and reporting APIs.'
+      metadata {
+        uses 'amazon-ecs'
+      }
+      luminai = system 'LUMINAI Refinery Advisor' {
+        description 'Beyond Limits decision-support system that analyzes refinery data and provides operational recommendations.'
+
+        web = container 'Web UI and API' {
+          description 'Presents refinery data to browser users and exposes LUMINAI APIs.'
+        }
+        ingestion = container 'Data ingestion' {
+          description 'Receives refinery data streams and directs them to Amazon MSK.'
+        }
+        sensorProcessing = container 'Sensor processing pipeline' {
+          description 'Processes sensor data streams in the LUMINAI pipeline.'
+        }
+        orchestrator = container 'Orchestrator' {
+          description 'LUMINAI business service that processes messages from Amazon MQ.'
+        }
+        reasoner = container 'Reasoner' {
+          description 'LUMINAI business service that processes messages from Amazon MQ and derives insights.'
+        }
+        reporting = container 'Reporting APIs' {
+          description 'Makes processed refinery data available to APIs and BI tools.'
+        }
+      }
+    }
+
+    msk = platform 'Amazon Managed Streaming for Apache Kafka' {
+      description 'Ingests and processes the refinery sensor streams before downstream ETL.'
+      metadata {
+        uses 'amazon-msk'
+      }
+    }
+    emr = platform 'Amazon EMR' {
+      description 'Runs the ETL jobs that process streams from Amazon MSK.'
+      metadata {
+        uses 'amazon-emr'
+      }
+      etl = system 'Refinery data ETL jobs' {
+        description 'ETL workload that processes streamed refinery data; AWS does not specify its implementation or transformations.'
+      }
+    }
+    aurora = platform 'Amazon Aurora PostgreSQL-Compatible Edition' {
+      description 'Stores ETL results and processed data for LUMINAI.'
+      metadata {
+        uses 'amazon-aurora-postgresql'
+      }
+      operationalData = database 'Operational and processed refinery data' {
+        description 'ETL results and processed refinery data made available to LUMINAI services, web UI, APIs, and BI tools.'
+      }
+    }
+    mq = platform 'Amazon MQ' {
+      description 'Provides the message queue consumed by the LUMINAI Orchestrator and Reasoner.'
+      metadata {
+        uses 'amazon-mq'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Stores long-term refinery data.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      longTermData = database 'Long-term refinery data' {
+        description 'Long-term data store; AWS does not specify its contents, organization, or retention.'
+      }
+    }
+  }
+
+  operators -> aws.ecs.luminai 'Uses the web UI or APIs'
+  authorizedClients -> aws.ecs.luminai 'Accesses refinery information'
+  refinerySites -> aws.dataAlb 'Streams operational data'
+  aws.dataAlb -> aws.ecs.luminai.ingestion 'Routes refinery streams to'
+  aws.ecs.luminai.ingestion -> aws.msk 'Sends streams to'
+  aws.msk -> aws.ecs.luminai.sensorProcessing 'Feeds the sensor processing pipeline'
+  aws.msk -> aws.emr.etl 'Provides streams for ETL'
+  aws.emr.etl -> aws.aurora.operationalData 'Stores ETL results in'
+  aws.emr.etl -> aws.mq 'Places ETL results on'
+  aws.mq -> aws.ecs.luminai.orchestrator 'Delivers messages to'
+  aws.mq -> aws.ecs.luminai.reasoner 'Delivers messages to'
+  aws.ecs.luminai.orchestrator -> aws.aurora.operationalData 'Stores processed data in'
+  aws.ecs.luminai.reasoner -> aws.aurora.operationalData 'Stores processed data in'
+  aws.ecs.luminai -> aws.s3.longTermData 'Stores long-term data in'
+  aws.aurora.operationalData -> aws.ecs.luminai.web 'Makes processed data available to'
+  aws.aurora.operationalData -> aws.ecs.luminai.reporting 'Makes processed data available to'
+  aws.ecs.luminai.reporting -> biTools 'Provides refinery information to'
+  aws.webAlb -> aws.ecs.luminai.web 'Routes browser requests to'
+  aws.reportingAlb -> aws.ecs.luminai.reporting 'Routes BI requests to'
+  authorizedClients -> biTools 'Uses'
+  biTools -> aws.reportingAlb 'Accesses reports through'
+}
+
+views {
+  view index {
+    title 'LUMINAI Refinery Advisor on AWS'
+    include *, aws.*, aws.ecs.*, aws.ecs.luminai.*, aws.emr.*
+  }
+}

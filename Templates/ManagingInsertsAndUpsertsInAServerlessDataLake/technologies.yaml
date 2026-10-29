@@ -1,0 +1,124 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them.
+technologies:
+  - key: aws-dms
+    name: AWS Database Migration Service
+    description: Captures and migrates source data, including change data capture, into the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dms/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage for raw staging, Parquet, and reportable data lake datasets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-glue
+    name: AWS Glue
+    description: Crawls data in Amazon S3 and populates the AWS Glue Data Catalog.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-emr
+    name: Amazon EMR
+    description: Runs Hive, Spark, and Apache Hudi workloads that clean, transform, and upsert data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/emr/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: apache-hive
+    name: Apache Hive
+    description: Reads raw data as part of the Hive and Spark processing on Amazon EMR.
+    vendor: Apache Software Foundation
+    url: https://hive.apache.org/
+    types: [library]
+  - key: apache-spark
+    name: Apache Spark
+    description: Reads, cleans, and transforms data on Amazon EMR; Apache Hudi uses its Spark APIs.
+    vendor: Apache Software Foundation
+    url: https://spark.apache.org/
+    types: [library]
+  - key: apache-hudi
+    name: Apache Hudi
+    description: Performs inserts and upserts on required datasets using Spark APIs on Amazon EMR.
+    vendor: Apache Software Foundation
+    url: https://hudi.apache.org/
+    types: [library]
+  - key: amazon-mwaa
+    name: Amazon Managed Workflows for Apache Airflow (MWAA)
+    description: Orchestrates data movement, on-demand Amazon EMR clusters, and data loading.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/managed-workflows-for-apache-airflow/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: apache-airflow
+    name: Apache Airflow
+    description: Workflow engine used by Amazon MWAA to orchestrate the data lake workflows.
+    vendor: Apache Software Foundation
+    url: https://airflow.apache.org/
+    types: [library]
+    packages: [{manager: pypi, name: apache-airflow}]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Queries reportable data on demand.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Loads reportable data into an enterprise data warehouse for analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sagemaker
+    name: Amazon SageMaker
+    description: Uses reportable datasets for data-science workloads.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Business intelligence service shown consuming Amazon Redshift data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: sftp
+    name: SFTP
+    description: Generic file-transfer option shown for source ingestion; the endpoint product and provider are unspecified.
+    types: [third-party]
+  - key: sql-client
+    name: SQL Client
+    description: Generic query client shown consuming Amazon Athena results; no product is specified.
+    types: [third-party]
+  - key: jupyter-notebooks
+    name: Jupyter Notebooks
+    description: Generic notebook consumer shown for data-science outputs; no hosting or deployment is specified.
+    types: [third-party]
+  - key: application-sdk
+    name: Application SDK
+    description: Generic application development resource shown consuming data-science outputs; no product is specified.
+    types: [third-party]

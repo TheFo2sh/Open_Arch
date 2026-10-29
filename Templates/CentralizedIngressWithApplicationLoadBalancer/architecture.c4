@@ -1,0 +1,95 @@
+// Centralized ingress with Application Load Balancer, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/centralized-ingress-alb/
+// The EC2, Auto Scaling group, and chained ALB target patterns are alternatives.
+model {
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    transitGateway = platform 'AWS Transit Gateway' {
+      description 'Routes traffic between the central ingress and application VPCs.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+
+    centralIngressVPC = platform 'Central Ingress VPC' {
+      description 'VPC containing the public Application Load Balancer and Internet Gateway.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+      internetGateway = platform 'Internet Gateway' {
+        metadata {
+          uses 'amazon-vpc-internet-gateway'
+        }
+      }
+      ingressALB = platform 'Central ingress Application Load Balancer' {
+        description 'Public ALB; target groups use IP addresses for the application VPC targets.'
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+    }
+
+    applicationVPC = platform 'Application VPC' {
+      description 'VPC containing EC2 targets; the ASG patterns also place a Network Load Balancer here.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      directEC2 = platform 'Amazon EC2 — IP target pattern' {
+        description 'EC2 instances are registered manually by IP address in the central ALB target group.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        directTarget = system 'Application EC2 target' {
+          description 'Application workload slot for the direct EC2 IP-target pattern; the application is not specified by AWS.'
+        }
+      }
+
+      networkLB = platform 'Network Load Balancer' {
+        description 'Static-IP target for the central ALB; forwards to an Auto Scaling group, directly or through an application ALB.'
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+      applicationALB = platform 'Application Load Balancer — chained pattern' {
+        description 'Optional application-VPC ALB that provides layer 7 load balancing after the Network Load Balancer.'
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+
+      autoScaling = platform 'Amazon EC2 Auto Scaling' {
+        description 'Manages registration of application instances for the Auto Scaling group patterns.'
+        metadata {
+          uses 'amazon-ec2-auto-scaling'
+        }
+        ec2 = platform 'Amazon EC2 — Auto Scaling targets' {
+          metadata {
+            uses 'amazon-ec2'
+          }
+          scaledTarget = system 'Application Auto Scaling group target' {
+            description 'Application workload slot for either Auto Scaling group pattern; the application is not specified by AWS.'
+          }
+        }
+      }
+    }
+  }
+
+  aws.centralIngressVPC.internetGateway -> aws.centralIngressVPC.ingressALB 'Provides the public ingress path to'
+  aws.centralIngressVPC.ingressALB -> aws.transitGateway 'Sends target traffic through'
+  aws.transitGateway -> aws.applicationVPC.directEC2.directTarget 'Routes requests to the configured EC2 IP target in'
+  aws.transitGateway -> aws.applicationVPC.networkLB 'Routes requests to the Network Load Balancer static IP in'
+  aws.applicationVPC.networkLB -> aws.applicationVPC.autoScaling.ec2.scaledTarget 'Forwards to registered EC2 instances using instance ID targets'
+  aws.applicationVPC.networkLB -> aws.applicationVPC.applicationALB 'Forwards to the application ALB using an ALB-type target group'
+  aws.applicationVPC.applicationALB -> aws.applicationVPC.autoScaling.ec2.scaledTarget 'Forwards to registered EC2 instances using instance ID targets'
+}
+
+views {
+  view index {
+    title 'Centralized Ingress with Application Load Balancer'
+    include *
+  }
+}

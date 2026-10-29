@@ -1,0 +1,131 @@
+// Consumer Review Sentiment Analysis for CPG, after AWS's reference architecture.
+// The AWS page's numbered flow and diagram are linked from the template README.
+// Read together with the repository's specification.c4.
+model {
+  reviewSources = system 'Consumer review sources' {
+    description 'External e-commerce sites, product websites, and social-media webhooks that provide consumer reviews.'
+  }
+  saasSources = system 'SaaS source applications' {
+    description 'Optional SaaS inputs such as Salesforce, Marketo, Slack, and ServiceNow, ingested through Amazon AppFlow.'
+  }
+  analyst = user 'Review analyst' {
+    description 'Uses dashboards to explore sentiment and extracted information from consumer reviews.'
+  }
+  reporting = system 'Consumer review analytics' {
+    description 'The project reporting system, with dashboards backed by Amazon QuickSight.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Receives review events from web, mobile, and social-media-facing sources.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Hosts the review ingestion and analysis functions.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      reviewProcessing = system 'Review processing' {
+        description 'Functions that accept reviews and analyze review objects after they arrive in S3.'
+        ingestion = container 'Review ingestion function' {
+          description 'Handles reviews received through API Gateway and forwards them to the ingestion delivery stream.'
+        }
+        analysis = container 'Review analysis function' {
+          description 'Runs on an S3 event, translates reviews when needed, and requests sentiment, key-phrase, and entity analysis.'
+        }
+      }
+    }
+    ingestionFirehose = platform 'Amazon Data Firehose ingestion stream' {
+      description 'The ingestion delivery stream that loads reviews into the raw S3 area; labeled Amazon Kinesis Data Firehose in the diagram.'
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+    appflow = platform 'Amazon AppFlow' {
+      description 'Ingests selected SaaS application data into Amazon S3.'
+      metadata {
+        uses 'amazon-appflow'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Persists incoming review data and processed analysis results.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      reviewData = database 'Review data' {
+        description 'Logical raw, sentiment, key phrase, and entity data areas shown in the diagram; physical bucket boundaries are not specified.'
+      }
+    }
+    analysisFirehose = platform 'Amazon Data Firehose analysis stream' {
+      description 'The delivery stream that writes analysis outputs to S3; labeled Amazon Kinesis Data Firehose in the diagram.'
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+    translate = platform 'Amazon Translate' {
+      description 'Translates reviews into a base language when required by the analysis flow.'
+      metadata {
+        uses 'amazon-translate'
+      }
+    }
+    comprehend = platform 'Amazon Comprehend' {
+      description 'Analyzes review text for sentiment, key phrases, and entities.'
+      metadata {
+        uses 'amazon-comprehend'
+      }
+    }
+    glue = platform 'AWS Glue Data Catalog' {
+      description 'Provides the logical database and table definitions for review data in S3.'
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      catalog = database 'Review data catalog' {
+        description 'Logical catalog database organizing tables for the review data in S3.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Queries review and analysis data in S3 using the catalog table definitions.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Displays review-analysis query results in dashboards.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+  }
+
+  reviewSources -> aws.apiGateway 'Submits reviews to'
+  aws.apiGateway -> aws.lambda.reviewProcessing.ingestion 'Invokes'
+  aws.lambda.reviewProcessing.ingestion -> aws.ingestionFirehose 'Delivers incoming review records through'
+  aws.ingestionFirehose -> aws.s3.reviewData 'Loads raw reviews into'
+  saasSources -> aws.appflow 'Provides selected SaaS data to'
+  aws.appflow -> aws.s3.reviewData 'Ingests SaaS data into'
+  aws.s3.reviewData -> aws.lambda.reviewProcessing.analysis 'Triggers analysis when raw review objects arrive'
+  aws.lambda.reviewProcessing.analysis -> aws.translate 'Uses for translation when needed'
+  aws.lambda.reviewProcessing.analysis -> aws.comprehend 'Requests sentiment, key-phrase, and entity analysis from'
+  aws.lambda.reviewProcessing.analysis -> aws.analysisFirehose 'Sends analysis outputs through'
+  aws.analysisFirehose -> aws.s3.reviewData 'Writes analysis outputs to'
+  aws.glue.catalog -> aws.s3.reviewData 'Describes the data stored in'
+  aws.athena -> aws.s3.reviewData 'Queries'
+  aws.glue.catalog -> aws.athena 'Provides table definitions to'
+  aws.athena -> aws.quickSight 'Provides query results to'
+  aws.quickSight -> reporting 'Presents review dashboards for'
+  aws.athena -> reporting 'Supplies query results for'
+  analyst -> reporting 'Explores review analysis in'
+}
+
+views {
+  view index {
+    title 'Consumer Review Sentiment Analysis for CPG'
+    include *, aws.*
+  }
+}

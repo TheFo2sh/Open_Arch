@@ -1,0 +1,7 @@
+PackageId: OpenArch.GeofencingWithAmazonLocationServiceAndAWSIoT
+Name: Geofencing with Amazon Location Service and AWS IoT
+Description: Track assets with AWS IoT and Amazon Location Service, process geofence events, and notify end users.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, iot, geofencing, location]

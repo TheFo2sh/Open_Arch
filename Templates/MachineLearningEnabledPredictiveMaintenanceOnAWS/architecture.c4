@@ -1,0 +1,113 @@
+// Machine Learning Enabled Predictive Maintenance on AWS.
+// Source: https://docs.aws.amazon.com/reference-architecture-diagrams/latest/ml-predictive-maintenance/ml-predictive-maintenance.html
+// Systems are slots mapped onto the project's own when the template is applied.
+model {
+  field = zone 'Oil and gas field' {
+    metadata {
+      platform 'other'
+    }
+
+    pumps = system 'Sucker rod pumps and temperature sensors' {
+      description 'The source depicts four sucker rod pumps with temperature sensors; this slot represents the pump fleet.'
+    }
+  }
+
+  edge = zone 'Edge device' {
+    metadata {
+      platform 'other'
+    }
+
+    factoryDevices = system 'Factory devices' {
+      description 'Factory devices collect measurements from the sucker rod pump sensors.'
+
+      deviceClient = container 'IoT device client' {
+        description 'Publishes pump telemetry to AWS IoT Core using the AWS IoT Device SDK and MQTT.'
+        technology 'AWS IoT Device SDK'
+        metadata {
+          uses 'aws-iot-device-sdk'
+        }
+      }
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      description 'Receives device telemetry and applies IoT rules for Timestream and Data Firehose.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    timestream = platform 'Amazon Timestream' {
+      description 'Stores incoming pump measurements as time-series data.'
+      metadata {
+        uses 'amazon-timestream'
+      }
+      telemetry = database 'Pump sensor time-series data'
+    }
+    grafana = platform 'Amazon Managed Grafana' {
+      description 'Visualizes sensor measurements from Timestream and inference results queried by Athena.'
+      metadata {
+        uses 'amazon-managed-grafana'
+      }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      description 'Captures, transforms, and delivers IoT telemetry to Amazon S3.'
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores telemetry and Lookout for Equipment inference results.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      data = database 'Predictive maintenance data' {
+        description 'Device telemetry delivered by Data Firehose and inference results written by Lookout for Equipment.'
+      }
+    }
+    lookout = platform 'Amazon Lookout for Equipment' {
+      description 'Analyzes data in S3 to detect equipment abnormalities and stores inference results back in S3.'
+      metadata {
+        uses 'amazon-lookout-for-equipment'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'A Glue crawler categorizes the S3 data in the Data Catalog.'
+      metadata {
+        uses 'aws-glue'
+      }
+      dataCatalog = database 'AWS Glue Data Catalog' {
+        description 'Catalog metadata for the S3 telemetry and inference data.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Runs on-demand queries using the Glue Data Catalog.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+  }
+
+  field.pumps -> edge.factoryDevices 'Provides temperature measurements to'
+  edge.factoryDevices.deviceClient -> aws.iotCore 'Publishes telemetry over MQTT to'
+  aws.iotCore -> aws.timestream.telemetry 'An IoT rule stores time-series data in'
+  aws.timestream.telemetry -> aws.grafana 'Provides sensor data for visualization in'
+  aws.iotCore -> aws.firehose 'An IoT rule routes data to'
+  aws.firehose -> aws.s3.data 'Delivers telemetry to'
+  aws.s3.data -> aws.lookout 'Provides equipment data for analysis to'
+  aws.lookout -> aws.s3.data 'Stores inference results in'
+  aws.s3.data -> aws.glue.dataCatalog 'A Glue crawler catalogs the data in'
+  aws.glue.dataCatalog -> aws.athena 'Provides catalog metadata for queries to'
+  aws.athena -> aws.grafana 'Provides inference query results for visualization in'
+}
+
+views {
+  view index {
+    title 'Machine Learning Enabled Predictive Maintenance on AWS'
+    include *, field.*, edge.*, edge.factoryDevices.*, aws.*
+  }
+}

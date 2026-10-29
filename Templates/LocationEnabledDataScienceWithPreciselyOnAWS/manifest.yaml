@@ -1,0 +1,7 @@
+PackageId: OpenArch.LocationEnabledDataScienceWithPreciselyOnAWS
+Name: Location-enabled Data Science with Precisely on AWS
+Description: Refresh Precisely geocoding reference data and make it available to data science experiments on AWS.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, data-science, geospatial, precisely]

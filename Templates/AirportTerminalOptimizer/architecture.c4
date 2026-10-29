@@ -1,0 +1,162 @@
+// Airport Terminal Optimizer, based on AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/airport-terminal-optimizer/airport-terminal-optimizer.html
+// Systems and the airport operations user are slots to map when applying the template.
+model {
+  airportOperations = user 'Airport operations team' {
+    description 'Provides terminal and gate configurations and terminal operating costs, and may use the optional what-if dashboard.'
+  }
+
+  batchInputs = system 'Airport optimizer batch inputs' {
+    description 'Slot for batch data sources including OAG airline schedules, airport configurations and costs, and supporting datasets; source applications and feed routing are not specified.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    dataExchange = platform 'AWS Data Exchange' {
+      description 'Batch data exchange path shown for airport optimizer inputs.'
+      metadata {
+        uses 'aws-data-exchange'
+      }
+    }
+    transferFamily = platform 'AWS Transfer Family' {
+      description 'SFTP batch-file path shown for airport optimizer inputs.'
+      metadata {
+        uses 'aws-transfer-family'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores batch staging, processed, configuration, and optimized data tiers.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      batchStaging = database 'Batch staging data' {
+        description 'Staged SSIM, SSM, airport configuration and cost files, aircraft data, time zones, and public datasets.'
+      }
+      processed = database 'Processed data' {
+        description 'Processed flight, airport, aircraft, time-zone, and operating-cost datasets.'
+      }
+      configurations = database 'Configuration data' {
+        description 'Gate and terminal configurations and their associated costs used for assignment optimization.'
+      }
+      optimized = database 'Optimized results' {
+        description 'Passenger traffic, landing slots, airport gate assignments, and airport terminal assignments.'
+      }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      description 'Catalogs data assets for discovery and processing.'
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Discovers, catalogs, and processes batch inputs with Amazon EMR.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    emr = platform 'Amazon EMR' {
+      description 'Runs the airport optimizer data-processing pipeline.'
+      metadata {
+        uses 'amazon-emr'
+      }
+      optimizer = system 'Airport terminal optimization pipeline' {
+        description 'Transforms batch inputs into flight data, passenger traffic, landing slots, and optimized gate and terminal assignments.'
+
+        preparation = container 'Input preparation' {
+          description 'Discovers and converts incoming data between CSV, JSON, and Parquet formats and prepares processed datasets.'
+        }
+        flightData = container 'Flight data builder' {
+          description 'Creates flight data from airline schedule files.'
+        }
+        trafficAndSlots = container 'Traffic and landing slot calculations' {
+          description 'Creates hourly and daily passenger traffic and landing slots from flight data.'
+        }
+        assignmentOptimization = container 'Terminal and gate assignment optimization' {
+          description 'Creates optimized terminal and gate assignments using airport configurations and operating costs.'
+        }
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Queries optimized results in Amazon S3.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Visualizes airport optimization results.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Provides the API entry point for the optional configuration dashboard.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the optional configuration management microservices.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      dashboard = system 'Configuration management dashboard backend' {
+        description 'Optional backend for configuration changes and what-if analyses.'
+        microservices = container 'Configuration management microservices' {
+          description 'Implements the optional dashboard configuration and what-if operations.'
+        }
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Stores configurations used by the optional dashboard.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      dashboardConfigurations = database 'Dashboard configurations' {
+        description 'Configuration data used by optional what-if analyses.'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis' {
+      description 'Carries configuration updates in the optional dashboard path; the Kinesis service variant is not specified.'
+      metadata {
+        uses 'amazon-kinesis'
+      }
+    }
+  }
+
+  airportOperations -> batchInputs 'Provides terminal, gate, and operating-cost inputs'
+  batchInputs -> aws.dataExchange 'Provides batch inputs; source-to-channel routing is not specified'
+  batchInputs -> aws.transferFamily 'Provides batch inputs; source-to-channel routing is not specified'
+  aws.dataExchange -> aws.s3.batchStaging 'Delivers batch inputs to'
+  aws.transferFamily -> aws.s3.batchStaging 'Transfers batch files to'
+  aws.glueCatalog -> aws.s3.batchStaging 'Catalogs staged data from'
+  aws.glue -> aws.s3.processed 'Processes input data into'
+  aws.emr.optimizer.preparation -> aws.s3.batchStaging 'Reads staged inputs from'
+  aws.emr.optimizer.preparation -> aws.s3.processed 'Writes prepared datasets to'
+  aws.emr.optimizer.flightData -> aws.s3.batchStaging 'Reads schedule files from'
+  aws.emr.optimizer.flightData -> aws.s3.processed 'Writes flight data to'
+  aws.emr.optimizer.trafficAndSlots -> aws.s3.processed 'Reads flight data from'
+  aws.emr.optimizer.trafficAndSlots -> aws.s3.optimized 'Writes passenger traffic and landing slots to'
+  aws.emr.optimizer.assignmentOptimization -> aws.s3.configurations 'Reads gate and terminal configurations and costs from'
+  aws.emr.optimizer.assignmentOptimization -> aws.s3.processed 'Uses processed data from'
+  aws.emr.optimizer.assignmentOptimization -> aws.s3.optimized 'Writes optimized assignments to'
+  aws.emr.optimizer.preparation -> aws.s3.configurations 'Writes prepared configurations and costs to'
+  aws.athena -> aws.s3.optimized 'Queries'
+  aws.athena -> aws.quickSight 'Provides query results for visualization in'
+
+  airportOperations -> aws.lambda.dashboard 'Uses the optional what-if configuration dashboard'
+  aws.apiGateway -> aws.lambda.dashboard 'Routes dashboard requests to'
+  aws.lambda.dashboard.microservices -> aws.dynamodb.dashboardConfigurations 'Reads and writes dashboard configurations in'
+  aws.lambda.dashboard.microservices -> aws.kinesis 'Publishes configuration updates to'
+  aws.kinesis -> aws.s3.configurations 'Updates configuration data in'
+}
+
+views {
+  view index {
+    title 'Airport Terminal Optimizer'
+    include *, aws.*, aws.s3.*, aws.emr.*, aws.emr.optimizer.*
+  }
+}

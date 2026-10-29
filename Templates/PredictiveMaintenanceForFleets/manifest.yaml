@@ -1,0 +1,7 @@
+PackageId: OpenArch.PredictiveMaintenanceForFleets
+Name: Predictive Maintenance for Fleets
+Description: Predict vehicle battery failures from historical and live telemetry, then notify drivers and fleet managers before failures occur.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, predictive-maintenance, fleet, machine-learning]

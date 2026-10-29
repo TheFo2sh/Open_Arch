@@ -1,0 +1,77 @@
+technologies:
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: REST endpoints for device registration, direct notifications, campaigns, and one-off messages.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Registration and notification workflows that coordinate serverless processing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the registration and notification logic invoked by the Step Functions workflows.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores mobile notification endpoint data and recipient or segment information.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-sns
+    name: Amazon Simple Notification Service (Amazon SNS)
+    description: Uses device tokens and push-provider credentials to distribute notifications to subscribers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cognito
+    name: Amazon Cognito
+    description: Authorizes marketing-employee requests to the notification API.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cognito/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-translate
+    name: Amazon Translate
+    description: Translates notification content as part of the notification workflow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/translate/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service (Amazon S3)
+    description: Stores raw notification data for cold-data analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: firebase-cloud-messaging
+    name: Firebase Cloud Messaging
+    description: External push-notification provider example used by Amazon SNS to deliver notifications to mobile devices.
+    vendor: Google
+    url: https://firebase.google.com/docs/cloud-messaging
+    types: [third-party]
+  - key: apple-push-notification-service
+    name: Apple Push Notification Service (APNs)
+    description: External push-notification provider example used by Amazon SNS to deliver notifications to Apple devices.
+    vendor: Apple
+    url: https://developer.apple.com/documentation/usernotifications
+    types: [third-party]

@@ -1,0 +1,7 @@
+PackageId: OpenArch.ColdChainLogisticsPoweredByMendixAndAWS
+Name: Cold Chain Logistics Powered by Mendix and AWS
+Description: A Mendix Cloud cold-chain application integrated with AWS IoT, image analysis, messaging, object storage, analytics, and database services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, logistics, cold-chain, mendix, iot]

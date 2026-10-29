@@ -1,0 +1,7 @@
+PackageId: OpenArch.ExposeMicroservicesUsingAmazonEKS
+Name: Expose Microservices Using Amazon EKS
+Description: Expose private Amazon EKS microservices to internet and on-premises clients using public and private load balancers.
+Version: 1.0.0
+Icon: logos:amazon-eks
+Publisher: Open_Arch
+Tags: [aws, containers, eks, kubernetes, hybrid-cloud, networking]

@@ -1,0 +1,7 @@
+PackageId: OpenArch.AmazonOpenSearchTrendingQueriesWithAWSGlueAndAmazonBedrock
+Name: Amazon OpenSearch Trending Queries with AWS Glue and Amazon Bedrock
+Description: Identifies trending search queries with Amazon OpenSearch Service, AWS Glue, and Amazon Bedrock so teams can improve search experiences and content strategy.
+Version: 1.0.0
+Icon: logos:opensearch
+Publisher: Open_Arch
+Tags: [aws, search, analytics, data-engineering, generative-ai]

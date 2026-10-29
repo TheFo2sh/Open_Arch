@@ -1,0 +1,7 @@
+PackageId: OpenArch.FastBackupAndRestoreOfTiDBOnAWS
+Name: Fast Backup and Restore of TiDB on AWS
+Description: Fast TiDB backup and restore using Amazon EBS snapshots, Amazon S3 backup metadata, and TiDB Operator on Amazon EKS.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, database, backup, restore, tidb]

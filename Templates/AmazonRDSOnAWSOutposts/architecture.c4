@@ -1,0 +1,121 @@
+// Based on AWS's Amazon RDS on AWS Outposts reference architecture.
+// The systems are slots; map them to application systems in the consuming architecture.
+model {
+  awsRegion = zone 'AWS Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Provides the secure connection between AWS Outposts and the parent Region.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    vpc = platform 'Amazon VPC' {
+      description 'Contains the regional application subnet and the VPC resources connected to Outposts.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      regionalEc2 = platform 'Amazon EC2' {
+        description 'Runs an application workload in the regional VPC subnet.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+
+        regionalApplication = system 'Regional application' {
+          description 'Application workload in the same VPC and Region as the Outposts database.'
+        }
+      }
+    }
+    regionalRds = platform 'Amazon RDS' {
+      description 'Hosts the regional database restored for disaster recovery.'
+      metadata {
+        uses 'amazon-rds'
+      }
+
+      restoredDatabase = database 'Restored RDS database' {
+        description 'Disaster-recovery database restored in the parent Region from an Outposts snapshot.'
+      }
+    }
+    backupStorage = platform 'Amazon S3' {
+      description 'Stores snapshots and transaction logs in the AWS Region.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    cloudWatch = platform 'Amazon CloudWatch' {
+      description 'Provides the CloudWatch metrics supported for AWS Outposts.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    kms = platform 'AWS Key Management Service' {
+      description 'Regional key-management service shown in the diagram; the source does not specify its use.'
+      metadata {
+        uses 'aws-key-management-service'
+      }
+    }
+  }
+
+  customerDataCenter = zone 'Corporate Data Center' {
+    metadata {
+      platform 'other'
+    }
+
+    onPremisesApplication = system 'On-premises application' {
+      description 'Customer-hosted application that can connect to the Outposts database through its Local Gateway.'
+    }
+
+    outposts = platform 'AWS Outposts' {
+      description 'AWS infrastructure installed in the customer data center.'
+      metadata {
+        uses 'aws-outposts'
+      }
+
+      localGateway = platform 'AWS Outposts Local Gateway' {
+        description 'Provides the local-network path for on-premises applications to the Outposts database.'
+        metadata {
+          uses 'aws-outposts-local-gateway'
+        }
+      }
+      outpostsEc2 = platform 'Amazon EC2' {
+        description 'Runs an application workload in an Outposts subnet.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+
+        outpostsApplication = system 'Outposts application' {
+          description 'Application workload running on EC2 in the Outposts VPC.'
+        }
+      }
+      outpostsRds = platform 'Amazon RDS on AWS Outposts' {
+        description 'Runs the managed database instance in an Outposts-associated DB subnet.'
+        metadata {
+          uses 'amazon-rds-outposts'
+        }
+
+        database = database 'RDS on Outposts database' {
+          description 'The Outposts-hosted database; AWS documents MySQL and PostgreSQL as supported engine options.'
+        }
+      }
+    }
+  }
+
+  awsRegion.directConnect -> customerDataCenter.outposts 'Connects this Outposts site to the parent Region'
+  awsRegion.vpc -> customerDataCenter.outposts.outpostsRds 'Provides the shared VPC and subnet context for'
+  awsRegion.vpc.regionalEc2.regionalApplication -> customerDataCenter.outposts.outpostsRds.database 'Connects to the database through the RDS endpoint'
+  customerDataCenter.outposts.outpostsEc2.outpostsApplication -> customerDataCenter.outposts.outpostsRds.database 'Connects to the database through the RDS endpoint'
+  customerDataCenter.onPremisesApplication -> customerDataCenter.outposts.localGateway 'Connects through the Direct VPC connection'
+  customerDataCenter.outposts.localGateway -> customerDataCenter.outposts.outpostsRds.database 'Provides the local-network path to'
+  customerDataCenter.outposts.outpostsRds.database -> awsRegion.backupStorage 'Stores automated backups, manual snapshots, and transaction logs in'
+  awsRegion.backupStorage -> awsRegion.regionalRds.restoredDatabase 'Provides snapshots to restore'
+}
+
+views {
+  view index {
+    title 'Amazon RDS on AWS Outposts'
+    include *, awsRegion.*, customerDataCenter.*, customerDataCenter.outposts.*
+  }
+}

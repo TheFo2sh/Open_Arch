@@ -1,0 +1,134 @@
+// Temenos T24 Transact service architecture after AWS's reference diagram.
+// The source depicts two generically labeled ECS application-container groups;
+// their names below are positional and do not claim distinct business roles.
+model {
+  t24User = user 'T24 user' {
+    description 'Uses the Temenos T24 Transact core banking service.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    waf = platform 'AWS WAF' {
+      metadata {
+        uses 'aws-waf'
+      }
+    }
+    shield = platform 'AWS Shield' {
+      metadata {
+        uses 'aws-shield'
+      }
+    }
+    cloudfront = platform 'Amazon CloudFront' {
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    route53 = platform 'Amazon Route 53' {
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    loadBalancer = platform 'Elastic Load Balancing' {
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+
+    ecs = platform 'Amazon Elastic Container Service' {
+      metadata {
+        uses 'amazon-ecs'
+      }
+      t24 = system 'Temenos T24 Transact' {
+        description 'Core banking system slot for the Temenos T24 Transact workload.'
+
+        appGroupA = container 'T24 application-container group A' {
+          description 'The first generically labeled ECS application-container group in the AWS service diagram.'
+        }
+        appGroupB = container 'T24 application-container group B' {
+          description 'The second generically labeled ECS application-container group in the AWS service diagram.'
+        }
+      }
+    }
+
+    ecr = platform 'Amazon Elastic Container Registry' {
+      metadata {
+        uses 'amazon-ecr'
+      }
+    }
+    secrets = platform 'AWS Secrets Manager' {
+      metadata {
+        uses 'aws-secrets-manager'
+      }
+    }
+    cloudwatch = platform 'Amazon CloudWatch' {
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    mq = platform 'Amazon MQ' {
+      metadata {
+        uses 'amazon-mq'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      querySystem = system 'Read-only query processing' {
+        description 'Processes read-only T24 queries as described by AWS.'
+        queryFunction = container 'Read-only query function' {
+          description 'Lambda processing for query-optimized DynamoDB reads.'
+        }
+      }
+      eventSystem = system 'Kinesis event ingestion' {
+        description 'Ingests events from selected Kinesis topics into DynamoDB.'
+        eventFunction = container 'Event ingestion function' {
+          description 'Lambda function for the documented stream-to-table ingestion flow.'
+        }
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      queryStore = database 'Query and event data' {
+        description 'Query-optimized DynamoDB storage used by read-only queries and stream-event ingestion.'
+      }
+    }
+    aurora = platform 'Amazon Aurora' {
+      metadata {
+        uses 'amazon-aurora'
+      }
+      relationalStore = database 'Relational database' {
+        description 'The relational database in the diagram; AWS lists Aurora, RDS for Oracle, RDS for SQL Server, or NuoDB as options.'
+      }
+    }
+  }
+
+  t24User -> aws.ecs.t24 'Uses'
+  aws.waf -> aws.cloudfront 'Protects the perimeter for'
+  aws.shield -> aws.cloudfront 'Protects the perimeter for'
+  aws.cloudfront -> aws.apiGateway 'Forwards access to'
+  aws.apiGateway -> aws.loadBalancer 'Directs OLTP traffic to'
+  aws.loadBalancer -> aws.ecs.t24.appGroupA 'Balances traffic to'
+  aws.apiGateway -> aws.lambda.querySystem.queryFunction 'Routes read-only queries to'
+  aws.lambda.querySystem.queryFunction -> aws.dynamodb.queryStore 'Reads query-optimized data from'
+  aws.ecs.t24.appGroupA -> aws.mq 'Exchanges messages through'
+  aws.mq -> aws.ecs.t24.appGroupB 'Passes messages to'
+  aws.ecs.t24.appGroupB -> aws.aurora.relationalStore 'Reads from and writes to'
+  aws.kinesis -> aws.lambda.eventSystem.eventFunction 'Supplies events from selected topics to'
+  aws.lambda.eventSystem.eventFunction -> aws.dynamodb.queryStore 'Writes ingested events to'
+}
