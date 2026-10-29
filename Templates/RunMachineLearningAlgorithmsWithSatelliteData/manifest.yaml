@@ -1,0 +1,7 @@
+PackageId: OpenArch.RunMachineLearningAlgorithmsWithSatelliteData
+Name: Run Machine Learning Algorithms with Satellite Data
+Description: Ingest satellite data through AWS Ground Station, prepare and label imagery, train SageMaker models, and serve inference results to applications.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, machine-learning, satellite-data, geospatial, earth-observation]
