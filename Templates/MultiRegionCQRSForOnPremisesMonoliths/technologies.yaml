@@ -1,0 +1,72 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Hybrid network connection between the on-premises installation and the primary AWS Region.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-dms
+    name: AWS Database Migration Service
+    description: Captures change data from the on-premises relational database and streams it to Kinesis.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dms/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Carries change data capture events from AWS DMS to the Lambda CDC handler.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the CDC handler, regional API dispatchers, and regional health information handler.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-dynamodb-global-tables
+    name: Amazon DynamoDB Global Tables
+    description: Stores denormalized regional read projections and, separately, regional API health state and locations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/global-tables/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: Monitors the health of regional APIs and sends health alarms.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: Receives regional API health alarms from Route 53 and forwards them to the health information handler.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: on-premises-relational-database
+    name: On-premises relational database
+    description: Generic database-hosting platform for the monolith's relational database; AWS does not specify its product or engine.
+    types: [data-platform]
+    platform: other
+    hosts: [database]
