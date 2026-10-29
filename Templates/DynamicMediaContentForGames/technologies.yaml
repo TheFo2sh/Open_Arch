@@ -1,0 +1,39 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Content delivery network that invokes edge request logic, fetches content from the selected S3 origin, and caches media at edge locations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-lambda-edge
+    name: AWS Lambda@Edge
+    description: Edge compute that uses low-cardinality player attributes and routing rules to select or rewrite the dynamic media origin request.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/edge/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: DynamoDB Global Tables stores routing rules in replicated regional copies so edge request logic can read from the nearest regional replica.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/global-tables/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage origin for the dynamic media content selected by edge request logic and delivered through CloudFront.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
