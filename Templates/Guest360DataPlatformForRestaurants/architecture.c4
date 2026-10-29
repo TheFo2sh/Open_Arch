@@ -1,0 +1,126 @@
+// Guest 360 Data Platform for Restaurants, after AWS's reference architecture.
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/guest-360-data-platform-restaurants/guest-360-data-platform-restaurants.html
+model {
+  guest = user 'Restaurant guest' {
+    description 'Interacts with restaurant web and mobile channels, both anonymously and as a known guest.'
+  }
+
+  restaurantData = system 'Restaurant data domains' {
+    description 'Slot for restaurant order, loyalty, and location domains, including purchase and registration attributes.'
+  }
+  digitalChannels = system 'Restaurant web and mobile channels' {
+    description 'Slot for the restaurant website and mobile experience where CDP tag management and first-party cookies collect guest activity.'
+  }
+  campaignChannels = system 'Guest campaign channels' {
+    description 'Slot for outbound campaign destinations; AWS does not specify the channel types.'
+  }
+  mdm = system 'Master Data Management (MDM)' {
+    description 'Vendor-neutral slot for matching purchase and registration attributes into unified profiles and identifying loyalty members.'
+    technology 'Master Data Management (MDM)'
+  }
+  cdp = system 'Customer Data Platform (CDP)' {
+    description 'Vendor-neutral slot for tag-managed digital activity, identity resolution, campaign activation, and measurement.'
+    technology 'Customer Data Platform (CDP)'
+  }
+  dsp = system 'Demand-side platforms (DSPs)' {
+    description 'Vendor-neutral slot for CDP-integrated customer acquisition campaigns.'
+    technology 'Demand-side platform (DSP)'
+  }
+  adExchanges = system 'Advertising exchanges' {
+    description 'Vendor-neutral slot for advertising inventory and campaign measurement integrations.'
+    technology 'Advertising exchange'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Open-standards guest activity data lake.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      guestActivity = database 'Guest activity data lake' {
+        description 'Stores curated order, loyalty, location, marketing, and web and mobile interaction data.'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Catalogs and curates data lake data.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    emr = platform 'Amazon EMR' {
+      description 'Processes and curates guest activity datasets.'
+      metadata {
+        uses 'amazon-emr'
+      }
+      processing = system 'Data lake processing jobs' {
+        description 'Slot for processing jobs that transform and curate guest activity using open standards.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Operational data store for guest 360 services.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      operationalStore = database 'Guest 360 operational data store' {
+        description 'Operational guest profile and service data, distinct from the analytics data lake.'
+      }
+    }
+    guest360Services = system 'Guest 360 microservices' {
+      description 'Serverless services that read and update operational guest data and personalize offers; implementation details are not specified by AWS.'
+    }
+    businessEvents = system 'Guest 360 business events' {
+      description 'Business events that supply guest context to operational services and offer personalization.'
+    }
+    personalize = platform 'Amazon Personalize' {
+      description 'Personalizes outbound campaigns and inbound web and mobile experiences.'
+      metadata {
+        uses 'amazon-personalize'
+      }
+    }
+    pinpoint = platform 'Amazon Pinpoint' {
+      description 'Supports outbound guest campaigns with Amazon Personalize.'
+      metadata {
+        uses 'amazon-pinpoint'
+      }
+    }
+  }
+
+  guest -> digitalChannels 'Uses'
+  restaurantData -> mdm 'Supplies order, loyalty, location, purchase, and registration attributes to'
+  mdm -> cdp 'Provides unified guest and loyalty identities to'
+  digitalChannels -> cdp 'Provides tagged web and mobile behavior and first-party identifiers to'
+  cdp -> aws.s3.guestActivity 'Contributes digital interactions to'
+  restaurantData -> aws.s3.guestActivity 'Contributes order, loyalty, and location data to'
+  mdm -> aws.s3.guestActivity 'Contributes unified guest profiles to'
+
+  aws.s3.guestActivity -> aws.glue 'Provides data for cataloging and curation'
+  aws.glue -> aws.s3.guestActivity 'Catalogs and curates'
+  aws.s3.guestActivity -> aws.emr.processing 'Provides data for processing'
+  aws.emr.processing -> aws.s3.guestActivity 'Writes curated datasets to'
+  aws.s3.guestActivity -> aws.guest360Services 'Provides curated guest data for operational serving'
+  aws.businessEvents -> aws.guest360Services 'Supplies guest and offer events to'
+  aws.guest360Services -> aws.dynamodb.operationalStore 'Reads and writes operational guest data'
+  aws.guest360Services -> aws.personalize 'Requests offer personalization'
+  aws.personalize -> aws.guest360Services 'Returns personalized offers'
+  aws.s3.guestActivity -> aws.personalize 'Supplies historical guest activity for personalization'
+  aws.personalize -> aws.pinpoint 'Supports outbound campaign personalization'
+  aws.pinpoint -> campaignChannels 'Delivers outbound campaigns through'
+  digitalChannels -> aws.personalize 'Requests inbound web and mobile personalization'
+  aws.personalize -> digitalChannels 'Returns personalized inbound campaign content'
+
+  cdp -> dsp 'Activates guest audiences for customer acquisition'
+  cdp -> adExchanges 'Integrates for campaign activation and measurement'
+  dsp -> adExchanges 'Runs acquisition campaigns through'
+  adExchanges -> cdp 'Returns campaign measurement results to'
+}
+
+views {
+  view index {
+    title 'Guest 360 Data Platform for Restaurants'
+    include *, aws.*
+  }
+}
