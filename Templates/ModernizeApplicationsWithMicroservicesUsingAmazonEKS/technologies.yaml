@@ -1,0 +1,128 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Private network boundary containing the EKS cluster and its private subnet.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-eks
+    name: Amazon Elastic Kubernetes Service
+    description: Fully managed Kubernetes clusters for separate development, test and production environments.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eks/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: vmware-cloud-on-aws
+    name: VMware Cloud on AWS
+    description: Software-defined data center retaining the legacy database tier on VMware ESXi clusters hosted by EC2 bare-metal instances.
+    vendor: VMware
+    url: https://aws.amazon.com/vmware/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Bare-metal instances providing the host hardware for VMware ESXi in the SDDC.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: vmware-esxi
+    name: VMware ESXi
+    description: VMware hypervisor clusters running on the SDDC's EC2 bare-metal instances and hosting legacy database workloads.
+    vendor: VMware
+    url: https://www.vmware.com/products/cloud-infrastructure/vsphere
+    types: [third-party, compute-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-ec2-eni
+    name: Amazon EC2 Elastic Network Interface
+    description: Network interface integration automatically attached to VMware Cloud on AWS bare-metal hosts during SDDC provisioning.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-eni.html
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: Resolves incoming client requests to the Network Load Balancer in the primary AWS Region.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: elastic-load-balancing-network-load-balancer
+    name: Network Load Balancer
+    description: Receives client requests and integrates with the Kubernetes Ingress Controller to expose applications.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/network-load-balancer/
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-codecommit
+    name: AWS CodeCommit
+    description: Source repository committed to by the development team to initiate the delivery pipeline.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codecommit/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-codepipeline
+    name: AWS CodePipeline
+    description: Starts processing source changes from CodeCommit and orchestrates the build pipeline.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codepipeline/
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-codebuild
+    name: AWS CodeBuild
+    description: Packages code and dependencies, builds Docker images, and uses kubectl to update Kubernetes deployment image tags.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codebuild/
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ecr
+    name: Amazon Elastic Container Registry
+    description: Stores the Docker images used by EKS microservice deployments.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecr/
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: kubernetes-ingress-controller
+    name: Kubernetes Ingress Controller
+    description: Cluster ingress controller integrated with the Network Load Balancer to expose applications.
+    vendor: Kubernetes
+    url: https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/
+    types: [library]
+    platform: kubernetes
+  - key: aws-app2container
+    name: AWS App2Container
+    description: AWS application containerization tool that can help refactor or rearchitect legacy applications into microservices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/app2container/
+    types: [library]
+  - key: docker
+    name: Docker
+    description: Container image format and tooling used by CodeBuild to package microservices.
+    vendor: Docker
+    url: https://www.docker.com/
+    types: [library]
+  - key: kubectl
+    name: kubectl
+    description: Kubernetes command-line tool used by CodeBuild to invoke the Kubernetes API and update deployment image tags.
+    vendor: Kubernetes
+    url: https://kubernetes.io/docs/reference/kubectl/
+    types: [library]
