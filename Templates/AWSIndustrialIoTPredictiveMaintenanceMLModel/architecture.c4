@@ -1,0 +1,134 @@
+// AWS Industrial IoT Predictive Maintenance ML Model.
+// Sources:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/industrial-iot-predictive-maintenance-ml/industrial-iot-predictive-maintenance-ml.html
+// https://docs.aws.amazon.com/pdfs/reference-architecture-diagrams/latest/industrial-iot-predictive-maintenance-ml/industrial-iot-predictive-maintenance-ml.pdf
+model {
+  factoryUser = user 'Factory portal user' {
+    description 'Views near-real-time factory data; AWS does not specify portal user roles.'
+  }
+  dataScientist = user 'Data scientist' {
+    description 'Uses the IoT Analytics dataset to build a predictive-maintenance machine-learning model.'
+  }
+
+  factory = zone 'Factory' {
+    metadata {
+      platform 'other'
+    }
+
+    equipment = system 'Factory equipment' {
+      description 'On-premises machines that produce telemetry over OPC-UA; equipment types and vendors are not specified.'
+    }
+
+    greengrass = platform 'AWS IoT Greengrass' {
+      description 'Edge runtime on the factory gateway, configured with the SiteWise connector and Stream Manager.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+
+      gateway = system 'Factory gateway' {
+        description 'Connects factory equipment to AWS IoT SiteWise and publishes other industrial data to AWS IoT Core.'
+
+        sitewiseConnector = container 'AWS IoT SiteWise Connector' {
+          description 'Collects factory equipment telemetry over OPC-UA and sends it to AWS IoT SiteWise.'
+          metadata {
+            uses 'aws-iot-sitewise-connector'
+          }
+        }
+        streamManager = container 'AWS IoT Greengrass Stream Manager' {
+          description 'Publishes other industrial data feeds from the gateway to AWS IoT Core.'
+          metadata {
+            uses 'aws-iot-greengrass-stream-manager'
+          }
+        }
+      }
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    sitewise = platform 'AWS IoT SiteWise' {
+      description 'Models factory assets and organizes and stores their equipment data.'
+      metadata {
+        uses 'aws-iot-sitewise'
+      }
+      datastore = database 'SiteWise datastore' {
+        description 'Organized factory equipment data and asset information used by the portal and IoT Analytics dataset.'
+      }
+    }
+    sitewiseMonitor = platform 'AWS IoT SiteWise Monitor' {
+      description 'Exposes the custom near-real-time factory data portal.'
+      metadata {
+        uses 'aws-iot-sitewise-monitor'
+      }
+      portal = system 'Custom factory data portal' {
+        description 'Factory portal for near-real-time visualization using AWS IoT SiteWise Monitor.'
+      }
+    }
+    identityCenter = platform 'AWS IAM Identity Center' {
+      description 'Provides user authentication for the custom factory portal.'
+      metadata {
+        uses 'aws-iam-identity-center'
+      }
+    }
+    iotCore = platform 'AWS IoT Core' {
+      description 'Receives other industrial data feeds and routes data to AWS IoT Analytics with rules.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    ecr = platform 'Amazon Elastic Container Registry' {
+      description 'Stores the custom Docker image used by the IoT Analytics container dataset.'
+      metadata {
+        uses 'amazon-ecr'
+      }
+    }
+    iotAnalytics = platform 'AWS IoT Analytics' {
+      description 'Creates a container dataset from the SiteWise datastore and a Docker image stored in Amazon ECR.'
+      metadata {
+        uses 'aws-iot-analytics'
+      }
+      dataset = database 'Container dataset' {
+        description 'IoT Analytics dataset combining the SiteWise datastore with the linked custom container image.'
+      }
+    }
+    dataScience = system 'Data science workbench' {
+      description 'Project system slot for data scientists using a Jupyter notebook on the IoT Analytics dataset.'
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Trains and deploys the predictive-maintenance machine-learning model.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Visualizes analysis from the AWS IoT Analytics data source.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+  }
+
+  factory.equipment -> factory.greengrass.gateway.sitewiseConnector 'Sends OPC-UA telemetry to'
+  factory.greengrass.gateway.sitewiseConnector -> aws.sitewise.datastore 'Collects and sends equipment data to'
+  factory.greengrass.gateway.streamManager -> aws.iotCore 'Publishes other industrial data feeds to'
+  aws.iotCore -> aws.iotAnalytics 'Routes data through rules to'
+  aws.sitewise.datastore -> aws.iotAnalytics.dataset 'Provides data for the container dataset'
+  aws.ecr -> aws.iotAnalytics 'Provides the custom Docker image for the container dataset'
+  aws.sitewise.datastore -> aws.sitewiseMonitor.portal 'Provides factory data for the portal'
+  factoryUser -> aws.sitewiseMonitor.portal 'Views factory data in'
+  aws.identityCenter -> aws.sitewiseMonitor.portal 'Authenticates users of'
+  dataScientist -> aws.dataScience 'Builds predictive-maintenance models with'
+  aws.iotAnalytics.dataset -> aws.dataScience 'Provides the dataset for the Jupyter notebook'
+  aws.dataScience -> aws.sagemaker 'Uses for model training and deployment'
+  aws.iotAnalytics.dataset -> aws.quickSight 'Provides the analysis data source for'
+}
+
+views {
+  view index {
+    title 'AWS Industrial IoT Predictive Maintenance ML Model'
+    include *, factory.*, factory.greengrass.*, factory.greengrass.gateway.*, aws.*
+  }
+}

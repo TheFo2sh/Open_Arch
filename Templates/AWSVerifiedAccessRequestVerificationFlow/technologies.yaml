@@ -1,0 +1,71 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-verified-access
+    name: AWS Verified Access
+    description: Evaluates each request against application policy and proxies requests that pass to a configured application endpoint.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/verified-access/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-iam-identity-center
+    name: AWS IAM Identity Center
+    description: Identity provider used to authenticate users on initial requests and return them to the application endpoint.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iam/identity-center/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-vpc
+    name: Amazon VPC
+    description: Customer virtual network containing the application endpoints protected by Verified Access.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: application-load-balancer
+    name: Application Load Balancer
+    description: One supported Verified Access endpoint target type for forwarding validated requests to an application.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/application-load-balancer/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: network-load-balancer
+    name: Network Load Balancer
+    description: One supported Verified Access endpoint target type for forwarding validated requests to an application.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/network-load-balancer/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: elastic-network-interface
+    name: Elastic network interface
+    description: One supported Verified Access endpoint target type for reaching an application in the VPC.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/using-eni.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: device-trust-provider
+    name: Device trust provider (vendor unspecified)
+    description: Third-party device trust provider used when device posture is included in Verified Access policy evaluation; AWS does not name a provider in this flow.
+    types: [managed-service, third-party]
+    platform: other
+    hosts: []
+  - key: device-trust-browser-extension
+    name: Device trust browser extension
+    description: Browser extension that detects redirects, maintains trusted Verified Access domains, and adds device information to requests in the device trust flows.
+    types: [library]
+  - key: device-posture-agent
+    name: Local device posture agent
+    description: Local agent that continually gathers device posture information for the browser extension to transmit with requests.
+    types: [library]

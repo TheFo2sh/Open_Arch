@@ -1,0 +1,70 @@
+# Technologies named in the AWS reference page and its numbered architecture flow.
+technologies:
+  - key: aws-outposts
+    name: AWS Outposts
+    description: AWS infrastructure hosting Amazon EKS nodes for the RIC deployment option at customer sites.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/outposts/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: []
+  - key: aws-local-zones
+    name: AWS Local Zones
+    description: AWS infrastructure hosting Amazon EKS nodes for the RIC deployment option closer to users.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/about-aws/global-infrastructure/localzones/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: []
+  - key: amazon-eks
+    name: Amazon Elastic Kubernetes Service
+    description: Runs RIC controller workloads and NoSQL database instances on nodes in AWS Outposts or AWS Local Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eks/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ebs
+    name: Amazon Elastic Block Store
+    description: Block storage attached to Amazon EKS nodes for persistent NoSQL database instances.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ebs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: nosql-database
+    name: NoSQL database (implementation unspecified)
+    description: NoSQL database instances for persistent RIC data; AWS does not specify a database product or vendor.
+    types: [third-party]
+  - key: amazon-ec2
+    name: Amazon Elastic Compute Cloud
+    description: EC2-hosted training, model update, deployment, and inference endpoint workloads used by both RIC controller types.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Develops, trains, and deploys machine-learning models used by near-real-time and non-real-time RIC applications.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Object storage backing the non-real-time RIC data lake, including raw and processed data, inference results, models, and EBS backup snapshots.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-lake-formation
+    name: AWS Lake Formation
+    description: Data-lake service used with Amazon S3 by the non-real-time RIC.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lake-formation/
+    types: [managed-service]
+    platform: aws
+    hosts: []

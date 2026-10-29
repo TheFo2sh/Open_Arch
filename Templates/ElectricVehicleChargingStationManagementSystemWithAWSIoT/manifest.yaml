@@ -1,0 +1,7 @@
+PackageId: OpenArch.ElectricVehicleChargingStationManagementSystemWithAWSIoT
+Name: Electric Vehicle Charging Station Management System with AWS IoT
+Description: An AWS IoT Core-based EV charge point operator architecture for secure provisioning, device operations, telemetry, firmware updates, fleet management, and partner-facing applications.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, aws-iot, electric-vehicles, ev-charging, mobility, energy]

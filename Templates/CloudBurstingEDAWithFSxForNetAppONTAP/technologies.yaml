@@ -1,0 +1,55 @@
+# Technologies used by the blueprint, keyed by architecture.c4 metadata { uses }.
+technologies:
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: AWS virtual network containing the EC2 compute instances and FSx for NetApp ONTAP file system.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: AWS compute instances that run the EDA jobs using the local FSx FlexCache volume.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-fsx-for-netapp-ontap
+    name: Amazon FSx for NetApp ONTAP
+    description: AWS-managed ONTAP file system hosting the cloud FlexCache volume for job inputs and origin volume for job results.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fsx/netapp-ontap/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Dedicated network connection recommended by AWS for production connectivity between the on-premises data center and AWS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-site-to-site-vpn
+    name: AWS Site-to-Site VPN
+    description: VPN connection AWS suggests for initial testing or proof of concept instead of production Direct Connect.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/site-to-site-vpn/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: on-premises-netapp-system
+    name: On-premises NetApp system
+    description: NetApp storage system providing the on-premises job input origin volume and job results FlexCache volume; the model and ONTAP version are not specified.
+    vendor: NetApp
+    url: https://www.netapp.com/
+    types: [data-platform, third-party]
+    platform: other
+    hosts: [database]

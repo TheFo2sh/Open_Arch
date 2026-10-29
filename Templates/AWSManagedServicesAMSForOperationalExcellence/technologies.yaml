@@ -1,0 +1,259 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-managed-services
+    name: AWS Managed Services (AMS)
+    description: Managed operations service providing 24x7 helpdesk, proactive monitoring, security operations, logging, patching, and backup capabilities.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/managed-services/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-support
+    name: AWS Support
+    description: AWS Support console and APIs receive incidents and service requests and return AMS updates and resolutions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/premiumsupport/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-service-management-connector
+    name: AWS Service Management Connector
+    description: Optional integration between customer ITSM tooling and AWS Support; the AMS diagram labels the connector AWS Service Catalog Management Connectors.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/solutions/implementations/aws-service-management-connector/
+    types: [library]
+  - key: servicenow
+    name: ServiceNow
+    description: Optional third-party ITSM platform that can integrate with AWS Support through the AWS Service Management Connector.
+    vendor: ServiceNow
+    url: https://www.servicenow.com/
+    types: [third-party]
+  - key: jira-service-desk
+    name: Jira Service Desk
+    description: Optional third-party ITSM platform, identified as Jira SD in the AWS source, that can integrate with AWS Support through the AWS Service Management Connector.
+    vendor: Atlassian
+    url: https://www.atlassian.com/software/jira/service-management
+    types: [third-party]
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud (Amazon VPC)
+    description: VPC boundaries are shown for application, AMS orchestration, security, and logging accounts; the source does not specify their network design.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon Elastic Compute Cloud (Amazon EC2)
+    description: AWS compute resources monitored by AMS and included among the services covered by patching and backup.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-rds
+    name: Amazon Relational Database Service (Amazon RDS)
+    description: AWS database service included in AMS baseline monitoring.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: AWS load-balancing service included in AMS baseline monitoring.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-vpn
+    name: AWS VPN
+    description: VPN service included in AMS baseline monitoring.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc-nat-gateway
+    name: NAT Gateway
+    description: Amazon VPC NAT Gateway included in AMS baseline monitoring.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service (Amazon S3)
+    description: AWS storage service monitored for security guardrails and included among AMS security operations targets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-iam
+    name: AWS Identity and Access Management (IAM)
+    description: AWS identity service monitored for security guardrails.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iam/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-eks
+    name: Amazon Elastic Kubernetes Service (Amazon EKS)
+    description: AWS Kubernetes service monitored for security guardrails.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eks/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ebs
+    name: Amazon Elastic Block Store (Amazon EBS)
+    description: EC2 block storage shown among the resources covered by AMS backup.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ebs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: amazon-efs
+    name: Amazon Elastic File System (Amazon EFS)
+    description: AWS file system shown among the resources covered by AMS backup.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/efs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: AMS uses CloudWatch metrics, alarms, rules, events, dashboards, and Logs for monitoring, alerting, and local log search.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-cloudwatch-agent
+    name: Amazon CloudWatch Agent
+    description: Agent used to collect operating-system and application logs for CloudWatch.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html
+    types: [library]
+  - key: aws-cloudtrail
+    name: AWS CloudTrail
+    description: Captures AWS API activity logs for CloudWatch and centralized logging.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudtrail/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: vpc-flow-logs
+    name: Amazon VPC Flow Logs
+    description: Captures network traffic metadata for local and centralized logging.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/flow-logs.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: DNS query logging is shown as a source of local account logs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-config
+    name: AWS Config
+    description: AWS Config rules and aggregators provide compliance findings for monitoring and centralized security operations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/config/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-guardduty
+    name: Amazon GuardDuty
+    description: Threat findings and guardrails are monitored and aggregated for AMS security operations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/guardduty/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-eventbridge
+    name: Amazon EventBridge
+    description: Routes monitoring, security, patching, and backup events to AMS automation or centralized logging.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eventbridge/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sns
+    name: Amazon Simple Notification Service (Amazon SNS)
+    description: Delivers notifications for AMS monitoring and operations workflows.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-systems-manager
+    name: AWS Systems Manager
+    description: Runs AMS patching and incident remediation through maintenance windows, baselines, and automation documents.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/systems-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-backup
+    name: AWS Backup
+    description: Performs managed backup and restore, with coverage reporting, monitoring, and failure remediation.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/backup/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-security-hub
+    name: AWS Security Hub
+    description: Aggregates security events from AWS services and optional third-party security tools.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/security-hub/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-macie
+    name: Amazon Macie
+    description: Optional sensitive-data monitoring service shown in the AMS security operations diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/macie/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: AWS Express Workflows orchestrate AMS alarm investigation, noise reduction, case management, remediation, aggregation, and reporting.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Shown in the AMS patching diagram alongside patch coverage reporting; the source does not detail its query or data design.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-data-firehose
+    name: Amazon Data Firehose
+    description: The source diagram labels this Amazon Kinesis Data Firehose; it collects and transforms event streams for centralized logging.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-opensearch-service
+    name: Amazon OpenSearch Service
+    description: Centralized logging destination shown for indexing events for operational alerting, reporting, and dashboards.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/opensearch-service/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]

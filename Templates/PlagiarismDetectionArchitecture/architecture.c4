@@ -1,0 +1,119 @@
+// Plagiarism Detection Architecture, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/plagiarism-detection-architecture/plagiarism-detection-architecture.html
+// Systems and users are slots: applying the template maps them onto the project's own.
+model {
+  submitter = user 'Document submitter' {
+    description 'Submits a document for plagiarism detection.'
+  }
+  documentUploader = system 'Source document uploader' {
+    description 'Placeholder for the user or application that uploads documents; AWS does not specify an uploader application.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    s3 = platform 'Amazon Simple Storage Service (Amazon S3)' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      sourceDocuments = database 'Submitted documents' {
+        description 'Documents uploaded for analysis and used to start the workflow.'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      documentProcessing = system 'Document processing functions' {
+        description 'Lambda functions that extract document text, request embeddings, and publish potential-match events.'
+        extractText = container 'Extract document text' {
+          description 'Reads a submitted document and uses Apache Tika to extract its text and metadata.'
+          tika = component 'Apache Tika' {
+            metadata {
+              uses 'apache-tika'
+            }
+          }
+        }
+        generateEmbeddings = container 'Generate paragraph embeddings' {
+          description 'Sends each document paragraph to the pre-trained model and receives its word-embedding vectors.'
+        }
+        publishFinding = container 'Publish potential-match event' {
+          description 'Publishes source-document details and relevant-work references after similarity assessment.'
+        }
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+      embeddingModel = system 'Pre-trained BERT-based model' {
+        description 'Model publisher, variant, and serving configuration are not specified by AWS.'
+        endpoint = container 'Word-embedding inference' {
+          description 'Produces word-embedding vectors for each paragraph supplied by the workflow.'
+          bert = component 'BERT-based model' {
+            metadata {
+              uses 'bert-based-model'
+            }
+          }
+        }
+      }
+    }
+    vpc = platform 'Amazon Virtual Private Cloud' {
+      description 'The diagram places the similarity-search Lambda function and OpenSearch domain inside this boundary.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+      privateLambda = platform 'AWS Lambda in the VPC' {
+        metadata {
+          uses 'aws-lambda'
+        }
+        similarityAssessment = system 'Similarity assessment function' {
+          description 'Runs K-Nearest Neighbor searches using cosine similarity and applies the configured threshold.'
+          search = container 'Search for similar works' {
+            description 'Searches the indexed work embeddings for each submitted-document embedding.'
+          }
+        }
+      }
+      openSearch = platform 'Amazon OpenSearch Service' {
+        metadata {
+          uses 'amazon-opensearch-service'
+        }
+        workIndex = database 'Pre-processed works embedding index' {
+          description 'Index of pre-processed works converted into word-embedding vectors; corpus ingestion is not shown in the source.'
+        }
+      }
+    }
+    eventBridge = platform 'Amazon EventBridge' {
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+  }
+
+  submitter -> documentUploader 'Submits a document through'
+  documentUploader -> aws.s3.sourceDocuments 'Uploads the document to'
+  aws.s3.sourceDocuments -> aws.stepFunctions 'Starts the workflow with an S3 event'
+  aws.stepFunctions -> aws.lambda.documentProcessing.extractText 'Invokes'
+  aws.lambda.documentProcessing.extractText -> aws.s3.sourceDocuments 'Reads the submitted document from'
+  aws.lambda.documentProcessing.extractText -> aws.lambda.documentProcessing.generateEmbeddings 'Passes extracted paragraphs to'
+  aws.lambda.documentProcessing.generateEmbeddings -> aws.sagemaker.embeddingModel.endpoint 'Requests word embeddings from'
+  aws.sagemaker.embeddingModel.endpoint -> aws.lambda.documentProcessing.generateEmbeddings 'Returns word-embedding vectors to'
+  aws.lambda.documentProcessing.generateEmbeddings -> aws.vpc.privateLambda.similarityAssessment.search 'Passes embeddings to'
+  aws.vpc.privateLambda.similarityAssessment.search -> aws.vpc.openSearch.workIndex 'Runs K-Nearest Neighbor searches against'
+  aws.vpc.privateLambda.similarityAssessment.search -> aws.lambda.documentProcessing.publishFinding 'Passes threshold-qualified results to'
+  aws.lambda.documentProcessing.publishFinding -> aws.eventBridge 'Raises an event on'
+}
+
+views {
+  view index {
+    title 'Plagiarism Detection Architecture'
+    include *, aws.*
+  }
+}

@@ -1,0 +1,96 @@
+# The technologies used by the blueprint, by the key its metadata { uses } names.
+technologies:
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores source data, linked tokenized datasets, and exported collaboration results.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: datavant-switchboard
+    name: Datavant Switchboard
+    description: Datavant's containerized software de-identifies and tokenizes source data, then links data with collaborators.
+    vendor: Datavant
+    url: https://datavant.com/
+    types: [library, third-party]
+  - key: aws-fargate
+    name: AWS Fargate
+    description: One of the container deployment methods supported for Datavant Switchboard; the source does not select a method.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fargate/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-eks
+    name: Amazon Elastic Kubernetes Service
+    description: One of the container deployment methods supported for Datavant Switchboard; the source does not select a method.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eks/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ecs
+    name: Amazon Elastic Container Service
+    description: One of the container deployment methods supported for Datavant Switchboard; the source does not select a method.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecs/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-glue-crawler
+    name: AWS Glue crawler
+    description: Crawls linked tokenized data in Amazon S3 to discover its schema.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-glue-data-catalog
+    name: AWS Glue Data Catalog
+    description: Catalogs the discovered linked-data tables for use in the collaboration.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-clean-rooms
+    name: AWS Clean Rooms
+    description: Enables collaborators to configure analysis rules and query linked tables without sharing their underlying data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/clean-rooms/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Optional analytics service for deriving insights from exported collaboration results.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Optional analytics service for deriving insights from exported collaboration results.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: amazon-emr
+    name: Amazon EMR
+    description: Optional analytics service for deriving insights from exported collaboration results.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/emr/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Optional analytics and machine-learning service for deriving insights from exported collaboration results.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
