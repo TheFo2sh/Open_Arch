@@ -1,0 +1,133 @@
+// TR-069 and AWS, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/tr-069-and-aws/tr-069-and-aws.html
+// The AWS page's numbered flow is authoritative where the diagram omits detail.
+model {
+  operations = user 'Operations personnel' {
+    description 'Monitor fleet health and receive findings-based notifications.'
+  }
+  customer = user 'End customers' {
+    description 'Receive findings-based notifications about their customer premises equipment.'
+  }
+
+  gateways = system 'Remote customer gateways (CPE)' {
+    description 'Send KPIs and TR-181 device parameters to AWS IoT Core; the reference does not specify gateway models or vendors.'
+    technology 'TR-181, MQTT, HTTPS'
+  }
+  acs = system 'Auto Configuration Server (ACS)' {
+    description 'Uses TR-069 to configure remote gateways and receives corrective actions from analytics. AWS says it may be on-premises or on AWS, so its deployment is not fixed to this zone.'
+    technology 'TR-069'
+  }
+  externalSystems = system 'External systems' {
+    description 'Receive data and insights from the lake; the AWS reference does not identify these systems.'
+  }
+  notificationWorkflow = system 'Operations and customer notifications' {
+    description 'Logical recipient-facing notification slot for the Connect and SNS flows; the AWS reference does not specify a separate application between those services and their recipients.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      description 'Receives gateway data over HTTPS with custom domains or MQTT; IoT rules route authenticated telemetry to Kinesis. HTTPS can optionally use an IoT Core custom authorizer.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Keeps raw incoming telemetry distinct from the normalized TR-181 stream emitted by Flink.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+      rawTelemetry = database 'Raw telemetry stream' {
+        description 'Authenticated gateway KPIs and TR-181 parameters before normalization.'
+      }
+      normalizedTelemetry = database 'Normalized TR-181 stream' {
+        description 'Normalized TR-181 data emitted by Managed Service for Apache Flink.'
+      }
+    }
+    flink = platform 'Amazon Managed Service for Apache Flink' {
+      description 'Normalizes incoming TR-181 payloads and performs real-time analytics.'
+      metadata {
+        uses 'amazon-managed-service-for-apache-flink'
+      }
+      analytics = system 'TR-181 stream analytics' {
+        description 'Detects CPE problems, emits normalized data to a second Kinesis stream, and can initiate corrective ACS actions.'
+      }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      description 'Delivers the normalized stream to the data lake.'
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+    dms = platform 'AWS Database Migration Service (AWS DMS)' {
+      description 'Brings additional ACS-collected metrics that are outside TR-069 into the data lake.'
+      metadata {
+        uses 'aws-database-migration-service'
+      }
+    }
+    dataLake = platform 'Data lake repository' {
+      description 'Logical AWS-hosted destination; the AWS numbered flow does not name its backing storage service.'
+      metadata {
+        uses 'data-lake-repository'
+      }
+      lake = database 'Fleet data lake' {
+        description 'Stores normalized TR-181 telemetry delivered by Firehose and additional ACS metrics delivered by DMS.'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Visualizes fleet health from data and insights in the lake.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    cloudWatch = platform 'Amazon CloudWatch' {
+      description 'Monitors fleet health using data and insights from the lake.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    connect = platform 'Amazon Connect' {
+      description 'Notifies operational personnel and end customers based on findings.'
+      metadata {
+        uses 'amazon-connect'
+      }
+    }
+    sns = platform 'Amazon SNS' {
+      description 'Notifies operational personnel and end customers based on findings.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+  }
+
+  acs -> gateways 'Configures remote gateways using TR-069'
+  gateways -> aws.iotCore 'Sends KPIs and TR-181 parameters over HTTPS custom domains or MQTT'
+  aws.iotCore -> aws.kinesis.rawTelemetry 'Routes authenticated telemetry through IoT rules'
+  aws.kinesis.rawTelemetry -> aws.flink.analytics 'Processes raw telemetry'
+  aws.flink.analytics -> aws.kinesis.normalizedTelemetry 'Emits normalized data to a second stream'
+  aws.flink.analytics -> acs 'Starts corrective ACS actions when CPE problems are detected'
+  aws.kinesis.normalizedTelemetry -> aws.firehose 'Delivers normalized telemetry through'
+  aws.firehose -> aws.dataLake.lake 'Stores normalized telemetry in'
+  acs -> aws.dms 'Provides additional metrics collected outside TR-069'
+  aws.dms -> aws.dataLake.lake 'Loads ACS metrics into'
+  aws.dataLake.lake -> aws.quickSight 'Provides data and insights for fleet-health visualization'
+  aws.dataLake.lake -> aws.cloudWatch 'Provides data and insights for fleet-health monitoring'
+  aws.dataLake.lake -> externalSystems 'Feeds data and insights to'
+  aws.dataLake.lake -> acs 'Provides findings for corrective actions'
+  aws.dataLake.lake -> aws.connect 'Provides findings for notifications through'
+  aws.connect -> notificationWorkflow 'Delivers notifications to'
+  aws.dataLake.lake -> aws.sns 'Provides findings for notifications through'
+  aws.sns -> notificationWorkflow 'Delivers notifications to'
+  operations -> notificationWorkflow 'Receives findings-based notifications'
+  customer -> notificationWorkflow 'Receives findings-based notifications'
+}
+
+views {
+  view index {
+    title 'TR-069 and AWS'
+    include *, aws.*
+  }
+}

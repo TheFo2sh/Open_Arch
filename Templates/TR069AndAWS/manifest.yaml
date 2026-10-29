@@ -1,0 +1,7 @@
+PackageId: OpenArch.TR069AndAWS
+Name: TR-069 and AWS
+Description: Connects TR-069 customer gateway fleets to AWS IoT Core for telemetry ingestion, streaming analytics, data lake insights, and corrective ACS actions.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, telecommunications, iot, tr-069]
