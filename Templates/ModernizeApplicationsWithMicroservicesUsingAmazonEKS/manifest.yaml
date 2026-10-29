@@ -1,0 +1,7 @@
+PackageId: OpenArch.ModernizeApplicationsWithMicroservicesUsingAmazonEKS
+Name: Modernize Applications with Microservices Using Amazon EKS
+Description: Modernize legacy applications as microservices on Amazon EKS while retaining the existing VMware Cloud on AWS database tier and using AWS DevOps tools for container builds and rolling deployments.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, eks, kubernetes, microservices, vmware, modernization]

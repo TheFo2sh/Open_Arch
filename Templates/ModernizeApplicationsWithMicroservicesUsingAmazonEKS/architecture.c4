@@ -1,0 +1,142 @@
+// Modernize Applications with Microservices Using Amazon EKS, based on AWS's reference architecture.
+// Systems and users are slots: applying the template maps them onto the project's own.
+model {
+  client = user 'Application user' {
+    description 'A client that accesses the modernized applications through the primary AWS Region.'
+  }
+  developers = user 'Development team' {
+    description 'Commits application changes to the source repository.'
+  }
+
+  aws = zone 'AWS Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Amazon VPC' {
+      description 'Customer VPC containing the private subnet and EKS cluster networking.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      eks = platform 'Amazon EKS clusters (dev, test and production)' {
+        description 'Separate fully managed clusters for development, testing and production; the source does not specify their rollout or promotion sequence.'
+        metadata {
+          uses 'amazon-eks'
+        }
+
+        microservices = system 'Modernized application' {
+          description 'Legacy application functionality refactored into UI and application microservices; AWS does not specify implementation details.'
+          ui = container 'UI microservice deployment' {
+            description 'UI deployment and pods exposed through the Kubernetes Ingress Controller.'
+          }
+          app = container 'Application microservice deployment' {
+            description 'Application deployment and pods; Kubernetes rolls pods when CodeBuild updates the image tag.'
+          }
+        }
+
+        ingressIntegration = system 'Cluster ingress integration' {
+          description 'Ingress integration slot for exposing applications through the Network Load Balancer.'
+          ingress = container 'Kubernetes Ingress Controller' {
+            description 'Integrates Kubernetes ingress with the Network Load Balancer.'
+            metadata {
+              uses 'kubernetes-ingress-controller'
+            }
+          }
+        }
+      }
+    }
+
+    vmware = platform 'VMware Cloud on AWS SDDC' {
+      description 'Retains the legacy database tier to avoid an immediate database migration.'
+      metadata {
+        uses 'vmware-cloud-on-aws'
+      }
+
+      ec2 = platform 'Amazon EC2 bare-metal hosts' {
+        description 'Bare-metal EC2 instances provide the SDDC host hardware.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+
+        esxi = platform 'VMware ESXi clusters' {
+          description 'ESXi clusters on the bare-metal hosts run the legacy database workloads.'
+          metadata {
+            uses 'vmware-esxi'
+          }
+          legacyDb = database 'Legacy database tier' {
+            description 'Existing database workload retained on VMware; the source does not specify its engine or data model.'
+          }
+        }
+      }
+
+    }
+
+    eni = platform 'Elastic Network Interface integration' {
+      description 'ENI integration is provisioned with the SDDC and attached to its EC2 bare-metal hosts.'
+      metadata {
+        uses 'amazon-ec2-eni'
+      }
+    }
+    route53 = platform 'Amazon Route 53' {
+      description 'Resolves incoming requests to the Network Load Balancer in the primary AWS Region.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    nlb = platform 'Network Load Balancer' {
+      description 'Integrates with the Kubernetes Ingress Controller to expose applications.'
+      metadata {
+        uses 'elastic-load-balancing-network-load-balancer'
+      }
+    }
+
+    codecommit = platform 'AWS CodeCommit' {
+      metadata {
+        uses 'aws-codecommit'
+      }
+      repository = system 'Application source repository' {
+        description 'Source repository committed to by the development team.'
+      }
+    }
+    codepipeline = platform 'AWS CodePipeline' {
+      metadata {
+        uses 'aws-codepipeline'
+      }
+    }
+    codebuild = platform 'AWS CodeBuild' {
+      description 'Packages dependencies, builds a Docker image, and invokes kubectl to update the Kubernetes deployment image tag.'
+      metadata {
+        uses 'aws-codebuild'
+      }
+    }
+    ecr = platform 'Amazon Elastic Container Registry' {
+      description 'Stores new Docker images for the microservice deployments.'
+      metadata {
+        uses 'amazon-ecr'
+      }
+    }
+  }
+
+  client -> aws.vpc.eks.microservices 'Uses'
+  developers -> aws.codecommit.repository 'Commits code to'
+  aws.route53 -> aws.nlb 'Resolves requests to'
+  aws.nlb -> aws.vpc.eks.ingressIntegration.ingress 'Integrates with'
+  aws.vpc.eks.ingressIntegration.ingress -> aws.vpc.eks.microservices.ui 'Routes requests to'
+  aws.vpc.eks.ingressIntegration.ingress -> aws.vpc.eks.microservices.app 'Routes requests to'
+  aws.vpc.eks.microservices.app -> aws.vmware.ec2.esxi.legacyDb 'Uses the existing database tier'
+  aws.vpc.eks -> aws.eni 'Connects to VMware Cloud on AWS through'
+  aws.eni -> aws.vmware 'Integrates the SDDC network with'
+  aws.codecommit -> aws.codepipeline 'Source changes initiate'
+  aws.codepipeline -> aws.codebuild 'Runs build steps in'
+  aws.codebuild -> aws.ecr 'Pushes the built Docker image to'
+  aws.codebuild -> aws.vpc.eks.microservices.app 'Uses kubectl and the Kubernetes API to update the image tag for'
+  aws.ecr -> aws.vpc.eks.microservices.app 'Provides the new image for Kubernetes to roll out'
+}
+
+views {
+  view index {
+    title 'Modernize Applications with Microservices Using Amazon EKS'
+    include *, aws.*
+  }
+}
