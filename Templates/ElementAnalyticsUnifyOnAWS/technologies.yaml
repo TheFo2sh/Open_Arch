@@ -1,0 +1,100 @@
+technologies:
+  - key: ignition
+    name: Ignition
+    description: Industrial software on the industrial PCs that ingests PLC and historian telemetry and asset metadata.
+    vendor: Inductive Automation
+    url: https://inductiveautomation.com/ignition
+    types: [third-party]
+  - key: kepserverex
+    name: KepServerEX
+    description: Industrial connectivity software on the industrial PCs for ingesting PLC and historian telemetry and asset metadata.
+    vendor: PTC
+    url: https://www.ptc.com/en/products/kepware/kepserverex
+    types: [third-party]
+  - key: pi-connectors
+    name: PI Connectors
+    description: Third-party PI connectors that feed industrial telemetry into the PI Server; the archived reference does not identify connector products or versions.
+    vendor: OSIsoft
+    types: [third-party]
+  - key: pi-server-af
+    name: PI Server and Asset Framework
+    description: Third-party PI historian and Asset Framework models managed by Element Unify's AF tool.
+    vendor: OSIsoft
+    url: https://www.aveva.com/en/products/aveva-pi-system/
+    types: [third-party]
+  - key: element-unify
+    name: Element Unify
+    description: Element Analytics platform for contextualizing and governing industrial data models and synchronizing them with PI Asset Framework and AWS IoT SiteWise.
+    vendor: Element Analytics
+    types: [third-party]
+  - key: ipaas
+    name: iPaaS
+    description: Provider-unspecified integration platform that carries SAP, EAM, and ERP information into Element Unify.
+    types: [third-party]
+  - key: sap-eam-erp
+    name: SAP, EAM, and ERP source systems
+    description: Enterprise information sources whose data enters Element Unify through an iPaaS; the archived reference does not name specific products.
+    types: [third-party]
+  - key: aws-iot-sitewise
+    name: AWS IoT SiteWise
+    description: Processes and stores industrial time-series values and synchronizes asset models with Element Unify.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-sitewise/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Receives MQTT property updates from AWS IoT SiteWise and routes them with IoT rules.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-data-firehose
+    name: Amazon Data Firehose
+    description: Transforms and delivers IoT property-update data into the industrial data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Industrial data lake receiving processed property updates and serving as the source for Lookout for Equipment and Athena.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-lookout-for-equipment
+    name: Amazon Lookout for Equipment
+    description: Reads industrial lake data to detect abnormal equipment behavior and writes computed metrics back to the lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lookout-for-equipment/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Queries data in the industrial S3 lake for analytics and dashboards.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Provides dashboards using analytics from the industrial data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]

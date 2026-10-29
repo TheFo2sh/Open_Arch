@@ -1,0 +1,7 @@
+PackageId: OpenArch.ElementAnalyticsUnifyOnAWS
+Name: Element Analytics Unify on AWS
+Description: Historical AWS reference architecture, reviewed May 20, 2021, for Element Unify contextualizing industrial IT/OT data with PI Asset Framework, AWS IoT SiteWise, and AWS analytics services. The AWS source is archived.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, industrial, analytics, iiot, asset-management]

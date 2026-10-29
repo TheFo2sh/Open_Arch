@@ -1,0 +1,123 @@
+// Element Analytics Unify on AWS, based on AWS's archived 2021 reference:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/element-analytics-unify-on-aws/element-analytics-unify-on-aws.html
+// Systems are slots; the external products and deployment details remain those of the adopting project.
+model {
+  industrialSite = zone 'Industrial site' {
+    metadata {
+      platform 'other'
+    }
+
+    equipment = system 'PLCs and historians' {
+      description 'Industrial sources of PLC and historian telemetry and asset metadata.'
+    }
+    industrialPcs = system 'Industrial PCs' {
+      description 'Runs Ignition and KepServerEX to ingest PLC and historian telemetry and asset metadata, and supplies edge tag lists to Element Unify.'
+      technology 'Ignition, KepServerEX'
+    }
+    piConnectors = system 'PI Connectors' {
+      description 'Third-party PI connectors that feed industrial telemetry into the PI Server; the archived reference does not specify their products or deployment.'
+      technology 'PI Connectors'
+    }
+    piSystem = system 'PI Server and Asset Framework' {
+      description 'Third-party PI historian and PI Asset Framework (AF) models synchronized with Element Unify.'
+      technology 'PI Server and Asset Framework'
+    }
+  }
+
+  engineeringAssets = system 'P&ID engineering assets' {
+    description 'Engineering assets from process and instrumentation diagrams ingested by Element Unify; their repository and format are not specified.'
+  }
+  enterpriseSystems = system 'SAP, EAM, and ERP systems' {
+    description 'Enterprise information sources integrated into Element Unify through an iPaaS; specific products are not specified.'
+    technology 'SAP, EAM, and ERP source systems'
+  }
+  integrationPlatform = system 'iPaaS' {
+    description 'Provider-unspecified integration platform that passes SAP, EAM, and ERP information to Element Unify.'
+    technology 'iPaaS'
+  }
+  unify = system 'Element Unify' {
+    description 'Contextualizes and governs industrial models, ingests edge tag lists and P&ID engineering assets, and synchronizes models with PI AF and AWS IoT SiteWise.'
+    technology 'Element Unify'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    sitewise = platform 'AWS IoT SiteWise' {
+      description 'Processes and stores industrial time-series values and synchronizes asset models with Element Unify.'
+      metadata {
+        uses 'aws-iot-sitewise'
+      }
+      industrialData = database 'Industrial assets and time-series values' {
+        description 'Industrial asset models and processed time-series property values held in AWS IoT SiteWise.'
+      }
+    }
+    iotCore = platform 'AWS IoT Core' {
+      description 'Receives MQTT property updates and routes them with IoT rules.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      description 'Transforms and delivers IoT property updates to the industrial data lake.'
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Industrial data lake for property updates, equipment analytics, and Athena queries.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Industrial data lake' {
+        description 'Industrial property data and computed equipment metrics used for analytics.'
+      }
+    }
+    lookout = platform 'Amazon Lookout for Equipment' {
+      description 'Reads lake data to detect abnormal equipment behavior and writes computed metrics back to the lake.'
+      metadata {
+        uses 'amazon-lookout-for-equipment'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Queries the industrial data lake for analytics.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Presents dashboards based on industrial lake analytics.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+  }
+
+  industrialSite.equipment -> industrialSite.industrialPcs 'Provides telemetry and asset metadata to'
+  industrialSite.equipment -> industrialSite.piConnectors 'Provides PI data to'
+  industrialSite.piConnectors -> industrialSite.piSystem 'Feeds telemetry to'
+  industrialSite.industrialPcs -> unify 'Provides edge tag lists to'
+  engineeringAssets -> unify 'Provides P&ID engineering assets to'
+  enterpriseSystems -> integrationPlatform 'Provides enterprise information to'
+  integrationPlatform -> unify 'Integrates SAP, EAM, and ERP information into'
+  unify -> industrialSite.piSystem 'Manages PI AF models with its AF tool'
+  industrialSite.piSystem -> unify 'Synchronizes PI AF models with'
+  unify -> aws.sitewise.industrialData 'Synchronizes contextualized models to'
+  aws.sitewise.industrialData -> unify 'Synchronizes SiteWise models to'
+  aws.sitewise -> aws.iotCore 'Publishes MQTT property updates to'
+  aws.iotCore -> aws.firehose 'IoT rules route property updates to'
+  aws.firehose -> aws.s3.dataLake 'Transforms and delivers property updates to'
+  aws.s3.dataLake -> aws.lookout 'Provides industrial lake data to'
+  aws.lookout -> aws.s3.dataLake 'Writes computed equipment metrics to'
+  aws.s3.dataLake -> aws.athena 'Provides data for queries to'
+  aws.athena -> aws.quickSight 'Provides query results for dashboards to'
+}
+
+views {
+  view index {
+    title 'Element Analytics Unify on AWS'
+    include *, industrialSite.*, aws.*, aws.sitewise.*, aws.s3.*
+  }
+}
