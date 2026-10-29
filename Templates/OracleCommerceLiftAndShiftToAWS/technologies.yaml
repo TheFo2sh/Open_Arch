@@ -1,0 +1,126 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Secure content delivery network in front of the ecommerce application.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud (Amazon VPC)
+    description: Virtual network boundary for the single-Region deployment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-waf
+    name: AWS WAF
+    description: Protects the ecommerce website against common web exploits.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/waf/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: Provides DNS configuration for the ecommerce website.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Distributes application traffic across Availability Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform for the Oracle Commerce clusters and partner-supported Oracle RAC database instances.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system, database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-elasticache-redis
+    name: Amazon ElastiCache for Redis
+    description: Redis cache used by the Oracle Commerce application for performance.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticache/redis/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-efs
+    name: Amazon Elastic File System
+    description: Shared file storage mounted by every Oracle Commerce instance.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/efs/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Provides application logging, monitoring, and alarms.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-internet-gateway
+    name: Internet Gateway
+    description: Internet gateway depicted at the VPC boundary in the AWS diagram.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-nat-gateway
+    name: NAT Gateway
+    description: NAT gateways depicted in the public subnets; the source does not specify their egress consumers.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: oracle-commerce
+    name: Oracle Commerce
+    description: Third-party ecommerce platform represented by the Oracle Commerce cluster in the reference diagram.
+    vendor: Oracle
+    url: https://www.oracle.com/industries/retail/commerce/
+    types: [third-party]
+  - key: oracle-endeca
+    name: Oracle Endeca
+    description: Third-party product shown as an Oracle Endeca cluster in the AWS reference diagram.
+    vendor: Oracle
+    url: https://www.oracle.com/industries/retail/commerce/
+    types: [third-party]
+  - key: oracle-rac
+    name: Oracle Real Application Clusters (RAC)
+    description: Third-party production database technology; AWS states that a partner solution runs the workload on Oracle RAC.
+    vendor: Oracle
+    url: https://www.oracle.com/database/technologies/rac.html
+    types: [third-party]
+  - key: flashgrid
+    name: FlashGrid
+    description: Third-party RAC-on-AWS solution cited by AWS as further reading; the reference does not identify it as the selected partner implementation.
+    vendor: FlashGrid
+    url: https://www.flashgrid.io/oracle-rac-on-aws/
+    types: [third-party]
