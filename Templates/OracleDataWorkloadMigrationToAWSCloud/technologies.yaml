@@ -1,0 +1,84 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+technologies:
+  - key: oracle-database
+    name: Oracle Database
+    description: Oracle database platform hosting the enterprise warehouse that supplies migration data.
+    vendor: Oracle
+    url: https://www.oracle.com/database/
+    types: [third-party, data-platform]
+    platform: other
+    hosts: [database]
+  - key: aws-schema-conversion-tool
+    name: AWS Schema Conversion Tool
+    description: Extracts Oracle DDL and schema for publication to Aurora and Snowflake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dms/schema-conversion-tool/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-dms
+    name: AWS Database Migration Service
+    description: Extracts OLTP data for Aurora and OLAP data as CSV for Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dms/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-aurora
+    name: Amazon Aurora
+    description: Operational database target for Oracle OLTP migration and transformed legacy data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage for DMS OLAP CSV extracts, legacy-system data, and Snowflake staging data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-glue
+    name: AWS Glue
+    description: Transforms legacy data from S3 into Aurora and Aurora data into S3 for Snowflake loading.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: snowflake
+    name: Snowflake
+    description: Required third-party data warehouse target for converted schema, historical OLAP data, and BI analysis.
+    vendor: Snowflake
+    url: https://www.snowflake.com/
+    types: [third-party, data-platform]
+    platform: other
+    hosts: [database]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: AWS business intelligence service consuming analysis data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: tableau
+    name: Tableau
+    description: Third-party business intelligence tool consuming analysis data.
+    vendor: Salesforce
+    url: https://www.tableau.com/
+    types: [third-party]
+  - key: oracle-business-intelligence-suite
+    name: Oracle Business Intelligence Suite
+    description: On-premises BI application shown querying Snowflake and Aurora.
+    vendor: Oracle
+    url: https://www.oracle.com/business-analytics/business-intelligence/
+    types: [third-party]

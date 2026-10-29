@@ -1,0 +1,7 @@
+PackageId: OpenArch.OracleDataWorkloadMigrationToAWSCloud
+Name: Oracle Data Workload Migration to AWS Cloud
+Description: Migrates Oracle workloads to Aurora and Snowflake through schema conversion, DMS, S3 staging, and AWS Glue ETL, with separate operational and historical reporting paths.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, oracle, migration, data-warehouse, snowflake]
