@@ -1,0 +1,84 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-s3
+    name: Amazon S3
+    description: Tiered data lake for batch and near-real-time feeds, module outputs, and reporting data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2-spot
+    name: Amazon EC2 Spot Instances
+    description: EC2 Spot capacity for migrated batch revenue-management modules.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/spot/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-efs
+    name: Amazon Elastic File System
+    description: Shared file system reproducing the structure required by migrated revenue-management modules.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/efs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2-on-demand
+    name: Amazon EC2 On-Demand Instances
+    description: EC2 On-Demand capacity for near-real-time booking-control workloads.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores fares, rules, and availability updated by near-real-time booking controls.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Data warehouse service used with the data lake for flexible revenue reporting.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Query service used with the data lake for flexible reporting.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: atpco
+    name: ATPCO
+    description: External airline data feed named by the AWS architecture.
+    vendor: ATPCO
+    url: https://www.atpco.net/
+    types: [third-party]
+  - key: ql2-infare
+    name: QL2 / INFARE
+    description: External airline data feed named by the AWS architecture.
+    vendor: QL2
+    url: https://www.ql2.com/
+    types: [third-party]
+  - key: 3victors
+    name: 3Victors
+    description: External airline data feed named by the AWS architecture.
+    vendor: 3Victors
+    url: https://3victors.com/
+    types: [third-party]
