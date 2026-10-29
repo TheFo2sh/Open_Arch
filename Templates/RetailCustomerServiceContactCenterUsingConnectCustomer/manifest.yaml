@@ -1,7 +1,0 @@
-PackageId: OpenArch.RetailCustomerServiceContactCenterUsingConnectCustomer
-Name: Retail Customer Service Contact Center Using Amazon Connect
-Description: Retail customer support on Amazon Connect with personalized IVR, skills-based agent routing, CRM integration, contact analytics, and API-based business system lookups.
-Version: 1.0.0
-Icon: logos:aws
-Publisher: Open_Arch
-Tags: [retail, aws, contact-center, amazon-connect, customer-service]

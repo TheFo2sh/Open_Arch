@@ -3,7 +3,7 @@
 technologies:
   - key: amazon-connect
     name: Amazon Connect
-    description: Cloud contact center for IVR, contact flows, skills-based call routing, and agent interactions.
+    description: Cloud contact center for natural-language IVR, contact flows, skills-based routing, and agent interactions.
     vendor: Amazon Web Services
     url: https://aws.amazon.com/connect/
     types: [managed-service]
@@ -12,7 +12,7 @@ technologies:
     packages: [{manager: terraform, name: hashicorp/aws}]
   - key: amazon-connect-contact-lens
     name: Amazon Connect Contact Lens
-    description: Amazon Connect capability for real-time sentiment analysis, transcripts, and contact analytics.
+    description: Amazon Connect feature that provides real-time sentiment analysis, transcripts, and detailed contact analytics.
     vendor: Amazon Web Services
     url: https://aws.amazon.com/connect/contact-lens/
     types: [managed-service]
@@ -21,25 +21,25 @@ technologies:
     packages: [{manager: terraform, name: hashicorp/aws}]
   - key: amazon-appflow
     name: Amazon AppFlow
-    description: Managed integration used to exchange customer profile data between Amazon Connect and a CRM.
+    description: Retrieves customer profile data such as name, membership status, and loyalty points from a CRM for Amazon Connect.
     vendor: Amazon Web Services
     url: https://aws.amazon.com/appflow/
     types: [managed-service]
     platform: aws
     hosts: []
     packages: [{manager: terraform, name: hashicorp/aws}]
-  - key: amazon-kinesis-data-streams
-    name: Amazon Kinesis Data Streams
+  - key: amazon-kinesis
+    name: Amazon Kinesis
     description: Streams Amazon Connect contact metadata for near-real-time processing.
     vendor: Amazon Web Services
-    url: https://aws.amazon.com/kinesis/data-streams/
+    url: https://aws.amazon.com/kinesis/
     types: [managed-service]
     platform: aws
     hosts: []
     packages: [{manager: terraform, name: hashicorp/aws}]
   - key: amazon-s3
-    name: Amazon Simple Storage Service (Amazon S3)
-    description: Stores call recordings and other contact data linked to contact trace records.
+    name: Amazon S3
+    description: Stores completed-call recordings and data used by the contact center analytics flow.
     vendor: Amazon Web Services
     url: https://aws.amazon.com/s3/
     types: [managed-service, data-platform]
@@ -57,12 +57,12 @@ technologies:
     packages: [{manager: terraform, name: hashicorp/aws}]
   - key: amazon-quicksight
     name: Amazon QuickSight
-    description: Business intelligence service for visualizing contact center analytics.
+    description: Visualizes contact center analytics in dashboards.
     vendor: Amazon Web Services
     url: https://aws.amazon.com/quicksight/
     types: [managed-service]
     platform: aws
-    hosts: []
+    hosts: [system]
     packages: [{manager: terraform, name: hashicorp/aws}]
   - key: amazon-api-gateway
     name: Amazon API Gateway
@@ -84,7 +84,7 @@ technologies:
     packages: [{manager: terraform, name: hashicorp/aws}]
   - key: amazon-dynamodb
     name: Amazon DynamoDB
-    description: NoSQL datastore used for low-latency lookups such as store FAQ responses.
+    description: NoSQL datastore for low-latency lookups made directly from API Gateway.
     vendor: Amazon Web Services
     url: https://aws.amazon.com/dynamodb/
     types: [managed-service, data-platform]
@@ -93,7 +93,7 @@ technologies:
     packages: [{manager: terraform, name: hashicorp/aws}]
   - key: salesforce-crm
     name: Salesforce CRM
-    description: Example third-party CRM shown in the AWS diagram; the source also allows other CRM systems.
+    description: Example third-party CRM named by AWS; the architecture also allows another CRM provider.
     vendor: Salesforce
     url: https://www.salesforce.com/crm/
     types: [third-party]
