@@ -1,0 +1,168 @@
+// Implementing Travel and Hospitality Data Mesh, based on AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/travel-hospitality-data-mesh/travel-hospitality-data-mesh.html
+// Systems and users are slots. The AWS account boundary and service configuration are not specified.
+model {
+  dataProducer = user 'Data producer' {
+    description 'A member of a business domain that owns and publishes producer data.'
+  }
+  dataConsumer = user 'Data consumer' {
+    description 'A member of a business domain that discovers governed datasets and uses them for analytics.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    producerDomain = system 'Producer domain' {
+      description 'A business domain that owns producer data and operational workloads, following organization-wide governance, security, and open-standard blueprints.'
+
+      ingestion = container 'Data ingestion' {
+        description 'Batch, real-time, SFTP, and IoT data paths; specific source systems and ingestion products are not identified.'
+      }
+      operationalServices = container 'Operational microservices and events' {
+        description 'Serverless producer workloads and events using DynamoDB with DAX; the implementation services are not specified.'
+      }
+      dataMetadata = container 'Data product metadata' {
+        description 'Tracks producer data contracts and lineage; the implementation details are not specified.'
+      }
+    }
+    consumerDomain = system 'Consumer domain' {
+      description 'A business domain that combines producer datasets into analytical products and reports, following organization-wide governance, security, and open-standard blueprints.'
+
+      dataProducts = container 'Consumer data products' {
+        description 'Combines producer datasets into Redshift marts.'
+      }
+      discovery = container 'Dataset discovery' {
+        description 'Searches and filters catalog metadata by content, sensitivity, and custom labels.'
+      }
+      reporting = container 'Ad-hoc analytics and reporting' {
+        description 'Runs SQL queries over S3 report datasets and supports QuickSight analytics.'
+      }
+      machineLearning = container 'Model building and recommendations' {
+        description 'Builds models with SageMaker and provides recommendations with Personalize.'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      rawData = database 'Raw lake datasets' {
+        description 'Raw data staged from batch, real-time, SFTP, and IoT paths, using read-oriented schemas.'
+      }
+      curatedData = database 'Curated lake datasets' {
+        description 'Curated datasets with read-oriented schemas.'
+      }
+      reportData = database 'Report datasets' {
+        description 'S3 datasets queried for ad-hoc reporting.'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Crawlers discover S3 datasets and populate the central catalog.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      catalog = database 'Central data catalog' {
+        description 'Dataset metadata, including content, sensitivity, and custom labels for consumer search and filtering.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      operationalData = database 'Producer operational data' {
+        description 'Operational data used by producer workloads.'
+      }
+      dataContracts = database 'Data contracts' {
+        description 'Data contracts used by producer and consumer domains.'
+      }
+    }
+    dax = platform 'Amazon DynamoDB Accelerator (DAX)' {
+      description 'Provides the DynamoDB cache used by producer operational workloads.'
+      metadata {
+        uses 'amazon-dynamodb-accelerator'
+      }
+    }
+    lakeFormation = platform 'AWS Lake Formation' {
+      description 'Applies fine-grained data access governance and auditing.'
+      metadata {
+        uses 'aws-lake-formation'
+      }
+    }
+    neptune = platform 'Amazon Neptune' {
+      metadata {
+        uses 'amazon-neptune'
+      }
+      lineage = database 'Data lineage' {
+        description 'Lineage metadata for the data mesh.'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      metadata {
+        uses 'amazon-redshift'
+      }
+      marts = database 'Consumer data marts' {
+        description 'Analytical marts combining datasets owned by producer domains.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    sageMaker = platform 'Amazon SageMaker AI' {
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+    personalize = platform 'Amazon Personalize' {
+      metadata {
+        uses 'amazon-personalize'
+      }
+    }
+  }
+
+  dataProducer -> aws.producerDomain 'Owns and publishes data through'
+  dataConsumer -> aws.consumerDomain 'Discovers and consumes data through'
+
+  aws.producerDomain.ingestion -> aws.s3.rawData 'Stages batch, real-time, SFTP, and IoT data in'
+  aws.s3.rawData -> aws.glue 'Is discovered by crawlers in'
+  aws.glue -> aws.glueCatalog.catalog 'Populates the central catalog with metadata for'
+  aws.producerDomain.operationalServices -> aws.dynamodb.operationalData 'Reads and writes operational data in'
+  aws.producerDomain.operationalServices -> aws.dax 'Uses as a cache for DynamoDB'
+  aws.dax -> aws.dynamodb.operationalData 'Caches access to'
+
+  aws.consumerDomain.dataProducts -> aws.s3.curatedData 'Reads curated producer datasets with read-oriented schemas from'
+  aws.consumerDomain.dataProducts -> aws.redshift.marts 'Combines producer datasets into'
+  aws.consumerDomain.discovery -> aws.glueCatalog.catalog 'Searches and filters metadata in'
+  aws.consumerDomain.discovery -> aws.dynamodb.dataContracts 'Uses contract metadata in'
+  aws.consumerDomain.reporting -> aws.athena 'Runs ad-hoc SQL queries with'
+  aws.athena -> aws.s3.reportData 'Queries'
+  aws.consumerDomain.reporting -> aws.quickSight 'Supports analytics with'
+  aws.quickSight -> aws.redshift.marts 'Uses consumer data marts from'
+  aws.consumerDomain.machineLearning -> aws.sageMaker 'Builds models with'
+  aws.consumerDomain.machineLearning -> aws.personalize 'Provides recommendations with'
+
+  aws.lakeFormation -> aws.s3 'Governs fine-grained access to'
+  aws.lakeFormation -> aws.glueCatalog 'Governs catalog access and auditing for'
+  aws.producerDomain.dataMetadata -> aws.dynamodb.dataContracts 'Stores data contracts in'
+  aws.producerDomain.dataMetadata -> aws.neptune.lineage 'Records data lineage in'
+}
+
+views {
+  view index {
+    title 'Implementing Travel and Hospitality Data Mesh'
+    include *, aws.*
+  }
+}

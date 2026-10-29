@@ -1,0 +1,97 @@
+technologies:
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage for raw and curated lake datasets and consumer report datasets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-glue
+    name: AWS Glue
+    description: Crawlers discover datasets in S3 and populate the central data catalog.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-glue-data-catalog
+    name: AWS Glue Data Catalog
+    description: Central catalog for dataset metadata, including content, sensitivity, and custom labels used for discovery.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/features/#GlueDataCatalog
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Operational data store for producer workloads and storage for data contracts.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-dynamodb-accelerator
+    name: Amazon DynamoDB Accelerator (DAX)
+    description: In-memory cache used with DynamoDB for producer operational workloads.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/dax/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Analytical data platform for consumer data marts that combine producer datasets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Analytics and visualization service for consumers of data mesh products.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-athena
+    name: Amazon Athena
+    description: SQL query service for ad-hoc queries over report datasets in S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-neptune
+    name: Amazon Neptune
+    description: Graph data platform used to store data lineage metadata.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/neptune/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-lake-formation
+    name: AWS Lake Formation
+    description: Fine-grained access governance and auditing for data lake resources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lake-formation/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Service used by data consumers to build machine-learning models.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/ai/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-personalize
+    name: Amazon Personalize
+    description: Recommendation service used to provide personalized experiences.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/personalize/
+    types: [managed-service]
+    platform: aws
+    hosts: []
