@@ -1,0 +1,7 @@
+PackageId: OpenArch.AWSIndustrialPdMMLModelAndAnomalyDetection
+Name: AWS Industrial PdM ML Model and Anomaly Detection
+Description: Factory predictive maintenance using SageMaker AI at the edge and stream-based anomaly detection with Amazon Managed Service for Apache Flink.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, manufacturing, industrial-iot, predictive-maintenance, machine-learning]

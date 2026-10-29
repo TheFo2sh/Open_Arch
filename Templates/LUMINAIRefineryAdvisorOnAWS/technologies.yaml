@@ -1,0 +1,65 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+technologies:
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Application Load Balancers route web, refinery data, and reporting traffic to the corresponding LUMINAI workloads.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ecs
+    name: Amazon Elastic Container Service
+    description: Runs the LUMINAI web, ingestion, sensor processing, business, and reporting services in containers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecs/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-msk
+    name: Amazon Managed Streaming for Apache Kafka
+    description: Ingests and processes refinery sensor data streams in real time before downstream ETL.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/msk/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-emr
+    name: Amazon EMR
+    description: Runs the ETL jobs that process streaming data from Amazon MSK.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/emr/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-aurora-postgresql
+    name: Amazon Aurora PostgreSQL-Compatible Edition
+    description: Stores ETL results and processed refinery data for LUMINAI services, web access, APIs, and BI tools.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/postgresql/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-mq
+    name: Amazon MQ
+    description: Queues ETL results for the LUMINAI Orchestrator and Reasoner business services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/amazon-mq/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores long-term refinery data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]

@@ -1,0 +1,105 @@
+# Technologies named in AWS's Connected Home Command and Control reference
+# architecture, including the optional edge runtimes and stream processors it cites.
+technologies:
+  - key: amazon-alexa
+    name: Amazon Alexa
+    description: Third-party voice assistant and Alexa Voice Service used to invoke the skill and deliver proactive notifications.
+    vendor: Amazon
+    url: https://www.amazon.com/alexa
+    types: [third-party]
+  - key: amazon-echo
+    name: Amazon Echo
+    description: Example Alexa-enabled device named by AWS as an invocation endpoint.
+    vendor: Amazon
+    url: https://www.amazon.com/echo
+    types: [third-party]
+  - key: alexa-voice-services-sdk
+    name: Alexa Voice Services SDK
+    description: Optional SDK named by AWS for Alexa-enabled devices that create Alexa invocations.
+    vendor: Amazon
+    url: https://developer.amazon.com/en-US/alexa/alexa-voice-service
+    types: [library, third-party]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Validates authorization and access control for Alexa skill requests before routing them to skill logic.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs authentication, Alexa skill, device-data processing, and proactive-notification logic.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores user authorization data associating users with their Alexa skill and devices.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Connects devices to the cloud and handles command and update messages, IoT rules, topics, and device-shadow synchronization.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Receives device-update messages routed by AWS IoT rules for real-time processing.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: aws-iot-device-sdk
+    name: AWS IoT Device SDK
+    description: One AWS-named option for device software to publish updates to AWS IoT Core.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot/latest/developerguide/iot-sdks.html
+    types: [library]
+  - key: aws-iot-greengrass
+    name: AWS IoT Greengrass
+    description: Optional device-side software path AWS names for publishing local device updates to AWS IoT Core.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/greengrass/
+    types: [compute-platform]
+    platform: other
+    hosts: [system]
+  - key: amazon-freertos
+    name: Amazon FreeRTOS
+    description: Optional device software path AWS names for publishing updates to AWS IoT Core.
+    vendor: Amazon Web Services
+    url: https://www.freertos.org/
+    types: [library]
+  - key: amazon-managed-service-for-apache-flink
+    name: Amazon Managed Service for Apache Flink
+    description: One of the optional downstream services AWS names for extracting and processing real-time Kinesis data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/managed-service-apache-flink/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-emr
+    name: Amazon EMR
+    description: AWS-named option for processing Kinesis data with Spark.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/emr/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: AWS-named option for extracting and processing real-time Kinesis data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]

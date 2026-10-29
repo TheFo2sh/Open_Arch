@@ -1,0 +1,187 @@
+// Temenos Payments Hub, after AWS's service and availability architecture diagrams.
+// The system and user are mapping slots; AWS does not specify the application internals.
+model {
+  paymentUser = user 'Payment user' {
+    description 'Accesses the private payment API through the VPN path shown in the service diagram.'
+  }
+  accessClient = system 'Payment access client' {
+    description 'Logical client between the user and VPN; AWS shows users but does not identify a client application.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    clientVpn = platform 'AWS Client VPN' {
+      description 'VPN path shown for users accessing the private API endpoint.'
+      metadata {
+        uses 'aws-client-vpn'
+      }
+    }
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Alternative on-premises access path named by AWS; the specific peer system is not shown.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    accessVpc = platform 'Private access VPC' {
+      description 'VPC boundary around the private endpoint in the service diagram.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+      apiEndpoint = platform 'Amazon VPC endpoint' {
+        description 'Private endpoint used to reach Amazon API Gateway.'
+        metadata {
+          uses 'amazon-vpc-endpoints'
+        }
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Controls and monitors API access and routes requests to Lambda and containerized processing.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the lightweight payment microservices.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      lambdaServices = system 'Payment microservices' {
+        description 'Slot for the lightweight payment microservices AWS places on Lambda; implementation is unspecified.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Optimized data store for the lightweight Lambda microservices.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      paymentData = database 'Payment microservice data' {
+        description 'DynamoDB data used by the lightweight microservices; schema and data model are unspecified.'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis' {
+      description 'Shown beside Lambda and the private endpoint; AWS does not describe its specific role.'
+      metadata {
+        uses 'amazon-kinesis'
+      }
+    }
+
+    applicationVpc = platform 'Application VPC' {
+      description 'VPC boundary around the containerized payment processing and its private AWS service access.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+      privateLink = platform 'AWS PrivateLink endpoints' {
+        description 'Provides the private service access shown from the application VPC.'
+        metadata {
+          uses 'aws-privatelink'
+        }
+      }
+      vpcLink = platform 'Amazon API Gateway VPC Link' {
+        description 'Private API Gateway HTTP API integration path to the Application Load Balancer in the availability diagram.'
+        metadata {
+          uses 'amazon-api-gateway-vpc-link'
+        }
+      }
+      loadBalancer = platform 'Elastic Load Balancing' {
+        description 'Distributes requests to the front-end ECS containers; the availability diagram identifies an Application Load Balancer.'
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+      ecs = platform 'Amazon Elastic Container Service' {
+        description 'Runs the front-end and back-end payment processing containers.'
+        metadata {
+          uses 'amazon-ecs'
+        }
+        fargate = platform 'AWS Fargate' {
+          description 'Compute option shown for ECS in the availability architecture; ECS on EC2 is also an option.'
+          metadata {
+            uses 'aws-fargate'
+          }
+          paymentsHub = system 'Temenos Payments Hub' {
+            description 'Temenos payment initiation and distribution application; its internal design is not specified by AWS.'
+
+            frontend = container 'Front-end containers' {
+              description 'Front-end ECS application processes shown in the service diagram.'
+            }
+            backend = container 'Back-end containers' {
+              description 'Back-end ECS application processes that handle online transaction processing.'
+            }
+          }
+        }
+      }
+      mq = platform 'Amazon MQ' {
+        description 'Message broker between the front-end and back-end ECS containers; the availability diagram describes active/standby.'
+        metadata {
+          uses 'amazon-mq'
+        }
+      }
+      rds = platform 'Amazon Relational Database Service' {
+        description 'Relational database service for the containerized online transaction processing tier; AWS names several engine options.'
+        metadata {
+          uses 'amazon-rds'
+        }
+        paymentDatabase = database 'Payment database' {
+          description 'Relational payment data store; engine, schema, and exact interactions are not specified.'
+        }
+      }
+    }
+
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'AWS service that the service architecture says can be reached from the VPC through endpoints.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    ecr = platform 'Amazon Elastic Container Registry' {
+      description 'AWS service that the service architecture says can be reached from the VPC through endpoints.'
+      metadata {
+        uses 'amazon-ecr'
+      }
+    }
+    secretsManager = platform 'AWS Secrets Manager' {
+      description 'AWS service shown as accessible from the VPC through PrivateLink; its specific use is not described.'
+      metadata {
+        uses 'aws-secrets-manager'
+      }
+    }
+    cloudwatch = platform 'Amazon CloudWatch' {
+      description 'AWS service shown as accessible from the VPC through PrivateLink; its specific use is not described.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+  }
+
+  paymentUser -> accessClient 'Uses'
+  accessClient -> aws.clientVpn 'Connects through'
+  aws.clientVpn -> aws.accessVpc.apiEndpoint 'Reaches the private endpoint'
+  aws.directConnect -> aws.accessVpc.apiEndpoint 'Provides the alternative private access path'
+  aws.accessVpc.apiEndpoint -> aws.apiGateway 'Forwards private API requests to'
+  aws.apiGateway -> aws.lambda 'Routes lightweight microservice requests to'
+  aws.lambda.lambdaServices -> aws.dynamodb.paymentData 'Uses the optimized data store'
+  aws.lambda.lambdaServices -> aws.kinesis 'Connects with the stream service shown in the diagram'
+  aws.apiGateway -> aws.applicationVpc.vpcLink 'Routes container requests through'
+  aws.applicationVpc.vpcLink -> aws.applicationVpc.loadBalancer 'Connects privately to'
+  aws.applicationVpc.loadBalancer -> aws.applicationVpc.ecs.fargate.paymentsHub.frontend 'Distributes requests to'
+  aws.applicationVpc.ecs.fargate.paymentsHub.frontend -> aws.applicationVpc.mq 'Exchanges messages through'
+  aws.applicationVpc.ecs.fargate.paymentsHub.backend -> aws.applicationVpc.mq 'Exchanges messages through'
+  aws.applicationVpc.ecs.fargate.paymentsHub.backend -> aws.applicationVpc.rds.paymentDatabase 'Uses the relational data store'
+  aws.applicationVpc.privateLink -> aws.s3 'Provides private VPC access to'
+  aws.applicationVpc.privateLink -> aws.ecr 'Provides private VPC access to'
+  aws.applicationVpc.privateLink -> aws.kinesis 'Provides private VPC access to'
+  aws.applicationVpc.privateLink -> aws.secretsManager 'Provides private VPC access to'
+  aws.applicationVpc.privateLink -> aws.cloudwatch 'Provides private VPC access to'
+  aws.applicationVpc.privateLink -> aws.applicationVpc.mq 'Provides private VPC access to'
+}
+
+views {
+  view index {
+    title 'Temenos Payments Hub'
+    include *
+  }
+}

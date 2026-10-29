@@ -1,0 +1,7 @@
+PackageId: OpenArch.ContentModerationAndComplianceUsingAWSAIServices
+Name: Content Moderation and Compliance Using AWS AI Services
+Description: A customizable serverless workflow that analyzes image, video, audio, text, and documents with AWS AI services and human review.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, ai, content-moderation, compliance]

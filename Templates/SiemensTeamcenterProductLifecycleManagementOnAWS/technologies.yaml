@@ -1,0 +1,184 @@
+# Technologies named in the blueprint, by the key its metadata { uses } names them by.
+technologies:
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: DNS service for the separate test and production environment URLs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Network boundary for the Teamcenter application and managed-plane environments.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-vpc-peering
+    name: Amazon VPC Peering
+    description: Private network connection between the application VPC and the separate managed-plane VPC.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-internet-gateway
+    name: Amazon VPC Internet Gateway
+    description: Internet connectivity shown for the application VPC.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-virtual-private-gateway
+    name: AWS Virtual Private Gateway
+    description: VPC-side gateway for the customer Direct Connect and Site-to-Site VPN connections.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: Application Load Balancers route test and production HTTPS requests to the Teamcenter web tiers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon Elastic Compute Cloud
+    description: Compute platform for the Teamcenter tiers, license servers, and monitoring and administration servers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-rds
+    name: Amazon Relational Database Service
+    description: Managed relational database platform; the reference permits Oracle or Microsoft SQL Server.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-ebs
+    name: Amazon Elastic Block Store
+    description: Block-storage option for the Teamcenter File Management System; the diagram labels EBS as non-HA.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ebs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: amazon-efs
+    name: Amazon Elastic File System
+    description: Shared file-storage option for the Teamcenter File Management System.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/efs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: amazon-fsx-netapp-ontap
+    name: Amazon FSx for NetApp ONTAP
+    description: Managed shared file-storage option for the Teamcenter File Management System.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fsx/netapp-ontap/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Dedicated network connection between the customer data center and the AWS application environment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-site-to-site-vpn
+    name: AWS Site-to-Site VPN
+    description: Encrypted network connection between the customer data center and the AWS application environment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-directory-service
+    name: AWS Directory Service
+    description: Directory-based authentication for administrators; the reference allows the directory to be on AWS or on premises.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directoryservice/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-systems-manager
+    name: AWS Systems Manager
+    description: One of the documented options for IT access to the environment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/systems-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-workspaces-applications
+    name: Amazon WorkSpaces Applications
+    description: Application streaming option for IT access to the environment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/workspaces/applications/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: siemens-teamcenter
+    name: Siemens Teamcenter
+    description: Product lifecycle management software used by the web and enterprise tiers.
+    vendor: Siemens
+    url: https://www.siemens.com/global/en/products/software/teamcenter.html
+    types: [library]
+  - key: siemens-active-workspace
+    name: Siemens Active Workspace
+    description: Browser-based Teamcenter workspace shown as an additional Teamcenter service.
+    vendor: Siemens
+    url: https://www.siemens.com/global/en/products/software/teamcenter/active-workspace.html
+    types: [library]
+  - key: siemens-teamcenter-fms
+    name: Siemens Teamcenter File Management System
+    description: Teamcenter service that stores and retrieves files using the selected AWS storage option.
+    vendor: Siemens
+    url: https://www.siemens.com/global/en/products/software/teamcenter.html
+    types: [library]
+  - key: apache-solr
+    name: Apache Solr
+    description: Search service listed among the additional Teamcenter services.
+    vendor: The Apache Software Foundation
+    url: https://solr.apache.org/
+    types: [library]
+  - key: siemens-deployment-center
+    name: Siemens Deployment Center
+    description: Deployment service listed among the additional Teamcenter services.
+    vendor: Siemens
+    url: https://www.siemens.com/global/en/products/software/teamcenter.html
+    types: [library]
+  - key: siemens-teamcenter-visualization
+    name: Siemens Teamcenter Visualization Server
+    description: Visualization server shown in the Teamcenter stack.
+    vendor: Siemens
+    url: https://www.siemens.com/global/en/products/software/teamcenter.html
+    types: [library]
+  - key: siemens-teamcenter-dispatcher
+    name: Siemens Teamcenter Dispatcher
+    description: Dispatcher server shown in the Teamcenter stack.
+    vendor: Siemens
+    url: https://www.siemens.com/global/en/products/software/teamcenter.html
+    types: [library]
+  - key: siemens-application-integration
+    name: Siemens Application Integration
+    description: Application Integration server shown in the Teamcenter stack.
+    vendor: Siemens
+    url: https://www.siemens.com/global/en/products/software/teamcenter.html
+    types: [library]
+  - key: siemens-license-server
+    name: Siemens License Server
+    description: Teamcenter license server instances shown across availability zones.
+    vendor: Siemens
+    url: https://www.siemens.com/global/en/products/software/teamcenter.html
+    types: [library]
