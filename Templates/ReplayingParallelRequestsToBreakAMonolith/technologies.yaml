@@ -1,0 +1,120 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-migration-hub-refactor-spaces
+    name: AWS Migration Hub Refactor Spaces
+    description: Provides the strangler facade and routes legacy endpoints to the monolith or recorder.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/migration-hub/features/refactor-spaces/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Front door for legacy application endpoints, routing modernized endpoints to the recorder.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute platform hosting the legacy monolith.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-rds
+    name: Amazon RDS
+    description: Relational database service hosting the monolith database and temporary replay database.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Serverless compute platform for the proxy recorder and replay-processing functions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Receives copies of request and response payloads from the proxy recorder.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-kinesis-data-firehose
+    name: Amazon Kinesis Data Firehose
+    description: Delivers the recorded payload stream to an Amazon S3 bucket.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores monolith payloads, database snapshots, and replayed microservice responses.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-timestream
+    name: Amazon Timestream
+    description: Stores recorded requests in time order and the final replay comparison results.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/timestream/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-backup
+    name: AWS Backup
+    description: Periodically snapshots the monolith database to establish the replay baseline.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/backup/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Orchestrates the manual replay flow, beginning with a database reset and then replaying requests.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sqs
+    name: Amazon Simple Queue Service
+    description: FIFO queue that preserves the order of requests to replay.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sqs/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: Raises an alarm when the monolith and microservice responses differ.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
