@@ -1,0 +1,7 @@
+PackageId: OpenArch.AWSIndustrialApplicationsWithSiemensLOGO
+Name: AWS Industrial Applications with Siemens LOGO!
+Description: Industrial applications connecting Siemens LOGO! controllers to AWS IoT, data lake, analytics, dashboards, and voice integrations.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, industrial-iot, siemens, iot, predictive-maintenance]

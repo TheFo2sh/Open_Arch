@@ -1,0 +1,220 @@
+// Traffic Encryption Options in AWS Direct Connect
+// Source: https://docs.aws.amazon.com/reference-architecture-diagrams/latest/traffic-encryption-direct-connect/
+// The customer network endpoints are slots; map them to the project's own systems.
+model {
+  corporateUser = user 'Corporate network user' {
+    description 'Uses a client in the corporate network to reach an AWS workload.'
+  }
+
+  corporateClient = system 'Corporate network client' {
+    description 'Client endpoint in the customer network that initiates traffic to an Amazon EC2 instance.'
+  }
+  customerGateway = system 'Customer gateway' {
+    description 'Customer-managed VPN endpoint; AWS does not specify a device, vendor, or model.'
+    metadata {
+      uses 'ipsec'
+    }
+  }
+  customerGatewayMacsec = system 'Customer gateway (MACsec pattern)' {
+    description 'Customer-managed gateway that routes traffic to the Direct Connect location; AWS does not specify a device or vendor.'
+  }
+  macsecDevice = system 'Customer or partner MACsec device' {
+    description 'Customer or partner device at the Direct Connect location; the device and provider are not specified.'
+    metadata {
+      uses 'macsec'
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    directConnectVpc = platform 'AWS Direct Connect for VPC VPN' {
+      description 'Direct Connect connection carrying encrypted VPN packets on a public virtual interface.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+      publicVifVpc = platform 'Public virtual interface for VPC VPN' {
+        description 'Public VIF carrying IPsec packets toward the public VPN endpoint for a VPC.'
+        metadata {
+          uses 'aws-direct-connect-public-vif'
+        }
+      }
+    }
+    vpnVpc = platform 'AWS Site-to-Site VPN to VPC' {
+      description 'IPsec VPN whose AWS endpoint is attached to the virtual private gateway.'
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    virtualPrivateGateway = platform 'AWS virtual private gateway' {
+      metadata {
+        uses 'aws-virtual-private-gateway'
+      }
+    }
+    vpcViaVpn = platform 'Amazon VPC reached through virtual private gateway' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+      ec2ViaVpn = platform 'Amazon EC2' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        workloadViaVpn = system 'VPC workload (virtual private gateway pattern)' {
+          description 'Amazon EC2 instance reached through the Site-to-Site VPN and virtual private gateway.'
+        }
+      }
+    }
+
+    directConnectTgw = platform 'AWS Direct Connect for public VIF VPN to Transit Gateway' {
+      description 'Direct Connect connection carrying encrypted VPN packets on a public virtual interface.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+      publicVifTgw = platform 'Public virtual interface for Transit Gateway VPN' {
+        description 'Public VIF carrying IPsec packets toward the public VPN endpoint attached to Transit Gateway.'
+        metadata {
+          uses 'aws-direct-connect-public-vif'
+        }
+      }
+    }
+    vpnTgw = platform 'AWS Site-to-Site VPN to Transit Gateway (public VIF)' {
+      description 'IPsec VPN using a public VIF to reach a Transit Gateway and its attached VPCs.'
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    transitGatewayPublic = platform 'AWS Transit Gateway (public VIF VPN pattern)' {
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    vpcPublic = platform 'Spoke VPC (public VIF VPN pattern)' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+      ec2Public = platform 'Amazon EC2' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        workloadPublic = system 'Spoke VPC workload (public VIF VPN pattern)' {
+          description 'Amazon EC2 instance reached through the Transit Gateway VPN route table.'
+        }
+      }
+    }
+
+    directConnectPrivate = platform 'AWS Direct Connect for private IP VPN' {
+      description 'Direct Connect connection with a transit virtual interface for private IP VPN transport.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+      transitVifPrivate = platform 'Transit virtual interface for private IP VPN' {
+        metadata {
+          uses 'aws-direct-connect-transit-vif'
+        }
+      }
+    }
+    directConnectGatewayPrivate = platform 'AWS Direct Connect gateway (private IP VPN pattern)' {
+      metadata {
+        uses 'aws-direct-connect-gateway'
+      }
+    }
+    vpnPrivate = platform 'AWS Site-to-Site private IP VPN' {
+      description 'IPsec VPN using private tunnel endpoint addresses over a transit VIF and Direct Connect gateway.'
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    transitGatewayPrivate = platform 'AWS Transit Gateway (private IP VPN pattern)' {
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    vpcPrivate = platform 'Spoke VPC (private IP VPN pattern)' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+      ec2Private = platform 'Amazon EC2' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        workloadPrivate = system 'Spoke VPC workload (private IP VPN pattern)' {
+          description 'Amazon EC2 instance reached through the Transit Gateway VPN route table.'
+        }
+      }
+    }
+
+    directConnectMacsec = platform 'MACsec-enabled AWS Direct Connect connection' {
+      description 'Dedicated Direct Connect connection with MACsec enabled on a supported port and location.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+      transitVifMacsec = platform 'Transit virtual interface for MACsec pattern' {
+        metadata {
+          uses 'aws-direct-connect-transit-vif'
+        }
+      }
+    }
+    directConnectGatewayMacsec = platform 'AWS Direct Connect gateway (MACsec pattern)' {
+      metadata {
+        uses 'aws-direct-connect-gateway'
+      }
+    }
+    transitGatewayMacsec = platform 'AWS Transit Gateway (MACsec pattern)' {
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    vpcMacsec = platform 'Spoke VPC (MACsec pattern)' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+      ec2Macsec = platform 'Amazon EC2' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        workloadMacsec = system 'Spoke VPC workload (MACsec pattern)' {
+          description 'Amazon EC2 instance reached through the Transit Gateway Direct Connect route table.'
+        }
+      }
+    }
+  }
+
+  corporateUser -> corporateClient 'Uses'
+  corporateClient -> customerGateway 'Routes traffic through'
+  customerGateway -> aws.publicVifVpc 'Carries encrypted IPsec packets over'
+  customerGateway -> aws.vpnVpc 'Establishes an IPsec tunnel to'
+  aws.publicVifVpc -> aws.vpnVpc 'Delivers VPN packets to'
+  aws.vpnVpc -> aws.virtualPrivateGateway 'Terminates at'
+  aws.virtualPrivateGateway -> aws.vpcViaVpn 'Connects to'
+
+  customerGateway -> aws.publicVifTgw 'Carries encrypted IPsec packets over'
+  customerGateway -> aws.vpnTgw 'Establishes an IPsec tunnel to'
+  aws.publicVifTgw -> aws.vpnTgw 'Delivers VPN packets to'
+  aws.vpnTgw -> aws.transitGatewayPublic 'Terminates at'
+  aws.transitGatewayPublic -> aws.vpcPublic 'Routes traffic to'
+
+  customerGateway -> aws.transitVifPrivate 'Carries private IP VPN traffic over'
+  customerGateway -> aws.vpnPrivate 'Establishes a private IP IPsec tunnel to'
+  aws.vpnPrivate -> aws.directConnectGatewayPrivate 'Uses as underlying transport'
+  aws.transitVifPrivate -> aws.directConnectGatewayPrivate 'Connects through'
+  aws.directConnectGatewayPrivate -> aws.transitGatewayPrivate 'Associates with'
+  aws.vpnPrivate -> aws.transitGatewayPrivate 'Terminates at'
+  aws.transitGatewayPrivate -> aws.vpcPrivate 'Routes traffic to'
+
+  corporateClient -> customerGatewayMacsec 'Routes traffic through'
+  customerGatewayMacsec -> macsecDevice 'Reaches the Direct Connect location over the customer or partner circuit'
+  macsecDevice -> aws.directConnectMacsec 'Uses the MACsec-protected link'
+  macsecDevice -> aws.transitVifMacsec 'Sends traffic over'
+  aws.transitVifMacsec -> aws.directConnectGatewayMacsec 'Uses'
+  aws.directConnectGatewayMacsec -> aws.transitGatewayMacsec 'Associates with'
+  aws.transitGatewayMacsec -> aws.vpcMacsec 'Routes traffic to'
+}
+
+views {
+  view index {
+    title 'Traffic Encryption Options in AWS Direct Connect'
+    include *
+  }
+}

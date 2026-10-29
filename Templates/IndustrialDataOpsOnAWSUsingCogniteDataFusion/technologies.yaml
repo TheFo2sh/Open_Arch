@@ -1,0 +1,117 @@
+technologies:
+  - key: aws-iot-greengrass
+    name: AWS IoT Greengrass
+    description: Edge runtime shown bringing data from industrial gateways and PLCs into AWS.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/greengrass/v2/developerguide/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-iot-sitewise
+    name: AWS IoT SiteWise
+    description: Industrial data service receiving data from AWS IoT Greengrass.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot-sitewise/latest/userguide/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Object storage in the customer data lake from which Cognite Native Extractors ingest pre-aggregated industrial data.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/AmazonS3/latest/userguide/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Data warehouse in the customer data lake from which Cognite Native Extractors ingest pre-aggregated industrial data.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/redshift/latest/dg/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Database in the customer data lake from which Cognite Native Extractors ingest pre-aggregated industrial data.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: API service used with AWS Lambda to ingest data from Cognite Data Fusion.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/apigateway/latest/developerguide/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Serverless compute used with API Gateway to ingest data from Cognite Data Fusion.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/lambda/latest/dg/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-glue
+    name: AWS Glue
+    description: Transforms data before it is written back into Cognite Data Fusion.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/glue/latest/dg/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: amazon-managed-service-for-apache-flink
+    name: Amazon Managed Service for Apache Flink
+    description: Additional analytics capability; the diagram labels this service Kinesis Data Analytics.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/managed-flink/latest/java/what-is.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Additional machine-learning capability for the industrial DataOps architecture.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/sagemaker/latest/dg/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-twinmaker
+    name: AWS IoT TwinMaker
+    description: AWS service used by end users to create custom applications for industrial data.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot-twinmaker/latest/guide/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: amazon-managed-grafana
+    name: Amazon Managed Grafana
+    description: Managed Grafana service used by end users to create custom industrial data applications.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/grafana/latest/userguide/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: cognite-data-fusion
+    name: Cognite Data Fusion
+    description: Third-party SaaS platform that contextualizes industrial data and builds knowledge graphs.
+    vendor: Cognite
+    url: https://www.cognite.com/en/product/cognite_data_fusion_industrial_dataops_platform
+    types: [managed-service, third-party]
+    platform: other
+    hosts: [database]
+  - key: cognite-native-extractors
+    name: Cognite Native Extractors
+    description: Cognite software used to ingest industrial data from on-premises sources and pre-aggregated data from the customer data lake.
+    vendor: Cognite
+    url: https://docs.cognite.com/cdf/extraction/
+    types: [library, third-party]
+  - key: cognite-sdk
+    name: Cognite SDK
+    description: Cognite software development kit used by AWS Glue to write transformed data back into Cognite Data Fusion.
+    vendor: Cognite
+    url: https://docs.cognite.com/cdf/
+    types: [library, third-party]

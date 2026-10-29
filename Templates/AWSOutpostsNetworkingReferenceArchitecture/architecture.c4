@@ -1,0 +1,174 @@
+// AWS Outposts Networking Reference Architecture
+// Source: https://docs.aws.amazon.com/reference-architecture-diagrams/latest/outposts-networking/outposts-networking.html
+// Systems represent the example EC2 instances; their workloads are unspecified.
+model {
+  aws = zone 'AWS Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Amazon VPC A' {
+      description 'Regional VPC extended to an Outpost subnet. The source depicts a public subnet, an Outpost subnet, an internet gateway, and VPC endpoints.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      internetGateway = platform 'AWS Internet Gateway' {
+        description 'Depicted in the VPC; the source does not specify its traffic flow.'
+        metadata {
+          uses 'aws-internet-gateway'
+        }
+      }
+      vpcEndpoints = platform 'AWS VPC endpoints' {
+        description 'Depicted in the VPC; the endpoint services and traffic flows are not specified.'
+        metadata {
+          uses 'aws-vpc-endpoints'
+        }
+      }
+      regionalEc2 = platform 'Amazon EC2 — Availability Zone 1' {
+        description 'EC2 instance in the regional public subnet shown in the diagram.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        instanceA = system 'Regional EC2 instance A' {
+          description 'Example instance; AWS does not specify its workload.'
+        }
+      }
+    }
+
+    serviceAnchor = platform 'AWS Outposts service link anchor' {
+      description 'Public Amazon IPs for the service-link anchor in an Availability Zone selected by the customer; the diagram labels service-link traffic on port 443.'
+      metadata {
+        uses 'aws-outposts'
+      }
+    }
+
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Optional path to the service-link anchor; the diagram shows a Direct Connect Point of Presence.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+      pointOfPresence = platform 'AWS Direct Connect Point of Presence' {
+        description 'The source gives Equinix SV1 and CoreSite NY1 as examples, not required providers.'
+        metadata {
+          uses 'aws-direct-connect'
+        }
+        publicVif = platform 'AWS Direct Connect public virtual interface' {
+          description 'Connects to the service-link anchor IPs and advertises Amazon public ranges to the customer router.'
+          metadata {
+            uses 'aws-direct-connect-public-vif'
+          }
+        }
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Regional service shown in the diagram; its workload and specific traffic flow are not specified.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      description 'Regional service shown in the diagram; its workload and specific traffic flow are not specified.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+    }
+  }
+
+  customer = zone 'Customer on-premises network' {
+    metadata {
+      platform 'other'
+    }
+
+    edgeRouter = platform 'Customer edge router' {
+      description 'Customer-provided edge router; its vendor, configuration, and routing policy are not specified.'
+      metadata {
+        uses 'customer-network-infrastructure'
+      }
+    }
+    internetConnection = platform 'Existing internet connection' {
+      description 'Alternative to Direct Connect for reaching the public Outposts service-link anchor.'
+      metadata {
+        uses 'customer-network-infrastructure'
+      }
+    }
+    customerDevice1 = platform 'Customer device 1' {
+      description 'Customer network device connected to an Outpost network device.'
+      metadata {
+        uses 'customer-network-infrastructure'
+      }
+    }
+    customerDevice2 = platform 'Customer device 2' {
+      description 'Customer network device connected to an Outpost network device.'
+      metadata {
+        uses 'customer-network-infrastructure'
+      }
+    }
+
+    outpost = platform 'AWS Outposts Rack' {
+      description 'Outpost homed to an Availability Zone. The diagram places an Outpost subnet and EC2 instance in Availability Zone 2.'
+      metadata {
+        uses 'aws-outposts'
+      }
+
+      networkDevice1 = platform 'Outpost network device 1' {
+        description 'Network device connected to customer equipment through the rack patch panel.'
+        metadata {
+          uses 'aws-outposts'
+        }
+      }
+      networkDevice2 = platform 'Outpost network device 2' {
+        description 'Network device connected to customer equipment through the rack patch panel.'
+        metadata {
+          uses 'aws-outposts'
+        }
+      }
+      localGateway = platform 'AWS Outposts local gateway' {
+        description 'One per Outpost; attaches to one or more VPCs and provides NAT between the Outpost VPC range and the CoIP range.'
+        metadata {
+          uses 'aws-outposts-local-gateway'
+        }
+      }
+      outpostEc2 = platform 'Amazon EC2 on Outposts' {
+        description 'Compute platform for instances in the Outpost subnet.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        instanceB = system 'Outposts EC2 instance B' {
+          description 'Example instance; its workload and whether it has an Elastic IP are not specified.'
+        }
+      }
+    }
+  }
+
+  directConnectLocation = zone 'Direct Connect location (if selected)' {
+    metadata {
+      platform 'other'
+    }
+    customerRouter = platform 'Customer router at Direct Connect location' {
+      description 'Customer or partner router at the Direct Connect Point of Presence; the device and provider are not specified.'
+      metadata {
+        uses 'customer-network-infrastructure'
+      }
+    }
+  }
+
+  customer.customerDevice1 -> customer.outpost.networkDevice1 'Connects through the patch panel using link aggregation, VLAN A (service link), VLAN B (Local Gateway), and BGP'
+  customer.customerDevice2 -> customer.outpost.networkDevice2 'Connects through the patch panel using link aggregation, VLAN A (service link), VLAN B (Local Gateway), and BGP'
+
+  customer.outpost.networkDevice1 -> aws.serviceAnchor 'Carries service-link connectivity to the regional anchor over VLAN A'
+  customer.outpost.networkDevice2 -> aws.serviceAnchor 'Carries service-link connectivity to the regional anchor over VLAN A'
+  customer.outpost -> aws.serviceAnchor 'Connects to the anchor over the service link through Direct Connect or the public internet'
+
+  customer.edgeRouter -> customer.internetConnection 'Uses when the existing internet connection is selected instead of Direct Connect'
+  customer.internetConnection -> aws.serviceAnchor 'Provides a public-internet path to the anchor IPs; NAT or PAT can support the service link'
+  customer.edgeRouter -> directConnectLocation.customerRouter 'Uses the customer router at the Direct Connect location when that option is selected'
+  directConnectLocation.customerRouter -> aws.directConnect.pointOfPresence.publicVif 'Connects to the public VIF'
+  aws.directConnect.pointOfPresence.publicVif -> aws.serviceAnchor 'Connects to the anchor IPs and advertises Amazon public ranges to the customer router'
+
+  customer.outpost -> aws.vpc 'Associates with VPC A; multiple VPCs can associate with an Outpost'
+  customer.outpost.localGateway -> aws.vpc 'Attaches to VPC A; the LGW translates between the VPC range and the CoIP range'
+  customer.outpost.instanceB -> customer.outpost.localGateway 'Uses the Local Gateway path for on-premises connectivity when configured with an Elastic IP'
+  customer.outpost.localGateway -> customer.customerDevice1 'Routes translated customer traffic toward the on-premises network over VLAN B'
+}

@@ -1,0 +1,139 @@
+// Automated archival for Amazon Redshift, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/automated-archival-redshift/automated-archival-redshift.html
+// Systems and users are project slots; unnamed implementations are left unspecified.
+model {
+  dataEngineer = user 'Data engineer' {
+    description 'Can create archival queue entries manually and operates the data ingestion workflow.'
+  }
+
+  ingestionWorkflow = system 'Data ingestion workflow' {
+    description 'Project-specific slot for the process that loads Redshift and records archival metadata; AWS does not specify its implementation.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    redshift = platform 'Amazon Redshift' {
+      description 'Receives datasets at varying frequencies and is the source of data selected for archival.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+      warehouse = database 'Redshift tables' {
+        description 'Existing warehouse tables whose table and period data is considered for archival.'
+      }
+      spectrum = platform 'Amazon Redshift Spectrum' {
+        description 'Redshift capability that queries cold S3 data alongside existing cluster datasets.'
+        metadata {
+          uses 'amazon-redshift-spectrum'
+        }
+      }
+    }
+
+    rds = platform 'Amazon RDS' {
+      description 'Stores metadata about Redshift tables and their archival periods.'
+      metadata {
+        uses 'amazon-rds'
+      }
+      archivalQueue = database 'Archival metadata queue' {
+        description 'RDS table containing table name, cluster, region, processed date, period start and end, archived status, and archival date.'
+      }
+    }
+
+    eventBridge = platform 'Amazon EventBridge' {
+      description 'Schedules archival queue processing daily, weekly, or monthly.'
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    getArchivalTables = platform 'AWS Lambda (getArchivalTables)' {
+      description 'Reads the RDS metadata queue and enqueues each period due for archival.'
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+    sqs = platform 'Amazon SQS' {
+      description 'Queues one message for each table and period due for archival.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    invokeUnloadStepFunction = platform 'AWS Lambda (invokeUnloadStepFunction)' {
+      description 'Dequeues archival messages and invokes Step Functions once per message.'
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Coordinates the Redshift UNLOAD, S3 export, RDS status update, and the data deletion shown in the diagram.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Stores the partitioned cold-data exports and inventory manifest files.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      coldData = database 'Partitioned cold-data bucket' {
+        description 'Receives Redshift UNLOAD output for each table and period.'
+      }
+      inventory = platform 'Amazon S3 Inventory' {
+        description 'Generates a daily inventory of the cold-data bucket.'
+        metadata {
+          uses 'amazon-s3-inventory'
+        }
+      }
+      inventoryManifests = database 'Inventory manifest bucket' {
+        description 'Stores the daily inventory manifest files for the cold-data bucket.'
+      }
+      normalizedManifests = database 'Normalized manifest bucket' {
+        description 'Stores manifest files after the restore-preparation Lambda normalizes them.'
+      }
+    }
+    glacier = platform 'Amazon S3 Glacier' {
+      description 'Logical archive tier for the cold-data bucket after its 90-day S3 lifecycle transition; it is not modeled as a separate bucket.'
+      metadata {
+        uses 'amazon-s3-glacier'
+      }
+      archivedData = database 'Archived data' {
+        description 'The cold-data objects in the S3 Glacier storage class.'
+      }
+    }
+    normalizeInventoryData = platform 'AWS Lambda (normaliseInventoryData)' {
+      description 'Normalizes inventory manifests when S3 reports a new manifest object.'
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+  }
+
+  dataEngineer -> ingestionWorkflow 'Operates and may manually queue archival metadata through'
+  ingestionWorkflow -> aws.redshift.warehouse 'Loads datasets at varying frequencies into'
+  ingestionWorkflow -> aws.rds.archivalQueue 'Records table and period metadata after each load in'
+  aws.eventBridge -> aws.getArchivalTables 'Schedules queue processing'
+  aws.getArchivalTables -> aws.rds.archivalQueue 'Reads archival periods due from'
+  aws.getArchivalTables -> aws.sqs 'Enqueues one message per due table and period in'
+  aws.sqs -> aws.invokeUnloadStepFunction 'Delivers archival messages to'
+  aws.invokeUnloadStepFunction -> aws.stepFunctions 'Starts one unload workflow per message'
+  aws.stepFunctions -> aws.redshift.warehouse 'Unloads selected table-period data from'
+  aws.stepFunctions -> aws.s3.coldData 'Writes partitioned export objects to'
+  aws.stepFunctions -> aws.redshift.warehouse 'Deletes archived data from'
+  aws.stepFunctions -> aws.rds.archivalQueue 'Updates archival status and dates in'
+  aws.s3.coldData -> aws.glacier.archivedData 'Transitions after 90 days to the S3 Glacier storage class'
+  aws.s3.coldData -> aws.s3.inventory 'Supplies objects for daily inventory'
+  aws.s3.inventory -> aws.s3.inventoryManifests 'Writes daily inventory manifests to'
+  aws.s3.inventoryManifests -> aws.normalizeInventoryData 'Triggers on an S3 object-created event notification'
+  aws.normalizeInventoryData -> aws.s3.normalizedManifests 'Writes normalized manifests to'
+  aws.redshift.spectrum -> aws.redshift.warehouse 'Runs with the existing Redshift cluster'
+  aws.redshift.spectrum -> aws.s3.coldData 'Queries cold data from'
+}
+
+views {
+  view index {
+    title 'Automated Archival for Amazon Redshift'
+    include *, aws.*
+  }
+}

@@ -1,0 +1,212 @@
+# Technologies named in AWS's reference architecture, keyed by metadata { uses }.
+technologies:
+  - key: amazon-cognito
+    name: Amazon Cognito
+    description: User pools authenticate application users and issue JWTs and credentials for AWS service access.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/pm/cognito/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-amplify
+    name: AWS Amplify
+    description: Client framework for communicating with application backend services from mobile and web front ends.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/amplify/
+    types: [library]
+  - key: aws-appsync
+    name: AWS AppSync
+    description: Managed GraphQL API for client queries, mutations, and subscriptions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/appsync/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Serverless compute for AppSync resolvers and DynamoDB event-driven indexing functions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Serverless NoSQL database for application data and real-time GraphQL data sources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-elasticsearch-service
+    name: Amazon Elasticsearch Service
+    description: Search domain indexed by Lambda when DynamoDB table changes arrive.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/opensearch-service/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: HTTP API endpoint for requests routed to services running on ECS with Fargate.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-privatelink
+    name: AWS PrivateLink
+    description: Private connectivity from API Gateway to the VPC-hosted service load balancer and for ECR API access.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/privatelink/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-vpc
+    name: Amazon Virtual Private Cloud
+    description: Network boundary containing the private application and database subnets shown in the reference diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: elastic-load-balancing-network-load-balancer
+    name: Elastic Load Balancing Network Load Balancer
+    description: Network Load Balancer with a service port for each private ECS integration.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ecs-fargate
+    name: Amazon ECS on AWS Fargate
+    description: Containerized application services deployed across multiple Availability Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fargate/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ecr
+    name: Amazon Elastic Container Registry
+    description: Private container image registry used by the build and deployment pipeline and Fargate services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecr/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-dax
+    name: Amazon DynamoDB Accelerator (DAX)
+    description: In-memory cache used by the ECS application workload for frequently accessed DynamoDB data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/dax/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-codecommit
+    name: AWS CodeCommit
+    description: Source code repository for developer changes.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codecommit/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: aws-codebuild
+    name: AWS CodeBuild
+    description: Builds source code, runs tests, and produces deployable software packages.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codebuild/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-codedeploy
+    name: AWS CodeDeploy
+    description: Automates application deployments to the Fargate environment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codedeploy/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-codepipeline
+    name: AWS CodePipeline
+    description: Orchestrates the source, build, test, and deployment stages.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/codepipeline/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Data warehouse receiving DynamoDB data for complex business intelligence queries.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-kinesis-data-firehose
+    name: Amazon Kinesis Data Firehose
+    description: Near-real-time delivery of unstructured application data to the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Object storage for the analytics data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-glue
+    name: AWS Glue
+    description: ETL service connecting data in S3 with the Glue Data Catalog.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-glue-data-catalog
+    name: AWS Glue Data Catalog
+    description: Metadata catalog for tables and columns in the S3 data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Interactive SQL query service for data registered with the Glue Data Catalog.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Business intelligence service for creating and publishing interactive dashboards.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: amazon-pinpoint
+    name: Amazon Pinpoint
+    description: Customer engagement service for audience segmentation and personalized push, SMS, email, and voice campaigns.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/pinpoint/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: aws-identity-and-access-management
+    name: AWS Identity and Access Management (IAM)
+    description: IAM roles provide temporary credentials for protected service integrations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iam/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: saml-identity-provider
+    name: SAML 2.0 identity provider (not specified)
+    description: External identity provider for QuickSight federation; the AWS source does not name a provider.
+    types: [third-party]

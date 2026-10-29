@@ -1,0 +1,162 @@
+// GxP Compliance Automation, based on AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/gxp-compliance-automation/gxp-compliance-automation.html
+// Systems and users are M1Spec slots, mapped onto the consuming project's own.
+model {
+  securityAdmin = user 'Security administrator' {
+    description 'Publishes approved infrastructure products and monitors compliance.'
+  }
+  developer = user 'Developer' {
+    description 'Uses approved templates and manages application code under source control.'
+  }
+
+  workload = zone 'GxP workload account' {
+    metadata {
+      platform 'aws'
+    }
+
+    landingZone = platform 'AWS Landing Zone' {
+      description 'Automates setup of a secure and scalable environment.'
+      metadata {
+        uses 'aws-landing-zone'
+      }
+    }
+    serviceCatalog = platform 'AWS Service Catalog' {
+      description 'Publishes approved infrastructure products for developers.'
+      metadata {
+        uses 'aws-service-catalog'
+      }
+    }
+    cloudFormation = platform 'AWS CloudFormation' {
+      description 'Provisions resources from the templates in a launched product stack.'
+      metadata {
+        uses 'aws-cloudformation'
+      }
+    }
+    codeCommit = platform 'AWS CodeCommit' {
+      description 'Private source control repository for modified application code.'
+      metadata {
+        uses 'aws-codecommit'
+      }
+    }
+
+    gxpApplication = system 'GxP application' {
+      description 'Slot for the consuming project’s GxP workload; the source does not specify its runtime or resources.'
+    }
+    complianceOperations = system 'Compliance monitoring and response' {
+      description 'Slot for the dashboard and administrator response to compliance events and alarms; implementation is not specified.'
+    }
+
+    lambda = platform 'AWS Lambda' {
+      description 'One documented option for automating tests and installation qualification.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      lambdaQualification = system 'Qualification automation (Lambda option)' {
+        description 'Test and installation qualification automation hosted on Lambda.'
+      }
+    }
+    pythonQualification = system 'Qualification automation (Python option)' {
+      description 'Alternative qualification automation using Python; its execution environment is not specified.'
+      qualificationScripts = container 'Qualification scripts' {
+        metadata {
+          uses 'python'
+        }
+      }
+    }
+
+    qualificationStorage = platform 'Amazon S3' {
+      description 'Stores test summaries and qualification reports.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      qualificationReports = database 'Qualification reports' {
+        description 'Test summaries and installation qualification reports.'
+      }
+    }
+
+    cloudTrail = platform 'AWS CloudTrail' {
+      metadata {
+        uses 'aws-cloudtrail'
+      }
+    }
+    flowLogs = platform 'Amazon VPC Flow Logs' {
+      metadata {
+        uses 'amazon-vpc-flow-logs'
+      }
+    }
+    config = platform 'AWS Config' {
+      description 'Tracks stack changes and out-of-compliance events.'
+      metadata {
+        uses 'aws-config'
+      }
+    }
+    cloudWatch = platform 'Amazon CloudWatch' {
+      description 'Monitors stack health and changes and evaluates alert rules.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    cloudWatchEvents = platform 'Amazon CloudWatch Events' {
+      description 'Alerts administrators about changes that could cause non-compliance.'
+      metadata {
+        uses 'amazon-cloudwatch-events'
+      }
+    }
+  }
+
+  centralLogging = zone 'Central logging account' {
+    metadata {
+      platform 'aws'
+    }
+
+    logStorage = platform 'Amazon S3' {
+      description 'Centralized log bucket in a separate AWS account.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      auditLogs = database 'Central audit and configuration logs' {
+        description 'Aggregated CloudTrail logs, VPC flow logs, and AWS Config changes.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+  }
+
+  securityAdmin -> workload.gxpApplication 'Defines approved products and monitors compliance for'
+  developer -> workload.gxpApplication 'Develops and deploys changes for'
+  securityAdmin -> workload.complianceOperations 'Responds to alerts through'
+
+  workload.landingZone -> workload.serviceCatalog 'Sets up the secure environment for'
+  workload.codeCommit -> workload.gxpApplication 'Stores modified source code for'
+  workload.serviceCatalog -> workload.cloudFormation 'Launches approved products as stacks with'
+  workload.cloudFormation -> workload.gxpApplication 'Provisions the GxP workload resources for'
+
+  workload.lambda.lambdaQualification -> workload.qualificationStorage.qualificationReports 'Writes test summaries and qualification reports to'
+  workload.pythonQualification -> workload.qualificationStorage.qualificationReports 'Writes test summaries and qualification reports to'
+
+  workload.cloudTrail -> centralLogging.logStorage.auditLogs 'Aggregates API activity logs to'
+  workload.flowLogs -> centralLogging.logStorage.auditLogs 'Aggregates network flow logs to'
+  workload.config -> centralLogging.logStorage.auditLogs 'Aggregates configuration changes to'
+  workload.config -> workload.complianceOperations 'Tracks changes and surfaces out-of-compliance events in'
+  workload.config -> workload.cloudWatchEvents 'Provides change events for'
+  workload.cloudWatch -> workload.complianceOperations 'Monitors health and raises rule-based alarms for'
+  workload.cloudWatchEvents -> workload.complianceOperations 'Sends potential non-compliance alerts to'
+
+  centralLogging.athena -> centralLogging.logStorage.auditLogs 'Queries for audit'
+  centralLogging.quickSight -> centralLogging.logStorage.auditLogs 'Visualizes CloudTrail logs from'
+}
+
+views {
+  view index {
+    title 'GxP Compliance Automation'
+    include *, workload.*, centralLogging.*
+  }
+}
