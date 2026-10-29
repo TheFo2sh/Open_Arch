@@ -1,0 +1,7 @@
+PackageId: OpenArch.BESCyberSystemInformationOnAWS
+Name: BES Cyber System Information on AWS
+Description: A secure AWS extension for utility OT data ingestion, BES Cyber System Information data lakes, analytics, and AI/ML.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, energy, cybersecurity, nerc-cip, data-lake]

@@ -1,0 +1,174 @@
+// AWS Industrial Applications with Siemens LOGO!, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/industrial-applications-siemens-logo/industrial-applications-siemens-logo.html
+// Systems and users are slots mapped onto the project's own when the template is applied.
+model {
+  industrialFacilities = zone 'Industrial facilities' {
+    metadata {
+      platform 'other'
+    }
+
+    facilityOne = system 'Industrial facility 1' {
+      description 'Industrial equipment controlled by Siemens LOGO! controllers; the diagram labels S7 and Modbus TCP between equipment and controllers.'
+      technology 'Siemens LOGO!, S7 communication, Modbus TCP'
+    }
+    facilityTwo = system 'Industrial facility 2' {
+      description 'A second depicted industrial facility with equipment controlled by Siemens LOGO! controllers using the labeled S7 and Modbus TCP protocols.'
+      technology 'Siemens LOGO!, S7 communication, Modbus TCP'
+    }
+  }
+
+  applicationUser = user 'Industrial application user' {
+    description 'Uses the custom mobile or web applications to monitor and control IoT devices.'
+  }
+  alexaUser = user 'Alexa user' {
+    description 'Uses an Alexa-enabled device and custom Alexa skill to control LOGO! input and output variables.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      description 'Connects LOGO! controllers over MQTT and provides the path for device data exchange.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the data transformation and Alexa integration functions shown in the reference.'
+      metadata {
+        uses 'aws-lambda'
+      }
+
+      dataTransformer = system 'Incoming data transformation function' {
+        description 'Transforms incoming controller data; AWS does not specify its implementation or exact invocation path.'
+      }
+      alexaIntegration = system 'Alexa integration function' {
+        description 'Supports the custom Alexa skill integration with LOGO! input and output variables.'
+      }
+    }
+    mendixApps = system 'Custom apps with Mendix' {
+      description 'Custom low-code web and mobile applications for monitoring and controlling IoT devices.'
+      technology 'Mendix'
+    }
+    iotEvents = platform 'AWS IoT Events' {
+      description 'Detects changes and anomalies in IoT data.'
+      metadata {
+        uses 'aws-iot-events'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      description 'Sends notifications triggered by AWS IoT Events.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      description 'Ingests industrial data into the data lake.'
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Stores the industrial data lake.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Industrial data lake' {
+        description 'Industrial data ingested for ETL, cataloging, analytics, and predictive health analysis.'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Crawls and catalogs data and performs data lake ETL jobs.'
+      metadata {
+        uses 'aws-glue'
+      }
+      dataCatalog = database 'AWS Glue Data Catalog' {
+        description 'Catalog of data lake assets built by AWS Glue.'
+      }
+    }
+    sitewise = platform 'AWS IoT SiteWise' {
+      description 'Models and stores industrial equipment data for large-scale deployments.'
+      metadata {
+        uses 'aws-iot-sitewise'
+      }
+      equipmentData = database 'SiteWise equipment data' {
+        description 'Equipment data modeled and stored by AWS IoT SiteWise.'
+      }
+    }
+    timestream = platform 'Amazon Timestream' {
+      description 'Stores time-series data optimized for analytical queries.'
+      metadata {
+        uses 'amazon-timestream'
+      }
+      timeSeriesData = database 'Industrial time-series data' {
+        description 'Time-series data stored for fast analytical queries; the source does not specify its ingestion path.'
+      }
+    }
+    grafana = platform 'Amazon Managed Grafana' {
+      description 'Visualizes industrial data on near real-time dashboards.'
+      metadata {
+        uses 'amazon-managed-grafana'
+      }
+
+      dashboards = system 'Near real-time industrial dashboards' {
+        description 'Project dashboard system slot for visualizing SiteWise and time-series data.'
+      }
+    }
+    forecast = platform 'Amazon Forecast' {
+      description 'Uses curated data for predictive health analysis.'
+      metadata {
+        uses 'amazon-forecast'
+      }
+    }
+    lookout = platform 'Amazon Lookout for Equipment' {
+      description 'Analyzes curated data for predictive equipment health.'
+      metadata {
+        uses 'amazon-lookout-for-equipment'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Supports AI and machine learning analysis of curated data.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+    alexaSkill = system 'Custom Alexa skill' {
+      description 'Enables voice control of LOGO! input and output variables through an Alexa-enabled device.'
+      technology 'Alexa Skills Kit'
+    }
+  }
+
+  facilityOne -> aws.iotCore 'Exchanges device data over MQTT'
+  facilityTwo -> aws.iotCore 'Exchanges device data over MQTT'
+  aws.iotCore -> industrialFacilities.facilityOne 'Exchanges data between LOGO! devices'
+  aws.iotCore -> industrialFacilities.facilityTwo 'Exchanges data between LOGO! devices'
+  aws.iotCore -> aws.lambda.dataTransformer 'Connects incoming data to transformation'
+  aws.lambda.dataTransformer -> aws.iotCore 'Returns transformed data for IoT processing'
+  applicationUser -> aws.mendixApps 'Monitors and controls devices with a mobile or web client'
+  aws.mendixApps -> aws.iotCore 'Monitors and controls IoT devices through'
+  aws.iotCore -> aws.iotEvents 'Provides IoT data for change and anomaly detection'
+  aws.iotCore -> aws.firehose 'Streams industrial data through'
+  aws.iotEvents -> aws.sns 'Triggers notifications through'
+  aws.firehose -> aws.s3.dataLake 'Ingests data into'
+  aws.s3.dataLake -> aws.glue 'Provides data for ETL and cataloging'
+  aws.s3.dataLake -> aws.glue.dataCatalog 'Catalogs data lake assets in'
+  aws.s3.dataLake -> aws.forecast 'Provides curated data for predictive health analysis to'
+  aws.s3.dataLake -> aws.lookout 'Provides curated data for predictive health analysis to'
+  aws.s3.dataLake -> aws.sagemaker 'Provides curated data for AI and ML analysis to'
+  aws.iotCore -> aws.sitewise.equipmentData 'Provides industrial equipment data to'
+  aws.sitewise.equipmentData -> aws.grafana.dashboards 'Provides equipment data for near real-time dashboards'
+  aws.timestream.timeSeriesData -> aws.grafana.dashboards 'Provides time-series data for dashboards'
+  applicationUser -> aws.grafana.dashboards 'Views near real-time dashboards'
+  alexaUser -> aws.alexaSkill 'Uses voice commands with'
+  aws.alexaSkill -> aws.lambda.alexaIntegration 'Integrates voice requests through'
+  aws.lambda.alexaIntegration -> aws.iotCore 'Reads and controls LOGO! variables through'
+}
+
+views {
+  view index {
+    title 'AWS Industrial Applications with Siemens LOGO!'
+    include *, industrialFacilities.*, aws.*, aws.lambda.*, aws.s3.*, aws.glue.*, aws.sitewise.*, aws.timestream.*
+  }
+}

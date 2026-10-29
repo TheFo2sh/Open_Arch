@@ -1,0 +1,7 @@
+PackageId: OpenArch.VMwareCloudOnAWSNetworkingReferenceArchitectures
+Name: VMware Cloud on AWS Networking Reference Architectures
+Description: Reference patterns for connecting on-premises networks, Amazon VPCs, and VMware Cloud on AWS SDDCs across regions using Direct Connect, VPN, AWS Transit Gateway, VMware Transit Connect, and optional security VPC inspection.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, networking, vmware, hybrid-cloud, direct-connect, transit-gateway]
