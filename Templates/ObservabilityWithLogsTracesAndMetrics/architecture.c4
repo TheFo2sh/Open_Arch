@@ -1,0 +1,92 @@
+// Observability with Logs, Traces, and Metrics, after the AWS reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/observability-logs-traces-metrics/observability-logs-traces-metrics.html
+// Workloads, the collection pipeline, and users are slots mapped onto the project's own.
+model {
+  user = user 'Observability user' {
+    description 'Explores logs and traces and builds interactive cross-signal visualizations.'
+  }
+
+  workloads = system 'Applications, services, and containers' {
+    description 'Slot for the instrumented workloads that produce logs, traces, and metrics.'
+  }
+
+  telemetry = system 'Telemetry collection pipeline' {
+    description 'Slot for the collection software; AWS does not specify where these collectors are deployed.'
+
+    fluentBit = container 'Fluent Bit log collector' {
+      metadata {
+        uses 'fluent-bit'
+      }
+    }
+    openTelemetry = container 'OpenTelemetry metric scrapers' {
+      metadata {
+        uses 'aws-distro-for-opentelemetry'
+      }
+    }
+    dataPrepper = container 'OpenSearch Data Prepper' {
+      metadata {
+        uses 'opensearch-data-prepper'
+      }
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    openSearch = platform 'Amazon OpenSearch Service' {
+      metadata {
+        uses 'amazon-opensearch-service'
+      }
+      logAndTraceStore = database 'Logs and traces' {
+        description 'Stores logs and traces forwarded by OpenSearch Data Prepper.'
+      }
+      dashboards = system 'OpenSearch Dashboards' {
+        description 'Dashboard interface provided with Amazon OpenSearch Service.'
+        ui = container 'Logs and traces visualization' {
+          metadata {
+            uses 'opensearch-dashboards'
+          }
+        }
+      }
+    }
+
+    prometheus = platform 'Amazon Managed Service for Prometheus' {
+      metadata {
+        uses 'amazon-managed-service-for-prometheus'
+      }
+      metrics = database 'Metrics' {
+        description 'Stores metrics forwarded by AWS Distro for OpenTelemetry scrapers.'
+      }
+    }
+
+    grafana = platform 'Amazon Managed Grafana' {
+      metadata {
+        uses 'amazon-managed-grafana'
+      }
+      dashboards = system 'Amazon Managed Grafana dashboards' {
+        description 'Interactive visualizations using OpenSearch and Prometheus data sources.'
+      }
+    }
+  }
+
+  workloads -> telemetry.fluentBit 'Emits logs to'
+  workloads -> telemetry.openTelemetry 'Emits traces and metrics to'
+  telemetry.fluentBit -> telemetry.dataPrepper 'Forwards logs to'
+  telemetry.openTelemetry -> telemetry.dataPrepper 'Forwards traces to'
+  telemetry.openTelemetry -> aws.prometheus.metrics 'Forwards metrics to'
+  telemetry.dataPrepper -> aws.openSearch.logAndTraceStore 'Forwards logs and traces to'
+  user -> aws.openSearch.dashboards 'Explores logs and traces with'
+  user -> aws.grafana.dashboards 'Builds interactive visualizations with'
+  aws.openSearch.dashboards.ui -> aws.openSearch.logAndTraceStore 'Queries and visualizes'
+  aws.grafana.dashboards -> aws.openSearch.logAndTraceStore 'Uses the OpenSearch data source'
+  aws.grafana.dashboards -> aws.prometheus.metrics 'Uses the Prometheus data source'
+}
+
+views {
+  view index {
+    title 'Observability with Logs, Traces, and Metrics'
+    include *, aws.*
+  }
+}
