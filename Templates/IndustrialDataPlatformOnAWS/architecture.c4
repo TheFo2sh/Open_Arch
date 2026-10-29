@@ -1,0 +1,178 @@
+// Industrial Data Platform on AWS, based on AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/industrial-data-platform/industrial-data-platform.html
+// Systems are slots to map onto a project's own applications and industrial sources.
+model {
+  machines = system 'Machines and PLCs' {
+    description 'Industrial equipment that produces telemetry for edge ingestion.'
+  }
+  imageFiles = system 'Image file sources' {
+    description 'Sources of image files synchronized through AWS Storage Gateway.'
+  }
+  cameras = system 'Industrial IP cameras' {
+    description 'Cameras whose imagery is handled by AWS Panorama.'
+  }
+  manufacturingApps = system 'Manufacturing applications' {
+    description 'Applications that stream data or transfer files into the platform.'
+  }
+  enterpriseApps = system 'Industrial enterprise systems' {
+    description 'Systems that export historical and reference data and receive operational prediction results.'
+  }
+  dashboards = system 'Dashboards and applications' {
+    description 'Applications that access industrial datasets and inference results through AWS AppSync.'
+  }
+
+  factory = zone 'Industrial edge' {
+    metadata {
+      platform 'other'
+    }
+
+    greengrass = platform 'AWS IoT Greengrass' {
+      description 'Edge runtime for telemetry connectors and Lambda functions.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+
+      gateway = system 'Industrial edge gateway' {
+        description 'Runs edge components that ingest and transform machine and PLC telemetry.'
+
+        telemetry = container 'Telemetry connectors and edge Lambda' {
+          description 'Ingests and transforms equipment telemetry at the edge.'
+          metadata {
+            uses 'aws-iot-greengrass-connectors'
+          }
+        }
+      }
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    sitewise = platform 'AWS IoT SiteWise' {
+      metadata {
+        uses 'aws-iot-sitewise'
+      }
+      assetData = database 'Organized industrial asset data'
+    }
+    iotCore = platform 'AWS IoT Core' {
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Industrial data lake' {
+        description 'Stores telemetry, manufacturing data, and historical enterprise exports.'
+      }
+      synchronizedImages = database 'Synchronized image files'
+    }
+    storageGateway = platform 'AWS Storage Gateway' {
+      metadata {
+        uses 'aws-storage-gateway'
+      }
+    }
+    panorama = platform 'AWS Panorama' {
+      metadata {
+        uses 'aws-panorama'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+      manufacturingStream = database 'Manufacturing event stream'
+    }
+    transferFamily = platform 'AWS Transfer Family' {
+      metadata {
+        uses 'aws-transfer-family'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      referenceData = database 'Enterprise reference data'
+    }
+    glue = platform 'AWS Glue' {
+      metadata {
+        uses 'aws-glue'
+      }
+      catalog = database 'Dataset catalog'
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+      modelDevelopment = system 'Industrial machine-learning models' {
+        description 'Models built from engineered datasets and invoked by the inference workflow; lifecycle and endpoint details are unspecified.'
+      }
+    }
+    lookout = platform 'Amazon Lookout for Equipment' {
+      metadata {
+        uses 'amazon-lookout-for-equipment'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      inference = system 'Inference and feedback workflow' {
+        description 'Initiates inference and returns prediction results to industrial enterprise systems.'
+      }
+    }
+    appsync = platform 'AWS AppSync' {
+      metadata {
+        uses 'aws-appsync'
+      }
+    }
+  }
+
+  machines -> factory.greengrass.gateway.telemetry 'Sends telemetry to'
+  factory.greengrass.gateway.telemetry -> aws.sitewise.assetData 'Organizes equipment data in'
+  aws.sitewise.assetData -> aws.iotCore 'Routes organized IIoT data through'
+  aws.iotCore -> aws.firehose 'Delivers telemetry through'
+  aws.firehose -> aws.s3.dataLake 'Loads telemetry into'
+
+  imageFiles -> aws.storageGateway 'Synchronizes image files through'
+  aws.storageGateway -> aws.s3.synchronizedImages 'Stores synchronized files in'
+  cameras -> aws.panorama 'Provides IP-camera imagery to'
+  aws.panorama -> aws.s3.synchronizedImages 'Transfers camera images to'
+
+  manufacturingApps -> aws.kinesis.manufacturingStream 'Streams manufacturing data to'
+  aws.kinesis.manufacturingStream -> aws.s3.dataLake 'Loads streamed data into'
+  manufacturingApps -> aws.transferFamily 'Transfers manufacturing files through'
+  aws.transferFamily -> aws.s3.dataLake 'Loads transferred files into'
+
+  enterpriseApps -> aws.s3.dataLake 'Exports historical data to'
+  enterpriseApps -> aws.dynamodb.referenceData 'Exports reference data to'
+  aws.s3.dataLake -> aws.glue.catalog 'Catalogs and engineers datasets from'
+  aws.glue -> aws.s3.dataLake 'Writes engineered datasets to'
+  aws.glue.catalog -> aws.sagemaker.modelDevelopment 'Provides cataloged datasets for'
+  aws.s3.dataLake -> aws.lookout 'Provides equipment data for anomaly detection'
+
+  aws.lambda.inference -> aws.sagemaker.modelDevelopment 'Initiates model inference with'
+  aws.lambda.inference -> aws.lookout 'Initiates equipment anomaly detection with'
+  aws.lambda.inference -> enterpriseApps 'Returns prediction results to'
+
+  dashboards -> aws.appsync 'Accesses datasets and results through'
+  aws.appsync -> aws.s3.dataLake 'Provides access to industrial datasets in'
+  aws.appsync -> aws.dynamodb.referenceData 'Provides access to reference data in'
+  aws.lambda.inference -> aws.appsync 'Exposes inference results through'
+  aws.appsync -> dashboards 'Returns requested data to'
+}
+
+views {
+  view index {
+    title 'Industrial Data Platform on AWS'
+    include *, factory.*, factory.greengrass.*, factory.greengrass.gateway.*, aws.*
+  }
+}
