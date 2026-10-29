@@ -1,0 +1,365 @@
+// Amazon VPC Lattice Reference Architectures.
+// The source diagrams are separate examples; repeated zones keep distinct VPC associations explicit.
+model {
+  central = zone 'Central AWS account' {
+    metadata {
+      platform 'aws'
+    }
+
+    ram = platform 'AWS Resource Access Manager' {
+      description 'Shares service networks and services with consumer and provider accounts.'
+      metadata {
+        uses 'aws-resource-access-manager'
+      }
+    }
+    centralNetwork = platform 'Central service network' {
+      description 'A central account owns a service network and shares it with consumer VPCs.'
+      metadata {
+        uses 'amazon-vpc-lattice'
+      }
+    }
+    segmentedNetwork1 = platform 'Central service network 1' {
+      description 'One of multiple central networks used to segment services.'
+      metadata {
+        uses 'amazon-vpc-lattice'
+      }
+    }
+    segmentedNetwork2 = platform 'Central service network 2' {
+      description 'A separate central network; only services associated with it are reachable through it.'
+      metadata {
+        uses 'amazon-vpc-lattice'
+      }
+    }
+  }
+
+  singleConsumer = zone 'Consumer account - centralized network example' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Consumer VPC' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+      resolver = platform 'Amazon Route 53 Resolver' {
+        metadata {
+          uses 'amazon-route-53-resolver'
+        }
+      }
+      securityGroup = platform 'Amazon VPC security group' {
+        description 'Optional network-level filter attached to the VPC association.'
+        metadata {
+          uses 'amazon-vpc-security-groups'
+        }
+      }
+      ec2 = platform 'Amazon EC2' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        client = system 'Consumer application' {
+          description 'Application on an EC2 instance that resolves and calls a VPC Lattice service.'
+        }
+      }
+    }
+  }
+
+  lambdaConsumer = zone 'Consumer account - segmented network example' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Consumer VPC for Lambda client' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+      resolver = platform 'Amazon Route 53 Resolver' {
+        metadata {
+          uses 'amazon-route-53-resolver'
+        }
+      }
+      lambda = platform 'AWS Lambda' {
+        metadata {
+          uses 'aws-lambda'
+        }
+        client = system 'Lambda consumer application' {
+          description 'Consumer function in a VPC associated with a service network.'
+        }
+      }
+    }
+  }
+
+  ec2SegmentedConsumer = zone 'Consumer account - separate VPC for network segmentation example' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Consumer VPC associated with network 1' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+      resolver = platform 'Amazon Route 53 Resolver' {
+        metadata {
+          uses 'amazon-route-53-resolver'
+        }
+      }
+      ec2 = platform 'Amazon EC2' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        client = system 'EC2 consumer application' {
+          description 'Consumer function that attempts to call a service not associated with its VPC network.'
+        }
+      }
+    }
+  }
+
+  distributedEc2Consumer = zone 'Consumer account - distributed network for EC2 client' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Consumer VPC' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+      resolver = platform 'Amazon Route 53 Resolver' {
+        metadata {
+          uses 'amazon-route-53-resolver'
+        }
+      }
+      ec2 = platform 'Amazon EC2' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        client = system 'EC2 consumer application' {
+          description 'Consumer application using a service network it owns.'
+        }
+      }
+    }
+    consumerNetwork = platform 'Consumer-owned service network 1' {
+      description 'A consumer-owned network selects services shared by providers.'
+      metadata {
+        uses 'amazon-vpc-lattice'
+      }
+    }
+  }
+
+  distributedLambdaConsumer = zone 'Consumer account - distributed network for Lambda client' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Consumer VPC' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+      resolver = platform 'Amazon Route 53 Resolver' {
+        metadata {
+          uses 'amazon-route-53-resolver'
+        }
+      }
+      lambda = platform 'AWS Lambda' {
+        metadata {
+          uses 'aws-lambda'
+        }
+        client = system 'Lambda consumer application' {
+          description 'Consumer function accessing a service through its VPC-associated network.'
+        }
+      }
+    }
+    consumerNetwork = platform 'Consumer-owned service network 2' {
+      description 'A second consumer-owned network selects a different set of shared services.'
+      metadata {
+        uses 'amazon-vpc-lattice'
+      }
+    }
+  }
+
+  albProvider = zone 'Provider account - Application Load Balancer target example' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Provider service VPC' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+      alb = platform 'Application Load Balancer' {
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+      ec2 = platform 'Amazon EC2' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+        target = system 'EC2 service target' {
+          description 'EC2 instance registered behind the Application Load Balancer.'
+        }
+      }
+    }
+    ram = platform 'AWS Resource Access Manager' {
+      metadata {
+        uses 'aws-resource-access-manager'
+      }
+    }
+    service = platform 'VPC Lattice service - ALB target' {
+      description 'Service whose target group forwards through an Application Load Balancer.'
+      metadata {
+        uses 'amazon-vpc-lattice'
+      }
+    }
+  }
+
+  scalingProvider = zone 'Provider account - Auto Scaling target examples' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Provider service VPC' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+      scaling = platform 'Amazon EC2 Auto Scaling' {
+        metadata {
+          uses 'amazon-ec2-auto-scaling'
+        }
+        target = system 'EC2 service target' {
+          description 'EC2 instance in an Auto Scaling group; the diagrams show this as a service target.'
+        }
+      }
+    }
+    ram = platform 'AWS Resource Access Manager' {
+      metadata {
+        uses 'aws-resource-access-manager'
+      }
+    }
+    service = platform 'VPC Lattice service - Auto Scaling target' {
+      metadata {
+        uses 'amazon-vpc-lattice'
+      }
+    }
+  }
+
+  lambdaProvider = zone 'Provider account - Lambda target example' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Provider service VPC' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+      lambda = platform 'AWS Lambda' {
+        metadata {
+          uses 'aws-lambda'
+        }
+        target = system 'Lambda service target' {
+          description 'Function registered as the target for a VPC Lattice service.'
+        }
+      }
+    }
+    ram = platform 'AWS Resource Access Manager' {
+      metadata {
+        uses 'aws-resource-access-manager'
+      }
+    }
+    service = platform 'VPC Lattice service - Lambda target' {
+      metadata {
+        uses 'amazon-vpc-lattice'
+      }
+    }
+  }
+
+  eksProvider = zone 'Provider account - Kubernetes pod target example' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Provider service VPC' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+      eks = platform 'Amazon Elastic Kubernetes Service' {
+        metadata {
+          uses 'amazon-eks'
+        }
+        target = system 'Kubernetes service target' {
+          description 'Kubernetes pod registered as a VPC Lattice service target.'
+        }
+      }
+    }
+    ram = platform 'AWS Resource Access Manager' {
+      metadata {
+        uses 'aws-resource-access-manager'
+      }
+    }
+    service = platform 'VPC Lattice service - Kubernetes target' {
+      metadata {
+        uses 'amazon-vpc-lattice'
+      }
+    }
+  }
+
+  customDomain = zone 'AWS account - custom domain example' {
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53 private hosted zone' {
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    certificate = platform 'AWS Certificate Manager' {
+      description 'Optional certificate for HTTPS on the custom domain.'
+      metadata {
+        uses 'aws-certificate-manager'
+      }
+    }
+  }
+
+  singleConsumer.vpc -> central.centralNetwork 'VPC association; an attached security group can restrict network access'
+  singleConsumer.vpc.resolver -> albProvider.service 'Resolves the VPC Lattice service name'
+  singleConsumer.vpc.ec2.client -> albProvider.service 'Requests the service over the associated service network'
+  singleConsumer.vpc.ec2.client -> scalingProvider.service 'Both service and network policies allow the request in the centralized example'
+  singleConsumer.vpc.ec2.client -> lambdaProvider.service 'Request is dropped because policy does not allow this consumer'
+  albProvider.service -> albProvider.vpc.alb 'Routes to its Application Load Balancer target group'
+  albProvider.vpc.alb -> albProvider.vpc.ec2.target 'Forwards to'
+  scalingProvider.service -> scalingProvider.vpc.scaling.target 'Routes to an Auto Scaling group target'
+  lambdaProvider.service -> lambdaProvider.vpc.lambda.target 'Routes to a Lambda target'
+  eksProvider.service -> eksProvider.vpc.eks.target 'Routes to a Kubernetes pod target'
+
+  lambdaConsumer.vpc -> central.segmentedNetwork2 'VPC association'
+  lambdaConsumer.vpc.lambda.client -> scalingProvider.service 'Requests the service after DNS resolution'
+  central.segmentedNetwork2 -> scalingProvider.service 'Service and network policies permit access'
+  lambdaConsumer.vpc.resolver -> scalingProvider.service 'Resolves the service name to the service network path'
+
+  ec2SegmentedConsumer.vpc -> central.segmentedNetwork1 'VPC association'
+  ec2SegmentedConsumer.vpc.ec2.client -> eksProvider.service 'Request is dropped because the service is not associated with network 1'
+  ec2SegmentedConsumer.vpc.resolver -> eksProvider.service 'Resolves the service name; resolution does not grant access'
+
+  distributedEc2Consumer.vpc -> distributedEc2Consumer.consumerNetwork 'VPC association'
+  distributedEc2Consumer.vpc.resolver -> lambdaProvider.service 'Resolves the service name'
+  distributedEc2Consumer.vpc.ec2.client -> lambdaProvider.service 'Consumes the shared service through its own network'
+  distributedEc2Consumer.consumerNetwork -> lambdaProvider.service 'Provider associates and shares the service'
+
+  distributedLambdaConsumer.vpc -> distributedLambdaConsumer.consumerNetwork 'VPC association'
+  distributedLambdaConsumer.vpc.resolver -> scalingProvider.service 'Resolves the service name'
+  distributedLambdaConsumer.vpc.lambda.client -> scalingProvider.service 'Consumes the shared service through its own network'
+  distributedLambdaConsumer.consumerNetwork -> scalingProvider.service 'Provider associates and shares the service'
+
+  central.ram -> central.centralNetwork 'Shares the central service network with other accounts'
+  central.centralNetwork -> albProvider.service 'ALB target service is associated in the traffic-flow example'
+  albProvider.ram -> albProvider.service 'Provider shares its service with other accounts'
+  scalingProvider.ram -> scalingProvider.service 'Provider shares its service with other accounts'
+  lambdaProvider.ram -> lambdaProvider.service 'Provider shares its service with other accounts'
+  eksProvider.ram -> eksProvider.service 'Provider shares its service with other accounts'
+
+  central.centralNetwork -> scalingProvider.service 'Both service and network policies permit the centralized consumer'
+  central.centralNetwork -> lambdaProvider.service 'Service is associated; policies deny the centralized consumer'
+  customDomain.route53 -> scalingProvider.service 'Private hosted-zone alias maps the custom name to the generated service domain'
+  customDomain.certificate -> scalingProvider.service 'Optional certificate enables HTTPS for the custom domain'
+  customDomain.route53 -> singleConsumer.vpc.resolver 'Private hosted zone is associated with the consumer VPC'
+  singleConsumer.vpc.securityGroup -> central.centralNetwork 'Filters network access on the VPC association'
+}

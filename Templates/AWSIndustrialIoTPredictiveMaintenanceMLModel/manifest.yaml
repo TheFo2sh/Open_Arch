@@ -1,0 +1,7 @@
+PackageId: OpenArch.AWSIndustrialIoTPredictiveMaintenanceMLModel
+Name: AWS Industrial IoT Predictive Maintenance ML Model
+Description: Collect and organize factory equipment data with AWS IoT SiteWise and build predictive-maintenance machine-learning models with AWS IoT Analytics and SageMaker AI.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, manufacturing, industrial-iot, predictive-maintenance, machine-learning]

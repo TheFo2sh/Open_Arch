@@ -1,0 +1,7 @@
+PackageId: OpenArch.AWSAdTechPrivateLinkNetwork
+Name: Guidance for AdTech PrivateLink Network on AWS
+Description: Connects SSP and DSP programmatic bidding applications in one AWS Region with AWS PrivateLink for private real-time bidding traffic.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, adtech, networking, privatelink, real-time-bidding]

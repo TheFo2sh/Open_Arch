@@ -1,0 +1,108 @@
+// Electric Vehicle Charging OCPP Handler, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/electric-vehicle-charging-ocpp-handler/electric-vehicle-charging-ocpp-handler.html
+// Systems and users are slots mapped onto the project's own when the template is applied.
+model {
+  driver = user 'EV driver' {
+    description 'Connects an EV to a charge point and uses an RFID card to initiate charging.'
+  }
+  operator = user 'Charge point operator administrator' {
+    description 'Monitors the charging system, views data, and initiates configuration or firmware changes.'
+  }
+  chargePoint = system 'EV charge point' {
+    description 'External charging station that communicates with the OCPP Handler; product and vendor are not specified.'
+  }
+  csms = system 'Charging Station Management System (CSMS)' {
+    description 'External operator system that sends OCPP messages to charge points; implementation is not specified.'
+  }
+  operatorPortal = system 'Charge point operator portal' {
+    description 'Web-based portal for monitoring, data viewing, and initiating configuration or firmware changes; implementation is not specified.'
+  }
+  telemetryAnalytics = system 'Telemetry and analytics' {
+    description 'Slot for the unspecified data stores, analytics, and visualizations used for charge-point telemetry and metrics.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      description 'Returns the DNS record used to locate the OCPP endpoint.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    nlb = platform 'Elastic Load Balancing' {
+      description 'Network Load Balancer that routes charge-point connections to the OCPP Handler.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+    fargate = platform 'AWS Fargate' {
+      description 'Runs the containerized OCPP Handler.'
+      metadata {
+        uses 'aws-fargate'
+      }
+      chargePointOperator = system 'Charge point operator service' {
+        description 'The operator-side service that maintains charge-point connections.'
+        handler = container 'OCPP Handler' {
+          description 'Authenticates charge points and bridges OCPP messages between WebSockets and MQTT.'
+        }
+      }
+    }
+    iotCore = platform 'AWS IoT Core' {
+      description 'MQTT broker and rules engine; incoming messages use /in and outgoing messages use /out under a charge-point identifier.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Handles selected MQTT messages, such as Heartbeat, for automatic responses.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      autoResponse = system 'OCPP auto-response service' {
+        response = container 'Heartbeat auto-response' {
+          description 'Handles selected OCPP messages routed by an AWS IoT rule.'
+        }
+      }
+    }
+    sqs = platform 'Amazon Simple Queue Service' {
+      description 'Receives incoming OCPP message payloads from an AWS IoT rule.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Orchestrates OCPP payload interpretation and business logic after messages are queued.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+  }
+
+  driver -> chargePoint 'Starts charging with an RFID card'
+  chargePoint -> aws.route53 'Looks up the OCPP endpoint'
+  aws.route53 -> aws.nlb 'Resolves the endpoint to'
+  chargePoint -> aws.nlb 'Connects to the OCPP endpoint'
+  aws.nlb -> aws.fargate.chargePointOperator.handler 'Routes the connection to'
+  chargePoint -> aws.fargate.chargePointOperator.handler 'Exchanges OCPP messages over WebSockets'
+  aws.fargate.chargePointOperator.handler -> chargePoint 'Returns OCPP responses over WebSockets'
+  aws.fargate.chargePointOperator.handler -> aws.iotCore 'Publishes to and subscribes on MQTT topics keyed by charge point ID'
+  aws.iotCore -> aws.lambda.autoResponse.response 'IoT rule routes selected messages, such as Heartbeat, for auto-response'
+  aws.iotCore -> aws.sqs 'IoT rule forwards /in message payloads'
+  aws.sqs -> aws.stepFunctions 'Initiates orchestration of'
+  csms -> aws.iotCore 'Publishes charge-point messages to /out topics'
+  aws.iotCore -> aws.fargate.chargePointOperator.handler 'Delivers /out messages for forwarding to the charge point'
+  chargePoint -> telemetryAnalytics 'Sends telemetry and metrics to unspecified data stores'
+  operator -> operatorPortal 'Monitors the charging system and views data'
+  operatorPortal -> telemetryAnalytics 'Provides access to analytics and visualizations'
+  operatorPortal -> chargePoint 'Initiates configuration and firmware changes'
+}
+
+views {
+  view index {
+    title 'Electric Vehicle Charging OCPP Handler'
+    include *
+  }
+}
