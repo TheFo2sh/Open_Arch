@@ -1,0 +1,162 @@
+// Oracle workload migration to AWS, following the numbered flow in AWS's reference.
+// Systems are project-owned slots where the source does not name a product.
+model {
+  onPremises = zone 'On-premises systems' {
+    metadata {
+      platform 'other'
+    }
+
+    oracle = platform 'Oracle Database' {
+      description 'Hosts the on-premises Oracle Enterprise Data Warehouse.'
+      metadata {
+        uses 'oracle-database'
+      }
+      warehouse = database 'Oracle Enterprise Data Warehouse' {
+        description 'Receives data from Oracle and other backend systems, and supplies schema and workload data for migration.'
+      }
+    }
+
+    oracleBackend = system 'Oracle backend system' {
+      description 'On-premises Oracle backend that feeds the Oracle enterprise data warehouse.'
+    }
+    nonOracleBackends = system 'Non-Oracle backend systems' {
+      description 'On-premises non-Oracle backend systems that load transactional data into the Oracle enterprise data warehouse.'
+    }
+    legacy = system 'Legacy systems' {
+      description 'On-premises legacy systems that land data in Amazon S3; products are not specified.'
+    }
+    oracleBI = system 'Oracle Business Intelligence Suite and other on-premises BI tools' {
+      technology 'Oracle Business Intelligence Suite'
+      description 'On-premises BI applications that query Snowflake for historical reporting and Aurora for operational reporting.'
+    }
+  }
+
+  externalCloud = zone 'Third-party cloud services' {
+    metadata {
+      platform 'other'
+    }
+
+    snowflake = platform 'Snowflake Data Warehouse' {
+      description 'Required third-party cloud data warehouse.'
+      metadata {
+        uses 'snowflake'
+      }
+      warehouse = database 'Snowflake warehouse' {
+        description 'Receives converted schema, historical data, and data loaded by cloud ETL platforms.'
+      }
+    }
+    unmigrated = system 'Unmigrated warehouse systems' {
+      description 'Warehouse systems that remain unmigrated and are extracted by cloud ETL platforms.'
+    }
+    cloudETL = system 'Cloud ETL platform' {
+      description 'Unspecified cloud ETL platform that extracts data from unmigrated warehouse systems and loads Snowflake.'
+    }
+    tableau = system 'Tableau' {
+      technology 'Tableau'
+      description 'Third-party BI consumer of analysis data; deployment details are not specified.'
+    }
+    otherCloudBI = system 'Other cloud BI tools' {
+      description 'Unspecified cloud BI tools that receive analysis data and can query Snowflake and Aurora directly.'
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    sct = platform 'AWS Schema Conversion Tool' {
+      description 'Extracts Oracle DDL and schema and publishes DDL to Aurora and schema to Snowflake.'
+      metadata {
+        uses 'aws-schema-conversion-tool'
+      }
+    }
+
+    dms = platform 'AWS Database Migration Service' {
+      description 'Moves OLTP data directly to Aurora and exports OLAP data as CSV to Amazon S3.'
+      metadata {
+        uses 'aws-dms'
+      }
+    }
+
+    aurora = platform 'Amazon Aurora' {
+      metadata {
+        uses 'amazon-aurora'
+      }
+      operationalDb = database 'Aurora operational database' {
+        description 'Receives Oracle OLTP data and transformed legacy data; supports operational reporting.'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      olapExtracts = database 'DMS OLAP CSV extracts' {
+        description 'Stores OLAP data exported by AWS DMS in CSV format.'
+      }
+      legacyData = database 'Legacy data bucket' {
+        description 'Stores data landed from on-premises legacy systems for AWS Glue transformation.'
+      }
+      transformedData = database 'Transformed data bucket' {
+        description 'Stores transformed Aurora data staged for Snowflake OLAP loading.'
+      }
+    }
+
+    glue = platform 'AWS Glue' {
+      description 'Hosts the two S3/Aurora transformation paths shown in the migration flow.'
+      metadata {
+        uses 'aws-glue'
+      }
+      legacyETL = system 'Legacy S3-to-Aurora ETL' {
+        description 'Transforms legacy data landed in S3 and loads it into Aurora.'
+      }
+      historicalETL = system 'Aurora-to-S3 Snowflake ETL' {
+        description 'Transforms Aurora data and writes it to S3 for Snowflake OLAP loading.'
+      }
+    }
+
+    quickSight = platform 'Amazon QuickSight' {
+      description 'AWS BI consumer of analysis data.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+  }
+
+  onPremises.oracleBackend -> onPremises.oracle.warehouse 'Feeds transactional data to'
+  onPremises.nonOracleBackends -> onPremises.oracle.warehouse 'Loads transactional data into'
+  onPremises.oracle.warehouse -> aws.sct 'Supplies DDL and schema to'
+  aws.sct -> aws.aurora.operationalDb 'Publishes DDL to'
+  aws.sct -> externalCloud.snowflake.warehouse 'Publishes schema to'
+
+  onPremises.oracle.warehouse -> aws.dms 'Supplies OLTP and OLAP data to'
+  aws.dms -> aws.aurora.operationalDb 'Migrates OLTP data to'
+  aws.dms -> aws.s3.olapExtracts 'Writes OLAP extracts as CSV to'
+
+  onPremises.legacy -> aws.s3.legacyData 'Lands legacy data in'
+  aws.s3.legacyData -> aws.glue.legacyETL 'Supplies legacy data to'
+  aws.glue.legacyETL -> aws.aurora.operationalDb 'Transforms and loads data into'
+
+  aws.aurora.operationalDb -> aws.glue.historicalETL 'Supplies data for historical transformation to'
+  aws.glue.historicalETL -> aws.s3.transformedData 'Writes transformed Snowflake staging data to'
+  aws.s3.transformedData -> externalCloud.snowflake.warehouse 'Loads transformed historical OLAP data into'
+
+  externalCloud.unmigrated -> externalCloud.cloudETL 'Supplies data to'
+  externalCloud.cloudETL -> externalCloud.snowflake.warehouse 'Loads data into'
+
+  externalCloud.snowflake.warehouse -> aws.quickSight 'Provides analysis and reporting data to'
+  externalCloud.snowflake.warehouse -> onPremises.oracleBI 'Provides historical reporting data to'
+  aws.aurora.operationalDb -> onPremises.oracleBI 'Provides operational reporting data to'
+  externalCloud.snowflake.warehouse -> externalCloud.tableau 'Provides historical reporting data to'
+  aws.aurora.operationalDb -> externalCloud.tableau 'Provides operational reporting data to'
+  externalCloud.snowflake.warehouse -> externalCloud.otherCloudBI 'Provides historical reporting data to'
+  aws.aurora.operationalDb -> externalCloud.otherCloudBI 'Provides operational reporting data to'
+}
+
+views {
+  view index {
+    title 'Oracle Data Workload Migration to AWS Cloud'
+    include *
+  }
+}
