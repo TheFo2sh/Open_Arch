@@ -1,0 +1,7 @@
+PackageId: OpenArch.DynamoDBGlobalReplicationWithDataLocalization
+Name: DynamoDB Global Replication with Data Localization
+Description: Selective cross-Region DynamoDB item replication with localization-authority filtering and anonymization.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, database, data-localization, multi-region, replication]

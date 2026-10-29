@@ -1,0 +1,41 @@
+technologies:
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Regional tables store global and localized items; localized items are replicated selectively to their authority Region.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-dynamodb-streams
+    name: Amazon DynamoDB Streams
+    description: Captures mutations from the origin Region's DynamoDB table for the event-listener function.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the event-listener, destination replicator, and origin anonymizer functions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-appconfig
+    name: AWS AppConfig
+    description: Provides the mapping from localization authorities to AWS Regions to the event listener.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/systems-manager/appconfig/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-eventbridge
+    name: Amazon EventBridge
+    description: Regional event buses and rules route mutation details to destination Regions and replication acknowledgments to the origin.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eventbridge/
+    types: [managed-service]
+    platform: aws
+    hosts: []

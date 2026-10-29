@@ -1,0 +1,101 @@
+// DynamoDB Global Replication with Data Localization
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/dynamodb-global-replication/dynamodb-global-replication.html
+// Region A and Region B represent the source diagram's origin and one destination.
+model {
+  regionA = zone 'Region A - service region' {
+    metadata {
+      platform 'aws'
+    }
+
+    services = system 'Regional services' {
+      description 'Application services that create and update items in the regional tables.'
+    }
+
+    appconfig = platform 'AWS AppConfig' {
+      description 'Maps localization authorities to Regions for the event listener.'
+      metadata {
+        uses 'aws-appconfig'
+      }
+    }
+
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      table = database 'Regional DynamoDB table' {
+        description 'Stores global and localized items, including localization-authority and moved-region information.'
+      }
+    }
+
+    streams = platform 'Amazon DynamoDB Streams' {
+      metadata {
+        uses 'amazon-dynamodb-streams'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      listener = system 'Event-listener function' {
+        description 'Filters stream mutations using the localization map and publishes eligible item details.'
+      }
+      anonymizer = system 'Anonymizer function' {
+        description 'Anonymizes moved localized items after destination replication completes; ignores global items.'
+      }
+    }
+
+    eventbridge = platform 'Amazon EventBridge' {
+      description 'Origin-region event bus and rules for mutation routing and replication acknowledgments.'
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+  }
+
+  regionB = zone 'Region B - data-localization region' {
+    metadata {
+      platform 'aws'
+    }
+
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      table = database 'Regional DynamoDB table' {
+        description 'Stores replicated global items and localized items whose authority maps to this Region.'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      replicator = system 'Replicator function' {
+        description 'Writes received item details to the regional table and publishes a completion event.'
+      }
+    }
+
+    eventbridge = platform 'Amazon EventBridge' {
+      description 'Destination-region event bus and rules for replication and completion events.'
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+  }
+
+  regionA.services -> regionA.dynamodb.table 'Writes items with a localization-authority field'
+  regionA.dynamodb -> regionA.streams 'Publishes item mutations to'
+  regionA.streams -> regionA.lambda.listener 'Triggers on mutated items'
+  regionA.lambda.listener -> regionA.appconfig 'Reads the authority-to-Region mapping from'
+  regionA.lambda.listener -> regionA.eventbridge 'Publishes eligible item details and the localization Region to'
+  regionA.eventbridge -> regionB.eventbridge 'Routes global items to all Regions and localized items only to their designated Region'
+  regionB.eventbridge -> regionB.lambda.replicator 'Delivers item details to'
+  regionB.lambda.replicator -> regionB.dynamodb.table 'Writes replicated items to'
+  regionB.lambda.replicator -> regionB.eventbridge 'Publishes a replication-completed event to'
+  regionB.eventbridge -> regionA.eventbridge 'Routes replication-completed events to the origin Region'
+  regionA.eventbridge -> regionA.lambda.anonymizer 'Invokes for a replication-completed event'
+  regionA.lambda.anonymizer -> regionA.dynamodb.table 'Anonymizes moved localized items and stamps their destination Region'
+  regionA.services -> regionB.dynamodb.table 'Writes remotely localized items to'
+  regionA.services -> regionB.dynamodb.table 'Calls the authoritative Region table to update an already-moved localized item'
+}
