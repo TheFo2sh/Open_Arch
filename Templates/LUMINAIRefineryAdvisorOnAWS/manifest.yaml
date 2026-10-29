@@ -1,0 +1,7 @@
+PackageId: OpenArch.LUMINAIRefineryAdvisorOnAWS
+Name: LUMINAI Refinery Advisor on AWS
+Description: A reference architecture for Beyond Limits LUMINAI Refinery Advisor, using AWS services to ingest refinery data, process it, and provide operational insights.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, industrial, refinery, analytics, streaming]

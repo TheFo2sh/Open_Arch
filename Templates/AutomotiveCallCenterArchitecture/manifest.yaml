@@ -1,0 +1,7 @@
+PackageId: OpenArch.AutomotiveCallCenterArchitecture
+Name: Automotive Call Center Architecture
+Description: Connected-vehicle emergency, breakdown, service, and concierge call center with customer context, self-service, and analytics on AWS.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, automotive, connected-vehicles, call-center, reference-architecture]
