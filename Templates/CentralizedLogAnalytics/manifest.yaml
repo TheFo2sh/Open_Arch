@@ -1,0 +1,7 @@
+PackageId: OpenArch.CentralizedLogAnalytics
+Name: Centralized Log Analytics
+Description: Collects machine logs in Amazon S3, transforms them with AWS Lambda, indexes them in Amazon OpenSearch Service, and analyzes them with OpenSearch Dashboards.
+Version: 1.0.0
+Icon: logos:opensearch
+Publisher: Open_Arch
+Tags: [aws, logging, analytics, observability]

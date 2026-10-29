@@ -1,0 +1,7 @@
+PackageId: OpenArch.TemenosT24Transact
+Name: Temenos T24 Transact
+Description: Temenos T24 Transact core banking on AWS, with API access, containerized OLTP, read-only queries, and event ingestion.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, banking, core-banking, temenos]

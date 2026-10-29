@@ -1,0 +1,170 @@
+// Architecture of Crew Management System, after AWS's reference architecture
+// (https://docs.aws.amazon.com/reference-architecture-diagrams/latest/crew-management-architecture/crew-management-architecture.html).
+// Systems and users are slots: applying the template maps them onto the project's own.
+model {
+  crewMember = user 'Crew member' {
+    description 'Uses the crew application from a browser or mobile app.'
+  }
+  corporateUser = user 'Corporate user' {
+    description 'Uses the crew scheduler from the corporate data center.'
+  }
+  corporateSystems = system 'Corporate systems' {
+    description 'Corporate systems connected to the crew scheduler; the source does not identify them.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      description 'Resolves crew app domains to the nearest Region.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    cloudfront = platform 'Amazon CloudFront' {
+      description 'Distribution used by crew apps.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Hosts static pages served by CloudFront.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      staticPages = database 'Static pages'
+    }
+    waf = platform 'AWS WAF' {
+      description 'Shown protecting the application entry path.'
+      metadata {
+        uses 'aws-waf'
+      }
+    }
+    regionalApi = platform 'Amazon API Gateway (regional)' {
+      description 'Regional API access for reading crew trip data.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    privateApi = platform 'Amazon API Gateway (private)' {
+      description 'Private API access for crew schedulers to read and update trips.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    networkLoadBalancers = platform 'Network Load Balancers' {
+      description 'Route regional and private API traffic to Amazon EKS services.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+    eks = platform 'Amazon EKS (multiple Regions)' {
+      description 'Fully managed clusters host the trip services in multiple Regions.'
+      metadata {
+        uses 'amazon-eks'
+      }
+      crewManagement = system 'Crew management services' {
+        description 'Trip update and retrieve services deployed across Regions.'
+        tripRetrieve = container 'Trip Retrieve Service'
+        tripUpdate = container 'Trip Update Service'
+      }
+    }
+    aurora = platform 'Amazon Aurora Global Database' {
+      description 'Global Database with Aurora Replicas; write forwarding allows writes to any replica.'
+      metadata {
+        uses 'amazon-aurora'
+      }
+      tripData = database 'Crew trip data' {
+        description 'Trip data accessed by retrieve and update services across Regions.'
+      }
+    }
+
+    directConnectGateway = platform 'AWS Direct Connect Gateway' {
+      metadata {
+        uses 'aws-direct-connect-gateway'
+      }
+    }
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Corporate connectivity to AWS.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    cloudformation = platform 'AWS CloudFormation' {
+      description 'Single-click deployment approach for the multi-Region application.'
+      metadata {
+        uses 'aws-cloudformation'
+      }
+    }
+    cloudwatch = platform 'Amazon CloudWatch' {
+      description 'Monitoring service used to optimize operational health.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    cloudtrail = platform 'AWS CloudTrail' {
+      metadata {
+        uses 'aws-cloudtrail'
+      }
+    }
+    healthDashboard = platform 'AWS Public Health Dashboard' {
+      metadata {
+        uses 'aws-health-dashboard'
+      }
+    }
+
+    kms = platform 'AWS Key Management Service' {
+      description 'Security service shown as part of the encryption approach.'
+      metadata {
+        uses 'aws-kms'
+      }
+    }
+    certificateManager = platform 'AWS Certificate Manager' {
+      metadata {
+        uses 'aws-certificate-manager'
+      }
+    }
+    secretsManager = platform 'AWS Secrets Manager' {
+      metadata {
+        uses 'aws-secrets-manager'
+      }
+    }
+    cognito = platform 'Amazon Cognito' {
+      metadata {
+        uses 'amazon-cognito'
+      }
+    }
+    iam = platform 'AWS Identity and Access Management' {
+      metadata {
+        uses 'aws-identity-and-access-management'
+      }
+    }
+  }
+
+  crewMember -> aws.eks.crewManagement 'Retrieves and updates trips through the crew app'
+  corporateUser -> aws.eks.crewManagement 'Uses the crew scheduler'
+  corporateSystems -> aws.directConnect 'Connects to AWS through'
+  aws.route53 -> aws.cloudfront 'Resolves crew app domains to'
+  aws.route53 -> aws.regionalApi 'Routes crew trip read access to the nearest Region'
+  aws.cloudfront -> aws.s3.staticPages 'Serves static pages from'
+  aws.waf -> aws.regionalApi 'Protects'
+  aws.regionalApi -> aws.networkLoadBalancers 'Routes regional read requests through'
+  aws.privateApi -> aws.networkLoadBalancers 'Routes scheduler read and update requests through'
+  aws.networkLoadBalancers -> aws.eks.crewManagement.tripRetrieve 'Routes requests to'
+  aws.networkLoadBalancers -> aws.eks.crewManagement.tripUpdate 'Routes requests to'
+  aws.eks.crewManagement.tripRetrieve -> aws.aurora.tripData 'Reads trip data from'
+  aws.eks.crewManagement.tripUpdate -> aws.aurora.tripData 'Reads and writes trip data in'
+  aws.privateApi -> aws.directConnectGateway 'Provides corporate access through'
+  aws.directConnectGateway -> aws.directConnect 'Connects through'
+  aws.cloudformation -> aws.eks 'Deploys the application to'
+  aws.eks.crewManagement -> aws.cloudwatch 'Reports operational signals to'
+}
+
+views {
+  view index {
+    title 'Architecture of Crew Management System'
+    include *, aws.*
+  }
+}

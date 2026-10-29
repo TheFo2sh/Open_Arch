@@ -1,0 +1,161 @@
+// Real-Time Fraud Detection Powered by Redis Enterprise Cloud, after AWS's
+// reference architecture (https://docs.aws.amazon.com/reference-architecture-diagrams/latest/realtime-fraud-detection-redis/realtime-fraud-detection-redis.html).
+// Read together with the repository's specification.c4. Systems and users are slots.
+model {
+  clients = user 'Web and mobile clients' {
+    description 'Submit signed transaction requests for real-time fraud predictions.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Stores historical transaction datasets and, optionally, prediction-result exports.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      historicalTransactions = database 'Historical transaction data' {
+        description 'Historical credit-card transaction datasets used to train and exercise the fraud models.'
+      }
+      predictionExports = database 'Prediction result exports' {
+        description 'Optional S3 destination for prediction results delivered by Amazon Data Firehose.'
+      }
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Exposes the REST API that receives signed requests from web and mobile clients.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+      predictionApi = system 'Fraud prediction API' {
+        description 'Accepts a transaction request and publishes it for real-time processing.'
+      }
+    }
+
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Captures real-time transaction events between the prediction API and processing functions.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+      transactionEvents = database 'Transaction event stream' {
+        description 'Ordered stream of incoming transaction events awaiting fraud scoring.'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the historical-data processing and real-time transaction scoring functions.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      historicalProcessor = system 'Historical transaction processor' {
+        description 'Processes historical transactions and invokes the SageMaker inference endpoints for scoring.'
+      }
+      realTimeProcessor = system 'Real-time transaction processor' {
+        description 'Consumes stream events, retrieves online features, invokes fraud models, and persists predictions.'
+        redisAccess = container 'Transaction and feature access' {
+          description 'Uses RedisJSON for transaction persistence and RediSearch for the online feature-store index.'
+          metadata {
+            uses 'redis-json, redis-search'
+          }
+        }
+        metricsWriter = container 'Prediction metrics writer' {
+          description 'Optionally writes transaction details and prediction results to RedisTimeSeries.'
+          metadata {
+            uses 'redis-timeseries'
+          }
+        }
+      }
+    }
+
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Provides the notebook environment and managed endpoints for fraud-model training and inference.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+      modelDevelopment = system 'Fraud model development' {
+        description 'Uses a SageMaker notebook instance to train the fraud models on historical transaction data.'
+      }
+      anomalyModel = system 'Anomaly detection model' {
+        description 'SageMaker inference endpoint using the Random Cut Forest algorithm to assign anomaly scores.'
+        endpoint = container 'Random Cut Forest inference endpoint' {
+          description 'Scores transactions for anomalous patterns.'
+          metadata {
+            uses 'random-cut-forest'
+          }
+        }
+      }
+      classificationModel = system 'Fraud classification model' {
+        description 'SageMaker inference endpoint using XGBoost to assign fraud classification scores.'
+        endpoint = container 'XGBoost inference endpoint' {
+          description 'Classifies transactions and returns a fraud score.'
+          metadata {
+            uses 'xgboost'
+          }
+        }
+      }
+    }
+
+    redis = platform 'Redis Enterprise Cloud' {
+      description 'Redis-managed database hosted on AWS for transactions, online features, and optional time-series results.'
+      metadata {
+        uses 'redis-enterprise-cloud'
+      }
+      transactions = database 'Transaction records' {
+        description 'Transaction data persisted in the RedisJSON-enabled Redis Enterprise Cloud database.'
+      }
+      featureStore = database 'Online feature store' {
+        description 'Online features retrieved by the scoring function from Redis Enterprise Cloud; AWS notes that this feature-store use does not require Redis modules.'
+      }
+      predictionMetrics = database 'Prediction time series' {
+        description 'Optional prediction results and transaction details stored with RedisTimeSeries for visualization.'
+      }
+    }
+
+    firehose = platform 'Amazon Data Firehose' {
+      description 'Optionally delivers prediction results to an S3 bucket for analytics.'
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Optionally visualizes and analyzes prediction results exported to Amazon S3.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+
+    grafana = platform 'Amazon Managed Service for Grafana' {
+      description 'Optionally visualizes transaction and prediction metrics stored in Redis TimeSeries.'
+      metadata {
+        uses 'amazon-managed-grafana'
+      }
+    }
+  }
+
+  clients -> aws.apiGateway.predictionApi 'Submits signed prediction requests to'
+  aws.apiGateway.predictionApi -> aws.kinesis.transactionEvents 'Publishes transaction events to'
+  aws.kinesis.transactionEvents -> aws.lambda.realTimeProcessor 'Triggers processing of'
+  aws.s3.historicalTransactions -> aws.sagemaker.modelDevelopment 'Trains models using'
+  aws.s3.historicalTransactions -> aws.lambda.historicalProcessor 'Processes historical transactions from'
+  aws.lambda.historicalProcessor -> aws.sagemaker.anomalyModel 'Requests anomaly scores from'
+  aws.lambda.historicalProcessor -> aws.sagemaker.classificationModel 'Requests classification scores from'
+  aws.lambda.realTimeProcessor -> aws.sagemaker.anomalyModel 'Requests anomaly scores from'
+  aws.lambda.realTimeProcessor -> aws.sagemaker.classificationModel 'Requests classification scores from'
+  aws.lambda.realTimeProcessor -> aws.redis.transactions 'Persists transaction data to'
+  aws.lambda.realTimeProcessor -> aws.redis.featureStore 'Reads online features from'
+  aws.lambda.realTimeProcessor -> aws.redis.predictionMetrics 'Optionally stores predictions and transaction details in'
+  aws.lambda.realTimeProcessor -> aws.firehose 'Optionally sends prediction results to'
+  aws.firehose -> aws.s3.predictionExports 'Delivers prediction results to'
+  aws.s3.predictionExports -> aws.quickSight 'Optionally supplies analytics data to'
+  aws.redis.predictionMetrics -> aws.grafana 'Optionally supplies time-series data to'
+}
+
+views {
+  view index {
+    title 'Real-Time Fraud Detection Powered by Redis Enterprise Cloud'
+    include *, aws.*, aws.s3.*, aws.apiGateway.*, aws.kinesis.*, aws.lambda.*, aws.sagemaker.*, aws.redis.*
+  }
+}

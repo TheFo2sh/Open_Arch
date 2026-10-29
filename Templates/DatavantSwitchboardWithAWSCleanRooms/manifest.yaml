@@ -1,0 +1,7 @@
+PackageId: OpenArch.DatavantSwitchboardWithAWSCleanRooms
+Name: Datavant Switchboard with AWS Clean Rooms
+Description: De-identify and tokenize healthcare data with Datavant Switchboard, link datasets in Amazon S3, and collaborate on governed analysis with AWS Clean Rooms.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, healthcare, data-collaboration, clean-rooms, datavant]

@@ -1,0 +1,150 @@
+// Computer Vision for Quality Insights with IBM Maximo on AWS.
+// Sources: AWS reference architecture page and its linked PNG/PDF; see README.md.
+// Systems and users are slots mapped onto a project's own architecture.
+model {
+  subjectMatterExpert = user 'Subject matter expert' {
+    description 'Supplies training images and annotates images to train inspection models.'
+  }
+  plantManager = user 'Plant manager or technician' {
+    description 'Reviews inspection results using the MVI edge UI, mobile app, or training server.'
+  }
+
+  plant = zone 'Manufacturing plant' {
+    description 'Edge location at the manufacturing plant shown in the AWS diagram.'
+    metadata {
+      platform 'other'
+    }
+
+    operatorWorkstation = system 'Operator workstation' {
+      description 'Sends messages to MQTT topics consumed by MVI edge and mobile clients.'
+    }
+    mqttBroker = system 'MQTT broker' {
+      description 'The edge-location broker depicted by AWS; its product and operator are not specified.'
+    }
+    ipCamera = system 'IP camera' {
+      description 'Watches the assembly line and supplies video using RTSP.'
+    }
+    mviEdge = system 'IBM Maximo Visual Inspection edge' {
+      description 'Creates inspections, receives deployed models, performs image inference at the edge, and returns images and inference results to MVI.'
+    }
+    mviMobile = system 'IBM Maximo Visual Inspection mobile app' {
+      description 'Supports training-data ingestion, mobile inspections, model deployment, and receipt of MQTT messages.'
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    description 'AWS resources shown in a VPC across three availability zones.'
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      description 'Provides DNS services for traffic reaching the OpenShift cluster.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    externalNlb = platform 'External Network Load Balancer' {
+      description 'External Network Load Balancer depicted in the VPC.'
+      metadata {
+        uses 'elastic-load-balancing-network-load-balancer'
+      }
+    }
+    internalNlb = platform 'Internal Network Load Balancer' {
+      description 'Internal Network Load Balancer depicted in the VPC.'
+      metadata {
+        uses 'elastic-load-balancing-network-load-balancer'
+      }
+    }
+    internetGateway = platform 'Internet Gateway' {
+      description 'Internet gateway shown in the VPC; AWS does not describe its individual traffic flows.'
+      metadata {
+        uses 'aws-internet-gateway'
+      }
+    }
+    natGatewayAz1 = platform 'NAT Gateway - Availability Zone 1' {
+      description 'One of the three NAT gateways shown, one per availability zone.'
+      metadata {
+        uses 'aws-nat-gateway'
+      }
+    }
+    natGatewayAz2 = platform 'NAT Gateway - Availability Zone 2' {
+      description 'One of the three NAT gateways shown, one per availability zone.'
+      metadata {
+        uses 'aws-nat-gateway'
+      }
+    }
+    natGatewayAz3 = platform 'NAT Gateway - Availability Zone 3' {
+      description 'One of the three NAT gateways shown, one per availability zone.'
+      metadata {
+        uses 'aws-nat-gateway'
+      }
+    }
+
+    ec2 = platform 'Amazon EC2' {
+      description 'Compute infrastructure on which the OpenShift cluster runs.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+      openshift = platform 'Red Hat OpenShift Container Platform' {
+        description 'Container platform shown on Amazon EC2 in the VPC.'
+        metadata {
+          uses 'red-hat-openshift'
+        }
+        maximo = system 'IBM Maximo Application Suite' {
+          description 'Maximo Application Suite runs on OpenShift and uses DocumentDB for its data dictionary and local user management.'
+          trainingServer = container 'IBM Maximo Visual Inspection training server' {
+            description 'Ingests training datasets, supports image annotation and model training, and receives images with inference results.'
+            technology 'IBM Maximo Visual Inspection'
+          }
+          trainingWebApp = container 'IBM Maximo Visual Inspection web app' {
+            description 'Web app used by subject matter experts to interact with the training server.'
+            technology 'IBM Maximo Visual Inspection'
+          }
+        }
+      }
+    }
+
+    efs = platform 'Amazon Elastic File System' {
+      description 'Network file storage connected to the OpenShift cluster.'
+      metadata {
+        uses 'amazon-efs'
+      }
+    }
+    ebs = platform 'Amazon Elastic Block Store' {
+      description 'Block storage used by the OpenShift cluster; the diagram shows volumes and mount points across availability zones.'
+      metadata {
+        uses 'amazon-ebs'
+      }
+    }
+    documentdb = platform 'Amazon DocumentDB (with MongoDB compatibility)' {
+      description 'Stores Maximo Application Suite data dictionary and local user management data.'
+      metadata {
+        uses 'amazon-documentdb'
+      }
+      maximoData = database 'Maximo Application Suite data' {
+        description 'Data dictionary and local user management data used by Maximo Application Suite.'
+      }
+    }
+  }
+
+  subjectMatterExpert -> aws.ec2.openshift.maximo 'Provides training images and annotates images'
+  subjectMatterExpert -> plant.mviMobile 'Can ingest training datasets with'
+  plant.operatorWorkstation -> plant.mqttBroker 'Publishes messages to MQTT topics'
+  plant.mqttBroker -> plant.mviEdge 'Delivers MQTT messages to'
+  plant.mqttBroker -> plant.mviMobile 'Delivers MQTT messages to'
+  plant.ipCamera -> plant.mviEdge 'Streams video using RTSP'
+  plant.mviEdge -> aws.ec2.openshift.maximo.trainingServer 'Sends images and inference results to'
+  aws.ec2.openshift.maximo.trainingServer -> plant.mviEdge 'Provides trained models for deployment to'
+  plant.mviEdge -> plant.mqttBroker 'Publishes alerts and inference results to an MQTT topic'
+  plant.mviMobile -> aws.ec2.openshift.maximo.trainingServer 'Uploads training datasets to'
+  plantManager -> plant.mviEdge 'Reviews inference results in the edge UI'
+  plantManager -> plant.mviMobile 'Reviews inference results with'
+  plantManager -> aws.ec2.openshift.maximo 'Reviews inference results in'
+  route53 -> externalNlb 'Provides DNS services for'
+  externalNlb -> aws.ec2.openshift.maximo 'Provides traffic to the OpenShift cluster'
+  internalNlb -> aws.ec2.openshift.maximo 'Provides traffic to the OpenShift cluster'
+  aws.ec2.openshift.maximo -> efs 'Uses as network file storage'
+  aws.ec2.openshift.maximo -> ebs 'Uses as block storage'
+  aws.ec2.openshift.maximo -> documentdb.maximoData 'Uses for the data dictionary and local user management'
+}
