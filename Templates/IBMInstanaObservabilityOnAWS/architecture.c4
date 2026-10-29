@@ -1,0 +1,162 @@
+// IBM Instana Observability on AWS, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/ibm-instana-observability/ibm-instana-observability.html
+// Systems and users are slots mapped onto the project's own.
+model {
+  operators = user 'SREs and developers' {
+    description 'Use Instana dashboards to troubleshoot monitored systems and identify optimization opportunities.'
+  }
+
+  hostAgents = system 'IBM Instana host agents' {
+    description 'One host agent runs on each monitored AWS or corporate data-center host, loads technology-specific sensors, aggregates their telemetry, and sends it to the Instana backend.'
+    technology 'IBM Instana host agent'
+  }
+
+  sensorRepositories = system 'IBM Instana sensor repositories' {
+    description 'Provide the technology-specific sensors that host agents dynamically deploy; the reference notes support for more than 300 technologies.'
+    technology 'IBM Instana sensor repositories'
+  }
+
+  alertChannels = system 'Alert and event destinations' {
+    description 'External destinations reached through APIs, webhooks, email, or instant messaging; providers and endpoint details are not specified.'
+    technology 'APIs, webhooks, email, and instant messaging'
+  }
+
+  aws = zone 'AWS customer environment' {
+    metadata {
+      platform 'aws'
+    }
+
+    ec2 = platform 'Amazon EC2' {
+      metadata {
+        uses 'amazon-ec2'
+      }
+      workloads = system 'Monitored EC2 workloads' {
+        description 'Slot for workloads running on monitored EC2 hosts; the reference does not identify specific applications.'
+      }
+    }
+    eks = platform 'Amazon EKS' {
+      metadata {
+        uses 'amazon-eks'
+      }
+      workloads = system 'Monitored EKS workloads' {
+        description 'Slot for workloads running on monitored EKS hosts; the reference does not identify specific applications.'
+      }
+    }
+    ecs = platform 'Amazon ECS' {
+      metadata {
+        uses 'amazon-ecs'
+      }
+      workloads = system 'Monitored ECS workloads' {
+        description 'Slot for workloads running on monitored ECS hosts; the reference does not identify specific applications.'
+      }
+    }
+    rosa = platform 'Red Hat OpenShift Service on AWS (ROSA)' {
+      metadata {
+        uses 'red-hat-openshift-service-on-aws'
+      }
+
+      otherRosaWorkloads = system 'Other ROSA workloads' {
+        description 'Slot for additional workloads monitored on ROSA; the reference does not name them.'
+      }
+      db2 = system 'IBM Db2 workload' {
+        description 'Example AWS workload whose traces and metrics are collected by Instana sensors.'
+        technology 'IBM Db2'
+      }
+      mq = system 'IBM MQ workload' {
+        description 'Example AWS workload whose traces and metrics are collected by Instana sensors.'
+        technology 'IBM MQ'
+      }
+    }
+
+    cloudwatch = platform 'Amazon CloudWatch' {
+      description 'AWS telemetry source for the services listed in the reference.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    sqs = platform 'Amazon SQS' {
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    msk = platform 'Amazon MSK' {
+      metadata {
+        uses 'amazon-msk'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    aurora = platform 'Amazon Aurora' {
+      metadata {
+        uses 'amazon-aurora'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+  }
+
+  instanaSaaS = zone 'IBM Instana SaaS boundary shown in the AWS diagram' {
+    description 'The source depicts IBM Instana SaaS in an AWS boundary but does not identify its underlying hosting products.'
+    metadata {
+      platform 'aws'
+    }
+
+    backend = system 'IBM Instana backend' {
+      description 'Receives aggregated sensor telemetry and sends alerts and events; the reference depicts a stream processor and UI backend.'
+      technology 'IBM Instana'
+    }
+    dashboards = system 'IBM Instana dashboards' {
+      description 'User interface used by SREs and developers to troubleshoot and find optimization opportunities.'
+      technology 'IBM Instana'
+    }
+  }
+
+  corporate = zone 'Corporate data center' {
+    metadata {
+      platform 'other'
+    }
+
+    workloads = system 'Corporate data-center workloads' {
+      description 'Slot for software systems hosted on corporate data-center servers; an Instana agent runs on each monitored host.'
+    }
+  }
+
+  operators -> instanaSaaS.dashboards 'Use for troubleshooting and optimization'
+  hostAgents -> aws.ec2.workloads 'Monitor workloads on each host'
+  hostAgents -> aws.eks.workloads 'Monitor workloads on each host'
+  hostAgents -> aws.ecs.workloads 'Monitor workloads on each host'
+  hostAgents -> corporate.workloads 'Run on monitored hosts in'
+  sensorRepositories -> hostAgents 'Provide dynamically loaded sensors to'
+  aws.sqs -> aws.cloudwatch 'Publishes telemetry to'
+  aws.msk -> aws.cloudwatch 'Publishes telemetry to'
+  aws.s3 -> aws.cloudwatch 'Publishes telemetry to'
+  aws.aurora -> aws.cloudwatch 'Publishes telemetry to'
+  aws.dynamodb -> aws.cloudwatch 'Publishes telemetry to'
+  aws.lambda -> aws.cloudwatch 'Publishes telemetry to'
+  aws.cloudwatch -> hostAgents 'Provides managed-service telemetry to sensors in'
+  aws.rosa.otherRosaWorkloads -> hostAgents 'Provides workload traces and metrics to sensors in'
+  aws.rosa.db2 -> hostAgents 'Provides workload traces and metrics to sensors in'
+  aws.rosa.mq -> hostAgents 'Provides workload traces and metrics to sensors in'
+  hostAgents -> instanaSaaS.backend 'Send aggregated sensor telemetry to'
+  instanaSaaS.backend -> instanaSaaS.dashboards 'Makes observability data available to'
+  instanaSaaS.backend -> alertChannels 'Delivers alerts and events through'
+  instanaSaaS.backend -> operators 'Sends alerts and events to'
+}
+
+views {
+  view index {
+    title 'IBM Instana Observability on AWS'
+    include *, aws.*, instanaSaaS.*, corporate.*
+  }
+}

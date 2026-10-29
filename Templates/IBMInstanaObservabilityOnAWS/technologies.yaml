@@ -1,0 +1,122 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-ec2
+    name: Amazon EC2
+    description: Compute hosts that run workloads monitored by an Instana host agent.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-eks
+    name: Amazon EKS
+    description: Managed Kubernetes hosts for workloads monitored by Instana agents.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eks/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ecs
+    name: Amazon ECS
+    description: Container orchestration service whose hosts can run Instana agents.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecs/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: red-hat-openshift-service-on-aws
+    name: Red Hat OpenShift Service on AWS (ROSA)
+    description: Managed OpenShift platform for monitored workloads such as ROSA, IBM Db2, and IBM MQ.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rosa/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: AWS telemetry source from which Instana sensors collect traces and metrics for managed services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-sqs
+    name: Amazon Simple Queue Service (Amazon SQS)
+    description: Managed queue service whose CloudWatch telemetry can be collected by Instana sensors.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sqs/
+    types: [managed-service]
+    platform: aws
+  - key: amazon-msk
+    name: Amazon Managed Streaming for Apache Kafka (Amazon MSK)
+    description: Managed Kafka service whose CloudWatch telemetry can be collected by Instana sensors.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/msk/
+    types: [managed-service, data-platform]
+    platform: aws
+  - key: amazon-s3
+    name: Amazon Simple Storage Service (Amazon S3)
+    description: Object storage service whose CloudWatch telemetry can be collected by Instana sensors.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-aurora
+    name: Amazon Aurora
+    description: Managed relational database service whose CloudWatch telemetry can be collected by Instana sensors.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Managed NoSQL database service whose CloudWatch telemetry can be collected by Instana sensors.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Serverless compute service whose CloudWatch telemetry can be collected by Instana sensors.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: ibm-instana
+    name: IBM Instana
+    description: Third-party observability service providing the SaaS backend and user interface shown in the reference.
+    vendor: IBM
+    url: https://www.ibm.com/products/instana
+    types: [third-party]
+  - key: ibm-instana-host-agent
+    name: IBM Instana host agent
+    description: Per-host agent that runs sensors, aggregates their telemetry, and sends it to the Instana backend.
+    vendor: IBM
+    url: https://www.ibm.com/products/instana
+    types: [third-party]
+  - key: ibm-instana-sensor-repository
+    name: IBM Instana sensor repositories
+    description: Repositories from which host agents dynamically obtain technology-specific sensors.
+    vendor: IBM
+    url: https://www.ibm.com/products/instana
+    types: [third-party]
+  - key: ibm-db2
+    name: IBM Db2
+    description: Example workload technology monitored by Instana sensors in the AWS environment.
+    vendor: IBM
+    url: https://www.ibm.com/products/db2
+    types: [third-party]
+  - key: ibm-mq
+    name: IBM MQ
+    description: Example workload technology monitored by Instana sensors in the AWS environment.
+    vendor: IBM
+    url: https://www.ibm.com/products/mq
+    types: [third-party]
+  - key: instana-alert-delivery-channels
+    name: APIs, webhooks, email, and instant messaging
+    description: Non-vendor-specific delivery methods named by the reference for Instana alerts and events.
+    types: [third-party]
