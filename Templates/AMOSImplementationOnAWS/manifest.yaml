@@ -1,0 +1,7 @@
+PackageId: OpenArch.AMOSImplementationOnAWS
+Name: AMOS Implementation on AWS
+Description: Highly available AWS deployment of the AMOS aircraft maintenance and engineering system with multi-AZ application and database failover, browser access, monitoring, patching, and secure remote connectivity.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, aviation, aircraft-maintenance, mro, amos]

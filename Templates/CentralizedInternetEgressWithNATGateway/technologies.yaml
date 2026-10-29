@@ -1,0 +1,35 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-vpc
+    name: Amazon VPC
+    description: Isolated virtual network for the spoke workloads and centralized egress resources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-transit-gateway
+    name: AWS Transit Gateway
+    description: Connects spoke VPCs to the centralized egress VPC and routes internet-bound traffic.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-nat-gateway
+    name: AWS NAT Gateway
+    description: Provides outbound internet access to private-subnet resources in the egress VPC.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/features/nat-gateway/
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-internet-gateway
+    name: AWS Internet Gateway
+    description: Connects the egress VPC to the public internet for NAT Gateway egress.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: terraform, name: hashicorp/aws}]

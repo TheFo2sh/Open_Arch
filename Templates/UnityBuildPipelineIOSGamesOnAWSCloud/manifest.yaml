@@ -1,0 +1,7 @@
+PackageId: OpenArch.UnityBuildPipelineIOSGamesOnAWSCloud
+Name: "Unity Build Pipeline: iOS Games on AWS Cloud"
+Description: A Jenkins-orchestrated Unity iOS build pipeline that prepares projects on Linux Spot workers and builds and signs them on EC2 Mac.
+Version: 1.0.0
+Icon: logos:jenkins
+Publisher: Open_Arch
+Tags: [aws, game-development, unity, ios, ci-cd]

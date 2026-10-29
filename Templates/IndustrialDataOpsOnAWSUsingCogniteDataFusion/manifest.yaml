@@ -1,0 +1,7 @@
+PackageId: OpenArch.IndustrialDataOpsOnAWSUsingCogniteDataFusion
+Name: Industrial DataOps on AWS using Cognite Data Fusion
+Description: Industrial DataOps architecture connecting industrial data sources, AWS analytics services, and Cognite Data Fusion.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, industrial-iot, dataops, cognite, manufacturing]

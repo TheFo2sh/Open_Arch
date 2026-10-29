@@ -1,0 +1,7 @@
+PackageId: OpenArch.RevenueManagementArchitectureForLodging
+Name: Revenue Management Architecture for Lodging
+Description: A tiered AWS data lake and revenue management architecture for lodging, combining batch and near real-time feeds, forecasting, analytics, booking controls, and reporting.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, hospitality, lodging, revenue-management, data-lake, analytics]

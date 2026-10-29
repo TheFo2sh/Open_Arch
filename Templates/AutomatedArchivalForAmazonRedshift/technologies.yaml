@@ -1,0 +1,91 @@
+technologies:
+  - key: amazon-redshift
+    name: Amazon Redshift
+    description: Data warehouse that ingests datasets and supplies the source data for archival and Spectrum queries.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/redshift/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-redshift-spectrum
+    name: Amazon Redshift Spectrum
+    description: Redshift capability used to query cold data in Amazon S3 and join it with datasets in the cluster.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/redshift/latest/dg/c-using-spectrum.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-rds
+    name: Amazon RDS
+    description: Relational database service holding the archival metadata queue and its table-period status.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-eventbridge
+    name: Amazon EventBridge
+    description: Schedules the archival queue processor at daily, weekly, or monthly intervals.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eventbridge/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the archival queue processor, SQS proxy, and inventory manifest normalization functions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sqs
+    name: Amazon SQS
+    description: Queues one archival message for each table and period due for archival.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sqs/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Orchestrates the Redshift unload, S3 export, metadata status update, and the depicted data deletion.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores partitioned cold-data exports, daily S3 Inventory manifests, and normalized manifests.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3-inventory
+    name: Amazon S3 Inventory
+    description: Generates a daily inventory report for the cold-data bucket and writes manifest files to an S3 bucket.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/AmazonS3/latest/userguide/storage-inventory.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3-glacier
+    name: Amazon S3 Glacier
+    description: S3 Glacier storage class used for cold archival data after the 90-day lifecycle transition.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/storage-classes/glacier/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
