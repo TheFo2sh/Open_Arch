@@ -1,0 +1,173 @@
+// Innovation Sandbox on AWS, based on AWS's implementation guide and high-level architecture.
+// The systems and users are slots to map onto a project's own architecture.
+model {
+  administrator = user 'Administrator' {
+    description 'Configures the solution and its account cleanup settings.'
+  }
+  manager = user 'Manager' {
+    description 'Oversees sandbox accounts, leases, and usage.'
+  }
+  sandboxUser = user 'Sandbox user' {
+    description 'Requests a temporary sandbox lease and uses the assigned AWS account.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    cognito = platform 'Amazon Cognito' {
+      description 'Authenticates portal users and provides tokens and temporary IAM credentials.'
+      metadata {
+        uses 'amazon-cognito'
+      }
+    }
+    identityCenter = platform 'AWS IAM Identity Center' {
+      description 'Federated identity, user groups, and the access portal for assigned sandbox accounts.'
+      metadata {
+        uses 'aws-iam-identity-center'
+      }
+    }
+    cloudfront = platform 'Amazon CloudFront' {
+      description 'Delivers the web interface stored in Amazon S3.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores the static web frontend and long-term log archives.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      webAssets = database 'Web frontend assets' {
+        description 'HTML, CSS, and JavaScript served through CloudFront.'
+      }
+      logArchive = database 'Long-term log archive' {
+        description 'Archived logs retained in S3 Standard for one year and then S3 Glacier for additional years.'
+      }
+      portal = system 'Innovation Sandbox portal' {
+        description 'Web interface for requesting leases, tracking accounts and costs, and accessing assigned accounts.'
+        web = container 'Web interface' {
+          description 'Static HTML, CSS, and JavaScript frontend served through CloudFront.'
+        }
+      }
+    }
+    waf = platform 'AWS WAF' {
+      description 'Protects the API Gateway REST API from common exploits.'
+      metadata {
+        uses 'aws-waf'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'REST API entry point; authorizes requests using IAM.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs API handlers and event-driven account lifecycle functions.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      backend = system 'Sandbox lifecycle backend' {
+        description 'Enforces group-based access and manages leases, accounts, and lifecycle operations.'
+        apiHandlers = container 'API handlers' {
+          description 'Reads and updates solution configuration and operational data for API requests.'
+        }
+        lifecycleHandlers = container 'Lifecycle handlers' {
+          description 'Processes lease thresholds, account status changes, and cleanup validation.'
+        }
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Persistent store for global settings and operational records.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      operationalData = database 'Sandbox operational data' {
+        description 'Lease preferences, cleanup and notification settings, maintenance mode, leases, accounts, templates, and principals.'
+      }
+    }
+    organizations = platform 'AWS Organizations' {
+      description 'Organizes existing sandbox accounts into OUs and applies service control policies.'
+      metadata {
+        uses 'aws-organizations'
+      }
+    }
+    eventBridge = platform 'Amazon EventBridge' {
+      description 'Routes domain events and triggers notification and lifecycle processing.'
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    ses = platform 'Amazon Simple Email Service' {
+      description 'Sends email notifications for lease budget or duration threshold events.'
+      metadata {
+        uses 'amazon-ses'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Orchestrates blueprint deployment and assignment workflows, including retries and error handling.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    codeBuild = platform 'AWS CodeBuild' {
+      description 'Runs the account cleanup job that removes user-created resources.'
+      metadata {
+        uses 'aws-codebuild'
+      }
+      cleanupJob = system 'Sandbox account cleanup job' {
+        description 'Deletes user-created resources and validates the account before reuse or quarantine.'
+        cleanup = container 'Resource cleanup' {
+          description 'Runs AWS Nuke using the configured resource filter.'
+          metadata {
+            uses 'aws-nuke'
+          }
+        }
+      }
+    }
+    cloudWatch = platform 'Amazon CloudWatch' {
+      description 'Retains compute logs for 90 days before long-term S3 archival.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    appConfig = platform 'AWS AppConfig' {
+      description 'Provides the AWS Nuke resource filter and post-cleanup validation exclusions.'
+      metadata {
+        uses 'aws-appconfig'
+      }
+    }
+  }
+
+  administrator -> aws.s3.portal 'Configures and administers'
+  manager -> aws.s3.portal 'Oversees sandbox usage through'
+  sandboxUser -> aws.s3.portal 'Requests and uses a sandbox through'
+  aws.s3.portal.web -> cognito 'Authenticates with'
+  cognito -> identityCenter 'Federates sign-in through SAML 2.0 to'
+  cloudfront -> aws.s3.portal.web 'Delivers the interface for'
+  cloudfront -> aws.s3.webAssets 'Fetches static assets from'
+  aws.s3.portal.web -> apiGateway 'Signs API requests with SigV4 and calls'
+  waf -> apiGateway 'Protects'
+  apiGateway -> aws.lambda.backend 'Routes authorized requests to'
+  aws.lambda.backend -> aws.dynamodb.operationalData 'Reads and writes'
+  aws.lambda.backend -> organizations 'Moves accounts between OUs governed by SCPs'
+  aws.lambda.backend -> eventBridge 'Publishes and handles domain events through'
+  eventBridge -> ses 'Triggers email notifications through'
+  aws.lambda.backend -> stepFunctions 'Starts multi-step workflows with'
+  stepFunctions -> aws.lambda.backend 'Orchestrates workflow tasks with'
+  aws.lambda.backend -> codeBuild.cleanupJob 'Invokes account cleanup in'
+  codeBuild.cleanupJob -> appConfig 'Reads cleanup filters and validation exclusions from'
+  aws.lambda.backend -> cloudWatch 'Writes compute logs to'
+  codeBuild.cleanupJob -> cloudWatch 'Writes compute logs to'
+  cloudWatch -> aws.s3.logArchive 'Archives logs to'
+  identityCenter -> aws.s3.portal 'Provides the SSO access-portal link for assigned accounts to'
+}
+
+views {
+  view index {
+    title 'Innovation Sandbox on AWS'
+    include *, aws.*
+  }
+}

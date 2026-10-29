@@ -1,0 +1,240 @@
+// Connected Medical Devices with AWS IoT, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/connected-medical-devices-iot/connected-medical-devices-iot.html
+// Read together with the repository's specification.c4. Systems and users are slots.
+model {
+  operator = user 'Operator/Tech' {
+    description 'Operates local applications for medical-device command and control.'
+  }
+  customerSupport = user 'Customer Support' {
+    description 'Receives event notifications in the architecture diagram.'
+  }
+  businessUser = user 'Business User' {
+    description 'Consumes analytics insights.'
+  }
+  dataEngineer = user 'Data Engineer/Scientist' {
+    description 'Works with the data lake and machine-learning workflow.'
+  }
+
+  thirdPartyApis = system 'Third-party API endpoints' {
+    description 'External API endpoints accessed through Amazon API Gateway; providers and API details are not specified.'
+    technology 'Third-party APIs'
+  }
+  manufacturerPki = system 'Manufacturer-hosted PKI services' {
+    description 'External PKI services referenced by the diagram; the provider and integration details are not specified.'
+    technology 'Manufacturer-hosted PKI services'
+  }
+
+  hospital = zone 'Hospital or Large Clinic' {
+    metadata {
+      platform 'other'
+    }
+
+    medicalDevices = system 'Medical devices' {
+      description 'Devices in the protected hospital or clinic network; AWS states these are not AWS IoT Things or cloud-connected devices.'
+    }
+    onPremApps = system 'On-premises applications' {
+      description 'Local applications used by operators and technicians for device command and control.'
+    }
+    greengrass = platform 'AWS IoT Greengrass' {
+      description 'Edge gateway runtime providing local processing, device management, and secure connectivity for the protected device network.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+
+      edgeGateway = system 'Edge gateway' {
+        description 'Linux or Windows gateway that proxies hospital devices and connects to AWS IoT Core and other AWS services.'
+      }
+      localLambda = platform 'AWS Lambda (local processing)' {
+        description 'Runs local processing functions on the Greengrass edge gateway.'
+        metadata {
+          uses 'aws-lambda'
+        }
+        localFunctions = system 'Local processing functions' {
+          description 'Functions used for local medical-device processing.'
+        }
+      }
+      docker = platform 'Docker' {
+        description 'Runs custom applications in containers on the edge gateway.'
+        metadata {
+          uses 'docker'
+        }
+        customApps = system 'Custom edge applications' {
+          description 'Custom applications running in Docker containers on the edge gateway.'
+        }
+      }
+    }
+  }
+
+  homeClinic = zone 'Small Clinic or Home' {
+    metadata {
+      platform 'other'
+    }
+
+    directDevices = system 'Directly connected medical devices' {
+      description 'Devices that connect directly to AWS over the internet or a VPN, as an alternative to the hospital edge-gateway pattern.'
+      freertos = container 'Amazon FreeRTOS device option' {
+        description 'Device software option shown for small clinics or homes.'
+        metadata {
+          uses 'amazon-freertos'
+        }
+      }
+      deviceSdk = container 'AWS IoT Device SDK option' {
+        description 'Alternative device software option shown for small clinics or homes.'
+        metadata {
+          uses 'aws-iot-device-sdk'
+        }
+      }
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Single secure API endpoint invoked by AWS IoT Greengrass for provisioning, AWS service access, and third-party API calls.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    cognito = platform 'Amazon Cognito' {
+      description 'Provides user authentication and authorization.'
+      metadata {
+        uses 'amazon-cognito'
+      }
+    }
+    iam = platform 'AWS Identity and Access Management (IAM)' {
+      description 'Provides identity and access management for AWS resources.'
+      metadata {
+        uses 'aws-iam'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the cloud functions shown for device metadata storage and updates.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      metadataOperations = system 'Device metadata operations' {
+        description 'Lambda functions that store and update medical-device metadata.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Stores metadata for medical devices.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      deviceMetadata = database 'Device metadata' {
+        description 'Medical-device metadata used to associate devices with data and video insights.'
+      }
+    }
+    iotCore = platform 'AWS IoT Core' {
+      description 'Handles cloud-based device provisioning and receives telemetry from edge and directly connected devices.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis' {
+      description 'Receives streaming video from medical devices; the specific Kinesis service is not identified.'
+      metadata {
+        uses 'amazon-kinesis'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores streaming video, procedure-generated files, and data lake content.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Medical device data lake' {
+        description 'Video and procedure-generated files stored in Amazon S3, with data linked to device metadata.'
+      }
+    }
+    glacier = platform 'Amazon Glacier' {
+      description 'Archive storage shown within the data lake in the diagram; the documented text does not describe its role or flows.'
+      metadata {
+        uses 'amazon-glacier'
+      }
+      archive = database 'Data lake archive' {
+        description 'Archive storage shown in the diagram; the data stored and retention behavior are unspecified.'
+      }
+    }
+    timestream = platform 'Amazon Timestream' {
+      description 'Stores device telemetry for historical analytics.'
+      metadata {
+        uses 'amazon-timestream'
+      }
+      telemetry = database 'Historical telemetry' {
+        description 'Time-series telemetry used for historical analytics.'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Performs ETL processing on data in the data lake.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Queries data lake content for analytics.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Visualizes analytics insights.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Trains machine-learning models and deploys them to the edge for inferencing.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+    iotEvents = platform 'AWS IoT Events' {
+      description 'Detects complex events from connected-device data.'
+      metadata {
+        uses 'aws-iot-events'
+      }
+    }
+    sns = platform 'Amazon SNS' {
+      description 'Publishes notifications for detected events.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+  }
+
+  operator -> hospital.onPremApps 'Uses for device command and control'
+  hospital.onPremApps -> hospital.greengrass.edgeGateway 'Uses the edge gateway to proxy devices'
+  hospital.medicalDevices -> hospital.greengrass.edgeGateway 'Connect outbound to the gateway only'
+  hospital.greengrass.edgeGateway -> aws.apiGateway 'Calls for provisioning and API access'
+  hospital.greengrass.edgeGateway -> aws.iotCore 'Sends telemetry using MQTT/HTTPS'
+  hospital.greengrass.edgeGateway -> aws.kinesis 'Streams medical-device video to'
+  hospital.greengrass.edgeGateway -> aws.s3.dataLake 'Uploads procedure-generated data files to'
+  hospital.greengrass.edgeGateway -> manufacturerPki 'Uses manufacturer-hosted PKI services for secure connectivity'
+  aws.apiGateway -> aws.cognito 'Uses for user authentication and authorization'
+  aws.iam -> aws.lambda.metadataOperations 'Manages access to AWS resources for'
+  aws.apiGateway -> aws.lambda.metadataOperations 'Invokes for device metadata operations'
+  aws.apiGateway -> thirdPartyApis 'Provides access to'
+  aws.lambda.metadataOperations -> aws.dynamodb.deviceMetadata 'Stores and updates'
+  homeClinic.directDevices -> aws.iotCore 'Connect directly over the internet or a VPN using MQTT/HTTPS'
+  aws.kinesis -> aws.s3.dataLake 'Persists streaming video in'
+  aws.s3.dataLake -> aws.dynamodb.deviceMetadata 'Links data and video insights with'
+  aws.iotCore -> aws.timestream.telemetry 'Stores telemetry for historical analytics in'
+  aws.iotCore -> aws.s3.dataLake 'Persists telemetry in'
+  aws.iotCore -> aws.iotEvents 'Provides device data for complex event detection in'
+  aws.iotEvents -> aws.sns 'Publishes event notifications through'
+  aws.s3.dataLake -> aws.glue 'Provides data for ETL processing by'
+  aws.athena -> aws.s3.dataLake 'Queries data in'
+  aws.athena -> aws.quickSight 'Provides query results for visualization in'
+  aws.s3.dataLake -> aws.sagemaker 'Provides data for model training'
+  aws.sagemaker -> hospital.greengrass.edgeGateway 'Deploys models for edge inferencing to'
+}
+
+views {
+  view index {
+    title 'Connected Medical Devices with AWS IoT'
+    include *, aws.*, hospital.*, hospital.greengrass.*, homeClinic.*
+  }
+}

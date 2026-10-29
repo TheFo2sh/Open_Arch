@@ -1,0 +1,142 @@
+// Synchronous data mesh for GraphQL queries, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/synchronous-data-mesh-graphql/synchronous-data-mesh-graphql.html
+model {
+  clients = user 'GraphQL clients' {
+    description 'Query domain APIs or subscribe to large data sets.'
+  }
+
+  aws = zone 'AWS domain' {
+    metadata {
+      platform 'aws'
+    }
+
+    appSync = platform 'AWS AppSync' {
+      description 'Exposes the domain GraphQL API over HTTPS and can provide server-side caching.'
+      metadata {
+        uses 'aws-appsync'
+      }
+      api = system 'Domain GraphQL API' {
+        description 'The domain API queried by clients; its schema and resolver details are project-specific.'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      description 'Runs resolver functions for Athena, database proxy, and external HTTP data sources.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      resolvers = system 'Lambda resolvers' {
+        description 'Resolver functions that retrieve data for the domain GraphQL API.'
+        athenaResolver = container 'Athena query resolver' {
+          description 'Runs asynchronous Athena queries using athena-express.'
+          metadata {
+            uses 'athena-express'
+          }
+        }
+        databaseProxy = container 'Database proxy resolvers' {
+          description 'Optional proxy resolvers for database sources.'
+        }
+        externalResolver = container 'External HTTP resolver' {
+          description 'Fetches data by invoking a remote HTTP API.'
+        }
+      }
+    }
+
+    athena = platform 'Amazon Athena' {
+      description 'Runs SQL queries against data in the data lake.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      lakeData = database 'Data lake data' {
+        description 'Data queried by Athena; its format and layout are not specified.'
+      }
+    }
+
+    glue = platform 'AWS Glue Data Catalog' {
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      catalog = database 'Data lake catalog' {
+        description 'Catalog metadata used by Athena; its schema is not specified.'
+      }
+    }
+
+    aurora = platform 'Amazon Aurora' {
+      metadata {
+        uses 'amazon-aurora'
+      }
+      relationalData = database 'Relational database' {
+        description 'A relational data source for direct or Lambda-proxy resolvers.'
+      }
+    }
+
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      keyValueData = database 'Key-value database' {
+        description 'A key-value data source for direct or Lambda-proxy resolvers.'
+      }
+    }
+
+    dataExchange = platform 'AWS Data Exchange' {
+      description 'Separate sharing and subscription path for large datasets.'
+      metadata {
+        uses 'aws-data-exchange'
+      }
+    }
+  }
+
+  peerAws = zone 'Peer AWS domain' {
+    metadata {
+      platform 'aws'
+    }
+    appSync = platform 'AWS AppSync' {
+      description 'A peer domain can expose its own GraphQL API using AppSync.'
+      metadata {
+        uses 'aws-appsync'
+      }
+      api = system 'Peer AWS-domain GraphQL API' {
+        description 'An independently owned peer API; its schema and resolvers are not specified.'
+      }
+    }
+  }
+
+  other = zone 'Non-AWS domain' {
+    metadata {
+      platform 'other'
+    }
+    api = system 'Non-AWS GraphQL API' {
+      description 'A peer GraphQL API built with technology not specified by AWS.'
+    }
+  }
+
+  remoteHttpApi = system 'Remote HTTP API' {
+    description 'An external data source called by a Lambda resolver; its provider and implementation are unspecified.'
+  }
+  dataExchangeConsumer = system 'Large-dataset consumer' {
+    description 'Consumer-side slot for AWS Data Exchange subscriptions; the delivery implementation is unspecified.'
+  }
+
+  clients -> aws.appSync.api 'Queries over HTTPS'
+  clients -> peerAws.appSync.api 'Queries the peer domain'
+  clients -> other.api 'Queries the non-AWS domain'
+  clients -> dataExchangeConsumer 'Subscribes to large datasets'
+
+  aws.appSync.api -> aws.lambda.resolvers 'Invokes Lambda resolvers'
+  aws.lambda.resolvers.athenaResolver -> aws.athena 'Runs asynchronous SQL queries'
+  aws.athena -> aws.s3.lakeData 'Queries data in'
+  aws.athena -> aws.glue.catalog 'Reads table metadata from'
+  aws.appSync.api -> aws.aurora.relationalData 'Can resolve directly from'
+  aws.appSync.api -> aws.dynamodb.keyValueData 'Can resolve directly from'
+  aws.lambda.resolvers.databaseProxy -> aws.aurora.relationalData 'Can proxy queries to'
+  aws.lambda.resolvers.databaseProxy -> aws.dynamodb.keyValueData 'Can proxy queries to'
+  aws.lambda.resolvers.externalResolver -> remoteHttpApi 'Fetches data over HTTP from'
+  aws.dataExchange -> dataExchangeConsumer 'Makes large datasets available to'
+}

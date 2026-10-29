@@ -1,0 +1,72 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+technologies:
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: DNS service shown in the reference diagram; its specific role is not described in the numbered flow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Virtual network boundary containing the depicted control, public, and private subnets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-internet-gateway
+    name: AWS Internet Gateway
+    description: Internet gateway connecting the VPC to the public internet.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Dedicated network connection shown as an option for corporate-network access to the AWS environment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-site-to-site-vpn
+    name: AWS Site-to-Site VPN
+    description: VPN connection shown as an alternative for corporate-network access to the AWS environment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon Elastic Compute Cloud
+    description: EC2 instances host the Avaya Aura roles across two Availability Zones.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-workspaces
+    name: Amazon WorkSpaces
+    description: Managed desktop service used as a simplified bastion host for management activities.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/workspaces/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: aws-directory-service
+    name: AWS Directory Service
+    description: Unified directory service for user creation.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directoryservice/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: avaya-aura
+    name: Avaya Aura
+    description: Third-party unified communications software whose roles are hosted on Amazon EC2.
+    vendor: Avaya
+    url: https://www.avaya.com/en/products/unified-communications/
+    types: [library, third-party]
