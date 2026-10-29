@@ -1,0 +1,151 @@
+// DERMS on AWS for Utilities, after AWS's reference architecture
+// (https://docs.aws.amazon.com/reference-architecture-diagrams/latest/derms-on-aws-for-utilities/derms-on-aws-for-utilities.html).
+// Systems and users are slots. The source describes options rather than a deployable infrastructure design.
+model {
+  operator = user 'Utility operators and analysts' {
+    description 'Use the DERMS and access analytics dashboards.'
+  }
+
+  dataSources = system 'Customer and grid data sources' {
+    description 'Customer, grid, meter, market-price, and weather data; batch and streaming sources.'
+  }
+  derAssets = system 'Distributed energy resources' {
+    description 'External DER assets that provide measurements and may receive control commands.'
+  }
+  scadaAdms = system 'SCADA and/or ADMS' {
+    description 'External utility operational systems receiving DERMS recommendations; AWS does not specify which are present.'
+  }
+  partnerModels = system 'Partner or utility ML models' {
+    description 'Optional models from a partner or the utility, as shown in the reference diagram.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    storageGateway = platform 'AWS Storage Gateway' {
+      metadata {
+        uses 'aws-storage-gateway'
+      }
+    }
+    iot = platform 'AWS IoT services' {
+      description 'AWS does not identify a specific IoT service.'
+      metadata {
+        uses 'aws-iot-services'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis' {
+      metadata {
+        uses 'amazon-kinesis'
+      }
+    }
+    transferFamily = platform 'AWS Transfer Family' {
+      description 'One of the batch and file integration options in the source text.'
+      metadata {
+        uses 'aws-transfer-family'
+      }
+    }
+    applicationIntegration = platform 'AWS application integration services' {
+      description 'Integration services such as API Gateway, SNS, SQS, or EventBridge; the selected option is unspecified.'
+      metadata {
+        uses 'aws-application-integration'
+      }
+    }
+
+    compute = platform 'AWS compute services' {
+      description 'Generic compute shown in the diagram. EC2, Lambda, and AWS container services are documented alternatives, not a selected deployment.'
+      metadata {
+        uses 'aws-compute-services'
+      }
+      derms = system 'Vendor DERMS application' {
+        description 'Vendor-supplied application for managing the utility fleet of distributed energy resources.'
+      }
+    }
+    databases = platform 'AWS purpose-built database services' {
+      description 'The database products and engines for transactional and operational data are not specified.'
+      metadata {
+        uses 'aws-database-services'
+      }
+      operationalData = database 'DERMS transactional and operational data' {
+        description 'Associated DERMS data sets; database engine and access patterns are unspecified.'
+      }
+    }
+
+    glue = platform 'AWS Glue' {
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Raw, curated, and archived data lake' {
+        description 'Low-cost storage for raw and curated data, with archival copies for retention and compliance.'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      metadata {
+        uses 'amazon-redshift'
+      }
+      warehouse = database 'Analytics data warehouse' {
+        description 'Structured and semi-structured data queried for analytics.'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      metadata {
+        uses 'amazon-quicksight'
+      }
+      dashboards = system 'Utility analytics dashboards' {
+        description 'Interactive dashboards available on devices or embedded in applications and websites.'
+      }
+    }
+    forecast = platform 'Amazon Forecast' {
+      description 'Pre-trained ML for grid anomalies, energy usage forecasts, and equipment failure prediction.'
+      metadata {
+        uses 'amazon-forecast'
+      }
+    }
+    sageMaker = platform 'Amazon SageMaker AI' {
+      description 'Build, train, and deploy utility-specific ML models.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+  }
+
+  operator -> aws.compute.derms 'Uses'
+  operator -> aws.quickSight.dashboards 'Views'
+
+  dataSources -> aws.storageGateway 'Ingests data through'
+  dataSources -> aws.transferFamily 'May transfer batch data through'
+  aws.transferFamily -> aws.compute.derms 'Transfers batch inputs to'
+  dataSources -> aws.kinesis 'Streams real-time data through'
+  aws.kinesis -> aws.compute.derms 'Streams telemetry to'
+  derAssets -> aws.iot 'Sends measurements through'
+  aws.iot -> aws.compute.derms 'Provides DER telemetry to'
+  aws.compute.derms -> aws.iot 'Sends direct DER controls through'
+  aws.iot -> derAssets 'Controls'
+
+  aws.compute.derms -> aws.databases.operationalData 'Reads and writes'
+  aws.compute.derms -> aws.applicationIntegration 'Exchanges API and event messages through'
+  aws.applicationIntegration -> scadaAdms 'Delivers recommendations to'
+  aws.applicationIntegration -> derAssets 'May carry API-based control commands to'
+
+  aws.storageGateway -> aws.s3.dataLake 'Stores data in'
+  aws.kinesis -> aws.s3.dataLake 'Feeds streaming data to'
+  aws.glue -> aws.s3.dataLake 'Transforms and catalogs'
+  aws.s3.dataLake -> aws.redshift.warehouse 'Supplies data for SQL analytics'
+  aws.redshift.warehouse -> aws.quickSight.dashboards 'Supplies dashboard data to'
+  aws.s3.dataLake -> aws.forecast 'Provides data for forecasts'
+  aws.s3.dataLake -> aws.sageMaker 'Provides data for model training'
+  partnerModels -> aws.sageMaker 'May integrate with; details are unspecified'
+}
+
+views {
+  view index {
+    title 'DERMS on AWS for Utilities'
+    include *, aws.*
+  }
+}

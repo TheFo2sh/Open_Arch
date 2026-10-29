@@ -1,0 +1,7 @@
+PackageId: OpenArch.ConnectedMedicalDevicesWithAWSIoT
+Name: Connected Medical Devices with AWS IoT
+Description: A connected medical-device architecture using AWS IoT Greengrass for edge connectivity and AWS services for device management, data, analytics, and machine learning.
+Version: 1.0.0
+Icon: fa6-solid:heart-pulse
+Publisher: Open_Arch
+Tags: [aws, healthcare, medical-devices, iot, edge-computing]

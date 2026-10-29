@@ -1,0 +1,148 @@
+// AMOS Implementation on AWS, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/amos-implementation/amos-implementation.html
+// The linked diagram is aws-reference-architecture-migration-airlines-amos-ra.png.
+// The systems and users are slots to map to the applying project's own systems and users.
+model {
+  remoteUsers = user 'Remote AMOS users and administrators' {
+    description 'Access AMOS through an HTML5 browser session.'
+  }
+  directUsers = user 'Direct-connection users' {
+    description 'Connect to AMOS through the documented secure channel when direct access is required.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    appstream = platform 'Amazon AppStream 2.0' {
+      description 'Provides HTML5 browser access to the AMOS application and directs sessions to the standby application on failover.'
+      metadata {
+        uses 'amazon-appstream-2-0'
+      }
+    }
+    directoryService = platform 'AWS Directory Service' {
+      description 'Provides user authentication for AMOS.'
+      metadata {
+        uses 'aws-directory-service'
+      }
+    }
+    route53 = platform 'Amazon Route 53' {
+      description 'Provides DNS translation; the reference does not specify the DNS records or their targets.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    clientVpn = platform 'AWS Client VPN' {
+      description 'Secure channel for users who require direct connection to AMOS.'
+      metadata {
+        uses 'aws-client-vpn'
+      }
+    }
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Used with AWS Client VPN for the documented secure direct-access path.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+
+    vpc = platform 'Amazon VPC' {
+      description 'Contains private subnets in two Availability Zones: production in Availability Zone 1 and failover in Availability Zone 2.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      productionAppEc2 = platform 'Amazon EC2 — production application, Availability Zone 1' {
+        description 'Production AMOS application instance in a private subnet.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        primaryApp = system 'AMOS primary application' {
+          description 'Primary AMOS MRO application deployment in the production Availability Zone.'
+        }
+      }
+      productionDbEc2 = platform 'Amazon EC2 — production database, Availability Zone 1' {
+        description 'Production AMOS database instance in a private subnet; its database engine is not specified.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        primaryDb = database 'AMOS primary database' {
+          description 'Primary AMOS database; AWS lists supported engines but does not choose one for this architecture.'
+        }
+      }
+      failoverAppEc2 = platform 'Amazon EC2 — standby application, Availability Zone 2' {
+        description 'Standby AMOS application instance in a private subnet, ready for failover; AMOS is not load balanced.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        standbyApp = system 'AMOS standby application' {
+          description 'Standby AMOS MRO application deployment, replicated with the AMOS-native solution.'
+        }
+      }
+      failoverDbEc2 = platform 'Amazon EC2 — standby database, Availability Zone 2' {
+        description 'Standby AMOS database instance in a private subnet; its database engine is not specified.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        standbyDb = database 'AMOS standby database' {
+          description 'Standby copy maintained with the selected database engine native replication tools.'
+        }
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Stores AMOS application binaries, database devices, web drivers, and backups.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      assets = database 'AMOS binaries, database devices, web drivers, and backups' {
+        description 'Object-storage contents; AWS does not specify bucket layout, retention, or transfer mechanisms.'
+      }
+    }
+    cloudwatch = platform 'Amazon CloudWatch' {
+      description 'Monitors AMOS servers and the surrounding ecosystem.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    systemsManager = platform 'AWS Systems Manager' {
+      description 'Manages operating system patching for the Amazon EC2 instances.'
+      metadata {
+        uses 'aws-systems-manager'
+      }
+    }
+  }
+
+  remoteUsers -> aws.vpc.productionAppEc2.primaryApp 'Accesses through an HTML5 browser session on Amazon AppStream 2.0'
+  directUsers -> aws.vpc.productionAppEc2.primaryApp 'Connects through AWS Client VPN with AWS Direct Connect'
+  aws.route53 -> aws.appstream 'Provides DNS translation for browser access'
+  aws.appstream -> aws.vpc.productionAppEc2.primaryApp 'Provides HTML5 browser access to'
+  aws.appstream -> aws.vpc.failoverAppEc2.standbyApp 'Directs sessions to on failover'
+  aws.directoryService -> aws.vpc.productionAppEc2.primaryApp 'Authenticates AMOS users for'
+  aws.directConnect -> aws.clientVpn 'Provides connectivity used with'
+  aws.clientVpn -> aws.vpc.productionAppEc2.primaryApp 'Provides the secure direct-access channel to'
+  aws.vpc.productionAppEc2.primaryApp -> aws.vpc.failoverAppEc2.standbyApp 'Replicates application state with the AMOS-native solution; the specific mechanism is not described'
+  aws.vpc.productionDbEc2.primaryDb -> aws.vpc.failoverDbEc2.standbyDb 'Replicates across Availability Zones using native tools for the selected database engine'
+  aws.vpc.productionAppEc2.primaryApp -> aws.vpc.productionDbEc2.primaryDb 'Uses the production database; connection details are not specified'
+  aws.vpc.failoverAppEc2.standbyApp -> aws.vpc.failoverDbEc2.standbyDb 'Uses the standby database after failover; connection details are not specified'
+  aws.vpc.productionAppEc2.primaryApp -> aws.vpc.failoverAppEc2.standbyApp 'On failover, remaps the primary Elastic Network Interface to the standby instance'
+  aws.s3 -> aws.vpc.productionAppEc2.primaryApp 'Provides AMOS application binaries and web drivers'
+  aws.s3 -> aws.vpc.failoverAppEc2.standbyApp 'Provides AMOS application binaries and web drivers'
+  aws.vpc.productionDbEc2.primaryDb -> aws.s3 'Uses S3 for database devices and backups; transfer details are not specified'
+  aws.vpc.failoverDbEc2.standbyDb -> aws.s3 'Uses S3 for database devices and backups; transfer details are not specified'
+  aws.cloudwatch -> aws.vpc.productionAppEc2.primaryApp 'Monitors the AMOS server'
+  aws.cloudwatch -> aws.vpc.productionDbEc2.primaryDb 'Monitors the AMOS server'
+  aws.cloudwatch -> aws.vpc.failoverAppEc2.standbyApp 'Monitors the AMOS server'
+  aws.cloudwatch -> aws.vpc.failoverDbEc2.standbyDb 'Monitors the AMOS server'
+  aws.systemsManager -> aws.vpc.productionAppEc2.primaryApp 'Manages operating system patching for'
+  aws.systemsManager -> aws.vpc.productionDbEc2.primaryDb 'Manages operating system patching for'
+  aws.systemsManager -> aws.vpc.failoverAppEc2.standbyApp 'Manages operating system patching for'
+  aws.systemsManager -> aws.vpc.failoverDbEc2.standbyDb 'Manages operating system patching for'
+}
+
+views {
+  view index {
+    title 'AMOS Implementation on AWS'
+    include *
+  }
+}

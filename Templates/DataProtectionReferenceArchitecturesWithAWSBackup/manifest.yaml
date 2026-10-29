@@ -1,0 +1,7 @@
+PackageId: OpenArch.DataProtectionReferenceArchitecturesWithAWSBackup
+Name: Data Protection Reference Architectures with AWS Backup
+Description: AWS Backup patterns for cloud-native protection, cross-account and Region copies, landing-zone integration, and immutable backup vaults.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, backup, data-protection, security]
