@@ -1,0 +1,66 @@
+# Technologies named in the blueprint; vendor-neutral services remain third-party slots.
+technologies:
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Object storage for the guest activity data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-glue
+    name: AWS Glue
+    description: Catalogs and curates data for the guest activity data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-emr
+    name: Amazon EMR
+    description: Processes and curates data lake datasets using open standards.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/emr/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Operational data store for guest profiles and guest 360 service data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-pinpoint
+    name: Amazon Pinpoint
+    description: Supports outbound guest campaigns with Amazon Personalize.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/pinpoint/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-personalize
+    name: Amazon Personalize
+    description: Personalizes outbound campaigns and inbound web and mobile experiences.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/personalize/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: master-data-management
+    name: Master Data Management (MDM)
+    description: Vendor-neutral MDM capability for matching purchase and registration attributes into unified guest profiles.
+    types: [third-party]
+  - key: customer-data-platform
+    name: Customer Data Platform (CDP)
+    description: Vendor-neutral CDP capability for tag-managed digital activity, guest identity, campaign activation, and measurement.
+    types: [third-party]
+  - key: demand-side-platform
+    name: Demand-side platform (DSP)
+    description: Vendor-neutral advertising platform integrated with the CDP for customer acquisition campaigns.
+    types: [third-party]
+  - key: advertising-exchange
+    name: Advertising exchange
+    description: Vendor-neutral advertising exchange used with DSP integrations for campaign delivery and measurement.
+    types: [third-party]

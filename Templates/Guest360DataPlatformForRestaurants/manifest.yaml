@@ -1,0 +1,7 @@
+PackageId: OpenArch.Guest360DataPlatformForRestaurants
+Name: Guest 360 Data Platform for Restaurants
+Description: Unifies restaurant, loyalty, and digital guest activity to support personalized offers, campaigns, and customer acquisition.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, hospitality, restaurants, customer-data-platform, personalization]
