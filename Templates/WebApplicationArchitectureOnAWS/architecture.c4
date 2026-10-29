@@ -1,0 +1,130 @@
+// Web Application Architecture on AWS, after the AWS reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/web-application-architecture/web-application-architecture.html
+// Systems and users are slots; applying the template maps them onto the project's own.
+model {
+  webClient = user 'Web client' {
+    description 'Accesses the web application.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      description 'Resolves the application domain to its web endpoints.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    cloudfront = platform 'Amazon CloudFront' {
+      description 'Delivers static content and forwards web requests.'
+      metadata {
+        uses 'amazon-cloudfront'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores static content and backups.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    waf = platform 'AWS WAF' {
+      description 'Protects web access from common exploits.'
+      metadata {
+        uses 'aws-waf'
+      }
+    }
+    acm = platform 'AWS Certificate Manager' {
+      description 'Manages certificates for secure web access.'
+      metadata {
+        uses 'aws-certificate-manager'
+      }
+    }
+    publicAlb = platform 'Internet-facing Application Load Balancer' {
+      description 'Distributes web traffic to the web tier across Availability Zones.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+    internalAlb = platform 'Internal Application Load Balancer' {
+      description 'Distributes requests from the web tier to application servers across Availability Zones.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+    nat = platform 'NAT gateways' {
+      description 'One NAT gateway in each public subnet provides internet egress for EC2 instances in private subnets.'
+      metadata {
+        uses 'amazon-vpc-nat-gateway'
+      }
+    }
+
+    ec2 = platform 'Amazon EC2 Auto Scaling' {
+      description 'Runs the web and application server tiers in private subnets across multiple Availability Zones.'
+      metadata {
+        uses 'amazon-ec2-auto-scaling'
+      }
+
+      webApplication = system 'Web application' {
+        description 'Application system slot hosted across the web and application server tiers.'
+
+        webTier = container 'Web servers' {
+          description 'Web server instances in an Auto Scaling group across multiple Availability Zones.'
+        }
+        applicationTier = container 'Application servers' {
+          description 'Application server instances in a separate Auto Scaling group across multiple Availability Zones.'
+        }
+      }
+    }
+
+    rds = platform 'Amazon RDS' {
+      description 'Managed relational database tier; the source diagram depicts primary and standby databases across Availability Zones.'
+      metadata {
+        uses 'amazon-rds'
+      }
+      applicationDatabase = database 'Application database' {
+        description 'Relational database; the source does not specify an engine or schema.'
+      }
+    }
+    elasticache = platform 'Amazon ElastiCache' {
+      description 'Optional caching tier for read-heavy database access patterns.'
+      metadata {
+        uses 'amazon-elasticache'
+      }
+      cache = database 'Application cache' {
+        description 'Optional cache for database reads; cache technology and data policy are unspecified.'
+      }
+    }
+    efs = platform 'Amazon EFS' {
+      description 'Optional shared file system for servers that need shared files.'
+      metadata {
+        uses 'amazon-efs'
+      }
+    }
+  }
+
+  webClient -> aws.ec2.webApplication 'Uses'
+  aws.route53 -> aws.cloudfront 'Resolves the application domain to'
+  aws.waf -> aws.cloudfront 'Protects web requests to'
+  aws.cloudfront -> aws.s3 'Delivers static content from'
+  aws.cloudfront -> aws.publicAlb 'Forwards web requests to'
+  aws.acm -> aws.cloudfront 'Manages certificates for'
+  aws.acm -> aws.publicAlb 'Manages certificates for'
+  aws.publicAlb -> aws.ec2.webApplication.webTier 'Balances web traffic across'
+  aws.ec2.webApplication.webTier -> aws.internalAlb 'Sends application requests to'
+  aws.internalAlb -> aws.ec2.webApplication.applicationTier 'Balances requests across'
+  aws.ec2.webApplication.webTier -> aws.nat 'Uses for outbound internet access'
+  aws.ec2.webApplication.applicationTier -> aws.nat 'Uses for outbound internet access'
+  aws.ec2.webApplication.applicationTier -> aws.rds.applicationDatabase 'Reads from and writes to'
+  aws.ec2.webApplication.applicationTier -> aws.elasticache.cache 'Uses when read-heavy caching is needed'
+  aws.ec2.webApplication.webTier -> aws.efs 'Uses when shared files are needed'
+  aws.ec2.webApplication.applicationTier -> aws.efs 'Uses when shared files are needed'
+}
+
+views {
+  view index {
+    title 'Web Application Architecture on AWS'
+    include *, aws.*, aws.ec2.*, aws.ec2.webApplication.*
+  }
+}
