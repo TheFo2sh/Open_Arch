@@ -1,0 +1,164 @@
+# The AWS services named by the blueprint, by the key its metadata { uses } names them by.
+technologies:
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Routes API requests by path at edge locations to support incremental migration of legacy operations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: Selects the lowest-latency AWS Region for API requests.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Exposes regional REST or SOAP APIs using CQRS for queries and commands.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-eventbridge
+    name: Amazon EventBridge
+    description: Event bus for asynchronous commands, external-system events, and application logic and data-change events.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eventbridge/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs transactional functions, CQRS handlers, and event-driven logic.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ecs-fargate
+    name: Amazon ECS on AWS Fargate
+    description: Runs long-running container workloads without managing servers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fargate/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Orchestrates saga workflows for distributed transactions and eventual consistency.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-augmented-ai
+    name: Amazon Augmented AI (Amazon A2I)
+    description: Machine-learning service shown in the AWS diagram; the specific workflow is not described.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/augmented-ai/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Key-value data store; DynamoDB Global Tables replicate tables across Regions and support multi-Region writes.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-dax
+    name: Amazon DynamoDB Accelerator (DAX)
+    description: In-memory cache shown in front of the DynamoDB single-view store.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/dax/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-aurora-global-database
+    name: Amazon Aurora Global Database
+    description: Relational database across Regions with a primary writer cluster and replicated secondary clusters.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/global-database/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-rds-proxy
+    name: Amazon RDS Proxy
+    description: Database proxy shown in front of the Aurora report database.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/proxy/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores ingestion data and the data lake; S3 Cross-Region Replication copies objects to another Region.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-lake-formation
+    name: AWS Lake Formation
+    description: Data-lake service shown with the S3 analytics and machine-learning layer.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lake-formation/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3-access-points
+    name: Amazon S3 Access Points
+    description: Access interface shown for the S3 data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/features/access-points/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-storage-gateway
+    name: AWS Storage Gateway
+    description: Connects the external file system shown in the diagram to S3 ingestion.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/storagegateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-database-migration-service
+    name: AWS Database Migration Service
+    description: Captures database change events from an external system of record.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dms/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-kinesis
+    name: Amazon Kinesis
+    description: Carries database change events from AWS DMS to the S3 ingestion layer; the specific Kinesis product is not stated.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
