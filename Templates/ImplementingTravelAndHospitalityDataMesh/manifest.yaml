@@ -1,0 +1,7 @@
+PackageId: OpenArch.ImplementingTravelAndHospitalityDataMesh
+Name: Implementing Travel and Hospitality Data Mesh
+Description: A domain-owned AWS data mesh that stages producer data in S3, governs and catalogs datasets, and supports consumer analytics, reporting, and recommendations.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, data-mesh, travel, hospitality, analytics, data-governance]
