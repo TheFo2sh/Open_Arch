@@ -1,0 +1,198 @@
+// Identify Product Defects using Industrial Computer Vision, after AWS's October 10, 2024 reference architecture.
+// Systems and users are slots mapped onto the project's own when the template is applied.
+model {
+  administrators = user 'Administrators' {
+    description 'Manage defect detection models through the model management interface.'
+  }
+  dataScientists = user 'Data scientists' {
+    description 'Manage and review defect detection models.'
+  }
+  businessUsers = user 'Business users' {
+    description 'Receive confidence-based notifications, review results, and label undetected data.'
+  }
+
+  shopFloor = zone 'Shop floor' {
+    metadata {
+      platform 'other'
+    }
+
+    imageDevices = system 'Product imaging devices' {
+      description 'X-ray machines, cameras, and other devices capture product images under consistent conditions.'
+    }
+    mes = system 'Manufacturing execution system (MES)' {
+      description 'Existing shop-floor MES that receives final inspection results; its product and interface are unspecified.'
+    }
+  }
+
+  edge = zone 'Edge tier' {
+    metadata {
+      platform 'other'
+    }
+
+    greengrass = platform 'AWS IoT Greengrass' {
+      description 'Edge image transfer option for devices that use an edge runtime.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+
+      edgeTransfer = system 'Edge image transfer' {
+        description 'Project system slot for the edge transfer process; AWS does not specify its configuration.'
+      }
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    transferFamily = platform 'AWS Transfer Family' {
+      description 'One of the documented alternatives for transferring product images to AWS.'
+      metadata {
+        uses 'aws-transfer-family'
+      }
+    }
+    dataSync = platform 'AWS DataSync' {
+      description 'One of the documented alternatives for transferring product images to AWS.'
+      metadata {
+        uses 'aws-datasync'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores product image datasets and final inference results.'
+      metadata {
+        uses 'amazon-s3'
+      }
+
+      imageDatasets = database 'Product image train and test datasets' {
+        description 'Product images separated into training and testing datasets.'
+      }
+      inferenceResults = database 'Final inference results' {
+        description 'Results from interactive and batch defect detection for visualization and MES writeback.'
+      }
+    }
+    lookout = platform 'Amazon Lookout for Vision' {
+      description 'Labels, trains, tunes, and deploys the defect detection model.'
+      metadata {
+        uses 'amazon-lookout-for-vision'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs model management, inference, workflow, and result integration functions.'
+      metadata {
+        uses 'aws-lambda'
+      }
+
+      modelManagement = system 'Model management functions' {
+        description 'Project system slot for model management operations used by administrators and data scientists.'
+      }
+      runtimeLauncher = system 'Runtime and batch launcher functions' {
+        description 'Starts the Step Functions runtime workflow and submits batch inference jobs.'
+      }
+      inference = system 'Inference function' {
+        description 'Starts the deployed defect detection model for runtime inference.'
+      }
+      publishConfidence = system 'Confidence notification function' {
+        description 'Publishes inference confidence notifications to Amazon SNS.'
+      }
+      storeResults = system 'Inference result publisher' {
+        description 'Stores runtime inference results in Amazon S3.'
+      }
+      mesWriteback = system 'MES result writeback function' {
+        description 'Writes final inference results back to the shop-floor MES.'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Exposes model management operations for administrators and data scientists.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Orchestrates the serverless runtime inference workflow with Lambda.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+
+      inferenceWorkflow = system 'Runtime inference workflow' {
+        description 'Project system slot for the Step Functions workflow coordinating Lambda inference and result handling.'
+      }
+    }
+    batch = platform 'AWS Batch' {
+      description 'Submits batch anomaly-detection jobs.'
+      metadata {
+        uses 'aws-batch'
+      }
+    }
+    fargate = platform 'AWS Fargate' {
+      description 'Provides compute for AWS Batch jobs.'
+      metadata {
+        uses 'aws-fargate'
+      }
+
+      batchInference = system 'Batch inference job' {
+        description 'Project system slot for batch anomaly detection running on Fargate.'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      description 'Delivers confidence-based inference notifications to business users.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    confidenceReview = system 'Confidence review and labeling' {
+      description 'Project system slot for human review and labeling of undetected data when confidence is below the required threshold.'
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Visualizes final inference results for business users.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+
+      resultsDashboard = system 'Defect results dashboard' {
+        description 'Project system slot for business-user visualization of final inference results.'
+      }
+    }
+  }
+
+  shopFloor.imageDevices -> aws.transferFamily 'Transfers images through one documented option'
+  shopFloor.imageDevices -> aws.dataSync 'Transfers images through an alternative documented option'
+  shopFloor.imageDevices -> edge.greengrass.edgeTransfer 'Transfers edge-device images through'
+  edge.greengrass.edgeTransfer -> aws.s3.imageDatasets 'Stores transferred images in'
+  aws.transferFamily -> aws.s3.imageDatasets 'Stores transferred images in'
+  aws.dataSync -> aws.s3.imageDatasets 'Stores transferred images in'
+  aws.s3.imageDatasets -> aws.lookout 'Provides training images for'
+  aws.lookout -> aws.lambda.modelManagement 'Makes model management available through'
+  aws.lambda.modelManagement -> aws.apiGateway 'Exposes model operations through'
+  administrators -> aws.lambda.modelManagement 'Manage defect models with'
+  dataScientists -> aws.lambda.modelManagement 'Manage defect models with'
+
+  aws.s3.imageDatasets -> aws.stepFunctions.inferenceWorkflow 'Provides test images to'
+  aws.lambda.runtimeLauncher -> aws.stepFunctions.inferenceWorkflow 'Starts'
+  aws.stepFunctions.inferenceWorkflow -> aws.lambda.inference 'Coordinates runtime inference with'
+  aws.lambda.inference -> aws.lookout 'Starts the deployed model on'
+  aws.stepFunctions.inferenceWorkflow -> aws.lambda.publishConfidence 'Coordinates confidence notifications with'
+  aws.lambda.publishConfidence -> aws.sns 'Publishes confidence notifications through'
+  aws.sns -> aws.confidenceReview 'Notifies'
+  businessUsers -> aws.confidenceReview 'Review low-confidence results and label undetected data through'
+  aws.confidenceReview -> aws.s3.imageDatasets 'Returns human labels for additional model training to'
+  aws.stepFunctions.inferenceWorkflow -> aws.lambda.storeResults 'Coordinates result storage with'
+  aws.lambda.storeResults -> aws.s3.inferenceResults 'Stores runtime inference results in'
+
+  aws.lambda.runtimeLauncher -> aws.batch 'Submits batch inference jobs to'
+  aws.batch -> aws.fargate.batchInference 'Runs jobs on'
+  aws.s3.imageDatasets -> aws.fargate.batchInference 'Provides batch input to'
+  aws.fargate.batchInference -> aws.s3.inferenceResults 'Stores batch inference results in'
+
+  aws.s3.inferenceResults -> aws.quickSight.resultsDashboard 'Provides results for visualization to'
+  aws.quickSight.resultsDashboard -> businessUsers 'Shows defect results to'
+  aws.s3.inferenceResults -> aws.lambda.mesWriteback 'Provides final results to'
+  aws.lambda.mesWriteback -> shopFloor.mes 'Writes results back to'
+}
+
+views {
+  view index {
+    title 'Identify Product Defects using Industrial Computer Vision'
+    include *
+  }
+}

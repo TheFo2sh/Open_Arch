@@ -1,0 +1,7 @@
+PackageId: OpenArch.IdentifyProductDefectsUsingIndustrialComputerVision
+Name: Identify Product Defects using Industrial Computer Vision
+Description: Detect manufacturing defects in product images with Amazon Lookout for Vision, serverless inference, confidence-based review, and factory MES results.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, manufacturing, computer-vision, machine-learning, quality-inspection]

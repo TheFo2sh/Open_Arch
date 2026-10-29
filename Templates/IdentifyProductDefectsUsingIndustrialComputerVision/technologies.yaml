@@ -1,0 +1,97 @@
+technologies:
+  - key: aws-transfer-family
+    name: AWS Transfer Family
+    description: One documented option for transferring product images from shop-floor devices to AWS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/aws-transfer-family/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-datasync
+    name: AWS DataSync
+    description: One documented option for transferring product images from shop-floor devices to AWS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/datasync/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-greengrass
+    name: AWS IoT Greengrass
+    description: Edge runtime option for transferring images from edge devices to AWS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/greengrass/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores product image train and test datasets and final inference results.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-lookout-for-vision
+    name: Amazon Lookout for Vision
+    description: Labels, trains, tunes, and deploys the product defect detection model.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lookout-for-vision/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs model management, inference orchestration, result publishing, and MES writeback functions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Exposes model management operations to administrators and data scientists.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Orchestrates the serverless runtime inference workflow with Lambda.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: aws-batch
+    name: AWS Batch
+    description: Submits batch anomaly-detection jobs for execution on AWS Fargate.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/batch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-fargate
+    name: AWS Fargate
+    description: Provides compute for AWS Batch inference jobs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/fargate/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-sns
+    name: Amazon Simple Notification Service
+    description: Notifies users about inference confidence and results.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Visualizes final inference results for business users.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
