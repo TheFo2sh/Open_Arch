@@ -1,0 +1,7 @@
+PackageId: OpenArch.AlgorithmicTradingOnAWS
+Name: Algorithmic Trading on AWS
+Description: Backtest and host machine-learning-based algorithmic trading strategies using AWS data, model-training, container, and scheduling services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, financial-services, algorithmic-trading, machine-learning]

@@ -1,0 +1,7 @@
+PackageId: OpenArch.AWSConnectedVehicleReferenceArchitecture
+Name: AWS Connected Vehicle Reference Architecture
+Description: AWS connected-vehicle architecture for vehicle telemetry, remote commands, data analytics, certificate lifecycle management, encryption, and companion applications.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, connected-vehicle, automotive, iot, reference-architecture]

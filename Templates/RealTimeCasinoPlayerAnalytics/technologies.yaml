@@ -1,0 +1,83 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Private-network entry point for slot-machine telemetry and retrieval of player profiles, ratings, and offers.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Receives shuffler telemetry from the casino floor and forwards it into the streaming pipeline.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Streams slot-machine and shuffler records into their respective processing paths.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Processes slot telemetry to calculate player ratings and retain raw records for the analytics pipeline.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service (Amazon S3)
+    description: Holds raw casino telemetry and refined, deduplicated slot and shuffler data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-glue
+    name: AWS Glue
+    description: Transforms raw slot and shuffler records, identifies unique records, and writes refined data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Trains and updates player-offer and shuffler-failure prediction models using refined data.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/ai/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Serves customer profiles, player ratings, and personalized offers for quick retrieval during play.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-aurora
+    name: Amazon Aurora
+    description: Stores refined shuffler data for aggregation and retrieval; AWS does not specify a database engine.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Logging service shown in the reference diagram; the source does not identify log sources or logging configuration.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []

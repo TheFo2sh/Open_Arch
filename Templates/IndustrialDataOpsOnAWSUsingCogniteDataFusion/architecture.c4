@@ -1,0 +1,180 @@
+// Industrial DataOps on AWS using Cognite Data Fusion.
+// Source: https://docs.aws.amazon.com/reference-architecture-diagrams/latest/industrial-dataops-cognite-data-fusion/industrial-dataops-cognite-data-fusion.html
+model {
+  industrialDataUser = user 'Industrial data user' {
+    description 'Creates custom applications for industrial data; AWS does not specify user roles.'
+  }
+
+  onPremises = zone 'On-premises data center' {
+    metadata {
+      platform 'other'
+    }
+
+    historians = system 'Industrial historians and data sources' {
+      description 'Project system slot for historians and other IT, OT, and engineering data sources; products and protocols are not specified.'
+    }
+    industrialDevices = system 'Industrial gateways and PLCs' {
+      description 'Project system slot for industrial edge gateways and programmable logic controllers.'
+    }
+    purposeBuiltExtractors = system 'Industrial data extraction' {
+      description 'Project system slot for purpose-built extractors; AWS does not specify their products or configuration.'
+      extractors = container 'Cognite Extractors' {
+        description 'Extracts data from on-premises industrial sources and sends it to Cognite Data Fusion.'
+        metadata {
+          uses 'cognite-native-extractors'
+        }
+      }
+    }
+    greengrass = platform 'AWS IoT Greengrass' {
+      description 'Edge runtime shown bringing data from industrial gateways and PLCs into AWS.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+    }
+  }
+
+  cogniteCloud = zone 'Cognite SaaS' {
+    metadata {
+      platform 'other'
+    }
+    cdf = platform 'Cognite Data Fusion' {
+      description 'SaaS platform that contextualizes industrial data and builds knowledge graphs.'
+      metadata {
+        uses 'cognite-data-fusion'
+      }
+      knowledgeGraph = database 'Industrial knowledge graph' {
+        description 'Knowledge graph built by Cognite Data Fusion; its schema and contents are not specified.'
+      }
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    sitewise = platform 'AWS IoT SiteWise' {
+      description 'Receives industrial data flowing through AWS IoT Greengrass.'
+      metadata {
+        uses 'aws-iot-sitewise'
+      }
+      industrialData = database 'Industrial data' {
+        description 'Industrial data received by SiteWise; the data model and subsequent destination are not specified.'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Object storage in the customer data lake.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      lakeObjects = database 'S3 data lake objects' {
+        description 'Pre-aggregated industrial data read by Cognite Native Extractors; object layout is not specified.'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      description 'Data warehouse in the customer data lake.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+      warehouse = database 'Redshift data' {
+        description 'Pre-aggregated industrial data read by Cognite Native Extractors; schema is not specified.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Database in the customer data lake.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      records = database 'DynamoDB data' {
+        description 'Pre-aggregated industrial data read by Cognite Native Extractors; data model is not specified.'
+      }
+    }
+    nativeExtractors = system 'Cognite data lake extraction' {
+      description 'Project system slot for Cognite Native Extractors running in the customer AWS account.'
+      extractor = container 'Cognite Native Extractors' {
+        description 'Ingests pre-aggregated industrial data from S3, Redshift, and DynamoDB into Cognite Data Fusion.'
+        metadata {
+          uses 'cognite-native-extractors'
+        }
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Used with AWS Lambda to ingest data from Cognite Data Fusion.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Works with API Gateway in the Cognite Data Fusion ingestion flow.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      ingestion = system 'Cognite data ingestion' {
+        description 'Project system slot for Lambda-based ingestion from Cognite Data Fusion.'
+        handler = container 'CDF ingestion handler' {
+          description 'Ingests data from Cognite Data Fusion through the API integration.'
+        }
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Transforms data before writing it back into Cognite Data Fusion through the Cognite SDK.'
+      metadata {
+        uses 'aws-glue'
+      }
+      transformation = system 'Cognite data transformation' {
+        description 'Project system slot for transforming industrial data with AWS Glue.'
+        job = container 'Industrial data transformation' {
+          description 'Transforms data and writes it back into Cognite Data Fusion using the Cognite SDK.'
+          metadata {
+            uses 'cognite-sdk'
+          }
+        }
+      }
+    }
+    flink = platform 'Amazon Managed Service for Apache Flink' {
+      description 'Additional analytics capability; the diagram labels this service Kinesis Data Analytics.'
+      metadata {
+        uses 'amazon-managed-service-for-apache-flink'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Additional machine-learning capability.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+    twinMaker = platform 'AWS IoT TwinMaker' {
+      description 'Service used by end users to create custom applications.'
+      metadata {
+        uses 'aws-iot-twinmaker'
+      }
+      twinApplications = system 'Industrial applications' {
+        description 'Project system slot for custom applications built using AWS IoT TwinMaker.'
+      }
+    }
+    grafana = platform 'Amazon Managed Grafana' {
+      description 'Service used by end users to create custom applications.'
+      metadata {
+        uses 'amazon-managed-grafana'
+      }
+      dashboards = system 'Industrial dashboards' {
+        description 'Project system slot for custom applications built using Amazon Managed Grafana.'
+      }
+    }
+  }
+
+  historians -> onPremises.purposeBuiltExtractors.extractors 'Provides industrial source data to'
+  industrialDevices -> onPremises.greengrass 'Sends edge data through'
+  onPremises.greengrass -> aws.sitewise 'Flows through to'
+  aws.s3.lakeObjects -> aws.nativeExtractors.extractor 'Provides pre-aggregated data to'
+  aws.redshift.warehouse -> aws.nativeExtractors.extractor 'Provides pre-aggregated data to'
+  aws.dynamodb.records -> aws.nativeExtractors.extractor 'Provides pre-aggregated data to'
+  aws.nativeExtractors.extractor -> cogniteCloud.cdf 'Ingests data into'
+  onPremises.purposeBuiltExtractors.extractors -> cogniteCloud.cdf 'Ingests industrial data into'
+  cogniteCloud.cdf -> aws.apiGateway 'Data is ingested through'
+  aws.apiGateway -> aws.lambda.ingestion.handler 'Works with'
+  aws.lambda.ingestion.handler -> aws.glue.transformation.job 'Passes data for transformation to'
+  aws.glue.transformation.job -> cogniteCloud.cdf 'Writes transformed data to'
+  industrialDataUser -> aws.twinMaker.twinApplications 'Creates custom applications using'
+  industrialDataUser -> aws.grafana.dashboards 'Creates custom applications using'
+}

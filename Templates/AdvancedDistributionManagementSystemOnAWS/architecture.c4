@@ -1,0 +1,146 @@
+// Advanced Distribution Management System on AWS, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/advanced-distribution-management-system/advanced-distribution-management-system.html
+// Systems are slots mapped onto the project's own systems when the template is applied.
+model {
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    vpc = platform 'Amazon VPC' {
+      description 'Virtual networking for Outposts subnets and regional resources.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+
+    directConnect = platform 'AWS Direct Connect (optional)' {
+      description 'Optional connectivity to the home Region; AWS also allows an existing internet connection.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+
+    site1Outpost = platform 'AWS Outposts rack — Site 1' {
+      description 'Outposts rack at the first physically isolated customer site, homed to one Availability Zone.'
+      metadata {
+        uses 'aws-outposts'
+      }
+      localGateway1 = platform 'AWS Outposts local gateway — Site 1' {
+        metadata {
+          uses 'aws-outposts-local-gateway'
+        }
+      }
+      ec2Site1 = platform 'Amazon EC2 on Outposts — Site 1' {
+        description 'EC2 instances in the Outposts subnet at Site 1.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        admsSite1 = system 'ADMS application — Site 1' {
+          description 'Vendor-supplied ADMS application deployed on EC2 at the first site.'
+        }
+        databaseSite1 = database 'ADMS database — Site 1' {
+          description 'Database shown at this site; AWS does not specify its engine, data placement, or replication behavior.'
+        }
+      }
+    }
+
+    site2Outpost = platform 'AWS Outposts rack — Site 2' {
+      description 'Outposts rack at the second physically isolated customer site, homed to a different Availability Zone.'
+      metadata {
+        uses 'aws-outposts'
+      }
+      localGateway2 = platform 'AWS Outposts local gateway — Site 2' {
+        metadata {
+          uses 'aws-outposts-local-gateway'
+        }
+      }
+      ec2Site2 = platform 'Amazon EC2 on Outposts — Site 2' {
+        description 'EC2 instances in the Outposts subnet at Site 2.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        admsSite2 = system 'ADMS application — Site 2' {
+          description 'Vendor-supplied ADMS application deployed on EC2 at the second site.'
+        }
+        databaseSite2 = database 'ADMS database — Site 2' {
+          description 'Database shown at this site; AWS does not specify its engine, data placement, or replication behavior.'
+        }
+      }
+    }
+
+    regionalDerMS1 = system 'Regional DERMS — Availability Zone 1' {
+      description 'Example Distributed Energy Resource Management System in the home Region; its implementation and hosting are not specified.'
+    }
+    regionalDerMS2 = system 'Regional DERMS — Availability Zone 2' {
+      description 'Regional DERMS deployment shown in the second Availability Zone; its implementation and hosting are not specified.'
+    }
+
+    dataLake = platform 'Amazon S3' {
+      description 'Regional object storage shown as the data lake.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLakeStore = database 'Regional data lake' {
+        description 'Data lake contents and the data supplied by the ADMS are not specified.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Regional analytics service shown in the diagram.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Regional analytics and visualization service shown in the diagram.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    sageMaker = platform 'Amazon SageMaker AI' {
+      description 'Regional machine learning service shown in the diagram.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+  }
+
+  otApplications = system 'On-premises OT applications' {
+    description 'Customer applications in the operational technology network that integrate with the ADMS.'
+  }
+  fieldDevices = system 'Field devices' {
+    description 'Customer sensors and actuators connected through the local OT network.'
+  }
+  piServer = system 'PI server' {
+    description 'PI server depicted in the customer data center; its product, role, and integration are not specified.'
+  }
+  corporateIt = system 'Corporate IT' {
+    description 'Corporate IT infrastructure depicted in the customer data centers; specific integrations are not specified.'
+  }
+
+  aws.site1Outpost -> aws.vpc 'Connects to its home Region over the service link'
+  aws.site2Outpost -> aws.vpc 'Connects to its home Region over the service link'
+  aws.site1Outpost -> aws.directConnect 'May use Direct Connect instead of an existing internet connection'
+
+  aws.admsSite1 -> aws.localGateway1 'Uses the low-latency local network'
+  aws.admsSite2 -> aws.localGateway2 'Uses the low-latency local network'
+  aws.localGateway1 -> otApplications 'Provides local connectivity to'
+  aws.localGateway2 -> otApplications 'Provides local connectivity to'
+  aws.localGateway1 -> fieldDevices 'Provides local connectivity to'
+  aws.localGateway2 -> fieldDevices 'Provides local connectivity to'
+  aws.admsSite1 -> aws.databaseSite1 'Uses; database engine and replication are unspecified'
+  aws.admsSite2 -> aws.databaseSite2 'Uses; database engine and replication are unspecified'
+  aws.admsSite1 -> aws.regionalDerMS1 'Connects securely to regional applications such as'
+  aws.admsSite2 -> aws.regionalDerMS2 'Connects securely to regional applications such as'
+  aws.admsSite1 -> aws.dataLake 'Connects to regional analytics services; data flows are unspecified'
+  aws.admsSite1 -> aws.athena 'Connects to regional analytics services; data flows are unspecified'
+  aws.admsSite1 -> aws.quickSight 'Connects to regional analytics services; data flows are unspecified'
+  aws.admsSite1 -> aws.sageMaker 'Connects to regional machine learning services; data flows are unspecified'
+}
+
+views {
+  view index {
+    title 'Advanced Distribution Management System on AWS'
+    include *
+  }
+}

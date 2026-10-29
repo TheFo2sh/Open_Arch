@@ -1,0 +1,128 @@
+// DescribeForMe Web App, after AWS's reference architecture.
+// The source page's numbered description is modeled; unprovided implementation details are not inferred.
+model {
+  user = user 'Visually impaired user' {
+    description 'Submits an image and listens to its spoken description on a mobile device.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    amplify = platform 'AWS Amplify' {
+      description 'Distributes the mobile-friendly web app.'
+      metadata {
+        uses 'aws-amplify'
+      }
+
+      describeforme = system 'DescribeForMe Web App' {
+        description 'The web application that accepts an image and plays back its generated spoken description.'
+
+        frontend = container 'Mobile web app' {
+          description 'HTML, JavaScript, and CSS client that uploads images, invokes the backend, and plays the returned audio.'
+          technology 'HTML, JavaScript, and CSS, AWS SDK'
+          metadata {
+            uses 'html-javascript-css, aws-sdk'
+          }
+        }
+      }
+    }
+
+    cognito = platform 'Amazon Cognito' {
+      description 'Its identity pool grants temporary access to the S3 bucket.'
+      metadata {
+        uses 'amazon-cognito'
+      }
+    }
+
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Stores uploaded image files and generated MP3 audio.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      objects = database 'Image and audio objects' {
+        description 'The S3 bucket object data: user-uploaded images and workflow-generated MP3 files.'
+      }
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Receives an S3 object key, starts the workflow, and returns a pre-signed audio URL.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Runs the state machine that orchestrates the AI/ML services.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the functions used by Step Functions to orchestrate the AI/ML services.'
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+
+    rekognition = platform 'Amazon Rekognition' {
+      description 'AI/ML service included in the workflow; its specific task is not stated in the source.'
+      metadata {
+        uses 'amazon-rekognition'
+      }
+    }
+
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'AI/ML service included in the workflow; its model and specific task are not stated in the source.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+
+    textract = platform 'Amazon Textract' {
+      description 'AI/ML service included in the workflow; its specific task is not stated in the source.'
+      metadata {
+        uses 'amazon-textract'
+      }
+    }
+
+    translate = platform 'Amazon Translate' {
+      description 'AI/ML service included in the workflow; the source does not specify its exact task or supported languages.'
+      metadata {
+        uses 'amazon-translate'
+      }
+    }
+
+    polly = platform 'Amazon Polly' {
+      description 'Produces the spoken audio output; the source does not specify voice or synthesis settings.'
+      metadata {
+        uses 'amazon-polly'
+      }
+    }
+  }
+
+  user -> aws.amplify.describeforme 'Uses on a mobile device'
+  aws.amplify.describeforme.frontend -> aws.cognito 'Requests temporary S3 access'
+  aws.cognito -> aws.s3.objects 'Grants temporary bucket access'
+  aws.amplify.describeforme.frontend -> aws.s3.objects 'Uploads an image using the AWS SDK'
+  aws.amplify.describeforme.frontend -> aws.apiGateway 'Sends the S3 object key'
+  aws.apiGateway -> aws.stepFunctions 'Starts the state machine'
+  aws.stepFunctions -> aws.lambda 'Orchestrates service calls through functions'
+  aws.lambda -> aws.rekognition 'Invokes'
+  aws.lambda -> aws.sagemaker 'Invokes'
+  aws.lambda -> aws.textract 'Invokes'
+  aws.lambda -> aws.translate 'Invokes'
+  aws.lambda -> aws.polly 'Invokes'
+  aws.stepFunctions -> aws.s3.objects 'Stores the generated MP3'
+  aws.apiGateway -> aws.amplify.describeforme.frontend 'Returns a pre-signed audio URL'
+  aws.amplify.describeforme.frontend -> aws.s3.objects 'Plays the MP3 using its pre-signed URL'
+}
+
+views {
+  view index {
+    title 'DescribeForMe Web App'
+    include *
+  }
+}

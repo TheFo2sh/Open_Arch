@@ -1,0 +1,7 @@
+PackageId: OpenArch.AWSManagedServicesAMSForOperationalExcellence
+Name: AWS Managed Services (AMS) for Operational Excellence
+Description: Six AWS Managed Services capabilities for helpdesk, monitoring, security operations, logging, patching, and backup across managed AWS accounts.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, managed-services, operational-excellence, cloud-operations, monitoring, security]

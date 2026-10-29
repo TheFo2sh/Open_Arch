@@ -1,0 +1,106 @@
+# Technologies named by AWS's reference page and diagram, including its example SaaS sources.
+technologies:
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Receives review data from web, mobile, and social-media-facing integrations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the ingestion and review-analysis functions in response to API requests and S3 object events.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-data-firehose
+    name: Amazon Data Firehose
+    description: Delivers incoming reviews to S3 and writes processed analysis results to S3; the diagram labels it Amazon Kinesis Data Firehose.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-appflow
+    name: Amazon AppFlow
+    description: Ingests data from example SaaS applications into Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/appflow/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores raw review data and the sentiment, key-phrase, and entity analysis outputs.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-translate
+    name: Amazon Translate
+    description: Translates reviews to a base language when necessary before sentiment analysis.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/translate/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-comprehend
+    name: Amazon Comprehend
+    description: Performs natural-language sentiment analysis, key-phrase extraction, and entity extraction on review text.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/comprehend/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-glue-data-catalog
+    name: AWS Glue Data Catalog
+    description: Holds the logical database and table definitions for data stored in Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Queries the S3 review and analysis data using AWS Glue Data Catalog table definitions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Presents query results in dashboards for review analysis.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: salesforce
+    name: Salesforce
+    description: Example SaaS application source named by the AWS reference page; connected through Amazon AppFlow when selected.
+    vendor: Salesforce
+    url: https://www.salesforce.com/
+    types: [third-party]
+  - key: marketo
+    name: Marketo
+    description: Example SaaS application source named by the AWS reference page; connected through Amazon AppFlow when selected.
+    vendor: Adobe
+    url: https://business.adobe.com/products/marketo/marketing-automation.html
+    types: [third-party]
+  - key: slack
+    name: Slack
+    description: Example SaaS application source named by the AWS reference page; connected through Amazon AppFlow when selected.
+    vendor: Salesforce
+    url: https://slack.com/
+    types: [third-party]
+  - key: servicenow
+    name: ServiceNow
+    description: Example SaaS application source named by the AWS reference page; connected through Amazon AppFlow when selected.
+    vendor: ServiceNow
+    url: https://www.servicenow.com/
+    types: [third-party]

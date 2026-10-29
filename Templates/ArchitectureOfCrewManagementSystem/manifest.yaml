@@ -1,0 +1,7 @@
+PackageId: OpenArch.ArchitectureOfCrewManagementSystem
+Name: Architecture of Crew Management System
+Description: A multi-Region AWS architecture for crew trip retrieval and updates, with Aurora Global Database and corporate scheduler access.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, airline, crew-management, multi-region]
