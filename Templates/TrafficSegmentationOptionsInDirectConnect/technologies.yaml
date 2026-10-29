@@ -1,0 +1,82 @@
+# The AWS services and network protocols used by the blueprint.
+technologies:
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Dedicated network connectivity and virtual interfaces between customer networks and AWS.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect-gateway
+    name: AWS Direct Connect gateway
+    description: Gateway that associates Direct Connect virtual interfaces with virtual private or Transit Gateways.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/directconnect/latest/UserGuide/direct-connect-gateways-intro.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-virtual-private-gateway
+    name: AWS virtual private gateway
+    description: Virtual private gateway that connects a VPC with a Direct Connect private VIF.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpn/latest/s2svpn/VPNTunnels.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-transit-gateway
+    name: AWS Transit Gateway
+    description: Regional routing hub for VPC and Direct Connect gateway attachments and their associated route tables.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-transit-gateway-connect
+    name: AWS Transit Gateway Connect
+    description: Transit Gateway attachment type that supports GRE tunnels and BGP peering with a third-party appliance.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/tgw/tgw-connect.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-site-to-site-vpn
+    name: AWS Site-to-Site VPN
+    description: Managed VPN connections between customer networks and AWS gateways.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc
+    name: Amazon VPC
+    description: Isolated virtual networks with separate route tables for the A and B traffic segments.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: bgp
+    name: Border Gateway Protocol (BGP)
+    description: Routing protocol used for peering and route exchange in the documented segmentation patterns.
+    vendor: Internet Engineering Task Force
+    url: https://www.rfc-editor.org/rfc/rfc4271
+    types: [third-party]
+  - key: gre
+    name: Generic Routing Encapsulation (GRE)
+    description: Tunnel protocol used by Transit Gateway Connect attachments.
+    vendor: Internet Engineering Task Force
+    url: https://www.rfc-editor.org/rfc/rfc2784
+    types: [third-party]
+  - key: ipsec
+    name: IPsec
+    description: Network-layer security protocol used by Site-to-Site VPN tunnels.
+    vendor: Internet Engineering Task Force
+    url: https://www.rfc-editor.org/rfc/rfc4301.html
+    types: [library]
+  - key: ieee-802-1q-vlan
+    name: IEEE 802.1Q VLAN
+    description: Layer 2 virtual LAN tagging used to distinguish customer traffic on Direct Connect.
+    vendor: IEEE
+    url: https://standards.ieee.org/standard/802_1Q-2022.html
+    types: [third-party]
