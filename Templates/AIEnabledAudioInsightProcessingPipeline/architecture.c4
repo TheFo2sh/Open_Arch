@@ -1,0 +1,122 @@
+// AI-Enabled Audio Insight Processing Pipeline, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/ai-audio-insight-pipeline/ai-audio-insight-pipeline.html
+// Systems and users are slots; applying the template maps them onto the project's own.
+model {
+  client = user 'Audio processing client' {
+    description 'Uploads audio files and requests suitable matches with their insights.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the event-driven audio processing and match functions.'
+      metadata {
+        uses 'aws-lambda'
+      }
+
+      pipeline = system 'Audio insight processing pipeline' {
+        description 'Processes uploaded audio into translated text and searchable insights, then returns matching files.'
+
+        transcribe = container 'Transcribe function' {
+          description 'Submits uploaded audio for transcription, stores the returned text, and records file metadata.'
+        }
+        translate = container 'Translate function' {
+          description 'Translates transcribed text, stores the translated text, and updates file metadata.'
+        }
+        textInsights = container 'Text insights function' {
+          description 'Analyzes translated text and adds the resulting insights to file metadata.'
+        }
+        getMatch = container 'GET match function' {
+          description 'Finds matching file IDs, retrieves their insight metadata, and returns the most suitable matches.'
+        }
+      }
+    }
+
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Routes the HTTP GET match request to the Lambda match function.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores uploaded audio, transcribed text, and translated text in separate buckets.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      audioBucket = database 'Audio upload bucket' {
+        description 'Stores audio files uploaded for processing.'
+      }
+      transcribedBucket = database 'Transcribed text bucket' {
+        description 'Stores text returned by Amazon Transcribe.'
+      }
+      translatedBucket = database 'Translated text bucket' {
+        description 'Stores translated text for insight analysis and matching.'
+      }
+    }
+    transcribe = platform 'Amazon Transcribe' {
+      metadata {
+        uses 'amazon-transcribe'
+      }
+    }
+    translate = platform 'Amazon Translate' {
+      metadata {
+        uses 'amazon-translate'
+      }
+    }
+    comprehend = platform 'Amazon Comprehend' {
+      metadata {
+        uses 'amazon-comprehend'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      fileMetadata = database 'File metadata table' {
+        description 'Stores audio file names and metadata, updated with translation and text insights.'
+      }
+    }
+    kendra = platform 'Amazon Kendra' {
+      metadata {
+        uses 'amazon-kendra'
+      }
+      translatedTextIndex = database 'Translated text index' {
+        description 'Supports file matching against translated text.'
+      }
+    }
+  }
+
+  client -> aws.lambda.pipeline 'Uploads audio and requests file matches'
+  aws.s3.audioBucket -> aws.lambda.pipeline.transcribe 'S3 object-created event starts'
+  aws.lambda.pipeline.transcribe -> aws.transcribe 'Submits audio for transcription'
+  aws.transcribe -> aws.lambda.pipeline.transcribe 'Returns transcribed text to'
+  aws.lambda.pipeline.transcribe -> aws.s3.transcribedBucket 'Writes transcribed text to'
+  aws.lambda.pipeline.transcribe -> aws.dynamodb.fileMetadata 'Creates file and transcription metadata in'
+
+  aws.s3.transcribedBucket -> aws.lambda.pipeline.translate 'S3 object-created event starts'
+  aws.lambda.pipeline.translate -> aws.translate 'Submits text for translation'
+  aws.translate -> aws.lambda.pipeline.translate 'Returns translated text to'
+  aws.lambda.pipeline.translate -> aws.s3.translatedBucket 'Writes translated text to'
+  aws.lambda.pipeline.translate -> aws.dynamodb.fileMetadata 'Updates translation metadata in'
+
+  aws.s3.translatedBucket -> aws.lambda.pipeline.textInsights 'S3 object-created event starts'
+  aws.lambda.pipeline.textInsights -> aws.comprehend 'Requests document understanding analysis from'
+  aws.comprehend -> aws.lambda.pipeline.textInsights 'Returns entities, sentiment, and key phrases to'
+  aws.lambda.pipeline.textInsights -> aws.dynamodb.fileMetadata 'Adds text insights to'
+  aws.s3.translatedBucket -> aws.kendra.translatedTextIndex 'Provides translated text for indexing to'
+
+  aws.apiGateway -> aws.lambda.pipeline.getMatch 'Invokes for HTTP GET match requests'
+  aws.lambda.pipeline.getMatch -> aws.kendra.translatedTextIndex 'Finds matching file IDs in'
+  aws.lambda.pipeline.getMatch -> aws.dynamodb.fileMetadata 'Retrieves insight metadata from'
+  aws.lambda.pipeline -> client 'Returns the most suitable file matches with insights'
+}
+
+views {
+  view index {
+    title 'AI-Enabled Audio Insight Processing Pipeline'
+    include *, aws.*, aws.lambda.*, aws.lambda.pipeline.*, aws.s3.*, aws.dynamodb.*, aws.kendra.*
+  }
+}

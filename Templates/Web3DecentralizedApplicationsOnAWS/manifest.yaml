@@ -1,0 +1,7 @@
+PackageId: OpenArch.Web3DecentralizedApplicationsOnAWS
+Name: Web3 Decentralized Applications on AWS
+Description: Static DApp hosting on CloudFront and S3 with an API Gateway and Lambda backend that accesses Ethereum through an Amazon Managed Blockchain node.
+Version: 1.0.0
+Icon: logos:ethereum
+Publisher: Open_Arch
+Tags: [aws, web3, blockchain, decentralized-application]

@@ -1,0 +1,139 @@
+# Technologies named by the AWS reference page and diagram, plus the third-party
+# Alexa and Passenger Service System (PSS) services the architecture integrates with.
+technologies:
+  - key: amazon-alexa
+    name: Amazon Alexa
+    description: Voice-assistant and mobile-app channel through which travelers invoke the airline skill and receive authentication cards.
+    vendor: Amazon
+    url: https://www.amazon.com/alexa
+    types: [third-party]
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: API entry points for the skill authentication flow and the NLU integrations layer.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the skill functions and real-time analytics described by the reference architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-cognito
+    name: Amazon Cognito
+    description: Authenticates airline customers during the skill's account-linking flow.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cognito/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Provides network-latency optimization for the authentication experience.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores authentication-provider configuration and application log or skill-content objects used by the documented flows.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ecs
+    name: Amazon Elastic Container Service
+    description: Runs the natural-language understanding engine at scale.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecs/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: elastic-load-balancing
+    name: Elastic Load Balancing
+    description: The Application Load Balancer distributes NLU requests to the Amazon ECS service.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Provides low-latency access to skill content and stores AI/ML inference results.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-elasticache
+    name: Amazon ElastiCache
+    description: Provides low-latency access to conversation state.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticache/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-cloudwatch-logs
+    name: Amazon CloudWatch Logs
+    description: Captures application logs for the logging and analytics flows.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-data-firehose
+    name: Amazon Data Firehose
+    description: Delivers application log streams to storage; called Amazon Kinesis Data Firehose in the original diagram.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-aurora
+    name: Amazon Aurora
+    description: Stores real-time analytics results; the reference does not specify an Aurora database engine.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/aurora/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Runs AI/ML models on conversation trends.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/ai/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-step-functions
+    name: AWS Step Functions
+    description: Orchestrates updates to application content and Alexa skill configuration after an Amazon S3 object PUT.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/step-functions/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amadeus-pss
+    name: Amadeus Passenger Service System
+    description: Example third-party passenger service system provider that an airline may integrate with.
+    vendor: Amadeus
+    url: https://amadeus.com/
+    types: [third-party]
+  - key: sabre-pss
+    name: Sabre Passenger Service System
+    description: Example third-party passenger service system provider that an airline may integrate with.
+    vendor: Sabre
+    url: https://www.sabre.com/
+    types: [third-party]
+  - key: navitaire-pss
+    name: Navitaire Passenger Service System
+    description: Example third-party passenger service system provider that an airline may integrate with.
+    vendor: Navitaire
+    url: https://www.navitaire.com/
+    types: [third-party]

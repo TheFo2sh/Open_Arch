@@ -1,0 +1,7 @@
+PackageId: OpenArch.DeployingE2E5GNetworkWithAWS
+Name: Deploying E2E 5G Network with AWS
+Description: End-to-end 5G architecture spanning radio access, edge MEC and user plane, regional control and management, and AWS Wavelength.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, telecommunications, 5g, networking]

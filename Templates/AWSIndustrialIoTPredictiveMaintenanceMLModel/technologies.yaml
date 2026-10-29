@@ -1,0 +1,105 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: aws-iot-greengrass
+    name: AWS IoT Greengrass
+    description: Edge runtime that hosts the SiteWise connector and stream manager on the factory gateway.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/greengrass/v2/developerguide/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-iot-sitewise-connector
+    name: AWS IoT SiteWise Connector
+    description: Greengrass connector that collects factory machine data over OPC-UA for AWS IoT SiteWise.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot-sitewise/latest/userguide/
+    types: [library]
+  - key: aws-iot-greengrass-stream-manager
+    name: AWS IoT Greengrass Stream Manager
+    description: Greengrass component that publishes other industrial data streams to AWS IoT Core.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/greengrass/v2/developerguide/stream-manager.html
+    types: [library]
+  - key: opc-ua
+    name: OPC-UA
+    description: Industrial protocol used by the SiteWise Connector to collect factory machine data.
+    vendor: OPC Foundation
+    url: https://opcfoundation.org/about/opc-technologies/opc-ua/
+    types: [third-party]
+  - key: aws-iot-sitewise
+    name: AWS IoT SiteWise
+    description: Models factory devices, equipment, and processes and collects, organizes, and stores their data.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot-sitewise/latest/userguide/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: aws-iot-sitewise-monitor
+    name: AWS IoT SiteWise Monitor
+    description: Exposes a custom portal for near-real-time factory data visualization.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot-sitewise/latest/userguide/
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
+  - key: aws-iam-identity-center
+    name: AWS IAM Identity Center
+    description: Authenticates users of the custom SiteWise Monitor factory portal.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iam/identity-center/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Receives industrial data and uses rules to route it to AWS IoT Analytics.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot/latest/developerguide/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-analytics
+    name: AWS IoT Analytics
+    description: Provides a container dataset combining the SiteWise datastore with a Docker image from Amazon ECR.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iotanalytics/latest/userguide/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-ecr
+    name: Amazon Elastic Container Registry
+    description: Stores the custom Docker image linked to the IoT Analytics container dataset.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecr/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: docker
+    name: Docker
+    description: Container image format used for the custom image stored in Amazon ECR.
+    vendor: Docker, Inc.
+    url: https://www.docker.com/
+    types: [third-party]
+  - key: jupyter-notebook
+    name: Jupyter Notebook
+    description: Notebook environment used by data scientists to build a predictive-maintenance model from the dataset.
+    vendor: Project Jupyter
+    url: https://jupyter.org/
+    types: [third-party]
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Trains and deploys the predictive-maintenance machine-learning model.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/sagemaker/latest/dg/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Visualizes analysis from the AWS IoT Analytics data source.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/quicksight/latest/user/welcome.html
+    types: [managed-service]
+    platform: aws
+    hosts: []

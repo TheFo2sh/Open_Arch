@@ -1,0 +1,110 @@
+// Connected Home: Machine Learning at the Edge, after AWS's reference architecture.
+// Systems and users are slots mapped onto the project's own when the template is applied.
+model {
+  homeUser = user 'Home user' {
+    description 'Views the camera video stream using a mobile application.'
+  }
+
+  mobileApplication = system 'Mobile application' {
+    description 'Displays the IoT camera video stream; AWS does not specify the app or its provider.'
+  }
+
+  connectedHome = zone 'Connected Home' {
+    metadata {
+      platform 'other'
+    }
+
+    greengrassEdge = platform 'AWS IoT Greengrass edge runtime' {
+      description 'Runs on the camera and hosts the local application components.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+
+      camera = system 'IoT video camera' {
+        description 'Camera and sensor; publishes training data and streams video.'
+
+        inferenceWorkload = container 'Camera edge workload' {
+          description 'Greengrass-deployed application logic and the compact model used for local inference.'
+
+          inference = component 'Local ML inference function' {
+            description 'AWS Lambda function runs locally on the camera using the latest deployed model.'
+            metadata {
+              uses 'aws-lambda-function'
+            }
+          }
+          model = component 'Trained ML model' {
+            description 'Model artifact deployed to the camera for local inference; AWS does not specify its format.'
+          }
+        }
+      }
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      description 'Receives training data published from the Greengrass-enabled camera.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    iotRule = platform 'AWS IoT Rule' {
+      description 'Listens for camera data and routes messages to Amazon Kinesis Data Firehose.'
+      metadata {
+        uses 'aws-iot-rule'
+      }
+    }
+    firehose = platform 'Amazon Kinesis Data Firehose' {
+      description 'Delivers camera data to Amazon S3 for model training.'
+      metadata {
+        uses 'amazon-kinesis-data-firehose'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores incoming training data and the trained models produced by SageMaker AI.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      trainingData = database 'Camera training data' {
+        description 'Camera data delivered by Amazon Kinesis Data Firehose for model training.'
+      }
+      trainedModels = database 'Trained model artifacts' {
+        description 'Optimized model artifacts output by SageMaker AI for delivery to the camera.'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Trains and optimizes models to use less than one tenth of the memory footprint on resource-constrained devices.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+    greengrass = platform 'AWS IoT Greengrass cloud service' {
+      description 'Orchestrates deployment of trained models and application logic to the target camera.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+    }
+    videoStreams = platform 'Amazon Kinesis Video Streams' {
+      description 'Makes the camera video stream available to the mobile application.'
+      metadata {
+        uses 'amazon-kinesis-video-streams'
+      }
+    }
+  }
+
+  aws.iotCore -> aws.iotRule 'Routes camera messages to'
+  aws.iotRule -> aws.firehose 'Forwards messages to'
+  aws.firehose -> aws.s3.trainingData 'Stores training data in'
+  aws.sagemaker -> aws.s3.trainingData 'Trains models using'
+  aws.sagemaker -> aws.s3.trainedModels 'Outputs trained models to'
+  aws.s3.trainedModels -> aws.greengrass 'Provides model artifacts for deployment by'
+  aws.greengrass -> connectedHome.greengrassEdge.camera 'Orchestrates model and application deployments to'
+  connectedHome.greengrassEdge.camera.inferenceWorkload.inference -> connectedHome.greengrassEdge.camera.inferenceWorkload.model 'Performs inference using'
+  connectedHome.greengrassEdge.camera -> aws.iotCore 'Publishes training data to'
+  connectedHome.greengrassEdge.camera -> aws.videoStreams 'Publishes the video stream to'
+  homeUser -> mobileApplication 'Uses'
+  mobileApplication -> aws.videoStreams 'Views the camera stream through'
+}

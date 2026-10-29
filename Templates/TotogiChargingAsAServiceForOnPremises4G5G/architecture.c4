@@ -1,0 +1,160 @@
+// Totogi Charging-as-a-Service for On-Premises 4G/5G, based on AWS's reference
+// architecture page and diagram. Systems and users are slots mapped onto a
+// project's own architecture.
+model {
+  subscriber = user '4G/5G subscriber' {
+    description 'Receives voice and data services based on the provisioned plan and available credit.'
+  }
+
+  ran = system '4G/5G Radio Access Network (RAN)' {
+    description 'Radio sites connect subscriber devices to the telco data center.'
+  }
+
+  telco = zone 'Telco data center' {
+    metadata {
+      platform 'other'
+    }
+
+    core = system '4G/5G core network' {
+      description 'On-premises core-network control, user, and subscriber-data functions shown in the diagram.'
+
+      controlPlane = container 'Control plane' {
+        description 'Subscriber registration functions and charging interfaces.'
+        functions = component '4G/5G control-plane functions' {
+          description 'The diagram names AMF, SMF, MME, SGW-C, and PGW-C.'
+        }
+      }
+      userPlane = container 'User plane' {
+        description 'User traffic functions shown in the telco data center.'
+        functions = component 'User-plane functions' {
+          description 'The diagram names UPF, PGW-U, and SGW-U.'
+        }
+      }
+      subscriberData = container 'Subscriber data plane' {
+        functions = component 'Subscriber data functions' {
+          description 'The diagram names UDM and HSS; their products and implementations are not specified.'
+        }
+      }
+      networkEdge = container 'Telco network connectivity' {
+        functions = component 'Local router and customer gateways' {
+          description 'The diagram shows a local router, customer gateway, and customer internet gateway; their products and configuration are not specified.'
+        }
+      }
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    directConnect = platform 'AWS Direct Connect' {
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    transitGateway = platform 'AWS Transit Gateway' {
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    vpc = platform 'Amazon VPC' {
+      description 'VPC hosting the tenant Totogi charging engine.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      endpoint = platform 'VPC endpoint' {
+        description 'Shown in the diagram; the endpoint service and role are not specified.'
+        metadata {
+          uses 'aws-vpc-endpoints'
+        }
+      }
+      networkLoadBalancer = platform 'Network Load Balancer' {
+        metadata {
+          uses 'elastic-load-balancing-network-load-balancer'
+        }
+      }
+      accessScaling = platform 'EC2 Auto Scaling (access layer)' {
+        description 'Access-layer EC2 Auto Scaling group shown across three Availability Zones.'
+        metadata {
+          uses 'amazon-ec2-auto-scaling'
+        }
+        access = system 'Totogi charging access layer' {
+          diameterAdapter = container 'Diameter adapter' {
+            description 'Transforms requests and responses between 5G REST and 4G Diameter.'
+          }
+        }
+      }
+      chargingScaling = platform 'EC2 Auto Scaling (charging engine)' {
+        description 'Charging-engine EC2 Auto Scaling group shown across three Availability Zones.'
+        metadata {
+          uses 'amazon-ec2-auto-scaling'
+        }
+        charging = system 'Totogi Charging-as-a-Service' {
+          description 'Multi-tenant charging engine; the AWS reference identifies Totogi as the provider.'
+          decisionEngine = container 'Decision engine' {
+            description 'Handles rating requests and looks up balances and rating rules.'
+          }
+        }
+      }
+    }
+
+    cognito = platform 'Amazon Cognito' {
+      metadata {
+        uses 'amazon-cognito'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      subscriberBalances = database 'Subscriber balances and rating rules' {
+        description 'Data is partitioned by tenant ID and subscriber ID.'
+      }
+    }
+    eventBridge = platform 'Amazon EventBridge' {
+      metadata {
+        uses 'amazon-eventbridge'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      eventRecords = database 'Notification and event detail record buckets' {
+        description 'Buckets used in the customizable handling of notifications and event detail records; layout and event schemas are unspecified.'
+      }
+    }
+    organizations = platform 'AWS Organizations' {
+      description 'Shown in the diagram; its role in the charging flow is not specified.'
+      metadata {
+        uses 'aws-organizations'
+      }
+    }
+  }
+
+  subscriber -> ran 'Uses data and voice services through'
+  ran -> telco.core 'Connects to for subscriber registration over N2 (5G) or S1 (4G)'
+  telco.core -> aws.directConnect 'Connects the telco data center to AWS through'
+  telco.core -> aws.vpc.access.diameterAdapter 'Sends N40 (5G REST) and Gy (4G Diameter) charging requests through the AWS connection'
+  aws.directConnect -> aws.transitGateway 'Connects to'
+  aws.transitGateway -> aws.vpc 'Provides connectivity to'
+  aws.transitGateway -> aws.vpc.access 'Routes charging traffic to'
+  aws.vpc.access -> aws.vpc.networkLoadBalancer 'Forwards charging requests through'
+  aws.vpc.access.diameterAdapter -> aws.vpc.charging 'Transforms requests and responses between 5G REST and 4G Diameter'
+  aws.vpc.networkLoadBalancer -> aws.vpc.charging 'Routes 5G REST requests to'
+  aws.vpc.charging -> aws.cognito 'Gets the tenant ID from the access token'
+  aws.vpc.charging -> aws.dynamodb.subscriberBalances 'Looks up balances and rating rules in'
+  aws.vpc.charging -> aws.eventBridge 'Uses with S3 for customizable notification and EDR handling'
+  aws.vpc.charging -> aws.s3.eventRecords 'Uses buckets with EventBridge for customizable notification and EDR handling'
+  aws.vpc.charging -> subscriber 'Delivers session quotas to'
+  telco.core -> subscriber 'Provides data and voice services over N6/SGI based on the plan and available credit'
+}
+
+views {
+  view index {
+    title 'Totogi Charging-as-a-Service for On-Premises 4G/5G'
+    include *, aws.*, aws.vpc.*, aws.vpc.access.*, aws.vpc.charging.*, aws.vpc.charging.decisionEngine.*, aws.dynamodb.*, aws.s3.*
+  }
+}

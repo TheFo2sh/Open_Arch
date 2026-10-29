@@ -1,0 +1,120 @@
+// Direct Connect Traffic Flow with AWS Local Zone, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/direct-connect-local-zone/direct-connect-local-zone.html
+// The systems are workload/network slots, not provisioned resources.
+model {
+  customer = zone 'On-premises network' {
+    metadata {
+      platform 'other'
+    }
+
+    onPrem = system 'On-premises network' {
+      description 'Customer-managed network with separate private-VIF and transit-VIF routes to AWS; router and provider details are unspecified.'
+    }
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Provides the separate private and transit virtual interfaces shown in the reference.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+
+      privateVif = platform 'Private virtual interface' {
+        description 'Connects the on-premises network through gateway X and a virtual private gateway to VPC A.'
+        metadata {
+          uses 'aws-direct-connect'
+        }
+      }
+      transitVif = platform 'Transit virtual interface' {
+        description 'Connects the on-premises network through gateway Y and Transit Gateway to VPC A.'
+        metadata {
+          uses 'aws-direct-connect'
+        }
+      }
+    }
+
+    gatewayX = platform 'Direct Connect gateway X' {
+      description 'Uses an ASN distinct from gateway Y and associates the private VIF with the virtual private gateway.'
+      metadata {
+        uses 'aws-direct-connect-gateway'
+      }
+    }
+    gatewayY = platform 'Direct Connect gateway Y' {
+      description 'Uses an ASN distinct from gateway X; its allowed prefixes include the parent-Region subnet prefix.'
+      metadata {
+        uses 'aws-direct-connect-gateway'
+      }
+    }
+    vgw = platform 'Virtual Private Gateway' {
+      description 'Connects gateway X to VPC A on the private-VIF path.'
+      metadata {
+        uses 'aws-virtual-private-gateway'
+      }
+    }
+    transitGateway = platform 'Transit Gateway' {
+      description 'Connects gateway Y to VPC A and carries the parent-subnet route advertised back to on-premises.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+    vpc = platform 'VPC A' {
+      description 'Contains a parent-Region AZ subnet and a Local Zone subnet, each with its own route table. The source gives example CIDRs 10.0.0.0/24 and 10.0.1.0/24.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+    }
+    localZone = platform 'AWS Local Zone' {
+      description 'VPC A has a separate subnet and route table here for latency-sensitive workloads.'
+      metadata {
+        uses 'aws-local-zones'
+      }
+    }
+    parentRegionEc2 = platform 'Amazon EC2 in parent Region' {
+      description 'Runs the EC2 instance in the parent-Region Availability Zone subnet of VPC A.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+      parentWorkload = system 'Parent-Region EC2 instance' {
+        description 'Workload represented by the EC2 instance in the parent-Region subnet; its application is unspecified.'
+      }
+    }
+    localZoneEc2 = platform 'Amazon EC2 in Local Zone' {
+      description 'Runs latency-sensitive workloads in VPC A’s Local Zone subnet.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+      localWorkload = system 'Local Zone workload' {
+        description 'Latency-sensitive workload in the Local Zone subnet; its application is unspecified.'
+      }
+    }
+  }
+
+  customer.onPrem -> aws.directConnect.privateVif 'Routes through'
+  aws.directConnect.privateVif -> aws.gatewayX 'Connects to'
+  aws.gatewayX -> aws.vgw 'Associates with'
+  aws.vgw -> aws.vpc 'Routes to'
+
+  customer.onPrem -> aws.directConnect.transitVif 'Routes through'
+  aws.directConnect.transitVif -> aws.gatewayY 'Connects to'
+  aws.gatewayY -> aws.transitGateway 'Associates with'
+  aws.transitGateway -> aws.vpc 'Uses a VPC attachment to route to'
+
+  aws.vpc -> aws.parentRegionEc2 'Routes to the parent-Region subnet through its route table'
+  aws.vpc -> aws.localZone 'Extends VPC A into a Local Zone subnet'
+  aws.localZone -> aws.localZoneEc2 'Places latency-sensitive compute in'
+
+  aws.transitGateway -> aws.gatewayY 'Carries the parent-subnet route for advertisement'
+  aws.gatewayY -> aws.directConnect.transitVif 'Advertises its allowed prefixes over'
+  aws.directConnect.transitVif -> customer.onPrem 'Advertises the parent-subnet route to'
+}
+
+views {
+  view index {
+    title 'Direct Connect Traffic Flow with AWS Local Zone'
+    include *
+  }
+}

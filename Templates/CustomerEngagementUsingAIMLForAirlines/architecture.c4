@@ -1,0 +1,271 @@
+// Customer Engagement Using AI/ML for Airlines, based on AWS's reference page,
+// numbered flow, and diagram/PDF linked from that page.
+// The airline's systems, users, and unnamed providers are slots to map when applying the template.
+model {
+  traveler = user 'Airline traveler' {
+    description 'Uses airline customer channels and receives customer-service interactions and notifications.'
+  }
+  agent = user 'Airline customer service agent' {
+    description 'Uses the contact-center experience to assist travelers.'
+  }
+
+  systemsOfRecord = system 'Airline systems of record' {
+    description 'The source systems shown include Flight Ops, PSS, DCS, Loyalty, Baggage Sortation, Booking Engine, and Surveys System.'
+  }
+  demographicSources = system 'Demographic and address data' {
+    description 'Demographic and address data shown as inputs to the Traveler 360 data platform; source providers are not identified.'
+  }
+  batchIngress = system 'SFTP batch ingress' {
+    description 'SFTP is shown for batch input; AWS does not identify the endpoint implementation or provider.'
+  }
+  customerServicePortal = system 'Customer Center Portal' {
+    description 'Customer-service interface integrated with the Amazon Connect Contact Control Panel.'
+  }
+  pssAgentUi = system 'PSS Agent UI' {
+    description 'Passenger Service System agent interface integrated with the Amazon Connect Contact Control Panel.'
+  }
+  loyaltyAgentUi = system 'Loyalty Agent UI' {
+    description 'Loyalty agent interface integrated with the Amazon Connect Contact Control Panel.'
+  }
+  worldTracerUi = system 'World Tracer and Net Tracer interfaces' {
+    description 'Baggage-tracing user interfaces shown as integrations with the Amazon Connect Contact Control Panel.'
+  }
+  customerChannels = system 'Airline customer channels' {
+    description 'The diagram shows customer service apps, a customer website, and mobile customer apps.'
+  }
+  notificationChannels = system 'Customer notification channels' {
+    description 'The diagram shows phone, email, and chat notification channels; their providers are not identified.'
+  }
+  mdm = system 'Master data management service' {
+    description 'Optional third-party MDM integration that supplies a unified traveler profile; AWS does not name a product or vendor.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    connect = platform 'Amazon Connect' {
+      description 'Cloud contact center for customer service, skills-based routing, and workflows.'
+      metadata {
+        uses 'amazon-connect'
+      }
+      contactPanel = system 'Connect Customer Contact Control Panel' {
+        description 'Agent contact-center panel integrated with customer service, PSS, loyalty, and World Tracer interfaces.'
+      }
+    }
+    lex = platform 'Amazon Lex' {
+      description 'Conversational chatbot service.'
+      metadata {
+        uses 'amazon-lex'
+      }
+      chatbot = system 'Airline conversational chatbot' {
+        description 'Customer chatbot experience; the exact channels and conversation design are not specified.'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs the operational data platform integrations, customer-event functions, and API microservices.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      engagementFunctions = system 'Engagement data-platform integrations' {
+        description 'Lambda functions used by Amazon Connect for operational data-platform integration and by Amazon Lex for data access.'
+      }
+      customerEventFunctions = system 'Customer-event processing functions' {
+        description 'Lambda functions in the customer-event processing workflow.'
+      }
+      complexEventFunctions = system 'Complex-event processing functions' {
+        description 'Lambda functions in the complex-event processing workflow.'
+      }
+      apiMicroservices = system 'Customer API microservices' {
+        description 'Lambda microservices behind Amazon API Gateway.'
+      }
+    }
+    transcribe = platform 'Amazon Transcribe' {
+      description 'Used with Amazon Comprehend for sentiment analysis, as stated in the AWS page.'
+      metadata {
+        uses 'amazon-transcribe'
+      }
+    }
+    comprehend = platform 'Amazon Comprehend' {
+      description 'Used for sentiment analysis and customer-intent identification, as stated in the AWS page.'
+      metadata {
+        uses 'amazon-comprehend'
+      }
+    }
+
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Carries data events and MDM events in the diagram.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      description 'Delivers streamed data events to S3.'
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Data platform storage for staged, transformed, reportable, and customer-interaction data.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      staging = database 'Staging data' {
+        description 'Staging data shown for demographic, address, loyalty, shopping, and survey inputs.'
+      }
+      realtimeStaging = database 'Real-time staging data' {
+        description 'Real-time staging data shown for flight schedules, PNRs, tickets, ancillaries, loyalty, customer, and baggage-sortation data.'
+      }
+      parquet = database 'Parquet data sets' {
+        description 'Transformed data sets for the Traveler 360 data platform.'
+      }
+      reportable = database 'Reportable data sets' {
+        description 'Data sets shown for market-segment revenue, customer lifetime value, customer revenue and service indexes, and shopping insights.'
+      }
+      interactions = database 'Customer interactions data' {
+        description 'Interaction data shown for campaigns, Pinpoint interactions, and Connect conversations and interactions.'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Data integration service shown with the data lake and Glue Data Catalog.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      description 'Catalogs data sets in the data platform.'
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      catalog = database 'Data catalog' {
+        description 'Metadata catalog for data-platform data sets.'
+      }
+    }
+    emr = platform 'Amazon EMR' {
+      description 'Managed data-processing platform shown alongside AWS Glue.'
+      metadata {
+        uses 'amazon-emr'
+      }
+      processing = system 'Data-processing workloads' {
+        description 'Data-processing workloads shown with Amazon EMR; AWS does not specify individual jobs.'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      description 'Customer analytics data mart platform.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+      customerMarts = database 'Customer data marts' {
+        description 'Customer data marts shown for customer analytics.'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Customer analytics service.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+      analytics = system 'Customer analytics' {
+        description 'Customer analytics experience shown in the diagram.'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Customer analytics and machine-learning service shown in the diagram.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+      customerAnalytics = system 'Customer analytics workload' {
+        description 'Customer analytics workload shown on Amazon SageMaker; model details are not specified.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Query service shown with the data lake.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    personalize = platform 'Amazon Personalize' {
+      description 'Personalization service shown with customer interactions and analytics.'
+      metadata {
+        uses 'amazon-personalize'
+      }
+    }
+    pinpoint = platform 'Amazon Pinpoint' {
+      description 'Customer notification service shown with interaction data.'
+      metadata {
+        uses 'amazon-pinpoint'
+      }
+    }
+    stepFunctionsCustomerEvents = platform 'AWS Step Functions - customer event processing' {
+      description 'Customer-event workflow shown in the diagram.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    stepFunctionsComplexEvents = platform 'AWS Step Functions - complex event processing' {
+      description 'Complex-event workflow shown with Lambda functions and API Gateway.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Stores Customer 360 data; the diagram also shows DynamoDB Streams.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      traveler360 = database 'Customer 360 data' {
+        description 'Traveler profile data in the customer data platform.'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'API entry point shown for Lambda microservices.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+  }
+
+  batchIngress -> aws.s3.staging 'Provides batch input to'
+  systemsOfRecord -> batchIngress 'Sends batch data through'
+  systemsOfRecord -> aws.kinesis 'Provides operational events to'
+  demographicSources -> aws.s3.staging 'Provides demographic and address data to'
+  aws.kinesis -> aws.firehose 'Streams data events through'
+  aws.firehose -> aws.s3.realtimeStaging 'Delivers streamed data to'
+  aws.s3.staging -> aws.glue 'Provides data for integration'
+  aws.s3.realtimeStaging -> aws.glue 'Provides data for integration'
+  aws.glue -> aws.s3.parquet 'Produces transformed data in'
+  aws.glue -> aws.glueCatalog.catalog 'Catalogs data sets in'
+  aws.emr.processing -> aws.s3.parquet 'Processes data for'
+  aws.s3.parquet -> aws.s3.reportable 'Feeds reportable data sets'
+  aws.s3.reportable -> aws.redshift.customerMarts 'Feeds customer data marts'
+  aws.redshift.customerMarts -> aws.quickSight.analytics 'Provides customer analytics to'
+  aws.s3.parquet -> aws.athena 'Provides data for queries'
+  aws.s3.reportable -> aws.sagemaker.customerAnalytics 'Provides data for'
+  aws.s3.interactions -> aws.personalize 'Provides interaction data to'
+
+  agent -> aws.connect.contactPanel 'Uses'
+  traveler -> aws.lex.chatbot 'Interacts with'
+  aws.connect.contactPanel -> customerServicePortal 'Integrates with'
+  aws.connect.contactPanel -> pssAgentUi 'Integrates with'
+  aws.connect.contactPanel -> loyaltyAgentUi 'Integrates with'
+  aws.connect.contactPanel -> worldTracerUi 'Integrates with'
+  aws.connect.contactPanel -> aws.lambda.engagementFunctions 'Uses for operational data-platform integration'
+  aws.lex.chatbot -> aws.lambda.engagementFunctions 'Uses for data-platform access'
+  aws.connect.contactPanel -> aws.transcribe 'Uses for customer-interaction sentiment analysis'
+  aws.connect.contactPanel -> aws.comprehend 'Uses for sentiment analysis and customer-intent identification'
+  aws.lambda.engagementFunctions -> aws.dynamodb.traveler360 'Accesses traveler data in'
+  aws.kinesis -> aws.stepFunctionsCustomerEvents 'Carries data events to'
+  aws.stepFunctionsCustomerEvents -> aws.lambda.customerEventFunctions 'Orchestrates'
+  aws.lambda.customerEventFunctions -> aws.dynamodb.traveler360 'Updates'
+  mdm -> aws.kinesis 'Publishes MDM events to'
+  mdm -> aws.dynamodb.traveler360 'Provides unified traveler-profile data to'
+  aws.dynamodb.traveler360 -> aws.stepFunctionsComplexEvents 'Streams customer updates to'
+  aws.stepFunctionsComplexEvents -> aws.lambda.complexEventFunctions 'Orchestrates'
+  aws.apiGateway -> aws.lambda.apiMicroservices 'Routes API requests to'
+  traveler -> customerChannels 'Uses'
+  customerChannels -> aws.apiGateway 'Calls customer APIs through'
+  aws.pinpoint -> notificationChannels 'Sends customer notifications through'
+  aws.pinpoint -> aws.s3.interactions 'Contributes interaction data to'
+  aws.connect.contactPanel -> aws.s3.interactions 'Contributes conversation and interaction data to'
+  aws.personalize -> aws.s3.interactions 'Uses customer interactions from'
+}
