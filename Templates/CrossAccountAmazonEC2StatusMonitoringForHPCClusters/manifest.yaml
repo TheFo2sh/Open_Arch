@@ -1,0 +1,7 @@
+PackageId: OpenArch.CrossAccountAmazonEC2StatusMonitoringForHPCClusters
+Name: Cross-Account Amazon EC2 Status Monitoring for HPC Clusters
+Description: Monitor tagged EC2 instances in HPC cluster accounts from a centralized CloudWatch dashboard using EventBridge, Lambda, and cross-account CloudWatch observability.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, monitoring, observability, high-performance-computing, cross-account]

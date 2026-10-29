@@ -1,0 +1,111 @@
+// Expose Microservices Using Amazon EKS, based on AWS's hybrid IPv4 reference architecture.
+// Systems and users are slots: applying the template maps them onto the project's own.
+model {
+  internetClient = user 'Internet client' {
+    description 'An external client that requests a public microservice.'
+  }
+  onPremises = system 'On-premises network' {
+    description 'External network connected to AWS through VPN or Direct Connect.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      description 'Public and private hosted zones resolve requests to the corresponding load balancer.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    publicElb = platform 'Public Elastic Load Balancer' {
+      description 'Public ELB deployed by the AWS Load Balancer Controller for external requests.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+    privateElb = platform 'Private Elastic Load Balancer' {
+      description 'Private ELB deployed by the AWS Load Balancer Controller for internal requests.'
+      metadata {
+        uses 'elastic-load-balancing'
+      }
+    }
+
+    eks = platform 'Amazon Elastic Kubernetes Service' {
+      description 'Hosts microservices and the load-balancer controller on private worker nodes across two Availability Zones.'
+      metadata {
+        uses 'amazon-eks'
+      }
+      microservices = system 'Microservices' {
+        description 'Application workloads in private subnets; AWS does not specify their names or implementation.'
+        externalApps = container 'External applications' {
+          description 'Application pods exposed to external clients through Kubernetes services and ingresses.'
+        }
+        internalApps = container 'Internal applications' {
+          description 'Application pods exposed to internal clients through Kubernetes services and ingresses.'
+        }
+      }
+      ingressIntegration = system 'Cluster ingress integration' {
+        description 'Cluster add-on slot for the AWS Load Balancer Controller.'
+        controller = container 'AWS Load Balancer Controller' {
+          description 'Manages Elastic Load Balancers for Kubernetes services and ingresses.'
+          metadata {
+            uses 'aws-load-balancer-controller'
+          }
+        }
+      }
+    }
+
+    natGateways = platform 'AWS NAT Gateways' {
+      description 'NAT gateways in public subnets provide private-subnet egress to the internet.'
+      metadata {
+        uses 'aws-nat-gateway'
+      }
+    }
+    internetGateway = platform 'AWS Internet Gateway' {
+      metadata {
+        uses 'aws-internet-gateway'
+      }
+    }
+    virtualPrivateGateway = platform 'AWS Virtual Private Gateway' {
+      description 'Gateway for private-subnet routes to the on-premises network.'
+      metadata {
+        uses 'aws-virtual-private-gateway'
+      }
+    }
+    vpn = platform 'AWS Site-to-Site VPN' {
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    directConnect = platform 'AWS Direct Connect' {
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+  }
+
+  internetClient -> aws.eks.microservices 'Requests a public application'
+  onPremises -> aws.eks.microservices 'Requests an internal application'
+  aws.route53 -> aws.publicElb 'Public hosted zone resolves requests to'
+  aws.route53 -> aws.privateElb 'Private hosted zone resolves requests to'
+  aws.publicElb -> aws.eks.microservices.externalApps 'Forwards requests in instance or IP mode'
+  aws.privateElb -> aws.eks.microservices.internalApps 'Forwards requests in instance or IP mode'
+  aws.eks.ingressIntegration.controller -> aws.publicElb 'Manages'
+  aws.eks.ingressIntegration.controller -> aws.privateElb 'Manages'
+  aws.eks.microservices -> aws.natGateways 'Private-subnet internet egress routes through'
+  aws.natGateways -> aws.internetGateway 'Public route forwards traffic through'
+  aws.eks.microservices -> aws.virtualPrivateGateway 'Private route sends on-premises traffic through'
+  aws.virtualPrivateGateway -> aws.vpn 'On-premises connectivity can use'
+  aws.virtualPrivateGateway -> aws.directConnect 'On-premises connectivity can use'
+  aws.vpn -> onPremises 'Connects to'
+  aws.directConnect -> onPremises 'Connects to'
+}
+
+views {
+  view index {
+    title 'Expose Microservices Using Amazon EKS'
+    include *, aws.*
+  }
+}

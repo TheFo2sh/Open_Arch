@@ -1,0 +1,108 @@
+// Player Churn Prediction and Retention, after AWS's reference architecture
+// (https://docs.aws.amazon.com/reference-architecture-diagrams/latest/player-churn-prediction-retention/player-churn-prediction-retention.html).
+// Read together with the repository's specification.c4. Systems and users are slots.
+model {
+  mobileClient = system 'Mobile game client' {
+    description 'Sends player events for analysis and requests the retention action to present in the game.'
+  }
+  dataScientist = user 'Data scientist' {
+    description 'Prepares player data, tests algorithms, builds the model, and evaluates its accuracy.'
+  }
+  liveOps = user 'LiveOps' {
+    description 'The diagram shows this role but does not describe a specific interaction.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    kinesis = platform 'Amazon Kinesis Game Analytics Pipeline' {
+      description 'The game analytics pipeline shown collecting mobile player events.'
+      metadata {
+        uses 'amazon-kinesis-game-analytics-pipeline'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      analyticsData = database 'Analytics data' {
+        description 'Stores player events delivered by the game analytics pipeline.'
+      }
+      machineLearningData = database 'Machine learning data' {
+        description 'Stores transformed player data and trained model artifacts.'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+      churnWorkflow = system 'Player churn model workflow' {
+        description 'The data-science and inference resources used to build and apply the churn model.'
+
+        notebook = container 'SageMaker notebook' {
+          description 'Supports player-data preparation, algorithm testing, and model development.'
+        }
+        training = container 'Model training job' {
+          description 'Trains on 80% of the dataset and uses the remaining 20% to test model accuracy.'
+        }
+        batchTransform = container 'Batch transformation job' {
+          description 'Runs batch inference on the player dataset when triggered by AWS Glue.'
+        }
+        endpoint = container 'Real-time inference endpoint' {
+          description 'Evaluates player churn probability when invoked by the retention function.'
+        }
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      metadata {
+        uses 'aws-lambda'
+      }
+      retentionAction = system 'Player retention function' {
+        description 'Checks the player profile or real-time churn probability and selects a retention action.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      playerProfile = database 'Player profile' {
+        description 'Stores player profiles and churn predictions produced by batch inference.'
+      }
+    }
+  }
+
+  mobileClient -> aws.kinesis 'Sends player events through'
+  aws.kinesis -> aws.s3.analyticsData 'Stores events in'
+  aws.s3.analyticsData -> aws.glue 'Provides player events for transformation to'
+  aws.glue -> aws.s3.machineLearningData 'Writes transformed player data to'
+  dataScientist -> aws.sagemaker.churnWorkflow 'Prepares data, tests algorithms, and builds the model with'
+  aws.s3.machineLearningData -> aws.sagemaker.churnWorkflow.training 'Provides the player dataset to'
+  aws.sagemaker.churnWorkflow.training -> aws.s3.machineLearningData 'Stores the trained model in'
+
+  mobileClient -> aws.apiGateway 'Requests an in-game retention action through'
+  aws.apiGateway -> aws.lambda.retentionAction 'Routes the request to'
+  aws.lambda.retentionAction -> aws.dynamodb.playerProfile 'Checks the player profile and batch prediction in'
+  aws.lambda.retentionAction -> aws.sagemaker.churnWorkflow.endpoint 'Evaluates real-time churn probability with'
+  aws.glue -> aws.sagemaker.churnWorkflow.batchTransform 'Triggers batch inference with'
+  aws.glue -> aws.dynamodb.playerProfile 'Copies batch predictions to'
+  aws.lambda.retentionAction -> aws.apiGateway 'Returns the selected retention action through'
+}
+
+views {
+  view index {
+    title 'Player Churn Prediction and Retention'
+    include *, aws.*, aws.s3.*, aws.sagemaker.*, aws.sagemaker.churnWorkflow.*
+  }
+}

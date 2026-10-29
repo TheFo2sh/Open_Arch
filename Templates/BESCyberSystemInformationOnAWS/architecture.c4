@@ -1,0 +1,261 @@
+// BES Cyber System Information on AWS, based on AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/bes-cyber-system-information/bes-cyber-system-information.html
+// Systems are slots mapped onto the project's own systems when the template is applied.
+model {
+  utilityOt = system 'Utility OT environment' {
+    description 'Generation facilities, substations, data centers, customer locations, OT systems, SCADA, and data historians.'
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    controlTower = platform 'AWS Control Tower' {
+      metadata {
+        uses 'aws-control-tower'
+      }
+    }
+    config = platform 'AWS Config' {
+      metadata {
+        uses 'aws-config'
+      }
+    }
+    organizations = platform 'AWS Organizations' {
+      metadata {
+        uses 'aws-organizations'
+      }
+    }
+    cloudTrail = platform 'AWS CloudTrail' {
+      metadata {
+        uses 'aws-cloudtrail'
+      }
+    }
+    cloudWatch = platform 'Amazon CloudWatch' {
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    systemsManager = platform 'AWS Systems Manager' {
+      metadata {
+        uses 'aws-systems-manager'
+      }
+    }
+    cloudFormation = platform 'AWS CloudFormation' {
+      metadata {
+        uses 'aws-cloudformation'
+      }
+    }
+    backup = platform 'AWS Backup' {
+      metadata {
+        uses 'aws-backup'
+      }
+    }
+    auditManager = platform 'AWS Audit Manager' {
+      metadata {
+        uses 'aws-audit-manager'
+      }
+    }
+
+    iam = platform 'AWS Identity and Access Management (IAM)' {
+      metadata {
+        uses 'aws-iam'
+      }
+    }
+    directoryService = platform 'AWS Directory Service' {
+      metadata {
+        uses 'aws-directory-service'
+      }
+    }
+    guardDuty = platform 'Amazon GuardDuty' {
+      metadata {
+        uses 'amazon-guardduty'
+      }
+    }
+    kms = platform 'AWS Key Management Service (KMS)' {
+      metadata {
+        uses 'aws-kms'
+      }
+    }
+    firewallManager = platform 'AWS Firewall Manager' {
+      metadata {
+        uses 'aws-firewall-manager'
+      }
+    }
+    securityHub = platform 'AWS Security Hub' {
+      metadata {
+        uses 'aws-security-hub'
+      }
+    }
+
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Optional dedicated connection for guaranteed bandwidth; AWS recommends MACsec encryption with this option.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    siteToSiteVpn = platform 'AWS Site-to-Site VPN' {
+      description 'VPN option for connecting the utility OT network to AWS.'
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    virtualPrivateGateway = platform 'AWS Virtual Private Gateway' {
+      metadata {
+        uses 'aws-virtual-private-gateway'
+      }
+    }
+
+    dms = platform 'AWS Database Migration Service (AWS DMS)' {
+      metadata {
+        uses 'aws-database-migration-service'
+      }
+    }
+    storageGateway = platform 'AWS Storage Gateway (File Gateway)' {
+      metadata {
+        uses 'aws-storage-gateway'
+      }
+    }
+    transferFamily = platform 'AWS Transfer Family' {
+      description 'The diagram labels this AWS SFTP.'
+      metadata {
+        uses 'aws-transfer-family'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis' {
+      metadata {
+        uses 'amazon-kinesis'
+      }
+    }
+
+    vpc = platform 'Amazon VPC' {
+      description 'Isolated VPC boundary containing compute and relational database resources across two Availability Zones.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      vpcEndpoints = platform 'Amazon VPC endpoints' {
+        description 'Private route for data flows to the VPC.'
+        metadata {
+          uses 'amazon-vpc-endpoints'
+        }
+      }
+      ec2 = platform 'Amazon EC2' {
+        metadata {
+          uses 'amazon-ec2'
+        }
+      }
+      eks = platform 'Amazon EKS' {
+        metadata {
+          uses 'amazon-eks'
+        }
+      }
+      emr = platform 'Amazon EMR' {
+        metadata {
+          uses 'amazon-emr'
+        }
+      }
+      ecs = platform 'Amazon ECS' {
+        metadata {
+          uses 'amazon-ecs'
+        }
+      }
+      lambda = platform 'AWS Lambda' {
+        metadata {
+          uses 'aws-lambda'
+        }
+      }
+      fargate = platform 'AWS Fargate' {
+        metadata {
+          uses 'aws-fargate'
+        }
+      }
+      aurora = platform 'Amazon Aurora' {
+        metadata {
+          uses 'amazon-aurora'
+        }
+        auroraDatabase = database 'Aurora database'
+      }
+      rds = platform 'Amazon RDS' {
+        metadata {
+          uses 'amazon-rds'
+        }
+        rdsDatabase = database 'RDS database'
+      }
+      sageMaker = platform 'Amazon SageMaker AI' {
+        metadata {
+          uses 'amazon-sagemaker-ai'
+        }
+      }
+      thirdPartyAnalytics = system 'Third-party ML/analytics' {
+        description 'Unspecified third-party element shown in a private ML subnet; its vendor, role, and data flows are not documented.'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      rawData = database 'Amazon S3 raw data'
+      curatedData = database 'Amazon S3 curated data'
+    }
+    glue = platform 'AWS Glue ETL' {
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      dataCatalog = database 'OT data lake catalog'
+    }
+    glacier = platform 'Amazon S3 Glacier' {
+      metadata {
+        uses 'amazon-s3-glacier'
+      }
+      archivedData = database 'Archived OT data'
+    }
+  }
+
+  utilityOt -> aws.directConnect 'Connects to AWS with guaranteed bandwidth if selected'
+  utilityOt -> aws.siteToSiteVpn 'Connects to AWS over VPN'
+  aws.directConnect -> aws.virtualPrivateGateway 'Connects through'
+  aws.siteToSiteVpn -> aws.virtualPrivateGateway 'Terminates at'
+  aws.virtualPrivateGateway -> aws.vpc 'Connects to'
+
+  utilityOt -> aws.dms 'Supplies data for ingestion'
+  utilityOt -> aws.storageGateway 'Supplies data for ingestion'
+  utilityOt -> aws.transferFamily 'Supplies data for ingestion'
+  utilityOt -> aws.kinesis 'Supplies streaming data for ingestion'
+  aws.dms -> aws.vpc.vpcEndpoints 'Routes data through'
+  aws.storageGateway -> aws.vpc.vpcEndpoints 'Routes data through'
+  aws.transferFamily -> aws.vpc.vpcEndpoints 'Routes data through'
+  aws.kinesis -> aws.vpc.vpcEndpoints 'Routes data through'
+
+  aws.s3.rawData -> aws.glue 'Processed by ETL'
+  aws.glue -> aws.s3.curatedData 'Writes curated data to'
+  aws.glue -> aws.glueCatalog.dataCatalog 'Builds the data catalog'
+  aws.s3.curatedData -> aws.glacier.archivedData 'Archived to'
+
+  aws.guardDuty -> aws.vpc 'Monitors network traffic for malicious activity'
+  aws.kms -> aws.vpc.ec2 'Encrypts compute resources'
+  aws.kms -> aws.vpc.eks 'Encrypts compute resources'
+  aws.kms -> aws.vpc.emr 'Encrypts compute resources'
+  aws.kms -> aws.vpc.ecs 'Encrypts compute resources'
+  aws.kms -> aws.vpc.lambda 'Encrypts compute resources'
+  aws.kms -> aws.vpc.fargate 'Encrypts compute resources'
+  aws.kms -> aws.vpc.sageMaker 'Encrypts compute resources'
+  aws.kms -> aws.vpc.aurora.auroraDatabase 'Encrypts database data'
+  aws.kms -> aws.vpc.rds.rdsDatabase 'Encrypts database data'
+  aws.kms -> aws.s3.rawData 'Encrypts data'
+  aws.kms -> aws.s3.curatedData 'Encrypts data'
+  aws.kms -> aws.glacier.archivedData 'Encrypts data'
+}
+
+views {
+  view index {
+    title 'BES Cyber System Information on AWS'
+    include *
+  }
+}

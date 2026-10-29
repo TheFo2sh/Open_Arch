@@ -1,0 +1,77 @@
+technologies:
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Receives MQTT telemetry from IoT devices and routes it with IoT rules to Timestream and Data Firehose.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-timestream
+    name: Amazon Timestream
+    description: Stores pump sensor readings as time-series data for visualization and monitoring.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/timestream/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-managed-grafana
+    name: Amazon Managed Grafana
+    description: Visualizes sensor data from Timestream and inference results queried through Athena.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/grafana/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-data-firehose
+    name: Amazon Data Firehose
+    description: Captures, transforms, and delivers IoT telemetry from AWS IoT Core to Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores device telemetry delivered by Data Firehose and inference results produced by Lookout for Equipment.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-lookout-for-equipment
+    name: Amazon Lookout for Equipment
+    description: Analyzes equipment data in Amazon S3 to detect abnormalities and writes inference results back to S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lookout-for-equipment/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-glue
+    name: AWS Glue
+    description: Uses a crawler to categorize Amazon S3 data in the AWS Glue Data Catalog.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/glue/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-athena
+    name: Amazon Athena
+    description: Runs on-demand queries using metadata from the AWS Glue Data Catalog.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/athena/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-iot-device-sdk
+    name: AWS IoT Device SDK
+    description: Device software development kit used by factory devices to publish pump sensor data to AWS IoT Core.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/iot/latest/developerguide/iot-sdks.html
+    types: [library]
+  - key: mqtt
+    name: MQTT
+    description: Messaging protocol used by the IoT device SDK to ingest sensor data into AWS IoT Core.
+    vendor: OASIS Open
+    url: https://mqtt.org/
+    types: [third-party]
