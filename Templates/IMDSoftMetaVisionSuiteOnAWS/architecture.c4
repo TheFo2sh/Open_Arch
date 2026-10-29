@@ -1,0 +1,159 @@
+// iMDSoft MetaVision Suite on AWS, based on AWS's reference architecture.
+// Read together with the repository's specification.c4. Systems and users are slots.
+model {
+  clinician = user 'Hospital clinician' {
+    description 'Uses MetaVision from a hospital workstation and can use Emergency Data Access (EDA) during loss of connectivity.'
+  }
+
+  hospital = zone 'Hospital network' {
+    metadata {
+      platform 'other'
+    }
+
+    citrixWorkstations = system 'Citrix client workstations' {
+      description 'Hospital workstations used by clinicians to access MetaVision.'
+      technology 'Citrix'
+    }
+    bedsideDevices = system 'Bedside medical devices' {
+      description 'Hospital devices whose data is integrated with MetaVision through a serial server.'
+    }
+    serialServer = system 'Serial server' {
+      description 'Connects bedside devices to the MetaVision Integration Engine; vendor and configuration are unspecified.'
+    }
+    clinicalSystems = system 'Hospital clinical systems' {
+      description 'Other clinical systems integrated by the MetaVision Integration Engine; products are not specified.'
+    }
+    administrativeSystems = system 'Hospital administrative systems' {
+      description 'Administrative systems integrated by the MetaVision Integration Engine; products are not specified.'
+    }
+    edaWorkstations = system 'Emergency Data Access workstations' {
+      description 'On-premises workstations providing local continuity during a loss of connectivity and synchronized by SQL Server transactional replication.'
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Redundant links connect hospital sites to AWS; data in transit is encrypted with TLS.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+
+    vpc = platform 'Amazon VPC' {
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      applicationEc2 = platform 'Amazon EC2 - application servers' {
+        description 'MetaVision application server instances with Citrix across multiple Availability Zones.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        metaVision = system 'MetaVision Suite' {
+          description 'Clinical information system for intensive care, anesthesia, and operating-theatre workflows.'
+          technology 'iMDSoft MetaVision Suite'
+          applicationServer = container 'MetaVision application server' {
+            description 'Application tier accessed by hospital clinicians through Citrix workstations.'
+            technology 'iMDSoft MetaVision Suite, Citrix'
+          }
+        }
+      }
+
+      integrationEc2 = platform 'Amazon EC2 - MVIE cluster' {
+        description 'Windows Server instances across multiple Availability Zones, configured as a Windows Server Failover Cluster.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        mvie = system 'MetaVision Integration Engine (MVIE)' {
+          description 'Communication server integrating bedside devices and hospital clinical and administrative systems.'
+          technology 'iMDSoft MetaVision Suite'
+          communicationServer = container 'MVIE communication server' {
+            description 'Clustered integration tier running on Windows Server.'
+            technology 'iMDSoft MetaVision Suite, Microsoft Windows Server, Windows Server Failover Clustering'
+          }
+        }
+      }
+
+      databaseEc2 = platform 'Amazon EC2 - SQL Server Always On FCIs' {
+        description 'SQL Server Failover Cluster Instances host the MetaVision database across Availability Zones.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        primaryDatabase = database 'MetaVision database - primary' {
+          description 'Primary SQL Server instance in the high-availability FCI deployment.'
+          metadata {
+            uses 'microsoft-sql-server, sql-server-always-on-failover-cluster-instances'
+          }
+        }
+        standbyDatabase = database 'MetaVision database - standby' {
+          description 'Standby SQL Server instance synchronized with the primary across Availability Zones.'
+          metadata {
+            uses 'microsoft-sql-server, sql-server-always-on-failover-cluster-instances'
+          }
+        }
+      }
+
+      reportingEc2 = platform 'Amazon EC2 - reporting and EDA distributor' {
+        description 'Standalone SQL Server replica for reporting and Emergency Data Access synchronization.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+        reportingDatabase = database 'Reporting and EDA distributor replica' {
+          description 'Standalone SQL Server replica that serves reporting and distributes data to EDA workstations.'
+          metadata {
+            uses 'microsoft-sql-server, sql-server-transactional-replication'
+          }
+        }
+      }
+
+      sharedStorage = platform 'Amazon FSx for Windows File Server - shared SQL storage' {
+        description 'Multi-AZ file shares provide shared storage for the SQL Server instances.'
+        metadata {
+          uses 'amazon-fsx-windows-file-server'
+        }
+      }
+
+      clusterWitness = platform 'Amazon FSx for Windows File Server - cluster witness' {
+        description 'File-share witness for the SQL Server Failover Cluster Instances.'
+        metadata {
+          uses 'amazon-fsx-windows-file-server'
+        }
+      }
+    }
+  }
+
+  clinician -> hospital.citrixWorkstations 'Uses'
+  clinician -> hospital.edaWorkstations 'Uses for local continuity when connectivity is unavailable'
+  hospital.citrixWorkstations -> aws.directConnect 'Connects to AWS over redundant links encrypted with TLS'
+  hospital.edaWorkstations -> aws.directConnect 'Connects to AWS over redundant links encrypted with TLS'
+  hospital.serialServer -> aws.directConnect 'Connects bedside-device traffic to AWS over TLS'
+  hospital.clinicalSystems -> aws.directConnect 'Connects to AWS over TLS'
+  hospital.administrativeSystems -> aws.directConnect 'Connects to AWS over TLS'
+  aws.directConnect -> aws.vpc 'Connects hospital sites to'
+
+  hospital.citrixWorkstations -> aws.vpc.applicationEc2.metaVision 'Accesses'
+  hospital.bedsideDevices -> hospital.serialServer 'Sends device data through'
+  hospital.serialServer -> aws.vpc.integrationEc2.mvie.communicationServer 'Sends device data to'
+  aws.vpc.integrationEc2.mvie.communicationServer -> hospital.clinicalSystems 'Integrates with'
+  aws.vpc.integrationEc2.mvie.communicationServer -> hospital.administrativeSystems 'Integrates with'
+  aws.vpc.applicationEc2.metaVision.applicationServer -> aws.vpc.databaseEc2.primaryDatabase 'Stores and retrieves clinical data in'
+  aws.vpc.integrationEc2.mvie.communicationServer -> aws.vpc.databaseEc2.primaryDatabase 'Stores integrated device and hospital-system data in'
+  aws.vpc.databaseEc2.primaryDatabase -> aws.vpc.databaseEc2.standbyDatabase 'Synchronizes across Availability Zones'
+  aws.vpc.databaseEc2.primaryDatabase -> aws.vpc.reportingEc2.reportingDatabase 'Replicates asynchronously to'
+  aws.vpc.reportingEc2.reportingDatabase -> hospital.edaWorkstations 'Synchronizes continuously by SQL Server transactional replication over TLS'
+  aws.vpc.databaseEc2.primaryDatabase -> aws.vpc.sharedStorage 'Uses shared SQL storage on'
+  aws.vpc.databaseEc2.standbyDatabase -> aws.vpc.sharedStorage 'Uses shared SQL storage on'
+  aws.vpc.databaseEc2.primaryDatabase -> aws.vpc.clusterWitness 'Uses the file-share witness on'
+  aws.vpc.databaseEc2.standbyDatabase -> aws.vpc.clusterWitness 'Uses the file-share witness on'
+}
+
+views {
+  view index {
+    title 'iMDSoft MetaVision Suite on AWS'
+    include *, hospital.*, aws.*, aws.vpc.*
+  }
+}
