@@ -1,0 +1,464 @@
+// Seventeen alternative patterns from the June 23, 2022 AWS reference family.
+model {
+  outside = zone 'External clients and private networks' {
+    metadata { platform 'other' }
+    ipv4 = system 'IPv4 client or endpoint'
+    ipv6 = system 'IPv6 client or endpoint'
+    corporate = system 'Corporate network and router'
+  }
+  dualInternet = zone 'Dual stack internet' {
+    metadata { platform 'aws' }
+    vpc = platform 'Dual-stack VPC and public/private subnet routes' {
+      metadata { uses 'aws-vpc' }
+    }
+    public = platform 'Public dual-stack workload' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'Public dual-stack workload'
+    }
+    private = platform 'Private dual-stack workload' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'Private dual-stack workload'
+    }
+    igw = platform 'Internet gateway' {
+      metadata { uses 'aws-igw' }
+    }
+    nat = platform 'Public NAT gateway per AZ' {
+      metadata { uses 'aws-nat' }
+    }
+    eigw = platform 'Egress-only internet gateway' {
+      metadata { uses 'aws-eigw' }
+    }
+  }
+  mixedSubnets = zone 'IPv6-only subnets in a dual-stack VPC' {
+    metadata { platform 'aws' }
+    vpc = platform 'Dual-stack VPC with mixed subnet families' {
+      metadata { uses 'aws-vpc' }
+    }
+    v4 = platform 'IPv4-only subnet workload' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'IPv4-only subnet workload'
+    }
+    v6 = platform 'IPv6-only subnet workload' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'IPv6-only subnet workload'
+    }
+    dual = platform 'Dual-stack subnet workload' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'Dual-stack subnet workload'
+    }
+  }
+  ipv6Internet = zone 'IPv6-only internet connectivity' {
+    metadata { platform 'aws' }
+    vpc = platform 'Dual-stack VPC with IPv6-only subnets' {
+      metadata { uses 'aws-vpc' }
+    }
+    public = platform 'Public IPv6-only workload' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'Public IPv6-only workload'
+    }
+    private = platform 'Private IPv6-only workload' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'Private IPv6-only workload'
+    }
+    igw = platform 'Internet gateway' {
+      metadata { uses 'aws-igw' }
+    }
+    eigw = platform 'Egress-only internet gateway' {
+      metadata { uses 'aws-eigw' }
+    }
+  }
+  albV4 = zone 'Dual-stack ALB with IPv4 targets' {
+    metadata { platform 'aws' }
+    vpc = platform 'Dual-stack load-balancer subnets' {
+      metadata { uses 'aws-vpc' }
+    }
+    loadBalancer = platform 'Dual-stack ALB with IPv4 targets' {
+      metadata { uses 'aws-alb' }
+    }
+    target = platform 'IPv4 backend targets' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'IPv4 backend targets'
+    }
+  }
+  albV6 = zone 'Dual-stack ALB with IPv6 targets' {
+    metadata { platform 'aws' }
+    vpc = platform 'Dual-stack load-balancer subnets' {
+      metadata { uses 'aws-vpc' }
+    }
+    loadBalancer = platform 'Dual-stack ALB with IPv6 targets' {
+      metadata { uses 'aws-alb' }
+    }
+    target = platform 'IPv6 backend targets' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'IPv6 backend targets'
+    }
+  }
+  nlbV4 = zone 'Dual-stack NLB with IPv4 targets' {
+    metadata { platform 'aws' }
+    vpc = platform 'Dual-stack load-balancer subnets' {
+      metadata { uses 'aws-vpc' }
+    }
+    loadBalancer = platform 'Dual-stack NLB with IPv4 targets' {
+      metadata { uses 'aws-nlb' }
+    }
+    target = platform 'IPv4 backend targets' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'IPv4 backend targets'
+    }
+  }
+  nlbV6 = zone 'Dual-stack NLB with IPv6 targets' {
+    metadata { platform 'aws' }
+    vpc = platform 'Dual-stack load-balancer subnets' {
+      metadata { uses 'aws-vpc' }
+    }
+    loadBalancer = platform 'Dual-stack NLB with IPv6 targets' {
+      metadata { uses 'aws-nlb' }
+    }
+    target = platform 'IPv6 backend targets' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'IPv6 backend targets'
+    }
+  }
+  internalElb = zone 'Internal dual-stack ALB and NLB' {
+    metadata { platform 'aws' }
+    vpc = platform 'Dual-stack private load-balancer subnets' {
+      metadata { uses 'aws-vpc' }
+    }
+    alb = platform 'Internal dual-stack ALB' {
+      metadata { uses 'aws-alb' }
+    }
+    nlb = platform 'Internal dual-stack NLB' {
+      metadata { uses 'aws-nlb' }
+    }
+    v4 = platform 'IPv4 target group' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'IPv4 target group'
+    }
+    v6 = platform 'IPv6 IP-type target group' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'IPv6 IP-type target group'
+    }
+  }
+  dns64 = zone 'DNS64' {
+    metadata { platform 'aws' }
+    workload = platform 'IPv6-only client' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'IPv6-only client'
+    }
+    resolver = platform 'Subnet-enabled Route 53 Resolver DNS64' {
+      metadata { uses 'aws-resolver' }
+    }
+  }
+  nat64 = zone 'NAT64' {
+    metadata { platform 'aws' }
+    workload = platform 'IPv6-only client' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'IPv6-only client'
+    }
+    resolver = platform 'DNS64 resolver' {
+      metadata { uses 'aws-resolver' }
+    }
+    nat = platform 'NAT gateway' {
+      metadata { uses 'aws-nat' }
+    }
+    v4 = platform 'IPv4-only VPC endpoint' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'IPv4-only VPC endpoint'
+    }
+    igw = platform 'Internet gateway' {
+      metadata { uses 'aws-igw' }
+    }
+  }
+  centralNat64 = zone 'Centralized NAT64 egress' {
+    metadata { platform 'aws' }
+    spoke = platform 'IPv6-only spoke workload' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'IPv6-only spoke workload'
+    }
+    resolver = platform 'DNS64 in spoke subnets' {
+      metadata { uses 'aws-resolver' }
+    }
+    tgw = platform 'Transit Gateway' {
+      metadata { uses 'aws-tgw' }
+    }
+    egress = platform 'Central egress VPC and attachment routes' {
+      metadata { uses 'aws-vpc' }
+    }
+    nat = platform 'Central public NAT gateway' {
+      metadata { uses 'aws-nat' }
+    }
+    igw = platform 'Egress VPC internet gateway' {
+      metadata { uses 'aws-igw' }
+    }
+  }
+  peering = zone 'Dual-stack VPC peering' {
+    metadata { platform 'aws' }
+    vpcA = platform 'VPC A IPv4 and IPv6 routes' {
+      metadata { uses 'aws-vpc' }
+    }
+    a = platform 'VPC A workload' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'VPC A workload'
+    }
+    peer = platform 'Intra-Region or cross-Region peering' {
+      metadata { uses 'aws-peering' }
+    }
+    vpcB = platform 'VPC B IPv4 and IPv6 routes' {
+      metadata { uses 'aws-vpc' }
+    }
+    b = platform 'VPC B workload' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'VPC B workload'
+    }
+  }
+  transitGateway = zone 'Dual-stack Transit Gateway' {
+    metadata { platform 'aws' }
+    a = platform 'VPC A workload' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'VPC A workload'
+    }
+    vpcA = platform 'IPv6-enabled VPC A attachment subnets' {
+      metadata { uses 'aws-vpc' }
+    }
+    tgwA = platform 'Transit Gateway A' {
+      metadata { uses 'aws-tgw' }
+    }
+    tgwB = platform 'Transit Gateway B in another Region' {
+      metadata { uses 'aws-tgw' }
+    }
+    vpcB = platform 'IPv6-enabled VPC B attachment subnets' {
+      metadata { uses 'aws-vpc' }
+    }
+    b = platform 'VPC B workload' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'VPC B workload'
+    }
+  }
+  privateLink = zone 'Dual-stack PrivateLink' {
+    metadata { platform 'aws' }
+    consumer = platform 'Service consumer' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'Service consumer'
+    }
+    endpoints = platform 'Consumer endpoint ENIs across multiple AZs' {
+      metadata { uses 'aws-privatelink' }
+    }
+    nlb = platform 'Provider dual-stack NLB and endpoint service' {
+      metadata { uses 'aws-nlb' }
+    }
+    v4 = platform 'Provider IPv4 backend' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'Provider IPv4 backend'
+    }
+    v6 = platform 'Provider IPv6 IP-type backend' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'Provider IPv6 IP-type backend'
+    }
+  }
+  directConnect = zone 'Dual-stack Direct Connect' {
+    metadata { platform 'aws' }
+    dx = platform 'Public, private or transit virtual interfaces' {
+      metadata { uses 'aws-dx' }
+    }
+    gateway = platform 'Private VIF virtual private gateway option' {
+      metadata { uses 'aws-vgw' }
+    }
+    tgw = platform 'Transit VIF Transit Gateway option' {
+      metadata { uses 'aws-tgw' }
+    }
+    vpc = platform 'Dual-stack or IPv6-only workload routes' {
+      metadata { uses 'aws-vpc' }
+    }
+    workload = platform 'AWS workload' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'AWS workload'
+    }
+  }
+  vpn = zone 'Dual-stack VPN with Transit Gateway' {
+    metadata { platform 'aws' }
+    vpnV4 = platform 'IPv4-inner TGW VPN attachment' {
+      metadata { uses 'aws-vpn' }
+    }
+    vpnV6 = platform 'IPv6-inner TGW VPN attachment' {
+      metadata { uses 'aws-vpn' }
+    }
+    tgw = platform 'Transit Gateway' {
+      metadata { uses 'aws-tgw' }
+    }
+    workload = platform 'Dual-stack or IPv6-only AWS workload' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'Dual-stack or IPv6-only AWS workload'
+    }
+  }
+  tgwConnect = zone 'Dual-stack Transit Gateway Connect' {
+    metadata { platform 'aws' }
+    connect = platform 'Connect peer with IPv4 or IPv6 GRE endpoint' {
+      metadata { uses 'aws-connect' }
+    }
+    vpc = platform 'Dual-stack VPC transport attachment' {
+      metadata { uses 'aws-vpc' }
+    }
+    dx = platform 'Alternative Direct Connect gateway transport' {
+      metadata { uses 'aws-dx' }
+    }
+    tgw = platform 'Transit Gateway' {
+      metadata { uses 'aws-tgw' }
+    }
+    workload = platform 'AWS workload' {
+      metadata { uses 'aws-ec2' }
+      workload = system 'AWS workload'
+    }
+  }
+  dualInternet.public.workload -> dualInternet.igw 'IPv4 and IPv6 public internet traffic'
+  dualInternet.igw -> outside.ipv4 'IPv4 internet connectivity'
+  dualInternet.igw -> outside.ipv6 'IPv6 internet connectivity'
+  dualInternet.private.workload -> dualInternet.nat 'Outbound IPv4 plus return traffic'
+  dualInternet.nat -> dualInternet.igw 'Translated IPv4 egress'
+  dualInternet.private.workload -> dualInternet.eigw 'Outbound IPv6 plus return traffic'
+  dualInternet.eigw -> outside.ipv6 'IPv6 egress only'
+  mixedSubnets.v4.workload -> mixedSubnets.dual.workload 'Native IPv4 communication'
+  mixedSubnets.v6.workload -> mixedSubnets.dual.workload 'Native IPv6 communication'
+  ipv6Internet.public.workload -> ipv6Internet.igw 'IPv6 traffic using ::/0'
+  ipv6Internet.igw -> outside.ipv6 'Bidirectional public IPv6 connectivity'
+  ipv6Internet.private.workload -> ipv6Internet.eigw 'IPv6 egress using ::/0'
+  ipv6Internet.eigw -> outside.ipv6 'Outbound connections and return traffic only'
+  outside.ipv4 -> albV4.loadBalancer 'Client connects using IPv4'
+  outside.ipv6 -> albV4.loadBalancer 'Client connects using IPv6'
+  albV4.loadBalancer -> albV4.target.workload 'Healthy target connections use IPv4'
+  outside.ipv4 -> albV6.loadBalancer 'Client connects using IPv4'
+  outside.ipv6 -> albV6.loadBalancer 'Client connects using IPv6'
+  albV6.loadBalancer -> albV6.target.workload 'Healthy target connections use IPv6'
+  outside.ipv4 -> nlbV4.loadBalancer 'Client connects using IPv4'
+  outside.ipv6 -> nlbV4.loadBalancer 'Client connects using IPv6'
+  nlbV4.loadBalancer -> nlbV4.target.workload 'Healthy target connections use IPv4'
+  outside.ipv4 -> nlbV6.loadBalancer 'Client connects using IPv4'
+  outside.ipv6 -> nlbV6.loadBalancer 'Client connects using IPv6'
+  nlbV6.loadBalancer -> nlbV6.target.workload 'Healthy target connections use IPv6'
+  outside.corporate -> internalElb.alb 'Private IPv4 or IPv6 connection'
+  outside.corporate -> internalElb.nlb 'Alternative private IPv4 or IPv6 connection'
+  internalElb.alb -> internalElb.v4.workload 'IPv4 target-group option'
+  internalElb.alb -> internalElb.v6.workload 'Alternative IPv6 target-group option'
+  internalElb.nlb -> internalElb.v4.workload 'IPv4 target-group option'
+  internalElb.nlb -> internalElb.v6.workload 'Alternative IPv6 target-group option'
+  dns64.workload.workload -> dns64.resolver 'Queries A/AAAA records'
+  dns64.resolver -> outside.ipv4 'Looks up the IPv4-only destination name'
+  dns64.resolver -> dns64.workload.workload 'Synthesizes 64:ff9b::/96 plus IPv4 only when AAAA is absent'
+  nat64.workload.workload -> nat64.resolver 'Requests destination resolution'
+  nat64.resolver -> nat64.workload.workload 'Returns synthesized IPv6 destination'
+  nat64.workload.workload -> nat64.nat 'Routes 64:ff9b::/96 to NAT Gateway'
+  nat64.nat -> nat64.v4.workload 'Translates to IPv4 for same-VPC access'
+  nat64.nat -> nat64.igw 'Public NAT option for IPv4 internet access'
+  nat64.igw -> outside.ipv4 'Uses public NAT Elastic IP'
+  nat64.nat -> outside.corporate 'Alternative private IPv4 access over configured hybrid/peering routes'
+  centralNat64.spoke.workload -> centralNat64.resolver 'Resolves IPv4-only destination'
+  centralNat64.resolver -> centralNat64.spoke.workload 'Returns synthesized IPv6 destination'
+  centralNat64.spoke.workload -> centralNat64.tgw 'Routes 64:ff9b::/96 via spoke TGW ENI'
+  centralNat64.tgw -> centralNat64.egress 'Static prefix route selects egress attachment'
+  centralNat64.egress -> centralNat64.nat 'Egress attachment-subnet route selects NAT'
+  centralNat64.nat -> centralNat64.igw 'Translates to IPv4'
+  centralNat64.igw -> outside.ipv4 'Reaches IPv4 internet destination'
+  peering.a.workload -> peering.vpcA 'Sends peer traffic via configured routes'
+  peering.vpcA -> peering.peer 'Routes peer IPv4 and IPv6 CIDRs'
+  peering.peer -> peering.vpcB 'Connects nonoverlapping address ranges'
+  peering.vpcB -> peering.b.workload 'Routes destination traffic'
+  transitGateway.a.workload -> transitGateway.vpcA 'Uses IPv4 and IPv6 VPC routes'
+  transitGateway.vpcA -> transitGateway.tgwA 'Attachment enables IPv6 routing'
+  transitGateway.tgwA -> transitGateway.tgwB 'Dual-stack TGW peering'
+  transitGateway.tgwB -> transitGateway.vpcB 'Routes or propagates both address families'
+  transitGateway.vpcB -> transitGateway.b.workload 'Reaches peer workload'
+  privateLink.consumer.workload -> privateLink.endpoints 'Uses private IPv4 or IPv6 endpoint'
+  privateLink.endpoints -> privateLink.nlb 'Connects privately to shared endpoint service'
+  privateLink.nlb -> privateLink.v4.workload 'IPv4 target-group option'
+  privateLink.nlb -> privateLink.v6.workload 'Alternative IPv6 IP-type target group'
+  outside.corporate -> directConnect.dx 'Uses separate IPv4 and IPv6 BGP sessions'
+  directConnect.dx -> directConnect.gateway 'Private-VIF path'
+  directConnect.gateway -> directConnect.vpc 'Routes both stacks'
+  directConnect.dx -> directConnect.tgw 'Alternative transit-VIF and DX-gateway path'
+  directConnect.tgw -> directConnect.vpc 'Routes both stacks'
+  directConnect.vpc -> directConnect.workload.workload 'Reaches workload'
+  outside.corporate -> vpn.vpnV4 'Public IPv4 outer tunnel; IPv4 inner traffic'
+  outside.corporate -> vpn.vpnV6 'Public IPv4 outer tunnel; IPv6 inner traffic'
+  vpn.vpnV4 -> vpn.tgw 'IPv4 route attachment'
+  vpn.vpnV6 -> vpn.tgw 'IPv6 route attachment'
+  vpn.tgw -> vpn.workload.workload 'Routes each inner address family'
+  outside.corporate -> tgwConnect.connect 'GRE endpoint over IPv4 or IPv6; BGP inside both stacks'
+  tgwConnect.connect -> tgwConnect.vpc 'VPC transport option'
+  tgwConnect.connect -> tgwConnect.dx 'Alternative DX-gateway transport'
+  tgwConnect.vpc -> tgwConnect.tgw 'Carries Connect traffic'
+  tgwConnect.dx -> tgwConnect.tgw 'Carries Connect traffic'
+  tgwConnect.tgw -> tgwConnect.workload.workload 'Routes IPv4 and IPv6 prefixes'
+}
+views {
+  view index {
+    title 'Dual stack and IPv6-only VPC reference patterns'
+    include *
+  }
+  view dualInternet {
+    title 'Dual stack internet'
+    include dualInternet.*, outside.*
+  }
+  view mixedSubnets {
+    title 'IPv6-only subnets in a dual-stack VPC'
+    include mixedSubnets.*, outside.*
+  }
+  view ipv6Internet {
+    title 'IPv6-only internet connectivity'
+    include ipv6Internet.*, outside.*
+  }
+  view albV4 {
+    title 'Dual-stack ALB with IPv4 targets'
+    include albV4.*, outside.*
+  }
+  view albV6 {
+    title 'Dual-stack ALB with IPv6 targets'
+    include albV6.*, outside.*
+  }
+  view nlbV4 {
+    title 'Dual-stack NLB with IPv4 targets'
+    include nlbV4.*, outside.*
+  }
+  view nlbV6 {
+    title 'Dual-stack NLB with IPv6 targets'
+    include nlbV6.*, outside.*
+  }
+  view internalElb {
+    title 'Internal dual-stack ALB and NLB'
+    include internalElb.*, outside.*
+  }
+  view dns64 {
+    title 'DNS64'
+    include dns64.*, outside.*
+  }
+  view nat64 {
+    title 'NAT64'
+    include nat64.*, outside.*
+  }
+  view centralNat64 {
+    title 'Centralized NAT64 egress'
+    include centralNat64.*, outside.*
+  }
+  view peering {
+    title 'Dual-stack VPC peering'
+    include peering.*, outside.*
+  }
+  view transitGateway {
+    title 'Dual-stack Transit Gateway'
+    include transitGateway.*, outside.*
+  }
+  view privateLink {
+    title 'Dual-stack PrivateLink'
+    include privateLink.*, outside.*
+  }
+  view directConnect {
+    title 'Dual-stack Direct Connect'
+    include directConnect.*, outside.*
+  }
+  view vpn {
+    title 'Dual-stack VPN with Transit Gateway'
+    include vpn.*, outside.*
+  }
+  view tgwConnect {
+    title 'Dual-stack Transit Gateway Connect'
+    include tgwConnect.*, outside.*
+  }
+}

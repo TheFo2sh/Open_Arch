@@ -1,0 +1,121 @@
+technologies:
+  - key: aws-vpc
+    name: Amazon VPC
+    description: Amazon VPC in the AWS dual-stack and IPv6 reference patterns.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-ec2
+    name: Amazon EC2
+    description: Amazon EC2 in the AWS dual-stack and IPv6 reference patterns.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: aws-igw
+    name: Internet gateway
+    description: Internet gateway in the AWS dual-stack and IPv6 reference patterns.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-eigw
+    name: Egress-only internet gateway
+    description: Egress-only internet gateway in the AWS dual-stack and IPv6 reference patterns.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/egress-only-internet-gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-nat
+    name: NAT gateway with NAT64
+    description: NAT gateway with NAT64 in the AWS dual-stack and IPv6 reference patterns.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-alb
+    name: Application Load Balancer
+    description: Application Load Balancer in the AWS dual-stack and IPv6 reference patterns.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/application-load-balancer/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-nlb
+    name: Network Load Balancer
+    description: Network Load Balancer in the AWS dual-stack and IPv6 reference patterns.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/elasticloadbalancing/network-load-balancer/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-resolver
+    name: Amazon Route 53 Resolver
+    description: Amazon Route 53 Resolver in the AWS dual-stack and IPv6 reference patterns.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/resolver/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-tgw
+    name: AWS Transit Gateway
+    description: AWS Transit Gateway in the AWS dual-stack and IPv6 reference patterns.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/transit-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-dx
+    name: AWS Direct Connect
+    description: AWS Direct Connect in the AWS dual-stack and IPv6 reference patterns.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-vgw
+    name: Virtual private gateway
+    description: Virtual private gateway in the AWS dual-stack and IPv6 reference patterns.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpn/latest/s2svpn/VPC_VPN.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-peering
+    name: Amazon VPC peering
+    description: Amazon VPC peering in the AWS dual-stack and IPv6 reference patterns.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/peering/what-is-vpc-peering.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-privatelink
+    name: AWS PrivateLink
+    description: AWS PrivateLink in the AWS dual-stack and IPv6 reference patterns.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/privatelink/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-vpn
+    name: AWS Site-to-Site VPN
+    description: AWS Site-to-Site VPN in the AWS dual-stack and IPv6 reference patterns.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpn/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-connect
+    name: AWS Transit Gateway Connect
+    description: AWS Transit Gateway Connect in the AWS dual-stack and IPv6 reference patterns.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/tgw/tgw-connect.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
