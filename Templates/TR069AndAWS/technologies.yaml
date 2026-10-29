@@ -1,0 +1,112 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names.
+technologies:
+  - key: aws-iot-core
+    name: AWS IoT Core
+    description: Connects remote gateways and routes authenticated telemetry through IoT rules to Kinesis Data Streams; HTTPS ingestion can optionally use a custom authorizer.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iot-core/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-kinesis-data-streams
+    name: Amazon Kinesis Data Streams
+    description: Holds the incoming raw telemetry and the separate normalized TR-181 stream produced by Flink.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kinesis/data-streams/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-managed-service-for-apache-flink
+    name: Amazon Managed Service for Apache Flink
+    description: Normalizes TR-181 payloads, emits processed data to a second Kinesis stream, and detects CPE problems for ACS actions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/managed-service-apache-flink/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-data-firehose
+    name: Amazon Data Firehose
+    description: Delivers normalized telemetry to the data lake repository.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/firehose/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-database-migration-service
+    name: AWS Database Migration Service (AWS DMS)
+    description: Brings additional metrics collected by the ACS outside TR-069 into the data lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dms/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: data-lake-repository
+    name: Data lake repository
+    description: Logical destination named by the AWS reference; its underlying storage service is not specified in the numbered flow.
+    types: [data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-quicksight
+    name: Amazon QuickSight
+    description: Visualizes fleet health from the data and insights in the lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/quicksight/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Monitors fleet health using data and insights from the lake.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-connect
+    name: Amazon Connect
+    description: Notifies operational personnel and end customers based on findings.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/connect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sns
+    name: Amazon SNS
+    description: Publishes notifications to operational personnel and end customers based on findings.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sns/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: tr-069
+    name: TR-069
+    description: Broadband Forum protocol used by an Auto Configuration Server to configure remote customer gateways.
+    vendor: Broadband Forum
+    url: https://www.broadband-forum.org/
+    types: [third-party]
+  - key: tr-181
+    name: TR-181
+    description: Broadband Forum device data model whose parameters are sent from remote gateways for telemetry and analytics.
+    vendor: Broadband Forum
+    url: https://www.broadband-forum.org/
+    types: [third-party]
+  - key: mqtt
+    name: MQTT
+    description: Optional messaging protocol for remote gateways to send data to AWS IoT Core.
+    vendor: OASIS Open
+    url: https://mqtt.org/
+    types: [third-party]
+  - key: https
+    name: HTTPS
+    description: Optional transport for remote gateways to send data to AWS IoT Core through custom domains.
+    url: https://www.rfc-editor.org/rfc/rfc9110
+    types: [third-party]
