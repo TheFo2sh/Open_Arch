@@ -1,0 +1,7 @@
+PackageId: OpenArch.AWSInnovationSandbox
+Name: Innovation Sandbox on AWS
+Description: Governed, temporary AWS sandbox accounts with automated account lifecycle management, spend monitoring, and cleanup.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, sandbox, governance, cloud]

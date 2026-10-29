@@ -1,0 +1,121 @@
+// Serverless Real-Time Analytics for Games, after the AWS reference architecture.
+// The game client and game server systems are slots mapped onto the project's own.
+model {
+  gameClient = system 'Game client' {
+    description 'Collects client-side game events. It can submit JSON directly with an AWS SDK or use the REST API option.'
+  }
+  gameServers = system 'Game servers and backend services' {
+    description 'Submit server-side game events directly to Kinesis or through API Gateway; AWS recommends an authoritative server when possible.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    cognito = platform 'Amazon Cognito' {
+      description 'Identity pool that provides temporary credentials for the direct AWS SDK client option; not required for the API Gateway option.'
+      metadata {
+        uses 'amazon-cognito'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Optional REST API entry point with native Kinesis integration.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Central stream receiving events from clients and game servers.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    flink = platform 'Amazon Managed Service for Apache Flink' {
+      description 'Analyzes, filters, and processes stream events with real-time SQL; the diagram labels this Kinesis Data Analytics.'
+      metadata {
+        uses 'amazon-managed-service-for-apache-flink'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs real-time metric publishing and the optional Amazon Data Firehose transformation function.'
+      metadata {
+        uses 'aws-lambda'
+      }
+
+      analyticsFunctions = system 'Game analytics functions' {
+        description 'Functions integrated into the event analytics flow.'
+
+        metricsPublisher = container 'Real-time metrics function' {
+          description 'Processes real-time analytics output and sends custom metrics to CloudWatch.'
+        }
+        firehoseTransformer = container 'Firehose transformation function' {
+          description 'Optional built-in Firehose integration that can preprocess records, for example into Parquet format.'
+        }
+      }
+    }
+    cloudwatch = platform 'Amazon CloudWatch' {
+      description 'Receives custom metrics for real-time operational and game-event dashboards; can also drive alerts and notifications.'
+      metadata {
+        uses 'amazon-cloudwatch'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      description 'Optional path for CloudWatch alerts and notifications.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      description 'Consumes the event stream and batches processed records for S3.'
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Stores the batched processed events as the game analytics data lake.'
+      metadata {
+        uses 'amazon-s3'
+      }
+
+      gameAnalyticsLake = database 'Game analytics data lake' {
+        description 'Processed game events retained for batch and ad hoc analysis.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Queries data in the S3 game analytics data lake on an ad hoc basis.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    quicksight = platform 'Amazon QuickSight' {
+      description 'Visualizes Athena query results for business insights.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+  }
+
+  aws.cognito -> gameClient 'Provides temporary credentials for the direct SDK option'
+  gameClient -> aws.kinesis 'Submits JSON events directly using an AWS SDK (option)'
+  gameClient -> aws.apiGateway 'Submits events through the REST API (alternative option)'
+  gameServers -> aws.kinesis 'Submits server events directly (option)'
+  gameServers -> aws.apiGateway 'Can submit server events through the REST API'
+  aws.apiGateway -> aws.kinesis 'Integrates natively to submit events'
+  aws.kinesis -> aws.flink 'Feeds the real-time analytics path'
+  aws.flink -> aws.lambda.analyticsFunctions.metricsPublisher 'Sends processed data for custom metric publishing'
+  aws.lambda.analyticsFunctions.metricsPublisher -> aws.cloudwatch 'Publishes custom metrics to'
+  aws.cloudwatch -> aws.sns 'Can send alerts and notifications through'
+  aws.kinesis -> aws.firehose 'Feeds the batch storage path'
+  aws.firehose -> aws.lambda.analyticsFunctions.firehoseTransformer 'Can invoke its built-in Lambda transformation'
+  aws.firehose -> aws.s3.gameAnalyticsLake 'Batches and delivers processed events to'
+  aws.athena -> aws.s3.gameAnalyticsLake 'Queries data in'
+  aws.quicksight -> aws.athena 'Visualizes query results from'
+}
+
+views {
+  view index {
+    title 'Serverless Real-Time Analytics for Games'
+    include *, aws.*
+  }
+}

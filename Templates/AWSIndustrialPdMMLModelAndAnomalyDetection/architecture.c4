@@ -1,0 +1,138 @@
+// AWS Industrial PdM ML Model and Anomaly Detection.
+// Sources:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/industrial-pdm-ml-anomaly-detection/industrial-pdm-ml-anomaly-detection.html
+// https://docs.aws.amazon.com/pdfs/reference-architecture-diagrams/latest/industrial-pdm-ml-anomaly-detection/industrial-pdm-ml-anomaly-detection.pdf
+model {
+  factory = zone 'Factory' {
+    metadata {
+      platform 'other'
+    }
+
+    machines = system 'Factory machines' {
+      description 'Factory equipment that sends telemetry through the edge gateway; machine types and vendors are not specified.'
+    }
+
+    greengrass = platform 'AWS IoT Greengrass' {
+      description 'Edge runtime configured with connectors to communicate with factory machines and host the deployed PdM model.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+
+      gateway = system 'Factory edge gateway' {
+        description 'Connects factory machine data to AWS IoT Core and hosts edge inference for the deployed model.'
+
+        connectors = container 'Factory machine connectors' {
+          description 'Greengrass connectors communicate with factory machines and publish telemetry as MQTT topics; specific connectors and topic schemas are not supplied.'
+        }
+        inference = container 'Edge inference function' {
+          description 'Runs model inference on the Greengrass edge gateway; the diagram depicts a Lambda function but does not specify its implementation.'
+        }
+      }
+    }
+  }
+
+  aws = zone 'AWS Cloud' {
+    metadata {
+      platform 'aws'
+    }
+
+    iotCore = platform 'AWS IoT Core' {
+      description 'Rules trigger on MQTT topics and route factory telemetry to streaming services.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      description 'The diagram shows delivery streams for factory data and stream-analytics output.'
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Object storage for the factory-data lake and data connected with SageMaker AI.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Factory data lake' {
+        description 'Factory data delivered to Amazon S3; the source does not specify its schema or retention.'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Builds the predictive-maintenance machine-learning model for deployment to the factory edge gateway.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Queries the Amazon S3 data lake using AWS Glue Data Catalog metadata.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    glue = platform 'AWS Glue Data Catalog' {
+      description 'Provides the catalog metadata used by Amazon Athena.'
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+      catalog = database 'Data catalog' {
+        description 'Metadata catalog queried by Amazon Athena.'
+      }
+    }
+    quicksight = platform 'Amazon QuickSight' {
+      description 'Visualizes analysis from the Athena data source.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    streams = platform 'Amazon Kinesis Data Streams' {
+      description 'Receives streaming messages routed by AWS IoT Core.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    flink = platform 'Amazon Managed Service for Apache Flink' {
+      description 'Runs the streaming anomaly-detection application.'
+      metadata {
+        uses 'amazon-managed-service-for-apache-flink'
+      }
+
+      anomalyDetection = system 'Anomaly detection application' {
+        description 'Processes the incoming stream to detect anomalies; detection logic and thresholds are not specified.'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Processes anomaly-detection output before sending notifications to Amazon SNS.'
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+    sns = platform 'Amazon Simple Notification Service' {
+      description 'Publishes anomaly notifications; subscriber channels are not specified.'
+      metadata {
+        uses 'amazon-sns'
+      }
+    }
+  }
+
+  factory.machines -> factory.greengrass.gateway.connectors 'Sends machine telemetry through'
+  factory.greengrass.gateway.connectors -> aws.iotCore 'Publishes MQTT topics to'
+  aws.iotCore -> aws.firehose 'Routes factory telemetry to'
+  aws.firehose -> aws.s3.dataLake 'Delivers factory data to'
+  aws.iotCore -> aws.streams 'Routes streaming messages to'
+  aws.streams -> aws.flink.anomalyDetection 'Provides streaming input to'
+  aws.flink.anomalyDetection -> aws.firehose 'Delivers stream-analytics output to'
+  aws.flink.anomalyDetection -> aws.lambda 'Sends anomaly output to'
+  aws.lambda -> aws.sns 'Publishes notifications to'
+  aws.sagemaker -> aws.s3.dataLake 'Connects with'
+  aws.sagemaker -> factory.greengrass.gateway.inference 'Deploys the trained model to'
+  aws.s3.dataLake -> aws.athena 'Provides data for queries in'
+  aws.athena -> aws.glue.catalog 'Uses metadata from'
+  aws.athena -> aws.quicksight 'Provides an analysis data source to'
+}
+
+views {
+  view index {
+    title 'AWS Industrial PdM ML Model and Anomaly Detection'
+    include *, factory.*, factory.greengrass.*, factory.greengrass.gateway.*, aws.*
+  }
+}

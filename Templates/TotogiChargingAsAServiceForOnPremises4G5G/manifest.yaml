@@ -1,0 +1,7 @@
+PackageId: OpenArch.TotogiChargingAsAServiceForOnPremises4G5G
+Name: Totogi Charging-as-a-Service for On-Premises 4G/5G
+Description: Connects an on-premises 4G/5G core network to Totogi's multi-tenant charging engine on AWS for subscriber rating, quota delivery, and plan-based service.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, telecommunications, 4g, 5g, charging, on-premises]

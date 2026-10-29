@@ -1,0 +1,84 @@
+// Fast Backup and Restore of TiDB on AWS, after AWS's reference architecture.
+// Systems and users are slots; the data flow follows the documented four steps.
+model {
+  operator = user 'Operator' {
+    description 'Submits backup and restore requests for a TiDB cluster.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    eks = platform 'Amazon EKS' {
+      description 'Kubernetes service configured by TiDB Operator to manage the cluster and mount restored volumes.'
+      metadata {
+        uses 'amazon-eks'
+      }
+
+      tidbOperator = system 'TiDB Operator' {
+        description 'Orchestrates backup and restore jobs for the TiDB cluster.'
+        jobs = container 'Backup and restore jobs' {
+          description 'Collects volume information, coordinates EBS snapshots, and reads or writes backup metadata.'
+          metadata {
+            uses 'tidb-operator'
+          }
+        }
+      }
+
+      ec2 = platform 'Amazon EC2' {
+        description 'EC2 instances run the TiDB cluster nodes depicted in the reference diagram.'
+        metadata {
+          uses 'amazon-ec2'
+        }
+
+        cluster = system 'TiDB cluster' {
+          description 'The TiDB cluster whose TiKV data is backed up and restored.'
+          nodes = container 'TiDB cluster nodes' {
+            description 'TiDB cluster nodes use TiKV data stored on attached EBS volumes.'
+            metadata {
+              uses 'tidb, tikv'
+            }
+          }
+        }
+      }
+    }
+
+    ebs = platform 'Amazon EBS' {
+      description 'Provides the TiKV data volumes and snapshots used by the backup and restore jobs.'
+      metadata {
+        uses 'amazon-ebs'
+      }
+      tikvVolumes = database 'TiKV data volumes' {
+        description 'EBS volumes mounted to TiDB cluster nodes and containing TiKV data.'
+      }
+      snapshots = database 'EBS snapshots' {
+        description 'Snapshots created from TiKV data volumes and used to create restored volumes.'
+      }
+    }
+
+    s3 = platform 'Amazon S3' {
+      metadata {
+        uses 'amazon-s3'
+      }
+      backupMetadata = database 'Backup metadata' {
+        description 'Metadata saved after a snapshot completes and retrieved to identify snapshots during restore.'
+      }
+    }
+  }
+
+  operator -> aws.eks.tidbOperator 'Submits backup or restore requests to'
+  aws.eks.tidbOperator.jobs -> aws.eks.ec2.cluster 'Collects volume information and coordinates cluster maintenance for'
+  aws.eks.ec2.cluster.nodes -> aws.ebs.tikvVolumes 'Persists TiKV data on'
+  aws.eks.tidbOperator.jobs -> aws.ebs.snapshots 'Requests snapshots of and restores from'
+  aws.eks.tidbOperator.jobs -> aws.s3.backupMetadata 'Stores and retrieves snapshot metadata in'
+  aws.ebs.snapshots -> aws.ebs.tikvVolumes 'Creates restored volumes from'
+  aws.eks -> aws.ebs.tikvVolumes 'Mounts restored volumes to the corresponding TiDB nodes in'
+}
+
+views {
+  view index {
+    title 'Fast Backup and Restore of TiDB on AWS'
+    include *, aws.*, aws.eks.*, aws.eks.ec2.*, aws.eks.ec2.cluster.*, aws.eks.tidbOperator.*, aws.ebs.*, aws.s3.*
+  }
+}
