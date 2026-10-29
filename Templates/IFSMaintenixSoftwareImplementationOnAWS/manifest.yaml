@@ -1,0 +1,7 @@
+PackageId: OpenArch.IFSMaintenixSoftwareImplementationOnAWS
+Name: IFS Maintenix Software Implementation on AWS
+Description: Highly available IFS Maintenix application, integration, and reporting tiers on AWS with hybrid connectivity, Oracle on Amazon RDS, and CDC replication to an analytics warehouse.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, aviation, aircraft-maintenance, hybrid-cloud, maintenix]

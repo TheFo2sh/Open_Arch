@@ -1,0 +1,194 @@
+// IFS Maintenix Software Implementation on AWS, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/maintenix-implementation/maintenix-implementation.html
+// Systems and users are slots to map onto a project's own systems and users.
+model {
+  corporateUsers = user 'Corporate users' {
+    description 'Reach the Maintenix application tier from the corporate network.'
+  }
+  internetUsers = user 'Internet users' {
+    description 'Reach the public Maintenix application endpoint.'
+  }
+  onPremises = system 'On-premises routers and systems' {
+    description 'Corporate routers and other systems connected to AWS through the documented hybrid paths.'
+  }
+  dataWarehouse = system 'Corporate data warehouse' {
+    description 'External analytics destination; AWS does not specify its product, hosting, or ownership.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    route53 = platform 'Amazon Route 53' {
+      description 'Resolves the public Maintenix application endpoint for internet-connected users.'
+      metadata {
+        uses 'amazon-route-53'
+      }
+    }
+    waf = platform 'AWS WAF' {
+      description 'Protects the public Application Load Balancer.'
+      metadata {
+        uses 'aws-waf'
+      }
+    }
+    directConnect = platform 'AWS Direct Connect' {
+      description 'Highly available private connectivity from on-premises routers.'
+      metadata {
+        uses 'aws-direct-connect'
+      }
+    }
+    siteToSiteVpn = platform 'AWS Site-to-Site VPN' {
+      description 'Highly available VPN connectivity from on-premises routers.'
+      metadata {
+        uses 'aws-site-to-site-vpn'
+      }
+    }
+    transitGateway = platform 'AWS Transit Gateway' {
+      description 'Integrates the Direct Connect and Site-to-Site VPN paths with the VPC.'
+      metadata {
+        uses 'aws-transit-gateway'
+      }
+    }
+
+    vpc = platform 'Amazon VPC' {
+      description 'Contains the application, integration, reporting, and database tiers across two Availability Zones.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+
+      publicAlb = platform 'Public Application Load Balancer' {
+        description 'Internet-facing entry point to the Maintenix application tier.'
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+      corporateAlb = platform 'Private Application Load Balancer — application' {
+        description 'Private entry point from the corporate network to the Maintenix application tier.'
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+      integrationAlb = platform 'Private Application Load Balancer — integration' {
+        description 'Internal entry point to the integration tier from the application tier and on-premises.'
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+      reportingAlb = platform 'Private Application Load Balancer — reporting' {
+        description 'Internal entry point to the reporting tier from the application tier and on-premises.'
+        metadata {
+          uses 'elastic-load-balancing'
+        }
+      }
+
+      applicationScaling = platform 'Amazon EC2 Auto Scaling — application tier' {
+        description 'Application-tier Auto Scaling group spans two Availability Zones.'
+        metadata {
+          uses 'amazon-ec2-auto-scaling'
+        }
+        applicationEc2 = platform 'Amazon EC2 — application tier' {
+          metadata {
+            uses 'amazon-ec2'
+          }
+          applicationSystem = system 'Maintenix application tier' {
+            description 'The application tier of the IFS Maintenix deployment.'
+            application = container 'IFS Maintenix application' {
+              metadata {
+                uses 'ifs-maintenix'
+              }
+            }
+          }
+        }
+      }
+      integrationScaling = platform 'Amazon EC2 Auto Scaling — integration tier' {
+        description 'Integration-tier Auto Scaling group spans two Availability Zones and accepts internal traffic only.'
+        metadata {
+          uses 'amazon-ec2-auto-scaling'
+        }
+        integrationEc2 = platform 'Amazon EC2 — integration tier' {
+          metadata {
+            uses 'amazon-ec2'
+          }
+          integrationSystem = system 'Maintenix integration tier' {
+            description 'Internal-only integration tier of the IFS Maintenix deployment.'
+            integration = container 'IFS Maintenix integration' {
+              metadata {
+                uses 'ifs-maintenix'
+              }
+            }
+          }
+        }
+      }
+      reportingScaling = platform 'Amazon EC2 Auto Scaling — reporting tier' {
+        description 'Reporting-tier Auto Scaling group spans two Availability Zones and accepts internal traffic only.'
+        metadata {
+          uses 'amazon-ec2-auto-scaling'
+        }
+        reportingEc2 = platform 'Amazon EC2 — reporting tier' {
+          metadata {
+            uses 'amazon-ec2'
+          }
+          reportingSystem = system 'Maintenix reporting tier' {
+            description 'Internal-only reporting tier of the IFS Maintenix deployment.'
+            reporting = container 'IFS Maintenix reporting' {
+              metadata {
+                uses 'ifs-maintenix'
+              }
+            }
+          }
+        }
+      }
+      rds = platform 'Amazon RDS for Oracle' {
+        description 'Multi-AZ Oracle deployment with a primary database and failover standby.'
+        metadata {
+          uses 'amazon-rds-oracle'
+        }
+        maintenixDb = database 'Maintenix Oracle database' {
+          description 'Oracle database for Maintenix; RDS Multi-AZ maintains a failover standby.'
+        }
+      }
+    }
+
+    dms = platform 'AWS Database Migration Service' {
+      description 'Uses Change Data Capture to replicate database changes to the analytics warehouse.'
+      metadata {
+        uses 'aws-dms'
+      }
+    }
+  }
+
+  corporateUsers -> onPremises 'Access through the corporate network'
+  onPremises -> aws.directConnect 'Connects through the private network path'
+  onPremises -> aws.siteToSiteVpn 'Connects through the VPN path'
+  aws.directConnect -> aws.transitGateway 'Integrates with'
+  aws.siteToSiteVpn -> aws.transitGateway 'Integrates with'
+  aws.transitGateway -> aws.vpc 'Connects to'
+  aws.transitGateway -> aws.vpc.corporateAlb 'Carries corporate traffic to'
+  aws.transitGateway -> aws.vpc.integrationAlb 'Carries on-premises traffic to'
+  aws.transitGateway -> aws.vpc.reportingAlb 'Carries on-premises traffic to'
+
+  internetUsers -> aws.vpc.applicationScaling.applicationEc2.applicationSystem 'Accesses through Route 53, AWS WAF, and the public load balancer'
+  aws.route53 -> aws.vpc.publicAlb 'Resolves the public endpoint to'
+  aws.waf -> aws.vpc.publicAlb 'Protects'
+  aws.vpc.publicAlb -> aws.vpc.applicationScaling.applicationEc2.applicationSystem 'Routes internet traffic to'
+  aws.vpc.corporateAlb -> aws.vpc.applicationScaling.applicationEc2.applicationSystem 'Routes corporate traffic to'
+
+  aws.vpc.applicationScaling.applicationEc2.applicationSystem -> aws.vpc.maintenixDb 'Reads and writes Maintenix data'
+  aws.vpc.applicationScaling.applicationEc2.applicationSystem -> aws.vpc.integrationAlb 'Uses the internal integration endpoint'
+  aws.vpc.applicationScaling.applicationEc2.applicationSystem -> aws.vpc.reportingAlb 'Uses the internal reporting endpoint'
+  aws.vpc.integrationAlb -> aws.vpc.integrationScaling.integrationEc2.integrationSystem 'Routes internal traffic to'
+  aws.vpc.reportingAlb -> aws.vpc.reportingScaling.reportingEc2.reportingSystem 'Routes internal traffic to'
+  onPremises -> aws.vpc.integrationAlb 'Accesses the internal integration endpoint through Transit Gateway'
+  onPremises -> aws.vpc.reportingAlb 'Accesses the internal reporting endpoint through Transit Gateway'
+
+  aws.vpc.maintenixDb -> aws.dms 'Publishes database changes through Change Data Capture'
+  aws.dms -> dataWarehouse 'Replicates changes to for analytics'
+}
+
+views {
+  view index {
+    title 'IFS Maintenix Software Implementation on AWS'
+    include *
+  }
+}
