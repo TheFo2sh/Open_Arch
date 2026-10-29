@@ -1,0 +1,7 @@
+PackageId: OpenArch.DT4oFaktoryVisionQualityInsightsOnAWS
+Name: "DT4o Faktory Vision: Quality Insights on AWS"
+Description: Manufacturing quality inspection using DT4o Faktory Vision edge inference, AWS IoT Greengrass, Amazon S3, EC2, SageMaker AI, and ECR.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, manufacturing, computer-vision, quality-insights, dt4o-faktory]

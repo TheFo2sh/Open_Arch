@@ -1,0 +1,65 @@
+# Technologies named in the AWS reference page and its numbered flow.
+technologies:
+  - key: aws-iot-greengrass
+    name: AWS IoT Greengrass
+    description: Edge runtime that initiates camera capture and inference events and transfers images to Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/greengrass/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores factory images and versioned machine-learning models.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ec2
+    name: Amazon Elastic Compute Cloud
+    description: Compute platform running the DT4o Faktory Vision container.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [compute-platform]
+    platform: aws
+    hosts: [system]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Trains machine-learning models for each product type.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/ai/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-ecr
+    name: Amazon Elastic Container Registry
+    description: Container registry listed as a supporting service for DT4o Faktory Vision.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ecr/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: mqtt
+    name: Message Queuing Telemetry Transport (MQTT)
+    description: Messaging protocol used for low-latency image acquisition at the factory edge.
+    vendor: OASIS Open
+    url: https://mqtt.org/
+    types: [third-party]
+  - key: dt4o-faktory-vision
+    name: DT4o Faktory Vision
+    description: Product software that configures the plant hierarchy, initiates machine-learning modeling, and supports operator model feedback.
+    types: [third-party]
+  - key: dt4o-faktory-inference
+    name: DT4o Faktory Inference
+    description: Product service that downloads models to local disk and loads them according to the plant hierarchy.
+    types: [third-party]
+  - key: dt4o-faktory-edge
+    name: DT4o Faktory Edge
+    description: Product software that uses loaded models for runtime quality inference at the factory edge.
+    types: [third-party]
