@@ -1,0 +1,7 @@
+PackageId: OpenArch.EDAOnAWSWithIBMSpectrumLSF
+Name: EDA on AWS with IBM Spectrum LSF
+Description: Run electronic design automation simulations on elastic Amazon EC2 hosts managed by IBM Spectrum LSF, using Xilinx Vivado and shared Amazon EFS storage.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, eda, hpc, ibm, fpga, vivado]
