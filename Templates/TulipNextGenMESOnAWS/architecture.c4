@@ -1,0 +1,317 @@
+// Tulip Next-Gen MES on AWS, after the AWS reference page and diagram:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/tulip-next-gen-mes/tulip-next-gen-mes.html
+// Systems and users are slots. AWS lists service choices, not a required combined deployment.
+model {
+  operators = user 'Operators' {
+    description 'Use Tulip Player on the factory floor.'
+  }
+  processEngineers = user 'Process engineers' {
+    description 'Create and work with frontline operations applications in Tulip.'
+  }
+
+  factory = zone 'On-premises factory' {
+    metadata {
+      platform 'other'
+    }
+
+    devices = system 'Factory devices' {
+      description 'Barcode scanners, cameras, printers, scales, and industrial equipment; models are not specified.'
+    }
+    edgeIo = system 'Tulip Edge IO' {
+      description 'On-premises device that provides connectivity to barcode scanners, cameras, printers, and scales.'
+      technology 'Tulip Edge IO'
+    }
+    player = system 'Tulip Player' {
+      description 'Factory-floor client for Tulip applications.'
+      technology 'Tulip Player'
+    }
+    connectorHost = system 'Tulip Connector Host' {
+      description 'On-premises host that connects Tulip to local devices and systems.'
+      technology 'Tulip Connector Host'
+
+      localConnectors = container 'Local device connectors' {
+        description 'Connect to local devices using the connector choices configured by the adopting team.'
+        technology 'Tulip Connectors'
+      }
+    }
+    fileShares = system 'On-premises file shares' {
+      description 'Optional file-share sources for AWS DataSync ingestion.'
+    }
+    equipmentData = system 'Industrial data sources' {
+      description 'Historian, supervisory control and data acquisition, programmable logic controller, and other factory data sources.'
+    }
+    partners = system 'AWS Partner solutions' {
+      description 'Unspecified partner solutions connect additional data sources and provide context.'
+      technology 'AWS Partner solutions'
+    }
+
+    greengrass = platform 'AWS IoT Greengrass' {
+      description 'Edge runtime whose connectors provide industrial protocol connectivity.'
+      metadata {
+        uses 'aws-iot-greengrass'
+      }
+      gateway = system 'Factory edge gateway' {
+        description 'Customer-side system slot for the gateway running Greengrass connectors.'
+
+        protocolConnectors = container 'Industrial protocol connectors' {
+          description 'Provide OPC UA, Modbus TCP/RTU, and EtherNet/IP connectivity.'
+          metadata {
+            uses 'aws-iot-greengrass-connectors'
+          }
+          technology 'OPC UA, Modbus TCP, Modbus RTU, EtherNet/IP'
+        }
+      }
+    }
+  }
+
+  tulipSaaS = zone 'Tulip SaaS' {
+    metadata {
+      platform 'other'
+    }
+    tulip = system 'Tulip Frontline Operations Platform' {
+      description 'Tulip SaaS no-code platform for creating frontline operations applications.'
+      technology 'Tulip Frontline Operations Platform'
+
+      applications = container 'No-code applications' {
+        description 'Frontline operations applications created on the Tulip platform.'
+      }
+      integrations = container 'Tulip integrations' {
+        description 'Interfaces shown for connecting Tulip to external databases, SaaS applications, and APIs.'
+        sqlConnector = component 'Tulip SQL Connector' {
+          description 'Connector shown integrating Tulip with SQL databases.'
+          technology 'Tulip SQL Connector'
+        }
+        restConnector = component 'Tulip REST Connector' {
+          description 'Connector shown integrating Tulip with SaaS applications.'
+          technology 'Tulip REST Connector'
+        }
+        api = component 'Tulip API' {
+          description 'Tulip API shown alongside the platform connectors.'
+          technology 'Tulip API'
+        }
+      }
+    }
+  }
+
+  externalSql = system 'SQL databases' {
+    description 'External SQL databases connected through the Tulip SQL Connector; products and schemas are unspecified.'
+  }
+  saasApps = system 'SaaS applications' {
+    description 'External SaaS applications connected through the Tulip REST Connector; products are unspecified.'
+  }
+
+  aws = zone 'Customer AWS environment' {
+    metadata {
+      platform 'aws'
+    }
+
+    dataSync = platform 'AWS DataSync' {
+      description 'File-share ingestion option.'
+      metadata {
+        uses 'aws-datasync'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis' {
+      description 'Streaming-data ingestion option selected according to the source.'
+      metadata {
+        uses 'amazon-kinesis'
+      }
+    }
+    msk = platform 'Amazon Managed Streaming for Apache Kafka' {
+      description 'Streaming-data ingestion option selected according to the source.'
+      metadata {
+        uses 'amazon-msk'
+      }
+    }
+    iotCore = platform 'AWS IoT Core' {
+      description 'Streaming-data ingestion option for device and industrial data.'
+      metadata {
+        uses 'aws-iot-core'
+      }
+    }
+    transferFamily = platform 'AWS Transfer Family' {
+      description 'Streaming-data ingestion option shown as AWS SFTP in the diagram.'
+      metadata {
+        uses 'aws-transfer-family'
+      }
+    }
+
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Key-value storage option.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      dataStore = database 'DynamoDB data store' {
+        description 'Workload-specific key-value data; model and contents are not specified.'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Object storage option and an API Gateway REST-method target.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataStore = database 'S3 object store' {
+        description 'Workload-specific object data; buckets, contents, and retention are not specified.'
+      }
+    }
+    neptune = platform 'Amazon Neptune' {
+      description 'Graph storage option.'
+      metadata {
+        uses 'amazon-neptune'
+      }
+      dataStore = database 'Neptune graph store' {
+        description 'Workload-specific graph data; model and contents are not specified.'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      description 'Data warehousing option.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+      dataStore = database 'Redshift warehouse' {
+        description 'Workload-specific warehouse data; schema and contents are not specified.'
+      }
+    }
+    timestream = platform 'Amazon Timestream' {
+      description 'Time-series storage option.'
+      metadata {
+        uses 'amazon-timestream'
+      }
+      dataStore = database 'Timestream database' {
+        description 'Workload-specific time-series data; schema and retention are not specified.'
+      }
+    }
+    sitewise = platform 'AWS IoT SiteWise' {
+      description 'Industrial equipment data storage option.'
+      metadata {
+        uses 'aws-iot-sitewise'
+      }
+      dataStore = database 'SiteWise equipment data' {
+        description 'Workload-specific industrial equipment data; model and contents are not specified.'
+      }
+    }
+    rds = platform 'Amazon Relational Database Service' {
+      description 'Relational database service shown in the diagram; database engine and workload are unspecified.'
+      metadata {
+        uses 'amazon-rds'
+      }
+      dataStore = database 'Relational database' {
+        description 'Database engine, schema, and contents are not specified by the reference.'
+      }
+    }
+
+    forecast = platform 'Amazon Forecast' {
+      description 'AI and machine learning service listed for building, training, and deploying models.'
+      metadata {
+        uses 'amazon-forecast'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'AI and machine learning service listed for building, training, and deploying models.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+    lookout = platform 'Amazon Lookout for Vision' {
+      description 'Computer vision capability exposed through API Gateway REST methods.'
+      metadata {
+        uses 'amazon-lookout-for-vision'
+      }
+    }
+
+    emr = platform 'Amazon EMR' {
+      description 'Analytics service listed for data processing.'
+      metadata {
+        uses 'amazon-emr'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Analytics service listed for data processing.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Analytics service listed for data processing.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    firehose = platform 'Amazon Data Firehose' {
+      description 'Data processing and delivery service listed for analytics.'
+      metadata {
+        uses 'amazon-data-firehose'
+      }
+    }
+    kinesisAnalytics = platform 'Amazon Kinesis Data Analytics' {
+      description 'Analytics service shown in the architecture diagram; workload is unspecified.'
+      metadata {
+        uses 'amazon-kinesis-data-analytics'
+      }
+    }
+    opensearch = platform 'Amazon OpenSearch Service' {
+      description 'Search and analytics service for data processing.'
+      metadata {
+        uses 'amazon-opensearch-service'
+      }
+      index = database 'OpenSearch index' {
+        description 'Workload-specific search index; indexed data and query patterns are not specified.'
+      }
+    }
+
+    waf = platform 'AWS WAF' {
+      description 'Protection for the API path.'
+      metadata {
+        uses 'aws-waf'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'REST methods expose Amazon S3 and AWS AI capabilities.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Function service shown in the APIs section; the reference does not describe its role.'
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+    textract = platform 'Amazon Textract' {
+      description 'Document analysis capability exposed through API Gateway REST methods.'
+      metadata {
+        uses 'amazon-textract'
+      }
+    }
+    rekognition = platform 'Amazon Rekognition' {
+      description 'Image and video analysis capability exposed through API Gateway REST methods.'
+      metadata {
+        uses 'amazon-rekognition'
+      }
+    }
+  }
+
+  operators -> factory.player 'Use'
+  factory.player -> tulipSaaS.tulip.applications 'Accesses'
+  processEngineers -> tulipSaaS.tulip 'Create and manage applications in'
+  factory.edgeIo -> factory.devices 'Connects to'
+  factory.connectorHost.localConnectors -> factory.devices 'Connect to local devices'
+  factory.connectorHost.localConnectors -> tulipSaaS.tulip.applications 'Ingest data into'
+  factory.equipmentData -> factory.greengrass.gateway.protocolConnectors 'Connects through'
+  factory.greengrass.gateway.protocolConnectors -> aws.iotCore 'Can use as a streaming ingestion option'
+  factory.fileShares -> aws.dataSync 'Can be ingested with'
+  tulipSaaS.tulip.integrations.sqlConnector -> externalSql 'Connects to'
+  tulipSaaS.tulip.integrations.restConnector -> saasApps 'Connects to'
+  aws.waf -> aws.apiGateway 'Protects'
+  aws.apiGateway -> aws.s3.dataStore 'Provides REST methods for'
+  aws.apiGateway -> aws.lookout 'Provides REST methods for'
+  aws.apiGateway -> aws.textract 'Provides REST methods for'
+  aws.apiGateway -> aws.rekognition 'Provides REST methods for'
+}
+
+views {
+  view index {
+    title 'Tulip Next-Gen MES on AWS'
+    include *, factory.*, factory.greengrass.*, factory.greengrass.gateway.*, tulipSaaS.*, tulipSaaS.tulip.*, aws.*
+  }
+}
