@@ -1,0 +1,7 @@
+PackageId: OpenArch.DualStackAndIPv6OnlyAmazonVPCReferenceArchitectures
+Name: Dual Stack and IPv6-only Amazon VPC Reference Architectures
+Description: Seventeen dated AWS reference patterns for dual-stack and IPv6-only VPC internet, translation, load balancing, private, and hybrid connectivity.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, networking, ipv6, dual-stack, hybrid-cloud]
