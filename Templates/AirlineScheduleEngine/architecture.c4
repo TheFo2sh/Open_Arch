@@ -1,0 +1,128 @@
+// Airline Schedule Engine, based on AWS's reference architecture.
+// Read together with the repository's specification.c4. Systems and users are slots.
+model {
+  flightConsumer = user 'Flight schedule consumer' {
+    description 'A generic consumer of flight and schedule lookups; AWS does not specify the caller.'
+  }
+  airlineOperations = user 'Airline operations user' {
+    description 'A generic operator who manages connection rules; AWS does not identify a specific role.'
+  }
+
+  airlineFeeds = system 'Airline schedule and flight-data feeds' {
+    description 'External source feeds for SSIM schedules, SSM schedule messages, and FLIFO flight information; providers and protocols are unspecified.'
+  }
+  connectionDashboard = system 'Connection rules dashboard' {
+    description 'Dashboard used to manage schedule connection rules; its product and hosting are not specified.'
+  }
+  scheduleEngine = system 'Airline Schedule Engine' {
+    description 'Combines schedule and flight data to support flight lookups and schedule building.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    s3 = platform 'Amazon S3' {
+      description 'Stages batch and real-time feeds and stores processed data.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      batchStaging = database 'Batch staging data' {
+        description 'Batch schedule inputs such as Standard Schedules Information Manual (SSIM) files.'
+      }
+      realtimeStaging = database 'Real-time staging data' {
+        description 'Real-time Standard Schedule Messages (SSM) and flight information (FLIFO) inputs.'
+      }
+      processedData = database 'Processed schedule data' {
+        description 'Processed data combining batch and real-time inputs.'
+      }
+    }
+
+    glue = platform 'AWS Glue' {
+      description 'Discovers, catalogs, and processes schedule data.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    emr = platform 'Amazon EMR' {
+      description 'Processes batch and real-time schedule inputs.'
+      metadata {
+        uses 'amazon-emr'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Serverless compute for flight lookups and FLIFO event ingestion and serving.'
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+
+    dynamodb = platform 'Amazon DynamoDB' {
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      flightData = database 'Flight data' {
+        description 'Individual flights created from schedule files for direct lookup and FLIFO serving.'
+      }
+      connectionRules = database 'Connection rules' {
+        description 'Rules used to combine flights into complete schedules.'
+      }
+    }
+    dax = platform 'Amazon DynamoDB Accelerator (DAX)' {
+      description 'In-memory cache used with DynamoDB for flight lookups.'
+      metadata {
+        uses 'amazon-dynamodb-accelerator'
+      }
+      flightLookupCache = database 'Flight lookup cache' {
+        description 'Cached DynamoDB flight data for low-latency lookups.'
+      }
+    }
+    neptune = platform 'Amazon Neptune' {
+      description 'Graph database for route lookups by origin and destination.'
+      metadata {
+        uses 'amazon-neptune'
+      }
+      routes = database 'Airline routes' {
+        description 'Route data processed with mileage, day-of-week, seasonality, and airline-type information.'
+      }
+    }
+    elasticache = platform 'Amazon ElastiCache for Redis' {
+      description 'In-memory cache used when building schedules.'
+      metadata {
+        uses 'amazon-elasticache-redis'
+      }
+      scheduleCache = database 'Schedule cache' {
+        description 'Cached schedule-building data for performance.'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Used to improve route building and schedule lookup performance.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+  }
+
+  flightConsumer -> scheduleEngine 'Looks up flights and schedules through'
+  airlineOperations -> connectionDashboard 'Manages connection rules with'
+  airlineFeeds -> aws.s3.batchStaging 'Provides batch schedule files to'
+  airlineFeeds -> aws.s3.realtimeStaging 'Provides real-time schedule and flight feeds to'
+  aws.s3.batchStaging -> aws.glue 'Provides batch inputs for discovery, cataloging, and processing'
+  aws.s3.realtimeStaging -> aws.glue 'Provides real-time inputs for processing'
+  aws.s3.batchStaging -> aws.emr 'Provides batch inputs for processing'
+  aws.s3.realtimeStaging -> aws.emr 'Provides real-time inputs for processing'
+  aws.glue -> aws.s3.processedData 'Stores processed and combined data in'
+  aws.emr -> aws.s3.processedData 'Stores processed and combined data in'
+  aws.s3.processedData -> aws.dynamodb.flightData 'Provides schedules converted into individual flights for'
+  aws.s3.processedData -> aws.neptune.routes 'Provides processed route data for'
+  scheduleEngine -> aws.lambda 'Uses for flight lookups and FLIFO event handling'
+  scheduleEngine -> aws.dynamodb.flightData 'Looks up and serves flight data from'
+  scheduleEngine -> aws.dax.flightLookupCache 'Uses for in-memory flight lookup caching'
+  aws.dax.flightLookupCache -> aws.dynamodb.flightData 'Caches data from'
+  scheduleEngine -> aws.neptune.routes 'Looks up routes by origin and destination in'
+  scheduleEngine -> aws.dynamodb.connectionRules 'Retrieves connection rules from'
+  connectionDashboard -> aws.dynamodb.connectionRules 'Maintains connection rules in'
+  scheduleEngine -> aws.elasticache.scheduleCache 'Uses for schedule-building performance'
+  scheduleEngine -> aws.sagemaker 'Uses to improve route building and schedule lookup performance'
+}

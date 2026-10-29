@@ -1,0 +1,7 @@
+PackageId: OpenArch.TemenosPaymentsHub
+Name: Temenos Payments Hub
+Description: Temenos payment initiation and distribution on AWS, with API Gateway, Lambda, ECS containers, messaging, and relational data services.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, payments, banking, temenos]

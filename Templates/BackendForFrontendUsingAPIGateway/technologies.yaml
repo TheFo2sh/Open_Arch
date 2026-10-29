@@ -1,0 +1,43 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+# Applying the template adds the ones the project's technology catalogs lack.
+technologies:
+  - key: amazon-api-gateway
+    name: Amazon API Gateway
+    description: Provides the BFF REST or HTTP API and WebSocket endpoint for frontend clients.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/api-gateway/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-cognito
+    name: Amazon Cognito
+    description: Authenticates frontend clients and provides authorization for the BFF API.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cognito/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lambda
+    name: AWS Lambda
+    description: Runs the BFF query, WebSocket connection, and DynamoDB stream handler functions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lambda/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-dynamodb
+    name: Amazon DynamoDB
+    description: Stores denormalized UI data projections and the table of connected WebSocket clients.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/dynamodb/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-dynamodb-streams
+    name: Amazon DynamoDB Streams
+    description: Captures data-change records from DynamoDB tables and supplies them to the asynchronous BFF stream handler.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/Streams.html
+    types: [managed-service]
+    platform: aws
+    hosts: []

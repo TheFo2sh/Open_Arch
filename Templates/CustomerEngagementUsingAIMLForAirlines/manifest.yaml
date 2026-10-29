@@ -1,0 +1,7 @@
+PackageId: OpenArch.CustomerEngagementUsingAIMLForAirlines
+Name: Customer Engagement Using AI/ML for Airlines
+Description: An AWS airline customer-engagement architecture combining Amazon Connect and Lex with a Traveler 360 data platform, analytics, and optional master data management.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, travel, airlines, customer-engagement, ai-ml]

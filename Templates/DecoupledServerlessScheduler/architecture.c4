@@ -1,0 +1,94 @@
+// AWS Decoupled Serverless Scheduler, Parts 1 and 2:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/decoupled-serverless-scheduler/
+model {
+  operator = user 'HPC operator' {
+    description 'Submits jobs and monitors their status.'
+  }
+
+  operatorTools = system 'Job submission and monitoring tools' {
+    description 'Operator-provided use of Systems Manager Run Command and the AWS Management Console or CLI.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    sqs = platform 'Amazon Simple Queue Service' {
+      description 'Decouples job submission from the workflow that polls for work.'
+      metadata {
+        uses 'amazon-sqs'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Starts for a tagged EC2 worker, polls its queue, runs jobs, and writes job status.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    ec2 = platform 'Amazon Elastic Compute Cloud' {
+      description 'Runs the previously launched HPC worker instances or instance cluster.'
+      metadata {
+        uses 'amazon-ec2'
+      }
+
+      hpc = system 'HPC application' {
+        description 'Consumer-provided HPC workload executed on the EC2 workers; AWS does not specify the application or its runtime.'
+      }
+    }
+    cloudWatchEvents = platform 'Amazon CloudWatch Events' {
+      description 'Detects EC2 instance launches and triggers the scheduler Lambda function.'
+      metadata {
+        uses 'amazon-cloudwatch-events'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Starts a workflow for a newly launched worker and handles the S3-based job-submission and scaling extension.'
+      metadata {
+        uses 'aws-lambda'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Stores the job status written by the workflow.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      jobStatus = database 'Job status table' {
+        description 'Stores job status; AWS does not specify the table schema.'
+      }
+    }
+    systemsManager = platform 'AWS Systems Manager Run Command' {
+      description 'Provides the command interface for submitting jobs to Amazon SQS.'
+      metadata {
+        uses 'aws-systems-manager-run-command'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Stores job inputs, executables, and results in the Part 2 extension.'
+      metadata {
+        uses 'amazon-s3'
+      }
+    }
+    autoScaling = platform 'Amazon EC2 Auto Scaling' {
+      description 'Adjusts worker capacity from zero to a configured maximum in the Part 2 extension.'
+      metadata {
+        uses 'amazon-ec2-auto-scaling'
+      }
+    }
+  }
+
+  operator -> operatorTools 'Submits jobs and monitors status'
+  operatorTools -> aws.systemsManager 'Submits jobs using Run Command'
+  aws.systemsManager -> aws.sqs 'Submits jobs to'
+  aws.cloudWatchEvents -> aws.lambda 'Triggers on EC2 instance launch'
+  aws.lambda -> aws.stepFunctions 'Starts a workflow with the instance ID and queue name'
+  aws.stepFunctions -> aws.sqs 'Polls for jobs until the queue is empty'
+  aws.stepFunctions -> aws.hpc 'Runs jobs on the launched worker instances'
+  aws.stepFunctions -> aws.dynamodb.jobStatus 'Writes job status to'
+  operatorTools -> aws.dynamodb.jobStatus 'Checks job status through the AWS Console or CLI'
+  operatorTools -> aws.s3 'Uploads job inputs and executables and downloads results'
+  aws.s3 -> aws.lambda 'Triggers job creation when inputs are uploaded'
+  aws.lambda -> aws.sqs 'Creates and submits jobs from S3 events'
+  aws.lambda -> aws.autoScaling 'Monitors the queue and sets desired worker capacity'
+  aws.autoScaling -> aws.hpc 'Scales the worker instances running'
+}

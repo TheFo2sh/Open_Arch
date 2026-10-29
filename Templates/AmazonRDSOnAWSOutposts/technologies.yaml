@@ -1,0 +1,81 @@
+technologies:
+  - key: aws-outposts
+    name: AWS Outposts
+    description: AWS infrastructure deployed at a customer site for workloads that need to run locally.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/outposts/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-outposts-local-gateway
+    name: AWS Outposts Local Gateway
+    description: Routes traffic between an Outposts subnet and the local network.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/outposts/latest/userguide/outposts-local-gateways.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-direct-connect
+    name: AWS Direct Connect
+    description: Provides private connectivity between the customer data center and the parent AWS Region.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/directconnect/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Provides the VPC and subnets used by regional and Outposts resources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/vpc/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-ec2
+    name: Amazon Elastic Compute Cloud
+    description: Runs application workloads in the regional and Outposts subnets.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ec2/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-rds-outposts
+    name: Amazon RDS on AWS Outposts
+    description: Runs a managed relational database instance on AWS Outposts.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-rds
+    name: Amazon Relational Database Service
+    description: Hosts a regional RDS database restored for disaster recovery.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/rds/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Stores RDS snapshots and transaction logs in the parent AWS Region.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Provides the Outposts metrics shown in the reference architecture.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-key-management-service
+    name: AWS Key Management Service
+    description: Provides key management capabilities and is shown among the regional services.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kms/
+    types: [managed-service]
+    platform: aws
+    hosts: []

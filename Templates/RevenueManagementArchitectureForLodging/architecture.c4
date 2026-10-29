@@ -1,0 +1,213 @@
+// Revenue Management Architecture for Lodging, after AWS's reference architecture
+// (https://docs.aws.amazon.com/reference-architecture-diagrams/latest/revenue-management-lodging/revenue-management-lodging.html).
+// Read together with the repository's specification.c4. Systems and users are slots:
+// applying the template maps them onto the project's own.
+model {
+  revenueManager = user 'Revenue management user' {
+    description 'Uses revenue reporting and adjusts configurations and user overrides.'
+  }
+
+  propertyAndBookingSystems = system 'Property and booking systems' {
+    description 'Lodging property data, point of sale, group booking, and booking engine web and mobile analytics.'
+  }
+  centralReservations = system 'Central reservations system (CRS)' {
+    description 'Provides reservation data and receives booking and pricing controls.'
+  }
+  propertyManagement = system 'Property management systems (PMSs)' {
+    description 'Provide stay, folio, and ancillary data for lodging properties.'
+  }
+  marketDataProviders = system 'Market and competitive data providers' {
+    description 'External sources include KeyData Dashboard, Phocuswright, and Smith Travel Research (STR).'
+  }
+  shoppingDataProviders = system 'Shopping data providers' {
+    description 'External sources include BlueTent, InterContinental Net Designs (ICND), Q4Launch, Scurto Marketing, and TravelClick.'
+  }
+  dashboard = system 'Revenue management dashboard' {
+    description 'Presents reporting and analytics and lets users adjust configurations and overrides.'
+  }
+
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    kinesis = platform 'Amazon Kinesis' {
+      description 'Streams near real-time lodging events and configuration updates.'
+      metadata {
+        uses 'amazon-kinesis'
+      }
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores the tiered revenue management data lake.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      dataLake = database 'Revenue management data lake' {
+        description 'Staging, processed, optimized, and configuration data for lodging revenue management.'
+      }
+    }
+    transferFamily = platform 'AWS Transfer Family' {
+      description 'Supports batch file ingestion and transfers booking and pricing controls to the CRS.'
+      metadata {
+        uses 'aws-transfer-family'
+      }
+    }
+    dataExchange = platform 'AWS Data Exchange' {
+      description 'Ingests external market and competitive data.'
+      metadata {
+        uses 'aws-data-exchange'
+      }
+    }
+    appFlow = platform 'Amazon AppFlow' {
+      description 'Ingests external shopping data.'
+      metadata {
+        uses 'amazon-appflow'
+      }
+    }
+    emr = platform 'Amazon EMR' {
+      description 'Transforms data for the tiered data lake.'
+      metadata {
+        uses 'amazon-emr'
+      }
+    }
+    glue = platform 'AWS Glue' {
+      description 'Transforms and catalogs data used by analytics.'
+      metadata {
+        uses 'aws-glue'
+      }
+    }
+    glueCatalog = platform 'AWS Glue Data Catalog' {
+      description 'Catalogs data lake datasets.'
+      metadata {
+        uses 'aws-glue-data-catalog'
+      }
+    }
+    efs = platform 'Amazon Elastic File System' {
+      description 'Replicates the file structure required by existing revenue management modules.'
+      metadata {
+        uses 'amazon-efs'
+      }
+    }
+    batch = platform 'AWS Batch Spot fleet' {
+      description 'Runs batch revenue management processes on EC2 Spot Instances.'
+      metadata {
+        uses 'aws-batch'
+      }
+      revenueProcesses = system 'Revenue management batch processes' {
+        description 'Runs demand seasonality and forecast, optimization and post-processing, show-up forecasting, overbooking, and outlier identification modules.'
+      }
+    }
+    fargate = platform 'AWS Fargate' {
+      description 'Runs near real-time booking and pricing control processing.'
+      metadata {
+        uses 'aws-fargate'
+      }
+      bookingControls = system 'Near real-time booking controls' {
+        description 'Dynamically adjusts booking and pricing controls.'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      description 'Provides revenue data marts for reporting and analytics.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+      revenueMarts = database 'Revenue data marts' {
+        description 'Optimized revenue data for flexible reporting and analytics.'
+      }
+    }
+    athena = platform 'Amazon Athena' {
+      description 'Queries raw, processed, and optimized data in the lake for on-demand reporting.'
+      metadata {
+        uses 'amazon-athena'
+      }
+    }
+    forecast = platform 'Amazon Forecast' {
+      description 'Builds regional demand forecasting models.'
+      metadata {
+        uses 'amazon-forecast'
+      }
+    }
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Supports advanced revenue analytics.'
+      metadata {
+        uses 'amazon-sagemaker'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Provides revenue analytics reporting.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Provides the dashboard API entry point for revenue management microservices.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    stepFunctions = platform 'AWS Step Functions' {
+      description 'Orchestrates revenue management dashboard microservices.'
+      metadata {
+        uses 'aws-step-functions'
+      }
+    }
+    dynamoDb = platform 'Amazon DynamoDB' {
+      description 'Stores revenue management configurations.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      configurations = database 'Revenue management configurations' {
+        description 'Overbooking policies, oversale costs, property capacities, spoilage and variable costs, holiday and event calendars, and user overrides.'
+      }
+    }
+  }
+
+  propertyAndBookingSystems -> aws.kinesis 'Streams lodging events'
+  centralReservations -> aws.kinesis 'Streams reservation data'
+  propertyManagement -> aws.kinesis 'Streams stays, folios, and ancillary data'
+  aws.kinesis -> aws.s3.dataLake 'Stages near real-time feeds and configuration updates'
+
+  marketDataProviders -> aws.dataExchange 'Supplies market and competitive data'
+  aws.dataExchange -> aws.s3.dataLake 'Ingests batch data'
+  shoppingDataProviders -> aws.appFlow 'Supplies shopping data'
+  aws.appFlow -> aws.s3.dataLake 'Ingests batch data'
+  aws.transferFamily -> aws.s3.dataLake 'Loads batch files'
+
+  aws.s3.dataLake -> aws.emr 'Transforms staged data'
+  aws.emr -> aws.s3.dataLake 'Writes processed data'
+  aws.s3.dataLake -> aws.glue 'Transforms and catalogs datasets'
+  aws.glue -> aws.s3.dataLake 'Writes processed data'
+  aws.glue -> aws.glueCatalog 'Registers dataset metadata'
+
+  aws.s3.dataLake -> aws.batch.revenueProcesses 'Provides data for batch processing'
+  aws.batch.revenueProcesses -> aws.s3.dataLake 'Stores revenue management outputs'
+  aws.batch.revenueProcesses -> aws.efs 'Uses the replicated file structure'
+  aws.s3.dataLake -> aws.forecast 'Provides regional demand data'
+  aws.forecast -> aws.s3.dataLake 'Stores demand forecasts'
+  aws.s3.dataLake -> aws.sagemaker 'Provides data for advanced revenue analytics'
+  aws.sagemaker -> aws.s3.dataLake 'Stores analytics outputs'
+
+  aws.s3.dataLake -> aws.redshift.revenueMarts 'Loads data marts'
+  aws.s3.dataLake -> aws.athena 'Provides data for on-demand queries'
+  aws.glueCatalog -> aws.athena 'Provides dataset metadata for queries'
+  aws.redshift -> aws.quickSight 'Provides revenue data marts for reporting'
+  aws.athena -> aws.quickSight 'Provides on-demand query results'
+  revenueManager -> dashboard 'Reviews reports and adjusts revenue settings'
+  dashboard -> aws.quickSight 'Displays reporting and analytics'
+  dashboard -> aws.apiGateway 'Submits configuration changes'
+  aws.apiGateway -> aws.stepFunctions 'Invokes microservices'
+  aws.stepFunctions -> aws.dynamoDb.configurations 'Reads and writes configurations and overrides'
+  aws.dynamoDb.configurations -> aws.kinesis 'Streams configuration changes'
+
+  aws.s3.dataLake -> aws.bookingControls 'Provides optimized data and forecasts'
+  aws.bookingControls -> aws.transferFamily 'Transfers booking and pricing controls'
+  aws.transferFamily -> centralReservations 'Delivers booking and pricing controls'
+  centralReservations -> propertyManagement 'Coordinates reservations with properties'
+}
+
+views {
+  view index {
+    title 'Revenue Management Architecture for Lodging'
+    include *, aws.*
+  }
+}

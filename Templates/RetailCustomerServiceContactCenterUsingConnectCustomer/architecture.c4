@@ -1,0 +1,145 @@
+// Retail customer service contact center, after AWS's reference architecture:
+// https://docs.aws.amazon.com/reference-architecture-diagrams/latest/retail-customer-service-contact-center/retail-customer-service-contact-center.html
+// Systems and users are slots, mapped onto the project's own domain architecture.
+model {
+  customer = user 'Retail customer' {
+    description 'Calls the retailer customer service number from a phone.'
+  }
+  agent = user 'Customer service agent' {
+    description 'Answers routed calls using the Amazon Connect Contact Control Panel and softphone.'
+  }
+  remoteAgent = user 'Remote agent' {
+    description 'Uses the contact panel and softphone to answer calls from a remote environment.'
+  }
+  supervisor = user 'Contact center supervisor' {
+    description 'Monitors live conversations and reviews call recordings.'
+  }
+
+  crm = system 'Retail CRM' {
+    description 'External customer relationship management system; the AWS diagram shows Salesforce CRM as an example.'
+  }
+  orderManagement = system 'Order management system' {
+    description 'Retailer system integrated for common customer enquiries; the source allows customer systems on AWS or on-premises.'
+  }
+  inventory = system 'Inventory system' {
+    description 'Retailer system queried for product availability.'
+  }
+  customerData = system 'Data lake and customer data platform' {
+    description 'Retailer customer data system used for customer information lookups.'
+  }
+  aws = zone 'AWS' {
+    metadata {
+      platform 'aws'
+    }
+
+    connect = platform 'Amazon Connect' {
+      description 'Answers calls with personalized IVR, runs contact flows and skills-based routing, and transfers calls to agents.'
+      metadata {
+        uses 'amazon-connect'
+      }
+
+      contactCenter = system 'Retail customer contact center' {
+        description 'The retailer contact center experience, including caller self-service and agent-assisted enquiries.'
+      }
+      contactLens = platform 'Amazon Connect Contact Lens' {
+        description 'Provides real-time sentiment insights, transcripts, and detailed contact analytics.'
+        metadata {
+          uses 'amazon-connect-contact-lens'
+        }
+      }
+    }
+
+    appFlow = platform 'Amazon AppFlow' {
+      description 'Integrates customer profile data between the CRM and Amazon Connect.'
+      metadata {
+        uses 'amazon-appflow'
+      }
+    }
+    kinesis = platform 'Amazon Kinesis Data Streams' {
+      description 'Streams contact metadata such as call lengths, wait times, call abandonment, and agent activity.'
+      metadata {
+        uses 'amazon-kinesis-data-streams'
+      }
+    }
+    callMetrics = system 'Call metrics' {
+      description 'Near-real-time call metrics destination shown in the diagram; the source does not identify its implementation.'
+    }
+    s3 = platform 'Amazon S3' {
+      description 'Stores call recordings and other data associated with contact trace records.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      contactData = database 'Contact recordings and data' {
+        description 'Stored call recordings and contact data linked to contact trace records.'
+      }
+    }
+    redshift = platform 'Amazon Redshift' {
+      description 'Analytics warehouse for data ingested from Amazon S3.'
+      metadata {
+        uses 'amazon-redshift'
+      }
+      contactAnalytics = database 'Contact center analytics data' {
+        description 'Contact center data prepared for analytical queries and dashboards.'
+      }
+    }
+    quickSight = platform 'Amazon QuickSight' {
+      description 'Visualizes contact center analysis in dashboards.'
+      metadata {
+        uses 'amazon-quicksight'
+      }
+    }
+    apiGateway = platform 'Amazon API Gateway' {
+      description 'Exposes retailer capabilities through scalable, standardized APIs.'
+      metadata {
+        uses 'amazon-api-gateway'
+      }
+    }
+    lambda = platform 'AWS Lambda' {
+      description 'Runs business logic for retailer system integrations and low-latency lookups.'
+      metadata {
+        uses 'aws-lambda'
+      }
+      businessLogic = system 'Retail business integrations' {
+        description 'Functions that retrieve order status, product availability, and customer information.'
+      }
+    }
+    dynamodb = platform 'Amazon DynamoDB' {
+      description 'Provides a low-latency NoSQL lookup datastore.'
+      metadata {
+        uses 'amazon-dynamodb'
+      }
+      storeFaq = database 'Store FAQ' {
+        description 'FAQ data used for low-latency customer enquiry lookups.'
+      }
+    }
+  }
+
+  customer -> aws.connect.contactCenter 'Calls for customer service'
+  agent -> aws.connect.contactCenter 'Answers routed calls using the contact panel and softphone'
+  remoteAgent -> aws.connect.contactCenter 'Answers routed calls remotely'
+  supervisor -> aws.connect.contactCenter 'Monitors live conversations and reviews recordings'
+  supervisor -> callMetrics 'Monitors call activity'
+
+  crm -> aws.appFlow 'Provides customer profile data to'
+  aws.appFlow -> aws.connect 'Integrates CRM customer profiles with'
+  aws.connect.contactCenter -> aws.connect.contactLens 'Analyzes conversations with'
+  aws.connect -> aws.lambda 'Invokes business logic from contact flows'
+  aws.apiGateway -> aws.lambda 'Routes API requests to'
+  aws.lambda -> orderManagement 'Retrieves order status from'
+  aws.lambda -> inventory 'Looks up product availability in'
+  aws.lambda -> customerData 'Retrieves customer information from'
+  aws.apiGateway -> aws.dynamodb 'Exposes low-latency store FAQ lookups from'
+  aws.connect -> aws.kinesis 'Streams contact metadata to'
+  aws.kinesis -> callMetrics 'Provides data for near-real-time processing to'
+  aws.connect.contactLens -> aws.s3 'Stores transcripts and contact analytics in'
+  aws.connect -> aws.s3 'Stores completed-call recordings and contact data in'
+  aws.s3 -> aws.redshift 'Supplies stored contact data for ingestion by'
+  aws.redshift -> aws.quickSight 'Provides analytical data for dashboards in'
+}
+
+views {
+  view index {
+    title 'Retail Customer Service Contact Center Using Amazon Connect'
+    include *, aws.*, aws.connect.*, aws.s3.*, aws.redshift.*, aws.dynamodb.*, aws.lambda.*
+  }
+}
