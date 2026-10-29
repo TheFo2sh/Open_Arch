@@ -1,0 +1,7 @@
+PackageId: OpenArch.ElectricVehicleChargingOCPPHandler
+Name: Electric Vehicle Charging OCPP Handler
+Description: A charge point operator architecture that connects EV charge points over OCPP and WebSockets to AWS IoT Core, with serverless message handling and workflows.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, electric-vehicles, mobility, iot, energy]

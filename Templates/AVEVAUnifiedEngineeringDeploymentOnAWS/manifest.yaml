@@ -1,0 +1,7 @@
+PackageId: OpenArch.AVEVAUnifiedEngineeringDeploymentOnAWS
+Name: AVEVA Unified Engineering Deployment on AWS
+Description: Windows-based AVEVA engineering desktops and supporting servers on AWS, with multi-AZ WorkSpaces, SQL Server, FSx for Windows File Server, and AWS Backup.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, manufacturing, engineering, virtual-desktop, aveva]

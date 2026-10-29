@@ -1,0 +1,7 @@
+PackageId: OpenArch.BuildAHealthcareDataPipelineOnAWSWithIBMCloudPakForData
+Name: Build a Healthcare Data Pipeline on AWS with IBM Cloud Pak for Data
+Description: A healthcare data pipeline that transforms device data on AWS and uses IBM Cloud Pak for Data for governed analytics and machine learning.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [healthcare, data-pipeline, aws, ibm, machine-learning]

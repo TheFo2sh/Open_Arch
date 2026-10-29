@@ -1,0 +1,7 @@
+PackageId: OpenArch.SiemensNXOnAmazonWorkSpacesApplications
+Name: Siemens NX on Amazon WorkSpaces Applications
+Description: Reference architecture for streaming Siemens NX with AWS options for EBS shared folders, Teamcenter with FSx, and multi-Region storage replication.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, manufacturing, cad, siemens, workspaces-applications]

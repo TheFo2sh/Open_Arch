@@ -1,0 +1,171 @@
+// Deploying 5G O-RAN NWDAF on AWS, based on AWS's reference page and diagram.
+// Systems and users are slots mapped onto a project's own architecture.
+model {
+  subscriber = user '5G subscriber and end user' {
+    description 'Uses services delivered over the O-RAN and 5G network.'
+  }
+
+  radioSite = zone 'O-RAN radio site' {
+    metadata {
+      platform 'other'
+    }
+
+    ran = system 'O-RAN radio access network' {
+      description 'Radio units and access network equipment connecting end users to O-RAN network functions; vendors and detailed interfaces are not specified.'
+    }
+  }
+
+  outpostsSite = zone 'AWS Outposts site' {
+    metadata {
+      platform 'aws'
+    }
+
+    outposts = platform 'AWS Outposts' {
+      description 'AWS infrastructure shown hosting EKS-based radio and user-plane network functions.'
+      metadata {
+        uses 'aws-outposts'
+      }
+
+      edgeEks = platform 'Amazon Elastic Kubernetes Service' {
+        description 'Runs O-RAN radio and 5G user-plane functions at the edge.'
+        metadata {
+          uses 'amazon-eks'
+        }
+
+        edgeFunctions = system 'O-RAN and user-plane network functions' {
+          description 'Network-function software hosted on EKS near the radio network; products and vendors are not specified.'
+
+          ranFunctions = container 'O-RAN radio functions' {
+            description 'RAN functions including the O-DU and CU shown in the AWS diagram.'
+            odu = component 'O-RAN Distributed Unit (O-DU)' {
+              description 'Distributed radio function shown at the cell site.'
+            }
+            cu = component 'Central Unit (CU)' {
+              description 'Centralized radio function shown with the Outposts-hosted EKS cluster.'
+            }
+          }
+          userPlane = container '5G User Plane Function (UPF)' {
+            description 'User-plane functions shown running in the Outposts-hosted EKS cluster.'
+          }
+        }
+      }
+
+      edgeEbs = platform 'Amazon Elastic Block Store' {
+        description 'Block storage for the Outposts-hosted network functions.'
+        metadata {
+          uses 'amazon-ebs'
+        }
+      }
+    }
+  }
+
+  region = zone 'AWS Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    eks = platform 'Amazon Elastic Kubernetes Service' {
+      description 'Runs the regional 5G Core, NWDAF, and OAM functions.'
+      metadata {
+        uses 'amazon-eks'
+      }
+
+      core = system '5G Core network functions' {
+        description 'Regional 5G Core functions shown alongside NWDAF; implementation and vendor are not specified.'
+        functions = container '5G Core functions' {
+          amf = component 'Access and Mobility Management Function (AMF)'
+          smf = component 'Session Management Function (SMF)'
+          af = component 'Application Function (AF)'
+        }
+      }
+
+      nwdaf = system 'Network Data Analytics Function (NWDAF)' {
+        description 'Coordinates network-data collection and produces observed service-experience analytics.'
+
+        dccf = container 'Data Collection Coordination Function (DCCF)' {
+          description 'Coordinates data collection and distribution, avoiding overlapping subscriptions and notifications.'
+        }
+        adrf = container 'Analytics Data Repository Function (ADRF)' {
+          description 'Aggregates network data and manages its lifecycle.'
+        }
+        mfaf = container 'Messaging Framework Adaptor Function (MFAF)' {
+          description 'Formats and processes data received from network functions and coordinates its delivery.'
+        }
+        analytics = container 'NWDAF analytics functions' {
+          description 'Compares current observations with historical, expected, and predicted Mean Opinion Score (MoS) values.'
+          mtlf = component 'Model Training Logical Function (MTLF)' {
+            description 'Uses SageMaker AI for model training and deployment of inference endpoints.'
+          }
+          anlf = component 'Analytics Logical Functions (AnLFs)' {
+            description 'Use deployed inference endpoints to produce predictions and observed service-experience analysis.'
+          }
+        }
+      }
+
+      oam = system 'Operations, Administration, and Management (OAM) services' {
+        description 'Receives observed service-experience analysis for network optimization; product and implementation are not specified.'
+      }
+    }
+
+    sagemaker = platform 'Amazon SageMaker AI' {
+      description 'Provides machine-learning lifecycle operations and inference endpoints for NWDAF.'
+      metadata {
+        uses 'amazon-sagemaker-ai'
+      }
+    }
+    lakeFormation = platform 'AWS Lake Formation' {
+      description 'Manages the S3-backed NWDAF data lake.'
+      metadata {
+        uses 'aws-lake-formation'
+      }
+    }
+    s3 = platform 'Amazon Simple Storage Service' {
+      description 'Object storage backing the Lake Formation data lake.'
+      metadata {
+        uses 'amazon-s3'
+      }
+      analyticsData = database 'NWDAF analytics data lake' {
+        description 'Processed analytics, inference results, and trained models; the source does not specify schemas or retention policies.'
+      }
+    }
+  }
+
+  remoteRegion = zone 'Remote AWS Region' {
+    metadata {
+      platform 'aws'
+    }
+
+    remoteEbs = platform 'Amazon Elastic Block Store' {
+      description 'Remote-Region destination for EBS backups; the source does not specify the backup mechanism or Region.'
+      metadata {
+        uses 'amazon-ebs'
+      }
+    }
+  }
+
+  subscriber -> radioSite.ran 'Uses'
+  radioSite.ran -> outpostsSite.outposts.edgeEks.edgeFunctions.ranFunctions 'Connects to'
+  outpostsSite.outposts.edgeEks.edgeFunctions.userPlane -> region.eks.core 'Connects with'
+  outpostsSite.outposts.edgeEks.edgeFunctions -> region.eks.nwdaf.dccf 'Sends application, session, location, and QoE data to'
+  outpostsSite.outposts.edgeEks.edgeFunctions -> region.eks.nwdaf.mfaf 'Provides network-function data to'
+  region.eks.core -> region.eks.nwdaf.dccf 'Sends network-function data to'
+  region.eks.core -> region.eks.nwdaf.mfaf 'Provides network-function data to'
+  region.eks.nwdaf.dccf -> region.eks.nwdaf.adrf 'Forwards data to or retrieves data from'
+  region.eks.nwdaf.dccf -> region.eks.nwdaf.mfaf 'Coordinates collection and delivery through'
+  region.eks.nwdaf.mfaf -> region.eks.nwdaf.dccf 'Delivers formatted network-function data through'
+  region.eks.nwdaf.analytics.mtlf -> region.sagemaker 'Trains models and deploys inference endpoints with'
+  region.sagemaker -> region.eks.nwdaf.analytics.anlf 'Provides inference endpoints for'
+  region.eks.nwdaf.analytics.anlf -> region.s3.analyticsData 'Stores processed analytics and inference results in'
+  region.eks.nwdaf.analytics.mtlf -> region.s3.analyticsData 'Stores trained models in'
+  region.lakeFormation -> region.s3 'Manages the data lake stored in'
+  region.eks.nwdaf.analytics.anlf -> region.eks.oam 'Sends observed service-experience analysis to'
+  outpostsSite.outposts.edgeEks.edgeFunctions -> outpostsSite.outposts.edgeEbs 'Uses block storage from'
+  outpostsSite.outposts.edgeEbs -> remoteRegion.remoteEbs 'Backs up to'
+}
+
+views {
+  view index {
+    title 'Deploying 5G O-RAN NWDAF on AWS'
+    include *, radioSite.*, outpostsSite.*, outpostsSite.outposts.*, outpostsSite.outposts.edgeEks.*, outpostsSite.outposts.edgeEks.edgeFunctions.*, region.*, region.eks.*, region.eks.core.*, region.eks.nwdaf.*, region.eks.oam.*, region.s3.*, remoteRegion.*
+  }
+}

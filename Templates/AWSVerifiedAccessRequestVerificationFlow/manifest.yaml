@@ -1,0 +1,7 @@
+PackageId: OpenArch.AWSVerifiedAccessRequestVerificationFlow
+Name: AWS Verified Access Request Verification Flow
+Description: AWS Verified Access evaluates requests against identity and optional device posture before proxying them to application endpoints in an Amazon VPC.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, security, identity-and-access, zero-trust]

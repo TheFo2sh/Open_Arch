@@ -1,0 +1,7 @@
+PackageId: OpenArch.FinancialAdvisorChatAssistannt
+Name: Financial Advisor Chat Assistant
+Description: A conversational assistant for financial advisors, using Amazon Lex and Kendra to answer questions from Amazon S3 and Salesforce content.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, financial-services, conversational-ai, chatbot, knowledge-search]

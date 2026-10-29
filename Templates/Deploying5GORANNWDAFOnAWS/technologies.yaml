@@ -1,0 +1,50 @@
+# AWS services named in the reference page and its architecture diagram.
+technologies:
+  - key: aws-outposts
+    name: AWS Outposts
+    description: AWS infrastructure shown hosting EKS-based O-RAN and 5G user-plane network functions near the radio network.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/outposts/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-eks
+    name: Amazon Elastic Kubernetes Service
+    description: Kubernetes platform shown running O-RAN, 5G Core, NWDAF, and OAM network functions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/eks/
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-ebs
+    name: Amazon Elastic Block Store
+    description: Block storage for EKS-hosted network functions, with backups in remote AWS Regions.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/ebs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: []
+  - key: amazon-sagemaker-ai
+    name: Amazon SageMaker AI
+    description: Machine-learning lifecycle service used to train models and deploy inference endpoints for NWDAF analytics.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/sagemaker/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-lake-formation
+    name: AWS Lake Formation
+    description: Manages the S3-backed data lake for processed analytics, inference results, and trained models.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lake-formation/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-s3
+    name: Amazon Simple Storage Service
+    description: Object storage backing the Lake Formation data lake for NWDAF analytics, inference results, and trained models.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]

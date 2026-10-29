@@ -1,0 +1,7 @@
+PackageId: OpenArch.AlfrescoDigitalBusinessPlatformOnAWS
+Name: Alfresco Digital Business Platform on AWS
+Description: A highly available Alfresco content and process platform on AWS, with content storage, search, intelligence, and business integrations.
+Version: 1.0.0
+Icon: logos:aws
+Publisher: Open_Arch
+Tags: [aws, content-management, business-process-management, alfresco]

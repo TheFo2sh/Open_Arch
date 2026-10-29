@@ -1,0 +1,134 @@
+# The technologies the blueprint uses, by the key its metadata { uses } names them by.
+technologies:
+  - key: aws-amplify
+    name: AWS Amplify
+    description: Rapid application development service shown managing Route 53, CloudFront, S3, and Cognito; enable secure headers as AWS recommends.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/amplify/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-route-53
+    name: Amazon Route 53
+    description: Resolves the assistant's domain to its Amazon CloudFront and Amazon S3 web destinations.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/route53/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-cloudfront
+    name: Amazon CloudFront
+    description: Delivers the static assistant web application from Amazon S3.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudfront/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-s3
+    name: Amazon S3
+    description: Stores the HTML, CSS, and JavaScript web application and the source documents Amazon Kendra indexes.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/s3/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-cognito
+    name: Amazon Cognito
+    description: Authenticates users and returns temporary credentials to the browser or app for Amazon Lex access.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cognito/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-lex
+    name: Amazon Lex
+    description: Provides the conversational chatbot API and invokes its built-in Amazon Kendra search intent.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/lex/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-kendra
+    name: Amazon Kendra
+    description: Search service that indexes Amazon S3 objects and Salesforce content through its S3 and Salesforce connectors.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kendra/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-iam
+    name: AWS Identity and Access Management
+    description: An IAM role controls Amazon Kendra's access to its data sources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/iam/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-secrets-manager
+    name: AWS Secrets Manager
+    description: Stores the Salesforce consumer key and secret and rotates those credentials.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/secrets-manager/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-cloudtrail
+    name: AWS CloudTrail
+    description: Additional security recommendation for tracking API usage.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudtrail/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: amazon-cloudwatch
+    name: Amazon CloudWatch
+    description: Additional security recommendation for monitoring AWS resources.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/cloudwatch/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: aws-kms
+    name: AWS Key Management Service
+    description: Additional security recommendation for securely generating and managing encryption keys.
+    vendor: Amazon Web Services
+    url: https://aws.amazon.com/kms/
+    types: [managed-service]
+    platform: aws
+    hosts: []
+    packages: [{manager: terraform, name: hashicorp/aws}]
+  - key: salesforce
+    name: Salesforce
+    description: Required third-party CRM source, accessed through an OAuth-enabled connected app and Salesforce API v48.
+    vendor: Salesforce
+    url: https://www.salesforce.com/
+    types: [third-party]
+  - key: html
+    name: HTML
+    description: Markup used by the static web application shown in the AWS diagram.
+    vendor: WHATWG
+    url: https://html.spec.whatwg.org/
+    types: [library]
+  - key: css
+    name: CSS
+    description: Stylesheet technology used by the static web application shown in the AWS diagram.
+    vendor: W3C
+    url: https://www.w3.org/Style/CSS/
+    types: [library]
+  - key: javascript
+    name: JavaScript
+    description: Browser scripting language used by the static web application shown in the AWS diagram.
+    vendor: ECMA International
+    url: https://developer.mozilla.org/en-US/docs/Web/JavaScript
+    types: [library]
