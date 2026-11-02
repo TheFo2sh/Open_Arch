@@ -20,9 +20,6 @@ model {
           }
         }
       }
-      edgeApplications = system 'Industrial Edge applications' {
-        description 'Project-owned applications built for the Industrial Edge platform.'
-      }
       informationHub = platform 'Industrial Information Hub' {
         description 'Configured Siemens industrial data-layer service.'
         metadata {
@@ -70,6 +67,9 @@ model {
         metadata {
           uses 'docker'
         }
+        edgeApplications = system 'Industrial Edge applications' {
+          description 'Project-owned applications deployed to the Industrial Edge platform.'
+        }
       }
     }
 
@@ -111,6 +111,22 @@ model {
       description 'Configured product for monitoring machine-learning models on Industrial Edge.'
       metadata {
         uses 'siemens-ai-model-monitor'
+      }
+    }
+  }
+
+  mendixCloud = zone 'Mendix platform' {
+    metadata {
+      platform 'other'
+    }
+
+    mendix = platform 'Mendix' {
+      description 'Configured Mendix platform for industrial analytics applications; hosting location is not specified.'
+      metadata {
+        uses 'mendix'
+      }
+      analyticsApps = system 'Industrial analytics applications' {
+        description 'Project-owned analytics applications built and configured on Mendix.'
       }
     }
   }
@@ -171,15 +187,6 @@ model {
         }
       }
     }
-    mendix = platform 'Mendix' {
-      description 'Configured Mendix platform for industrial analytics applications.'
-      metadata {
-        uses 'mendix'
-      }
-      analyticsApps = system 'Industrial analytics applications' {
-        description 'Project-owned analytics applications built and configured on Mendix.'
-      }
-    }
     visualizationApps = system 'Industrial visualization applications' {
       appKit = container 'Custom IoT visualization applications' {
         metadata {
@@ -193,8 +200,8 @@ model {
   shopfloor.industrialEdge.connectors -> shopfloor.industrialEdge.sitewiseEdge 'Feeds collected data to'
   shopfloor.industrialEdge.sitewiseEdge -> aws.sitewise.industrialData 'Sends aggregated data to'
 
-  enterprise.edgeManagement -> shopfloor.industrialEdge 'Manages'
-  enterprise.repository -> shopfloor.industrialEdge.edgeApplications 'Distributes software and apps to'
+  enterprise.edgeManagement -> shopfloor.industrialEdge.docker.edgeApplications 'Manages'
+  enterprise.repository -> shopfloor.industrialEdge.docker.edgeApplications 'Distributes software and apps to'
   aws.sitewise.industrialData -> aws.s3.coldData 'Delivers cold industrial data to'
   aws.sitewise.industrialData -> aws.sitewiseMonitor 'Provides data for visualization'
   aws.sitewise.industrialData -> aws.twinmaker 'Provides data for digital twins'
@@ -203,12 +210,11 @@ model {
   aws.s3.coldData -> aws.athena 'Provides cold data for queries'
   aws.athena -> aws.grafana 'Provides query results to'
   aws.athena -> aws.quickSight 'Provides query results to'
-  aws.athena -> aws.mendix.analyticsApps 'Provides query results to'
+  aws.athena -> mendixCloud.mendix.analyticsApps 'Provides query results to'
   aws.s3.coldData -> aws.studioLab.modelTraining 'Provides training data to'
   aws.studioLab.modelTraining.modelPackaging -> enterprise.modelManager 'Delivers packaged models to'
   enterprise.modelManager -> shopfloor.industrialEdge.edgeInference 'Deploys models for'
   enterprise.modelMonitor -> shopfloor.industrialEdge.modelMonitorAgent 'Monitors models through'
-  shopfloor.industrialEdge.mendixEdge -> shopfloor.industrialEdge.edgeApplications 'Builds and deploys applications on'
-  shopfloor.industrialEdge.flowCreator -> shopfloor.industrialEdge.edgeApplications 'Builds applications on'
-  shopfloor.industrialEdge.docker -> shopfloor.industrialEdge.edgeApplications 'Packages and runs applications on'
+  shopfloor.industrialEdge.mendixEdge -> shopfloor.industrialEdge.docker.edgeApplications 'Builds and deploys applications on'
+  shopfloor.industrialEdge.flowCreator -> shopfloor.industrialEdge.docker.edgeApplications 'Builds applications on'
 }

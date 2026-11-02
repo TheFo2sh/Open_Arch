@@ -4,34 +4,39 @@ technologies:
     description: Shop-floor software platform that hosts industrial edge devices and their applications.
     vendor: Siemens
     url: https://www.siemens.com/global/en/products/automation/topic-areas/industrial-edge.html
-    types: [compute-platform, third-party]
+    types: [managed-service, compute-platform, third-party]
     platform: other
     hosts: [system]
   - key: siemens-industrial-edge-management
     name: Siemens Industrial Edge Management
     description: Central management for Industrial Edge devices and applications; the reference leaves its deployment location open.
     vendor: Siemens
-    types: [library, third-party]
+    types: [managed-service, third-party]
+    platform: other
   - key: siemens-industrial-edge-hub
     name: Siemens Industrial Edge Hub
     description: Industrial Edge management and application-distribution capability shown in the reference diagram.
     vendor: Siemens
-    types: [library, third-party]
+    types: [managed-service, third-party]
+    platform: other
   - key: siemens-global-software-app-repository
     name: Global Software and App Repository
     description: Software and application repository shown with the Industrial Edge Hub.
     vendor: Siemens
-    types: [library, third-party]
+    types: [managed-service, third-party]
+    platform: other
   - key: industrial-information-hub
     name: Industrial Information Hub
     description: Industrial data-layer component shown on the Industrial Edge device.
     vendor: Siemens
-    types: [library, third-party]
+    types: [managed-service, data-platform, third-party]
+    platform: other
   - key: industrial-edge-databus
     name: Industrial Edge Databus
     description: Data-bus component shown in the Industrial Edge applications data layer.
     vendor: Siemens
-    types: [library, third-party]
+    types: [managed-service, third-party]
+    platform: other
   - key: opc-ua
     name: OPC UA
     description: Industrial communication protocol named in the reference diagram for southbound connectors.
@@ -58,24 +63,30 @@ technologies:
     description: Application development platform named as an option for Industrial Edge apps and analytics applications.
     vendor: Mendix
     url: https://www.mendix.com/
-    types: [library, third-party]
+    types: [managed-service, compute-platform, third-party]
+    platform: other
+    hosts: [system]
   - key: flow-creator
     name: Flow Creator
     description: Application development option named in the reference for Industrial Edge apps.
     vendor: Siemens
-    types: [library, third-party]
+    types: [managed-service, third-party]
+    platform: other
   - key: docker
     name: Docker
     description: Container technology named as an option for creating Industrial Edge apps.
     vendor: Docker
     url: https://www.docker.com/
-    types: [library, third-party]
+    types: [managed-service, compute-platform, third-party]
+    platform: other
+    hosts: [system]
   - key: aws-iot-sitewise-edge
     name: AWS IoT SiteWise Edge
     description: Edge software that collects and aggregates industrial data before sending it to AWS IoT SiteWise.
     vendor: Amazon Web Services
     url: https://aws.amazon.com/iot-sitewise/
-    types: [library]
+    types: [managed-service, compute-platform]
+    platform: aws
   - key: aws-iot-sitewise
     name: AWS IoT SiteWise
     description: Cloud service for industrial data ingestion, asset modeling, and data management.
@@ -149,22 +160,26 @@ technologies:
     name: Siemens AI Model Manager
     description: Deploys and manages machine-learning models on Industrial Edge devices.
     vendor: Siemens
-    types: [library, third-party]
+    types: [managed-service, third-party]
+    platform: other
   - key: siemens-ai-inference-server
     name: Siemens AI Inference Server
     description: Runs machine-learning models on Industrial Edge devices.
     vendor: Siemens
-    types: [library, third-party]
+    types: [managed-service, third-party]
+    platform: other
   - key: siemens-ai-model-monitor
     name: Siemens AI Model Monitor
     description: Monitors machine-learning models on Industrial Edge devices.
     vendor: Siemens
-    types: [library, third-party]
+    types: [managed-service, third-party]
+    platform: other
   - key: siemens-ai-model-monitor-agent
     name: Siemens AI Model Monitor Agent
     description: Edge-side model-monitoring agent shown in the reference diagram.
     vendor: Siemens
-    types: [library, third-party]
+    types: [managed-service, third-party]
+    platform: other
   - key: amazon-sagemaker-studio-lab
     name: Amazon SageMaker Studio Lab
     description: AWS machine-learning environment shown in the reference diagram.
