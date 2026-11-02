@@ -4,7 +4,7 @@ An AWS reference architecture for increasing availability of IBM Planning Analyt
 
 ## What it is for
 
-Planning Analytics Workspace and TM1 Web provide the user-facing capabilities. A primary TM1 data tier serves requests while a standby tier, in another Availability Zone, can take over after a site reliability engineer initiates failover.
+Planning Analytics Workspace, TM1 Web, TM1 Server, and TM1 Admin Server are deployed IBM products configured on OpenShift and EC2, so the blueprint models them as managed-service platforms rather than project system slots. The primary TM1 data tier serves requests while a standby tier, in another Availability Zone, can take over after a site reliability engineer initiates failover.
 
 ## Architecture and data flow
 
@@ -22,7 +22,7 @@ Planning Analytics Workspace and TM1 Web provide the user-facing capabilities. A
 |---|---|
 | Zone | AWS |
 | Platforms | Direct Connect, Transit Gateway, VPC, Application Load Balancer, Route 53 Private Hosted Zone, Red Hat OpenShift Service on AWS, EC2, EBS, FSx for Windows File Server, CloudWatch, SNS |
-| System slots | Planning Analytics Workspace, TM1 Web tier, TM1 data tier |
+| Managed-service platforms | Planning Analytics Workspace, TM1 Web, TM1 Server, and TM1 Admin Server |
 | User slots | Corporate users, site reliability engineers |
 | Data stores | Primary and standby TM1 EBS volumes; primary and standby TM1 file systems |
 
@@ -38,6 +38,6 @@ This is an architecture template, not deployable infrastructure. It describes on
 
 ## What teams usually customize
 
-- Match the corporate users, SRE role, and three system slots to the project's existing systems and users.
+- Map the corporate users and SRE role to the project's existing users.
 - Specify the deployment details omitted by the AWS reference, including network/subnet design, sizing, software versions, monitoring thresholds, backup policies, and failover runbooks.
 - Adapt the private connectivity, DNS, and application ingress relationships to the team's actual network and routing design.

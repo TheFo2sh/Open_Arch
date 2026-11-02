@@ -106,8 +106,8 @@ technologies:
     description: Cluster ingress controller integrated with the Network Load Balancer to expose applications.
     vendor: Kubernetes
     url: https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/
-    types: [library]
-    platform: kubernetes
+    types: [managed-service]
+    platform: aws
   - key: aws-app2container
     name: AWS App2Container
     description: AWS application containerization tool that can help refactor or rearchitect legacy applications into microservices.

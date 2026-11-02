@@ -95,13 +95,15 @@ technologies:
     description: Open-source learning platform used by the CMS, LMS, Insights, Notes, Forums, and Blockstore applications.
     vendor: Axim Collaborative
     url: https://openedx.org/
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: proxysql
     name: ProxySQL
     description: MySQL-compatible proxy that routes writes to the Aurora cluster endpoint and reads to its reader endpoint.
     vendor: ProxySQL
     url: https://proxysql.com/
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: amazon-elasticache-redis
     name: Amazon ElastiCache for Redis
     description: Managed Redis cache nodes deployed across Availability Zones for Open edX cache and transaction state.

@@ -22,8 +22,8 @@ The source diagram depicts an EKS cluster with private worker nodes across two A
 |---|---|
 | Zone | **AWS**, on the AWS platform |
 | Platforms | Amazon Route 53, public and private Elastic Load Balancing, Amazon EKS, NAT Gateway, Internet Gateway, Virtual Private Gateway, Site-to-Site VPN, and Direct Connect |
-| Slots | **Internet client**, **On-premises network**, **Microservices**, and **Cluster ingress integration** |
-| Containers | External applications, internal applications, and AWS Load Balancer Controller |
+| Slots | **Internet client**, **On-premises network**, and **Microservices** |
+| Managed-service platform | AWS Load Balancer Controller, configured on EKS to manage Elastic Load Balancers |
 
 ## Assumptions and unspecified details
 
@@ -31,13 +31,13 @@ The source diagram depicts an EKS cluster with private worker nodes across two A
 - AWS does not name the applications, their APIs, languages, pod counts, or service boundaries. The external and internal application containers are generic slots.
 - The source calls the load balancers ELBs without specifying their type. This template does not infer Application Load Balancer or Network Load Balancer.
 - The diagram shows two Availability Zones, public and private subnet CIDRs, and NAT gateways, but the template does not prescribe a deployment topology, route-table configuration, or CIDR plan. The CIDRs in the drawing are examples, not requirements.
-- AWS names the AWS Load Balancer Controller as the selected controller. It is modeled as a cluster add-on; AWS does not specify its configuration or deployment method. The source does not name a separate third-party service. NGINX Ingress Controller is mentioned only as an alternative and is not included in the default architecture.
+- AWS names the AWS Load Balancer Controller as the selected controller. It is a managed product configured on EKS, not a project system slot or library. AWS does not specify its configuration or deployment method. NGINX Ingress Controller is mentioned only as an alternative and is not included in the default architecture.
 - VPN and Direct Connect are shown as on-premises connectivity options; the source does not require that both be deployed. AWS Fargate is discussed as an alternative compute option that requires ELB IP mode, but is not part of the depicted worker-node architecture.
 - This is an architecture template, not an infrastructure deployment plan. IAM, security groups, ports, TLS, DNS names, availability targets, scaling, and route-table details are not specified.
 
 ## What teams usually customize
 
-- Map the internet-client, on-premises-network, microservices, and cluster-ingress slots to the project's own systems and users; omit slots that do not apply.
+- Map the internet-client, on-premises-network, and microservices slots to the project's own systems and users; omit slots that do not apply.
 - Choose the load-balancer target mode and controller configuration for the EKS networking model.
 - Adapt the private hosted zone, subnet and route-table layout, NAT placement, and VPN or Direct Connect connectivity to the adopting environment.
 - Specify the application services, security controls, scaling and availability requirements that AWS leaves open.

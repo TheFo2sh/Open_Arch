@@ -6,49 +6,65 @@ technologies:
     description: Tulip's SaaS no-code environment for creating frontline operations applications.
     vendor: Tulip Interfaces
     url: https://tulip.co/
-    types: [third-party]
+    types: [managed-service]
+    platform: other
+    hosts: []
   - key: tulip-edge-io
     name: Tulip Edge IO
     description: On-premises device that connects barcode scanners, cameras, printers, and scales to Tulip.
     vendor: Tulip Interfaces
     url: https://tulip.co/
-    types: [third-party]
+    types: [managed-service]
+    platform: other
+    hosts: []
   - key: tulip-connector-host
     name: Tulip Connector Host
     description: On-premises host for Tulip connectors that connect to local devices and systems.
     vendor: Tulip Interfaces
     url: https://tulip.co/
-    types: [third-party]
+    types: [managed-service]
+    platform: other
+    hosts: []
   - key: tulip-player
     name: Tulip Player
     description: Tulip application player used by factory operators.
     vendor: Tulip Interfaces
     url: https://tulip.co/
-    types: [third-party]
+    types: [managed-service]
+    platform: other
+    hosts: []
   - key: tulip-connectors
     name: Tulip Connectors
     description: Interfaces used to ingest data into Tulip applications.
     vendor: Tulip Interfaces
     url: https://tulip.co/
-    types: [third-party]
+    types: [managed-service]
+    platform: other
+    hosts: []
   - key: tulip-sql-connector
     name: Tulip SQL Connector
     description: Tulip connector shown integrating the platform with SQL databases.
     vendor: Tulip Interfaces
     url: https://tulip.co/
-    types: [third-party]
+    types: [managed-service]
+    platform: other
+    hosts: []
   - key: tulip-rest-connector
     name: Tulip REST Connector
     description: Tulip connector shown integrating the platform with SaaS applications.
     vendor: Tulip Interfaces
     url: https://tulip.co/
-    types: [third-party]
+    types: [managed-service]
+    platform: other
+    hosts: []
   - key: tulip-api
     name: Tulip API
     description: Tulip API shown alongside the platform's SQL and REST connectors.
     vendor: Tulip Interfaces
     url: https://tulip.co/
-    types: [third-party]
+    types: [managed-service]
+    platform: other
+    hosts: []
   - key: aws-partner-solutions
     name: AWS Partner solutions
     description: Unspecified partner solutions that connect additional data sources and provide context.
@@ -89,13 +105,15 @@ technologies:
     url: https://docs.aws.amazon.com/greengrass/v2/developerguide/
     types: [managed-service, compute-platform]
     platform: aws
-    hosts: [system]
+    hosts: []
   - key: aws-iot-greengrass-connectors
     name: AWS IoT Greengrass connectors
     description: Edge connectors for OPC UA, Modbus TCP/RTU, and EtherNet/IP.
     vendor: Amazon Web Services
     url: https://docs.aws.amazon.com/greengrass/v2/developerguide/
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: aws-datasync
     name: AWS DataSync
     description: Data transfer option for ingesting data from file shares.

@@ -19,10 +19,6 @@ model {
   mobileFrontends = system 'Open edX mobile frontends' {
     description 'Slot for the stateless mobile frontend applications served from S3 through CloudFront.'
     frontend = container 'Mobile frontend application' {
-      technology 'Open edX'
-      metadata {
-        uses 'open-edx'
-      }
     }
   }
 
@@ -98,55 +94,16 @@ model {
           uses 'amazon-ec2-auto-scaling'
         }
 
-        userFacingApps = system 'Open edX user-facing backend apps' {
-          description 'Slot for the user-facing CMS, LMS, and Insights application tier.'
-          cms = container 'CMS' {
-            technology 'Open edX'
-            metadata {
-              uses 'open-edx'
-            }
-          }
-          lms = container 'LMS' {
-            technology 'Open edX'
-            metadata {
-              uses 'open-edx'
-            }
-          }
-          insights = container 'Insights' {
-            technology 'Open edX'
-            metadata {
-              uses 'open-edx'
-            }
+        openEdx = platform 'Open edX backend services' {
+          description 'Open edX CMS, LMS, Insights, Notes, Forums, and Blockstore products deployed on EC2.'
+          metadata {
+            uses 'open-edx'
           }
         }
-        apiServices = system 'Open edX API backend services' {
-          description 'Slot for the Notes, Forums, and Blockstore API services.'
-          notesContainer = container 'Notes' {
-            technology 'Open edX'
-            metadata {
-              uses 'open-edx'
-            }
-          }
-          forums = container 'Forums' {
-            technology 'Open edX'
-            metadata {
-              uses 'open-edx'
-            }
-          }
-          blockstore = container 'Blockstore' {
-            technology 'Open edX'
-            metadata {
-              uses 'open-edx'
-            }
-          }
-        }
-        databaseProxy = system 'Open edX relational database proxy' {
-          description 'Slot for the ProxySQL tier that exposes one MySQL-compatible endpoint.'
-          proxy = container 'ProxySQL' {
-            technology 'ProxySQL'
-            metadata {
-              uses 'proxysql'
-            }
+        databaseProxy = platform 'ProxySQL' {
+          description 'MySQL-compatible proxy deployed on EC2, routing writes to Aurora and reads to its reader endpoint.'
+          metadata {
+            uses 'proxysql'
           }
         }
       }
@@ -203,37 +160,27 @@ model {
 
   student -> mobileFrontends 'Uses'
   instructor -> mobileFrontends 'Uses'
-  student -> aws.ec2.autoScaling.userFacingApps 'Accesses'
-  instructor -> aws.ec2.autoScaling.userFacingApps 'Accesses'
+  student -> aws.ec2.autoScaling.openEdx 'Accesses'
+  instructor -> aws.ec2.autoScaling.openEdx 'Accesses'
   mobileFrontends -> aws.cloudfront 'Is delivered through'
   administrator -> aws.ec2.bastion 'Manages platform components through'
-  aws.ec2.bastion -> aws.ec2.autoScaling.userFacingApps 'Administers'
-  aws.ec2.bastion -> aws.ec2.autoScaling.apiServices 'Administers'
+  aws.ec2.bastion -> aws.ec2.autoScaling.openEdx 'Administers'
   aws.route53 -> aws.cloudfront 'Directs students to nearby edge locations'
   aws.acm -> aws.cloudfront 'Supplies TLS certificates for'
   aws.acm -> aws.alb 'Supplies TLS certificates for'
   aws.cloudfront -> aws.s3.mobileFrontendAssets 'Retrieves static frontend assets from'
-  aws.alb -> aws.ec2.autoScaling.userFacingApps 'Routes HTTPS requests to'
-  aws.alb -> aws.ec2.autoScaling.apiServices 'Routes HTTPS requests to'
+  aws.alb -> aws.ec2.autoScaling.openEdx 'Routes HTTPS requests to'
   aws.nat -> codeRepositories 'Provides private-subnet access to'
-  aws.ec2.autoScaling.userFacingApps -> aws.networkLoadBalancer 'Opens TCP connections to MongoDB through'
-  aws.ec2.autoScaling.apiServices -> aws.networkLoadBalancer 'Opens TCP connections to MongoDB through'
+  aws.ec2.autoScaling.openEdx -> aws.networkLoadBalancer 'Opens TCP connections to MongoDB through'
   aws.networkLoadBalancer -> aws.ec2.mongodb.openEdxData 'Selects a MongoDB target for'
-  aws.ec2.autoScaling.userFacingApps -> aws.ec2.autoScaling.databaseProxy.proxy 'Uses the MySQL-compatible endpoint'
-  aws.ec2.autoScaling.apiServices -> aws.ec2.autoScaling.databaseProxy.proxy 'Uses the MySQL-compatible endpoint'
-  aws.ec2.autoScaling.databaseProxy.proxy -> aws.aurora.relationalData 'Routes writes to the cluster endpoint and reads to the reader endpoint'
-  aws.ec2.autoScaling.userFacingApps -> aws.redis.cache 'Uses'
-  aws.ec2.autoScaling.apiServices -> aws.redis.cache 'Uses'
-  aws.ec2.autoScaling.userFacingApps -> aws.memcached.cache 'Uses'
-  aws.ec2.autoScaling.apiServices -> aws.memcached.cache 'Uses'
-  aws.ec2.autoScaling.userFacingApps -> aws.opensearch.searchData 'Searches'
-  aws.ec2.autoScaling.apiServices -> aws.opensearch.searchData 'Searches'
-  aws.ec2.autoScaling.userFacingApps -> aws.s3.learningAssets 'Reads and writes learning assets'
-  aws.ec2.autoScaling.apiServices -> aws.s3.learningAssets 'Reads and writes learning assets'
-  aws.ec2.autoScaling.userFacingApps -> aws.s3.serverLogs 'Writes server logs to'
-  aws.ec2.autoScaling.apiServices -> aws.s3.serverLogs 'Writes server logs to'
-  aws.ec2.autoScaling.userFacingApps -> aws.ses 'Sends student email through Open edX SMTP integration'
-  aws.ec2.autoScaling.apiServices -> aws.ses 'Sends student email through Open edX SMTP integration'
+  aws.ec2.autoScaling.openEdx -> aws.ec2.autoScaling.databaseProxy 'Uses the MySQL-compatible endpoint'
+  aws.ec2.autoScaling.databaseProxy -> aws.aurora.relationalData 'Routes writes to the cluster endpoint and reads to the reader endpoint'
+  aws.ec2.autoScaling.openEdx -> aws.redis.cache 'Uses'
+  aws.ec2.autoScaling.openEdx -> aws.memcached.cache 'Uses'
+  aws.ec2.autoScaling.openEdx -> aws.opensearch.searchData 'Searches'
+  aws.ec2.autoScaling.openEdx -> aws.s3.learningAssets 'Reads and writes learning assets'
+  aws.ec2.autoScaling.openEdx -> aws.s3.serverLogs 'Writes server logs to'
+  aws.ec2.autoScaling.openEdx -> aws.ses 'Sends student email through Open edX SMTP integration'
 }
 
 views {

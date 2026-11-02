@@ -10,7 +10,7 @@ A high-availability Open edX reference deployment on AWS, based on AWS's [Open e
 
 ## What it is for
 
-The architecture supports an Open edX learning platform with independently scalable user-facing and API backend tiers, multi-AZ data services, static mobile frontend delivery, and email to students.
+The architecture supports the Open edX product, deployed and configured on EC2 as a managed-service platform, with multi-AZ data services, a project mobile frontend system slot, and email to students.
 
 ## How it works
 
@@ -21,8 +21,7 @@ The numbered flow follows the AWS page and diagram:
 3. **CloudFront** serves stateless Open edX mobile frontend assets stored in **S3**. The source names instructor reports, learner accounts, and payment/card-access frontends; it does not identify a payment processor.
 4. An **Application Load Balancer** scales with student traffic, terminates HTTPS, and routes requests to application target groups.
 5. A **bastion host** provides administrator access to platform components. A **NAT gateway** provides a path from private subnets to Open edX code repositories.
-6. The user-facing **CMS**, **LMS**, and **Insights** backend applications run on **EC2** and are reached through the Application Load Balancer.
-7. The **Notes**, **Forums**, and **Blockstore** API backend services also run on EC2 and are reached through the load balancer.
+6. The Open edX **CMS**, **LMS**, **Insights**, **Notes**, **Forums**, and **Blockstore** backend services run on **EC2** and are reached through the Application Load Balancer. They are configured product services, not project system slots.
 8. **MongoDB** stores Open edX document data in a replicated cluster with one primary and two secondary nodes. The secondaries provide quorum to select a new primary if the current primary fails.
 9. A **Network Load Balancer** selects a target and opens a TCP connection for the MongoDB path.
 10. **ProxySQL** provides one MySQL-compatible endpoint, routing writes to the **Aurora** cluster endpoint and reads to its reader endpoint.

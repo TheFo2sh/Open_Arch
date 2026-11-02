@@ -18,6 +18,12 @@ Connect factory-floor devices and industrial data sources to Tulip's Frontline O
 6. **APIs.** AWS WAF provides protection for the API path. Amazon API Gateway supports REST methods for Amazon S3, Amazon Lookout for Vision, Amazon Textract, and Amazon Rekognition. AWS Lambda appears in the APIs section of the diagram.
 7. **Tulip SaaS integrations.** Tulip provides a no-code environment for applications and ingests data through Tulip Connectors. Its diagram shows SQL and REST connectors for SQL databases and SaaS applications, plus a Tulip API.
 
+## Classification updates
+
+- **Systems changed to managed-service platforms:** Tulip Edge IO, Tulip Player, Tulip Connector Host, Tulip Connectors, AWS IoT Greengrass connectors, Tulip Frontline Operations Platform, Tulip SQL Connector, Tulip REST Connector, and Tulip API. These are deployed products or provided services that are configured, not code-owned applications.
+- **Technologies reclassified as managed services:** `tulip-edge-io`, `tulip-player`, `tulip-connector-host`, `tulip-connectors`, `aws-iot-greengrass-connectors`, `tulip-frontline-operations-platform`, `tulip-sql-connector`, `tulip-rest-connector`, and `tulip-api`.
+- **Technologies left unchanged because they fit none of the system, managed-service, or library definitions:** OPC UA, Modbus TCP, Modbus RTU, EtherNet/IP, and MTConnect are protocols or standards; AWS Partner solutions is an unspecified partner category rather than an identified product.
+
 ## Assumptions and unspecified details
 
 - The source presents multiple service options by workload and access pattern. The template does not assert that every listed AWS service is deployed together, or specify which ingestion service feeds which store or analytics service.

@@ -43,12 +43,10 @@ model {
       metadata {
         uses 'red-hat-openshift-service-on-aws'
       }
-      workspace = system 'Planning Analytics Workspace' {
-        description 'IBM web interface for Planning Analytics modeling, reporting, and administration.'
-        app = container 'Planning Analytics Workspace' {
-          metadata {
-            uses 'ibm-planning-analytics-workspace'
-          }
+      workspace = platform 'Planning Analytics Workspace' {
+        description 'IBM web interface deployed and configured on Red Hat OpenShift Service on AWS.'
+        metadata {
+          uses 'ibm-planning-analytics-workspace'
         }
       }
     }
@@ -58,12 +56,10 @@ model {
       metadata {
         uses 'amazon-ec2'
       }
-      tm1Web = system 'TM1 Web tier' {
+      tm1Web = platform 'TM1 Web tier' {
         description 'Provides browser access to TM1 server cubes and websheets.'
-        app = container 'IBM TM1 Web' {
-          metadata {
-            uses 'ibm-tm1-web'
-          }
+        metadata {
+          uses 'ibm-tm1-web'
         }
       }
     }
@@ -72,15 +68,12 @@ model {
       metadata {
         uses 'amazon-ec2'
       }
-      dataTier = system 'TM1 data tier' {
+      dataTier = platform 'TM1 data tier' {
         description 'The TM1 Server and TM1 Admin Server run on the same EC2 instance; the standby instance takes over after an engineer initiates failover.'
-        server = container 'IBM TM1 Server' {
-          description 'Manages client access to the data directory and loads TM1 cubes into memory.'
-          metadata {
-            uses 'ibm-tm1-server'
-          }
+        metadata {
+          uses 'ibm-tm1-server'
         }
-        admin = container 'IBM TM1 Admin Server' {
+        admin = platform 'IBM TM1 Admin Server' {
           description 'Tracks active TM1 servers.'
           metadata {
             uses 'ibm-tm1-admin-server'

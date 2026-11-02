@@ -92,22 +92,26 @@ technologies:
     description: Web-based interface for Planning Analytics modeling, reporting, and administration.
     vendor: IBM
     url: https://www.ibm.com/products/planning-analytics
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: ibm-tm1-web
     name: IBM TM1 Web
     description: Web tier through which users access TM1 server cubes and websheets.
     vendor: IBM
     url: https://www.ibm.com/products/planning-analytics
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: ibm-tm1-server
     name: IBM TM1 Server
     description: TM1 data-tier server that manages client access to the data directory and loads cubes into memory.
     vendor: IBM
     url: https://www.ibm.com/products/planning-analytics
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: ibm-tm1-admin-server
     name: IBM TM1 Admin Server
     description: Tracks active TM1 servers for the active/passive data tier.
     vendor: IBM
     url: https://www.ibm.com/products/planning-analytics
-    types: [library]
+    types: [managed-service]
+    platform: aws

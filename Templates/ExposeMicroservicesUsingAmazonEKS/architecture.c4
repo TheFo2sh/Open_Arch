@@ -46,13 +46,10 @@ model {
           description 'Application pods exposed to internal clients through Kubernetes services and ingresses.'
         }
       }
-      ingressIntegration = system 'Cluster ingress integration' {
-        description 'Cluster add-on slot for the AWS Load Balancer Controller.'
-        controller = container 'AWS Load Balancer Controller' {
-          description 'Manages Elastic Load Balancers for Kubernetes services and ingresses.'
-          metadata {
-            uses 'aws-load-balancer-controller'
-          }
+      controller = platform 'AWS Load Balancer Controller' {
+        description 'Managed Kubernetes controller that configures Elastic Load Balancers for services and ingresses.'
+        metadata {
+          uses 'aws-load-balancer-controller'
         }
       }
     }
@@ -92,8 +89,8 @@ model {
   aws.route53 -> aws.privateElb 'Private hosted zone resolves requests to'
   aws.publicElb -> aws.eks.microservices.externalApps 'Forwards requests in instance or IP mode'
   aws.privateElb -> aws.eks.microservices.internalApps 'Forwards requests in instance or IP mode'
-  aws.eks.ingressIntegration.controller -> aws.publicElb 'Manages'
-  aws.eks.ingressIntegration.controller -> aws.privateElb 'Manages'
+  aws.eks.controller -> aws.publicElb 'Manages'
+  aws.eks.controller -> aws.privateElb 'Manages'
   aws.eks.microservices -> aws.natGateways 'Private-subnet internet egress routes through'
   aws.natGateways -> aws.internetGateway 'Public route forwards traffic through'
   aws.eks.microservices -> aws.virtualPrivateGateway 'Private route sends on-premises traffic through'
