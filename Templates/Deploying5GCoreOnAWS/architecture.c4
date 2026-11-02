@@ -113,15 +113,30 @@ model {
 
             upf = container 'User Plane Function (UPF)' {
               description 'UPF instances run as EKS containers and use Multus for multiple network interfaces.'
-              metadata {
-                uses 'multus'
-              }
             }
-            telemetry = container 'Telemetry and logging' {
-              description 'Prometheus, Grafana, and Fluentd are shown alongside the Outposts workload.'
-              metadata {
-                uses 'prometheus, grafana, fluentd'
-              }
+          }
+          multus = platform 'Multus' {
+            description 'Kubernetes network plugin that supplies multiple interfaces to the UPF pod.'
+            metadata {
+              uses 'multus'
+            }
+          }
+          prometheus = platform 'Prometheus' {
+            description 'Monitoring service shown collecting telemetry from the Outposts workload.'
+            metadata {
+              uses 'prometheus'
+            }
+          }
+          grafana = platform 'Grafana' {
+            description 'Observability dashboard shown with the Outposts workload.'
+            metadata {
+              uses 'grafana'
+            }
+          }
+          fluentd = platform 'Fluentd' {
+            description 'Log collector shown with the Outposts workload.'
+            metadata {
+              uses 'fluentd'
             }
           }
         }
@@ -146,6 +161,8 @@ model {
   region.controlPlane -> customerSite.outposts.vpcExtension.localEks.dataPlane 'Coordinates control and user-plane functions'
   customerSite.outposts.vpcExtension.localEks.dataPlane -> region.appMesh 'Uses'
   customerSite.outposts.vpcExtension.localEks.dataPlane -> region.xray 'Sends traces to'
+  customerSite.outposts.vpcExtension.localEks.dataPlane.upf -> customerSite.outposts.vpcExtension.localEks.multus 'Uses multiple network interfaces from'
+  customerSite.outposts.vpcExtension.localEks.dataPlane -> customerSite.outposts.vpcExtension.localEks.prometheus 'Sends telemetry to'
   region.ossBss -> region.directConnect 'Connects to on-premises data centers through'
 }
 

@@ -14,7 +14,7 @@ This template is a starting point for a 5G core whose user-plane processing runs
 4. Virtual LANs separate Service Link traffic from local traffic, allowing connectivity both locally and to AWS Regions.
 5. AWS Direct Connect provides a high-throughput connection from on-premises data centers to a regional VPC. A service endpoint provides direct access to regional services such as Amazon S3 without traversing the internet.
 6. AWS Transit Gateway connects to other VPCs used for 5G management and control. Regional EKS workloads include the 5G control-plane functions, OSS, and BSS.
-7. The diagram also shows AWS App Mesh, AWS X-Ray, Multus, Prometheus, Grafana, and Fluentd alongside the workloads.
+7. The diagram also shows AWS App Mesh, AWS X-Ray, Multus, Prometheus, Grafana, and Fluentd alongside the workloads. Multus and the observability products are deployed and configured on EKS, so they are modeled as managed-service platforms rather than libraries or system slots.
 
 ## Assumptions and unspecified details
 
@@ -27,6 +27,6 @@ This template is a starting point for a 5G core whose user-plane processing runs
 ## What teams usually customize
 
 - Map the RAN, subscriber, 5G control plane, user plane, OSS/BSS, and external management/control slots to the systems and users in the project.
-- Choose the network-function vendor and define its interfaces, lifecycle management, scaling, and operational integrations.
+- Choose and configure the network-function and observability products, and define their interfaces, lifecycle management, scaling, and operational integrations.
 - Specify the Outposts and regional VPCs, subnets, VLANs, route tables, service endpoints, and Direct Connect/Transit Gateway topology.
 - Decide which monitoring, logging, service-mesh, storage, and regional AWS services are actually required for the selected 5G products and deployment.

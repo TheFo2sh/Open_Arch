@@ -58,14 +58,10 @@ model {
         metadata {
           uses 'amazon-ec2'
         }
-        moodle = system 'Moodle learning platform' {
-          description 'The Moodle system used by learners, educators, and administrators.'
-          web = container 'Moodle web application' {
-            description 'Moodle LMS application running on PHP.'
-            technology 'Moodle, PHP'
-            metadata {
-              uses 'moodle, php'
-            }
+        moodle = platform 'Moodle learning platform' {
+          description 'Moodle LMS installed on EC2 and configured for learners, educators, and administrators.'
+          metadata {
+            uses 'moodle'
           }
         }
       }
@@ -143,9 +139,9 @@ model {
   aws.natGateway -> aws.internetGateway 'Uses for outbound internet access'
   aws.autoScaling.ec2.moodle -> aws.natGateway 'Uses for outbound internet access'
   aws.alb -> aws.autoScaling.ec2.moodle 'Distributes traffic to'
-  aws.autoScaling.ec2.moodle.web -> aws.efs 'Reads and writes shared Moodle files on'
-  aws.autoScaling.ec2.moodle.web -> aws.elasticache.cache 'Stores sessions and application cache in'
-  aws.autoScaling.ec2.moodle.web -> aws.aurora.moodleDb 'Reads and writes application data in'
+  aws.autoScaling.ec2.moodle -> aws.efs 'Reads and writes shared Moodle files on'
+  aws.autoScaling.ec2.moodle -> aws.elasticache.cache 'Stores sessions and application cache in'
+  aws.autoScaling.ec2.moodle -> aws.aurora.moodleDb 'Reads and writes application data in'
   aws.codeCommit -> aws.codePipeline 'Provides source to'
   aws.codePipeline -> aws.codeBuild 'Orchestrates build with'
   aws.codeBuild -> aws.codeDeploy 'Provides build artifacts to'

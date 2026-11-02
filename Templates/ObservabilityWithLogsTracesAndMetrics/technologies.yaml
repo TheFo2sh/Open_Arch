@@ -6,19 +6,25 @@ technologies:
     description: Open-source log collector that forwards application logs to OpenSearch Data Prepper.
     vendor: Fluent Bit
     url: https://fluentbit.io/
-    types: [library, third-party]
+    types: [managed-service, third-party]
+    platform: aws
+    packages: [{manager: docker, name: fluent/fluent-bit}]
   - key: opensearch-data-prepper
     name: OpenSearch Data Prepper
     description: Open-source collector that transforms and enriches logs and traces before forwarding them to Amazon OpenSearch Service.
     vendor: OpenSearch Project
     url: https://opensearch.org/docs/latest/data-prepper/
-    types: [library, third-party]
+    types: [managed-service, third-party]
+    platform: aws
+    packages: [{manager: docker, name: opensearchproject/data-prepper}]
   - key: aws-distro-for-opentelemetry
     name: AWS Distro for OpenTelemetry
     description: OpenTelemetry metric scrapers forward metrics to Amazon Managed Service for Prometheus and traces to OpenSearch Data Prepper.
     vendor: Amazon Web Services
     url: https://aws-otel.github.io/
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: docker, name: public.ecr.aws/aws-observability/aws-otel-collector}]
   - key: amazon-opensearch-service
     name: Amazon OpenSearch Service
     description: Managed data store for logs and traces received from OpenSearch Data Prepper; provides OpenSearch Dashboards.
@@ -26,13 +32,7 @@ technologies:
     url: https://aws.amazon.com/opensearch-service/
     types: [managed-service, data-platform]
     platform: aws
-    hosts: [system, database]
-  - key: opensearch-dashboards
-    name: OpenSearch Dashboards
-    description: Dashboard interface for exploring logs and traces stored in Amazon OpenSearch Service.
-    vendor: OpenSearch Project
-    url: https://opensearch.org/docs/latest/dashboards/
-    types: [library]
+    hosts: [database]
   - key: amazon-managed-service-for-prometheus
     name: Amazon Managed Service for Prometheus
     description: Managed metrics store for metrics received from AWS Distro for OpenTelemetry scrapers.
