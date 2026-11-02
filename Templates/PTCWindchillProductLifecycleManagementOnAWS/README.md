@@ -4,7 +4,7 @@ A highly available, load-balanced PTC Windchill deployment on AWS, based on the 
 
 ## What it is for
 
-Use this as a starting point for a Windchill PLM system that needs highly available web and method-server tiers, background processing, CAD and Office document rendering, keyword search, replicated metadata storage, and shared content storage.
+Use this as a starting point for a configured Windchill PLM service that needs highly available web and method-server tiers, background processing, CAD and Office document rendering, keyword search, replicated metadata storage, and shared content storage.
 
 ## How it works
 
@@ -39,7 +39,14 @@ The AWS numbered flow describes:
 - Define S3 buckets, content organization, access controls, retention, and lifecycle policies.
 - Set up the Solr index, worker rendering capacity, and Background Server workloads.
 - Configure monitoring coverage, corporate directory integration, VPN and VPC peering, and any separate-Region replication.
-- Map the Windchill and user slots to the project's own systems and users.
+- Map the user slots to the project's own users and confirm the Windchill service roles for the deployment.
+
+## Classification updates
+
+- **System elements changed to managed-service platforms:** PTC Windchill PLM and its web, method, background, worker, and replication server roles; the optional separate-region Windchill deployment; the on-premises Replication Server; and PTC Solution Monitor. These are configured vendor products, not code-owned applications.
+- **System container changed to a managed-service platform:** Apache Solr is a deployed search server, not a package dependency.
+- **Technologies reclassified as managed services:** `ptc-windchill`, `ptc-solution-monitor`, and `apache-solr`.
+- **Technologies left unchanged because they fit none of the system, managed-service, or library definitions:** `corporate-ldap` describes an unspecified directory implementation, not a named product or package.
 
 ## Sources
 

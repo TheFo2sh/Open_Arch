@@ -37,3 +37,9 @@ The architecture supports an airline's aviation maintenance management workload 
 - Select the required AWS Region, VPC and subnet layout, compute sizing, scaling policies, and load-balancer configuration.
 - Configure Oracle version/licensing and Multi-AZ operational settings, and define the DMS source/target endpoints and warehouse ingestion.
 - Set corporate and internet access controls, routing, authentication, monitoring, and security policies to match the deployment.
+
+## Classification updates
+
+- **Systems changed to managed-service platforms:** the IFS Maintenix application, integration, and reporting tiers. The reference describes configured product deployments, not code-owned applications.
+- **Technology reclassified as a managed service:** `ifs-maintenix`.
+- **Technologies left unchanged because they fit none of the system, managed-service, or library definitions:** none.

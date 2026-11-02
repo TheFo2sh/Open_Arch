@@ -35,34 +35,53 @@ model {
           uses 'amazon-ec2'
         }
 
-        windchill = system 'PTC Windchill PLM' {
-          description 'Windchill application deployed as a highly available cluster.'
-
-          webServers = container 'Windchill Web Servers' {
-            description 'Receive user requests routed by Elastic Load Balancing.'
+        windchill = platform 'PTC Windchill PLM' {
+          description 'Configured Windchill product deployed as a highly available cluster.'
+          metadata {
+            uses 'ptc-windchill'
           }
-          methodServers = container 'Foreground Method Servers' {
-            description 'Handle client transactions and interactions with other systems.'
-          }
-          backgroundServer = container 'Background Server' {
-            description 'Generates dynamic content for end users and backend systems.'
-          }
-          workers = container 'CAD/Doc Workers' {
-            description 'Render CAD and Office content into PDF documents.'
-          }
-          solr = container 'Solr Index Server' {
-            description 'Supports keyword searches, including searches across application metadata.'
+          webServers = platform 'Windchill Web Servers' {
+            description 'Configured Windchill servers that receive user requests from Elastic Load Balancing.'
             metadata {
-              uses 'apache-solr'
+              uses 'ptc-windchill'
             }
           }
-          replicationServer = container 'Windchill Replication Server' {
-            description 'Replicates content between Windchill deployments.'
+          methodServers = platform 'Foreground Method Servers' {
+            description 'Configured Windchill servers that handle client transactions and interactions with other systems.'
+            metadata {
+              uses 'ptc-windchill'
+            }
+          }
+          backgroundServer = platform 'Background Server' {
+            description 'Configured Windchill server that generates dynamic content for end users and backend systems.'
+            metadata {
+              uses 'ptc-windchill'
+            }
+          }
+          workers = platform 'CAD/Doc Workers' {
+            description 'Configured Windchill workers that render CAD and Office content into PDF documents.'
+            metadata {
+              uses 'ptc-windchill'
+            }
+          }
+          replicationServer = platform 'Windchill Replication Server' {
+            description 'Configured Windchill server that replicates content between deployments.'
+            metadata {
+              uses 'ptc-windchill'
+            }
           }
         }
-
-        solutionMonitor = system 'PTC Solution Monitor' {
-          description 'Real-time monitoring of Windchill system, application, and database performance.'
+        solr = platform 'Apache Solr' {
+          description 'Configured search index server supporting Windchill keyword searches.'
+          metadata {
+            uses 'apache-solr'
+          }
+        }
+        solutionMonitor = platform 'PTC Solution Monitor' {
+          description 'Configured product for real-time monitoring of Windchill system, application, and database performance.'
+          metadata {
+            uses 'ptc-solution-monitor'
+          }
         }
       }
 
@@ -124,8 +143,11 @@ model {
         metadata {
           uses 'amazon-ec2'
         }
-        regionalWindchill = system 'Separate-region Windchill deployment' {
+        regionalWindchill = platform 'Separate-region Windchill deployment' {
           description 'Optional Windchill workload in another Region; its server topology is not detailed.'
+          metadata {
+            uses 'ptc-windchill'
+          }
         }
       }
     }
@@ -138,8 +160,11 @@ model {
     corporateLdap = system 'Corporate LDAP Directory' {
       description 'Customer-provided corporate LDAP directory; product and deployment details are unspecified.'
     }
-    replicationServer = system 'On-premises Replication Server' {
+    replicationServer = platform 'On-premises Replication Server' {
       description 'Replication Server shown in the on-premises environment for collaboration across Windchill deployments.'
+      metadata {
+        uses 'ptc-windchill'
+      }
     }
   }
 
@@ -150,10 +175,10 @@ model {
   aws.vpc.ec2.windchill.methodServers -> aws.vpc.ec2.windchill.workers 'Uses to render CAD and Office documents'
   aws.vpc.ec2.windchill.workers -> aws.s3.content 'Stores generated PDF documents in'
   aws.vpc.ec2.windchill.methodServers -> aws.s3.content 'Reads and writes application content in'
-  aws.vpc.ec2.windchill.methodServers -> aws.vpc.ec2.windchill.solr 'Uses for keyword search'
+  aws.vpc.ec2.windchill.methodServers -> aws.vpc.ec2.solr 'Uses for keyword search'
   aws.vpc.ec2.windchill.methodServers -> aws.vpc.rds.metadataPrimary 'Reads and writes metadata in'
   aws.vpc.rds.metadataPrimary -> aws.vpc.rds.metadataReplica 'Replicates synchronously across Availability Zones to'
-  aws.vpc.ec2.solutionMonitor -> aws.vpc.ec2.windchill 'Monitors system and application performance for'
+  aws.vpc.ec2.solutionMonitor -> aws.vpc.ec2.windchill 'Monitors product and application performance for'
   aws.vpc.ec2.solutionMonitor -> aws.vpc.rds.metadataPrimary 'Monitors database performance for'
   aws.vpc.ec2.solutionMonitor -> aws.vpc.rds.metadataReplica 'Monitors database performance for'
   onPremises.corporateLdap -> aws.directoryService 'Integrates through'
