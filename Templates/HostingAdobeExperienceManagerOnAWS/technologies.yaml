@@ -53,9 +53,9 @@ technologies:
     description: Compute instances that run the AEM author, publish, and dispatcher tiers.
     vendor: Amazon Web Services
     url: https://aws.amazon.com/ec2/
-    types: [managed-service, compute-platform]
+    types: [compute-platform]
     platform: aws
-    hosts: [system]
+    hosts: []
   - key: aws-lambda
     name: AWS Lambda
     description: Runs scaling logic and automates dispatcher-publish pairing, replication-agent updates, and author failover logic.
@@ -85,25 +85,30 @@ technologies:
     description: Adobe's content management system, deployed as author and publish installations.
     vendor: Adobe
     url: https://business.adobe.com/products/experience-manager/adobe-experience-manager.html
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: adobe-tarmk
     name: Adobe TarMK
     description: Tar storage node store used by AEM publish and preferred for AEM author.
     vendor: Adobe
     url: https://experienceleague.adobe.com/en/docs/experience-manager-65/content/implementing/deploying/deploying/data-store-config
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    hosts: [database]
   - key: aem-dispatcher
     name: AEM Dispatcher
     description: Apache httpd-based AEM web tier that provides caching, load balancing, and application security.
     vendor: Adobe
     url: https://experienceleague.adobe.com/en/docs/experience-manager-dispatcher/using/dispatcher
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: apache-http-server
     name: Apache HTTP Server
     description: HTTP server underlying the AEM Dispatcher.
     vendor: Apache Software Foundation
     url: https://httpd.apache.org/
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: mongodb
     name: MongoDB
     description: Optional node-store alternative AWS mentions for scaling AEM author; deployment and configuration details are not specified.

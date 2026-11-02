@@ -16,13 +16,10 @@ model {
         uses 'amazon-eks'
       }
 
-      tidbOperator = system 'TiDB Operator' {
+      tidbOperator = platform 'TiDB Operator' {
         description 'Orchestrates backup and restore jobs for the TiDB cluster.'
-        jobs = container 'Backup and restore jobs' {
-          description 'Collects volume information, coordinates EBS snapshots, and reads or writes backup metadata.'
-          metadata {
-            uses 'tidb-operator'
-          }
+        metadata {
+          uses 'tidb-operator'
         }
       }
 
@@ -32,13 +29,19 @@ model {
           uses 'amazon-ec2'
         }
 
-        cluster = system 'TiDB cluster' {
+        cluster = platform 'TiDB cluster' {
           description 'The TiDB cluster whose TiKV data is backed up and restored.'
-          nodes = container 'TiDB cluster nodes' {
-            description 'TiDB cluster nodes use TiKV data stored on attached EBS volumes.'
-            metadata {
-              uses 'tidb, tikv'
-            }
+          metadata {
+            uses 'tidb'
+          }
+          clusterData = database 'TiDB cluster data' {
+            description 'Application data managed by TiDB and stored by TiKV.'
+          }
+        }
+        tikv = platform 'TiKV' {
+          description 'Distributed key-value storage component whose data is persisted on Amazon EBS volumes.'
+          metadata {
+            uses 'tikv'
           }
         }
       }
@@ -68,10 +71,11 @@ model {
   }
 
   operator -> aws.eks.tidbOperator 'Submits backup or restore requests to'
-  aws.eks.tidbOperator.jobs -> aws.eks.ec2.cluster 'Collects volume information and coordinates cluster maintenance for'
-  aws.eks.ec2.cluster.nodes -> aws.ebs.tikvVolumes 'Persists TiKV data on'
-  aws.eks.tidbOperator.jobs -> aws.ebs.snapshots 'Requests snapshots of and restores from'
-  aws.eks.tidbOperator.jobs -> aws.s3.backupMetadata 'Stores and retrieves snapshot metadata in'
+  aws.eks.tidbOperator -> aws.eks.ec2.cluster 'Collects volume information and coordinates cluster maintenance for'
+  aws.eks.ec2.tikv -> aws.ebs.tikvVolumes 'Persists TiKV data on'
+  aws.eks.tidbOperator -> aws.ebs.snapshots 'Requests snapshots of and restores from'
+  aws.eks.tidbOperator -> aws.s3.backupMetadata 'Stores and retrieves snapshot metadata in'
+  aws.eks.ec2.cluster -> aws.eks.ec2.tikv 'Stores cluster data with'
   aws.ebs.snapshots -> aws.ebs.tikvVolumes 'Creates restored volumes from'
   aws.eks -> aws.ebs.tikvVolumes 'Mounts restored volumes to the corresponding TiDB nodes in'
 }
@@ -79,6 +83,6 @@ model {
 views {
   view index {
     title 'Fast Backup and Restore of TiDB on AWS'
-    include *, aws.*, aws.eks.*, aws.eks.ec2.*, aws.eks.ec2.cluster.*, aws.eks.tidbOperator.*, aws.ebs.*, aws.s3.*
+    include *, aws.*, aws.eks.*, aws.eks.ec2.*, aws.eks.ec2.cluster.*, aws.eks.ec2.tikv.*, aws.eks.tidbOperator.*, aws.ebs.*, aws.s3.*
   }
 }

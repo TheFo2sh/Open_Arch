@@ -20,9 +20,6 @@ model {
 
     fmsCache = container 'FMS client cache' {
       description 'Customer-side Teamcenter File Management System client cache.'
-      metadata {
-        uses 'siemens-teamcenter-fms'
-      }
     }
     cadLicense = container 'CAD license server' {
       description 'Customer-side CAD license server; the source does not identify its product or vendor.'
@@ -99,63 +96,66 @@ model {
           uses 'amazon-ec2'
         }
 
-        teamcenter = system 'Teamcenter Product Lifecycle Management' {
-          description 'The Teamcenter application system, with separate test, production, and standby environments.'
+        teamcenter = platform 'Teamcenter Product Lifecycle Management' {
+          description 'Siemens Teamcenter deployed and configured with separate test, production, and standby environments.'
+          metadata {
+            uses 'siemens-teamcenter'
+          }
 
-          test = container 'Test environment' {
+          test = platform 'Test environment' {
             description 'Test Teamcenter stack shown in the first availability zone.'
             metadata {
               uses 'siemens-teamcenter'
             }
-            testWeb = component 'Teamcenter web tier' {
+            testWeb = platform 'Teamcenter web tier' {
               description 'Serves browser-based test environment requests.'
               metadata {
                 uses 'siemens-teamcenter'
               }
             }
-            testEnterprise = component 'Teamcenter Enterprise tier' {
+            testEnterprise = platform 'Teamcenter Enterprise tier' {
               description 'Processes test environment requests and interacts with Teamcenter services and data.'
               metadata {
                 uses 'siemens-teamcenter'
               }
             }
-            testFms = component 'Teamcenter File Management System' {
+            testFms = platform 'Teamcenter File Management System' {
               description 'Stores and retrieves test environment files.'
               metadata {
                 uses 'siemens-teamcenter-fms'
               }
             }
-            testWorkspace = component 'Active Workspace' {
+            testWorkspace = platform 'Active Workspace' {
               description 'Browser workspace for Teamcenter users.'
               metadata {
                 uses 'siemens-active-workspace'
               }
             }
-            testSolr = component 'Apache Solr' {
+            testSolr = platform 'Apache Solr' {
               description 'Search service in the Teamcenter stack.'
               metadata {
                 uses 'apache-solr'
               }
             }
-            testDeployment = component 'Deployment Center' {
+            testDeployment = platform 'Deployment Center' {
               description 'Deployment service in the Teamcenter stack.'
               metadata {
                 uses 'siemens-deployment-center'
               }
             }
-            testVisualization = component 'Visualization server' {
+            testVisualization = platform 'Visualization server' {
               description 'Visualization server in the Teamcenter stack.'
               metadata {
                 uses 'siemens-teamcenter-visualization'
               }
             }
-            testDispatcher = component 'Dispatcher' {
+            testDispatcher = platform 'Dispatcher' {
               description 'Dispatcher service in the Teamcenter stack.'
               metadata {
                 uses 'siemens-teamcenter-dispatcher'
               }
             }
-            testIntegration = component 'Application Integration' {
+            testIntegration = platform 'Application Integration' {
               description 'Application Integration server in the Teamcenter stack.'
               metadata {
                 uses 'siemens-application-integration'
@@ -163,60 +163,60 @@ model {
             }
           }
 
-          production = container 'Production multi-AZ environment' {
+          production = platform 'Production multi-AZ environment' {
             description 'Production Teamcenter stack distributed across availability zones.'
             metadata {
               uses 'siemens-teamcenter'
             }
-            productionWeb = component 'Teamcenter web tier' {
+            productionWeb = platform 'Teamcenter web tier' {
               description 'Serves production browser requests.'
               metadata {
                 uses 'siemens-teamcenter'
               }
             }
-            productionEnterprise = component 'Teamcenter Enterprise tier' {
+            productionEnterprise = platform 'Teamcenter Enterprise tier' {
               description 'Processes production requests and interacts with Teamcenter services and data.'
               metadata {
                 uses 'siemens-teamcenter'
               }
             }
-            productionFms = component 'Teamcenter File Management System' {
+            productionFms = platform 'Teamcenter File Management System' {
               description 'Stores and retrieves production files.'
               metadata {
                 uses 'siemens-teamcenter-fms'
               }
             }
-            productionWorkspace = component 'Active Workspace' {
+            productionWorkspace = platform 'Active Workspace' {
               description 'Browser workspace for production Teamcenter users.'
               metadata {
                 uses 'siemens-active-workspace'
               }
             }
-            productionSolr = component 'Apache Solr' {
+            productionSolr = platform 'Apache Solr' {
               description 'Search service in the Teamcenter stack.'
               metadata {
                 uses 'apache-solr'
               }
             }
-            productionDeployment = component 'Deployment Center' {
+            productionDeployment = platform 'Deployment Center' {
               description 'Deployment service in the Teamcenter stack.'
               metadata {
                 uses 'siemens-deployment-center'
               }
             }
-            productionVisualization = component 'Visualization server' {
+            productionVisualization = platform 'Visualization server' {
               description 'Visualization server in the Teamcenter stack.'
               metadata {
                 uses 'siemens-teamcenter-visualization'
               }
             }
-            productionDispatcher = component 'Dispatcher' {
+            productionDispatcher = platform 'Dispatcher' {
               description 'Dispatcher service in the Teamcenter stack.'
               metadata {
                 uses 'siemens-teamcenter-dispatcher'
               }
             }
-            productionIntegration = component 'Application Integration' {
+            productionIntegration = platform 'Application Integration' {
               description 'Application Integration server in the Teamcenter stack.'
               metadata {
                 uses 'siemens-application-integration'
@@ -224,60 +224,60 @@ model {
             }
           }
 
-          standby = container 'Production environment standby' {
+          standby = platform 'Production environment standby' {
             description 'Standby production stack shown in a second availability zone.'
             metadata {
               uses 'siemens-teamcenter'
             }
-            standbyWeb = component 'Teamcenter web tier' {
+            standbyWeb = platform 'Teamcenter web tier' {
               description 'Standby web tier for production.'
               metadata {
                 uses 'siemens-teamcenter'
               }
             }
-            standbyEnterprise = component 'Teamcenter Enterprise tier' {
+            standbyEnterprise = platform 'Teamcenter Enterprise tier' {
               description 'Standby enterprise tier for production.'
               metadata {
                 uses 'siemens-teamcenter'
               }
             }
-            standbyFms = component 'Teamcenter File Management System' {
+            standbyFms = platform 'Teamcenter File Management System' {
               description 'Standby file management tier for production.'
               metadata {
                 uses 'siemens-teamcenter-fms'
               }
             }
-            standbyWorkspace = component 'Active Workspace' {
+            standbyWorkspace = platform 'Active Workspace' {
               description 'Standby browser workspace for production.'
               metadata {
                 uses 'siemens-active-workspace'
               }
             }
-            standbySolr = component 'Apache Solr' {
+            standbySolr = platform 'Apache Solr' {
               description 'Standby search service.'
               metadata {
                 uses 'apache-solr'
               }
             }
-            standbyDeployment = component 'Deployment Center' {
+            standbyDeployment = platform 'Deployment Center' {
               description 'Standby deployment service.'
               metadata {
                 uses 'siemens-deployment-center'
               }
             }
-            standbyVisualization = component 'Visualization server' {
+            standbyVisualization = platform 'Visualization server' {
               description 'Standby visualization server.'
               metadata {
                 uses 'siemens-teamcenter-visualization'
               }
             }
-            standbyDispatcher = component 'Dispatcher' {
+            standbyDispatcher = platform 'Dispatcher' {
               description 'Standby dispatcher service.'
               metadata {
                 uses 'siemens-teamcenter-dispatcher'
               }
             }
-            standbyIntegration = component 'Application Integration' {
+            standbyIntegration = platform 'Application Integration' {
               description 'Standby Application Integration server.'
               metadata {
                 uses 'siemens-application-integration'
@@ -286,13 +286,10 @@ model {
           }
         }
 
-        licensing = system 'Siemens license service' {
+        licensing = platform 'Siemens license service' {
           description 'Teamcenter license server instances deployed for high availability.'
-          licenseServer = container 'Teamcenter license server' {
-            description 'The diagram shows active and standby license servers; the accompanying prose specifies three Availability Zones.'
-            metadata {
-              uses 'siemens-license-server'
-            }
+          metadata {
+            uses 'siemens-license-server'
           }
         }
       }

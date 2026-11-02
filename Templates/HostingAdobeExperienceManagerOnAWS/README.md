@@ -4,7 +4,7 @@ An AWS reference architecture for hosting Adobe Experience Manager (AEM), follow
 
 ## What it is for
 
-This template models an AEM website with separate author and publish installations on EC2 across two Availability Zones. Adobe Experience Manager is required third-party software; AWS's design does not specify an AEM version or licensing arrangement.
+This template models Adobe Experience Manager, its author and publish installations, Dispatcher, and Apache HTTP Server as managed-service platforms on EC2. They are deployed and configured products, not project system slots. AWS's design does not specify an AEM version or licensing arrangement.
 
 ## How it works
 
@@ -27,6 +27,6 @@ This template models an AEM website with separate author and publish installatio
 
 ## What teams usually customize
 
-- Map the **AEM website**, **Site visitors**, and **Content authors, editors, and approvers** slots to the project's existing systems and users.
+- Map the **Site visitors** and **Content authors, editors, and approvers** user slots to the project's users.
 - Choose whether to include the optional author dispatcher path and whether to use the preferred S3 shared binary datastore and TarMK author node store.
 - Specify AEM version and licensing, EC2 sizing, network boundaries, security controls, scaling policies, replication/failover behavior, and certificate endpoints for the actual environment.
