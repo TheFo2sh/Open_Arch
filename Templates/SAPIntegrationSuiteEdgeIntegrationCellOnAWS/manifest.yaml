@@ -1,0 +1,10 @@
+# Adapted for Open_Arch from SAP Architecture Center reference cd0961.
+# SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and architecture-center contributors
+# SPDX-License-Identifier: Apache-2.0
+PackageId: OpenArch.SAPIntegrationSuiteEdgeIntegrationCellOnAWS
+Name: SAP Integration Suite Edge Integration Cell on AWS
+Description: SAP BTP design and lifecycle management with an Edge Integration Cell runtime on private, multi-AZ Amazon EKS and managed PostgreSQL, Redis, and persistent storage.
+Version: 1.0.0
+Icon: logos:sap
+Publisher: Open_Arch
+Tags: [sap, aws, integration, hybrid-cloud, eks, high-availability]
