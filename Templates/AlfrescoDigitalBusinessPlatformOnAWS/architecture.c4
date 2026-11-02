@@ -125,88 +125,90 @@ model {
           metadata {
             uses 'amazon-ec2'
           }
-          alfresco = system 'Alfresco Digital Business Platform' {
-            description 'Enterprise content management, business process management, search, governance, and integrations.'
+          alfresco = platform 'Alfresco Content Services' {
+            description 'Enterprise content management platform deployed on EC2 and configured with Alfresco services.'
+            metadata {
+              uses 'alfresco-content-services'
+            }
 
-            contentCenter = container 'Alfresco Content Center (Admin)' {
+            contentCenter = platform 'Alfresco Content Center (Admin)' {
               description 'Administrative content application shown in both Availability Zones.'
               metadata {
                 uses 'alfresco-content-center'
               }
             }
-            digitalWorkspace = container 'Alfresco Digital Workspace' {
+            digitalWorkspace = platform 'Alfresco Digital Workspace' {
               description 'Browser-based workspace for knowledge workers.'
               metadata {
                 uses 'alfresco-digital-workspace'
               }
             }
-            identityServices = container 'Alfresco Identity Services' {
+            identityServices = platform 'Alfresco Identity Services' {
               description 'Identity services shown in the application tier.'
               metadata {
                 uses 'alfresco-identity-services'
               }
             }
-            microsoft365Connector = container 'Microsoft 365 Connector' {
+            microsoft365Connector = platform 'Microsoft 365 Connector' {
               description 'Connector for Microsoft Teams, Outlook, and Office.'
               metadata {
                 uses 'alfresco-microsoft-365-connector'
               }
             }
-            contentServices = container 'Alfresco Content Services' {
-              description 'Enterprise content management with information governance.'
-              metadata {
-                uses 'alfresco-content-services'
-              }
-            }
-            contentConnector = container 'Alfresco Content Connector' {
+            contentConnector = platform 'Alfresco Content Connector' {
               description 'Connects Alfresco content to Amazon S3, Amazon S3 Glacier, or optionally Amazon EFS.'
               metadata {
                 uses 'alfresco-content-connector'
               }
             }
-            governanceServices = container 'Alfresco Governance Services' {
+            governanceServices = platform 'Alfresco Governance Services' {
               description 'Adds information governance capabilities to Alfresco Content Services.'
               metadata {
                 uses 'alfresco-governance-services'
               }
             }
-            intelligenceServices = container 'Alfresco Intelligence Services' {
+            intelligenceServices = platform 'Alfresco Intelligence Services' {
               description 'Adds machine-learning metadata extraction and image and text analysis to the Transform engine.'
               metadata {
                 uses 'alfresco-intelligence-services'
               }
             }
-            transformEngine = container 'Alfresco Transform Engine' {
+            transformEngine = platform 'Alfresco Transform Engine' {
               description 'Transformation engine extended by Alfresco Intelligence Services.'
               metadata {
                 uses 'alfresco-transformation-engine'
               }
             }
-            businessConnectors = container 'Alfresco Business Connectors' {
+            businessConnectors = platform 'Alfresco Business Connectors' {
               description 'Integrations with Google Docs, Salesforce, SAP, SAP Cloud, and Microsoft 365 applications.'
               metadata {
                 uses 'alfresco-business-connectors'
               }
             }
-            processServices = container 'Alfresco Process Services' {
+            processServices = platform 'Alfresco Process Services' {
               description 'Business process management for creating, publishing, and using business operations.'
               metadata {
                 uses 'alfresco-process-services'
               }
             }
-            kendraConnector = container 'Alfresco Amazon Kendra data source connector' {
+            kendraConnector = platform 'Alfresco Amazon Kendra data source connector' {
               description 'Connects Alfresco content to Amazon Kendra for intelligent enterprise searches.'
               metadata {
                 uses 'alfresco-kendra-connector'
               }
             }
-            searchInsight = container 'Alfresco Search and Insight Engine' {
+            searchInsight = platform 'Alfresco Search and Insight Engine' {
               description 'Solr-based full-text search deployed on EC2 with EBS; indexes metadata stored in a database.'
               metadata {
-                uses 'alfresco-search-and-insight-engine, apache-solr'
+                uses 'alfresco-search-and-insight-engine'
+              }
+              solr = platform 'Apache Solr' {
+                metadata {
+                  uses 'apache-solr'
+                }
               }
             }
-            searchEnterprise = container 'Alfresco Search Enterprise' {
+            searchEnterprise = platform 'Alfresco Search Enterprise' {
               description 'Alternative to Search and Insight Engine that uses Amazon OpenSearch Service.'
               metadata {
                 uses 'alfresco-search-enterprise'
