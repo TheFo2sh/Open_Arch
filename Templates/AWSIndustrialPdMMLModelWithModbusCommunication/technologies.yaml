@@ -6,7 +6,7 @@ technologies:
     url: https://aws.amazon.com/greengrass/
     types: [managed-service, compute-platform]
     platform: aws
-    hosts: [system]
+    hosts: []
     packages: [{manager: terraform, name: hashicorp/aws}]
   - key: aws-iot-sitewise
     name: AWS IoT SiteWise
@@ -67,13 +67,17 @@ technologies:
     description: Greengrass connector that sends Modbus data through an AWS IoT Core rule.
     vendor: Amazon Web Services
     url: https://docs.aws.amazon.com/greengrass/v2/developerguide/
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: aws-iot-sitewise-gateway
     name: AWS IoT SiteWise Gateway
     description: Gateway software that connects factory OPC-UA servers to AWS IoT SiteWise.
     vendor: Amazon Web Services
     url: https://docs.aws.amazon.com/iot-sitewise/latest/userguide/
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: modbus
     name: Modbus
     description: Factory communication protocol shown between machines and the Greengrass connector; device mappings are not specified.

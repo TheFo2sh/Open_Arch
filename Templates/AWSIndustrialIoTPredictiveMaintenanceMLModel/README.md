@@ -20,9 +20,8 @@ Collect and organize factory equipment data with AWS IoT SiteWise, then make it 
 | | |
 |---|---|
 | Zones | **Factory** and **AWS Cloud** |
-| Platforms | AWS IoT Greengrass, AWS IoT SiteWise, AWS IoT SiteWise Monitor, AWS IAM Identity Center, AWS IoT Core, Amazon ECR, AWS IoT Analytics, Amazon SageMaker AI, and Amazon QuickSight |
-| Slots | **Factory equipment**, **Factory gateway**, **Custom factory data portal**, and **Data science workbench** systems; **Factory portal user** and **Data scientist** users |
-| Containers | AWS IoT SiteWise Connector and AWS IoT Greengrass Stream Manager on the factory gateway |
+| Platforms | AWS IoT Greengrass and its SiteWise Connector and Stream Manager, AWS IoT SiteWise, AWS IoT SiteWise Monitor, AWS IAM Identity Center, AWS IoT Core, Amazon ECR, AWS IoT Analytics, Amazon SageMaker AI, and Amazon QuickSight |
+| System slots | **Factory equipment** and **Data science workbench**; **Factory portal user** and **Data scientist** users |
 | Databases | **SiteWise datastore** and the **IoT Analytics container dataset** |
 
 The source names OPC-UA as the equipment protocol, Docker as the container image format, and Jupyter Notebook as the data-science environment. It does not identify a separate third-party hosted service.
@@ -40,3 +39,10 @@ The connections from the SiteWise datastore and Amazon ECR into the IoT Analytic
 - Define the IoT Core rules, SiteWise asset model and datastore, IoT Analytics dataset and Docker image, and their retention and refresh behavior.
 - Configure the notebook environment, SageMaker training and deployment lifecycle, portal access, and QuickSight analysis.
 - Add the network, account, region, security, and deployment details required for their AWS environment.
+
+## Classification updates
+
+- **System containers changed to managed-service platforms:** AWS IoT SiteWise Connector and AWS IoT Greengrass Stream Manager. These are configured edge products, not code dependencies.
+- **Product-only system slots removed:** the factory gateway and SiteWise Monitor custom portal are represented by their managed-service platforms; no gateway hardware or separate portal code is specified.
+- **Technologies reclassified as managed services:** `aws-iot-sitewise-connector` and `aws-iot-greengrass-stream-manager`.
+- **Technologies left unchanged because they fit none of the system, managed-service, or library definitions:** OPC-UA is a protocol; Docker names the container image format, and Jupyter Notebook is a data-science environment.

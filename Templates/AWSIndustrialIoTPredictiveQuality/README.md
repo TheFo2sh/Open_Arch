@@ -28,9 +28,8 @@ The diagram also labels Modbus, MQTT, and HTTP at the Greengrass gateway; it doe
 | | |
 |---|---|
 | Zones | **Factory** and **AWS Cloud** |
-| Platforms | AWS IoT Greengrass, AWS IoT SiteWise, AWS IoT SiteWise Monitor, AWS IoT Core, AWS IoT Events, AWS IoT Analytics, Amazon SNS, Amazon SageMaker AI, AWS Lake Formation, Amazon S3, Amazon QuickSight |
-| Slots | **Factory equipment and data sources**, **Factory edge gateway**, **Predictive quality model training**, **Factory data monitoring portal**, **Quality notifications**, and **Factory analytics dashboard** systems; **Operations Engineer** and **Operations Manager** users |
-| Edge containers | AWS IoT SiteWise Connector, Greengrass Connector, Video uploader, and ML inference |
+| Platforms | AWS IoT Greengrass and its SiteWise and Lambda connectors, AWS IoT SiteWise, AWS IoT SiteWise Monitor, AWS IoT Core, AWS IoT Events, AWS IoT Analytics, Amazon SNS, Amazon SageMaker AI, AWS Lake Formation, Amazon S3, Amazon QuickSight |
+| System slots | **Factory equipment and data sources**, **Video uploader function**, **Predictive-quality inference function**, and **Predictive quality model training**; **Operations Engineer** and **Operations Manager** users |
 | Database | **Processed factory images** on Amazon S3; **Factory asset models and data** on AWS IoT SiteWise |
 
 AWS does not identify a third-party service or supplier. Factory equipment, cameras, sensors, the OPC-UA server, and the on-premises historian are customer-side dependencies whose vendors and implementations are unspecified.
@@ -48,3 +47,10 @@ AWS does not identify a third-party service or supplier. Factory equipment, came
 - Identify the actual equipment, cameras, historian, gateway, OPC-UA endpoints, and any Modbus/MQTT/HTTP integrations.
 - Define the image-processing and model-training workflow, edge deployment and inference behavior, IoT rules, analytics, alert delivery, security, and operational requirements.
 - Confirm service availability and suitability for the target account and Region, and adapt the architecture to current AWS service capabilities.
+
+## Classification updates
+
+- **System containers changed to managed-service platforms:** AWS IoT SiteWise Connector and AWS IoT Greengrass Connector for AWS Lambda functions. These are configured Greengrass products.
+- **Product-only system slots removed:** the factory gateway, SiteWise Monitor portal, QuickSight dashboard, and SNS notification endpoint are represented by their respective services; video upload and inference remain code-owned system slots.
+- **Technologies reclassified as managed services:** `aws-iot-sitewise-connector` and `aws-iot-greengrass-lambda-connector`.
+- **Technologies left unchanged because they fit none of the system, managed-service, or library definitions:** OPC-UA, Modbus, MQTT, and HTTP are protocols; Docker names an image format, and Jupyter Notebook is a development environment.

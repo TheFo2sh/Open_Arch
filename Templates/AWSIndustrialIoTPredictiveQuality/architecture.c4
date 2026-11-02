@@ -24,31 +24,22 @@ model {
         uses 'aws-iot-greengrass'
       }
 
-      edge = system 'Factory edge gateway' {
-        description 'Project system slot for the gateway that collects factory data and performs local model inference.'
-
-        sitewiseConnector = container 'AWS IoT SiteWise Connector' {
-          description 'Collects factory equipment data over OPC-UA for AWS IoT SiteWise.'
-          technology 'AWS IoT SiteWise Connector; OPC-UA'
-          metadata {
-            uses 'aws-iot-sitewise-connector'
-          }
+      sitewiseConnector = platform 'AWS IoT SiteWise Connector' {
+        description 'Configured Greengrass connector that collects factory equipment data over OPC-UA for AWS IoT SiteWise.'
+        metadata {
+          uses 'aws-iot-sitewise-connector'
         }
-        messageConnector = container 'Greengrass Connector' {
-          description 'Handles the protocols labeled at the gateway; exact connector configuration and data routes are not specified.'
-          technology 'Modbus; MQTT; HTTP'
+      }
+      lambdaConnector = platform 'AWS IoT Greengrass Connector for AWS Lambda functions' {
+        description 'Configured Greengrass connector that runs the customer-owned video and inference functions.'
+        metadata {
+          uses 'aws-iot-greengrass-lambda-connector'
         }
-        videoUploader = container 'Video uploader' {
-          description 'Processes factory camera images and sends them to the data lake.'
-          metadata {
-            uses 'aws-iot-greengrass-lambda-connector'
-          }
+        videoUploader = system 'Video uploader function' {
+          description 'Project code that processes factory camera images and sends them to the data lake.'
         }
-        mlInference = container 'ML inference' {
-          description 'Runs the deployed predictive-quality model locally at the factory.'
-          metadata {
-            uses 'aws-iot-greengrass-lambda-connector'
-          }
+        mlInference = system 'Predictive-quality inference function' {
+          description 'Project code that runs the deployed predictive-quality model locally at the factory.'
         }
       }
     }
@@ -119,41 +110,29 @@ model {
       }
     }
 
-    monitoringPortal = system 'Factory data monitoring portal' {
-      description 'Project system slot for the AWS IoT SiteWise Monitor web portal.'
-    }
-    qualityNotifications = system 'Quality notifications' {
-      description 'Project system slot for delivery of defect alerts.'
-    }
-    analyticsDashboard = system 'Factory analytics dashboard' {
-      description 'Project system slot for operational insights derived from AWS IoT Analytics.'
-    }
   }
 
-  factory.sources -> factory.greengrass.edge.sitewiseConnector 'Provides OPC-UA equipment data to'
-  factory.sources -> factory.greengrass.edge.videoUploader 'Provides camera images to'
-  factory.greengrass.edge.sitewiseConnector -> aws.sitewise.assetModels 'Sends collected equipment data to'
-  factory.greengrass.edge.messageConnector -> aws.iotCore 'Exchanges messages with'
-  factory.greengrass.edge.videoUploader -> aws.s3.processedImages 'Sends processed images to'
+  factory.sources -> factory.greengrass.sitewiseConnector 'Provides OPC-UA equipment data to'
+  factory.sources -> factory.greengrass.lambdaConnector.videoUploader 'Provides camera images to'
+  factory.greengrass.sitewiseConnector -> aws.sitewise.assetModels 'Sends collected equipment data to'
+  factory.greengrass.lambdaConnector -> aws.iotCore 'Exchanges factory messages with'
+  factory.greengrass.lambdaConnector.videoUploader -> aws.s3.processedImages 'Sends processed images to'
   aws.sitewise.assetModels -> aws.sitewiseMonitor 'Provides factory data to'
-  aws.sitewiseMonitor -> aws.monitoringPortal 'Provides the web portal for'
-  operationsEngineer -> aws.monitoringPortal 'Monitors factory data in'
+  operationsEngineer -> aws.sitewiseMonitor 'Monitors factory data in'
   aws.iotCore -> aws.iotEvents 'Routes rule-triggered events to'
   aws.iotCore -> aws.iotAnalytics 'Sends rule-selected data to'
   aws.iotEvents -> aws.sns 'Publishes defect events to'
-  aws.sns -> aws.qualityNotifications 'Delivers quality alerts through'
-  aws.qualityNotifications -> operationsEngineer 'Notifies'
   aws.lakeFormation -> aws.s3.processedImages 'Manages the data lake containing'
   aws.s3.processedImages -> aws.sagemaker.modelTraining 'Provides training images to'
-  aws.sagemaker.modelTraining -> factory.greengrass.edge.mlInference 'Deploys the trained model to'
+  aws.sagemaker.modelTraining -> factory.greengrass.lambdaConnector.mlInference 'Deploys the trained model to'
   aws.iotAnalytics -> aws.quickSight 'Provides analytics data to'
-  aws.quickSight -> aws.analyticsDashboard 'Provides operational insights through'
-  operationsManager -> aws.analyticsDashboard 'Reviews factory insights in'
+  operationsManager -> aws.quickSight 'Reviews factory insights in'
+  aws.sns -> operationsEngineer 'Delivers quality alerts to'
 }
 
 views {
   view index {
     title 'AWS Industrial IoT Predictive Quality'
-    include *, factory.*, factory.greengrass.*, factory.greengrass.edge.*, aws.*, aws.sitewise.*, aws.sagemaker.*, aws.s3.*
+    include *, factory.*, factory.greengrass.*, factory.greengrass.lambdaConnector.*, aws.*, aws.sitewise.*, aws.sagemaker.*, aws.s3.*
   }
 }

@@ -11,7 +11,7 @@ Collect factory-machine data over OPC-UA and Modbus, model assets and metrics in
 
 ## How it works
 
-1. Factory machines expose OPC-UA servers and Modbus data. An industrial gateway runs an AWS IoT SiteWise Gateway connector for OPC-UA and an AWS IoT Greengrass Modbus connector.
+1. Factory machines expose OPC-UA servers and Modbus data. AWS IoT Greengrass runs the AWS IoT SiteWise Gateway connector for OPC-UA and the Greengrass Modbus connector.
 2. The SiteWise connector sends factory metrics to AWS IoT SiteWise, where machine assets and monitored metrics are modeled and stored.
 3. The Greengrass Modbus connector sends Modbus data through an AWS IoT Core rule to AWS IoT Analytics.
 4. AWS IoT Analytics creates a container data set from the AWS IoT SiteWise data store and links it to a Docker image stored in Amazon ECR. A Jupyter Notebook uses the data set to build the PdM ML model.
@@ -22,11 +22,10 @@ Collect factory-machine data over OPC-UA and Modbus, model assets and metrics in
 | | |
 |---|---|
 | Zones | **Factory**, represented as a non-AWS environment, and **AWS Cloud** |
-| Edge platform | **AWS IoT Greengrass**, hosting the industrial gateway system slot |
+| Edge platforms | **AWS IoT Greengrass**, AWS IoT SiteWise Gateway, and the Greengrass Modbus connector |
 | AWS platforms | IoT Core, IoT SiteWise, IoT Analytics, Elastic Container Registry, QuickSight, and SNS |
-| Systems | **Factory machines**, **Industrial gateway**, and **Predictive maintenance model development** are slots for the project's systems |
+| Systems | **Factory machines** and **Predictive maintenance model development** are slots for the project's systems |
 | Database elements | The SiteWise asset model/data store and the IoT Analytics container data set |
-| Connector containers | The Greengrass Modbus connector and AWS IoT SiteWise connector on the gateway |
 
 ## Assumptions and limits
 
@@ -46,3 +45,10 @@ The blueprint follows the source page's steps and diagram. Where AWS does not sp
 - Adapt the SiteWise asset hierarchy, metrics, and OPC-UA/Modbus integration to the plant's protocol details.
 - Specify the data-set cadence and retention, Docker image build, ML approach, and any production inference workflow.
 - Configure anomaly rules, SNS subscribers, and QuickSight analysis, including authorization and operational requirements.
+
+## Classification updates
+
+- **System containers changed to managed-service platforms:** the Greengrass Modbus Connector and AWS IoT SiteWise Gateway. These are deployed/configured edge products, not code dependencies.
+- **Unspecified gateway system slot removed:** the physical gateway hardware is not identified as a code-owned application or named product.
+- **Technologies reclassified as managed services:** `aws-iot-greengrass-modbus-connector` and `aws-iot-sitewise-gateway`.
+- **Technologies left unchanged because they fit none of the system, managed-service, or library definitions:** Modbus and OPC-UA are protocols; Docker names an image format, and Jupyter Notebook is a development environment.

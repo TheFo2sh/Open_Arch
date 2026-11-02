@@ -25,20 +25,16 @@ model {
         uses 'aws-iot-greengrass'
       }
 
-      gateway = system 'Factory gateway' {
-        description 'Connects factory equipment to AWS IoT SiteWise and publishes other industrial data to AWS IoT Core.'
-
-        sitewiseConnector = container 'AWS IoT SiteWise Connector' {
-          description 'Collects factory equipment telemetry over OPC-UA and sends it to AWS IoT SiteWise.'
-          metadata {
-            uses 'aws-iot-sitewise-connector'
-          }
+      sitewiseConnector = platform 'AWS IoT SiteWise Connector' {
+        description 'Configured Greengrass connector that collects factory equipment telemetry over OPC-UA and sends it to AWS IoT SiteWise.'
+        metadata {
+          uses 'aws-iot-sitewise-connector'
         }
-        streamManager = container 'AWS IoT Greengrass Stream Manager' {
-          description 'Publishes other industrial data feeds from the gateway to AWS IoT Core.'
-          metadata {
-            uses 'aws-iot-greengrass-stream-manager'
-          }
+      }
+      streamManager = platform 'AWS IoT Greengrass Stream Manager' {
+        description 'Configured Greengrass component that publishes other industrial data feeds to AWS IoT Core.'
+        metadata {
+          uses 'aws-iot-greengrass-stream-manager'
         }
       }
     }
@@ -62,9 +58,6 @@ model {
       description 'Exposes the custom near-real-time factory data portal.'
       metadata {
         uses 'aws-iot-sitewise-monitor'
-      }
-      portal = system 'Custom factory data portal' {
-        description 'Factory portal for near-real-time visualization using AWS IoT SiteWise Monitor.'
       }
     }
     identityCenter = platform 'AWS IAM Identity Center' {
@@ -111,15 +104,15 @@ model {
     }
   }
 
-  factory.equipment -> factory.greengrass.gateway.sitewiseConnector 'Sends OPC-UA telemetry to'
-  factory.greengrass.gateway.sitewiseConnector -> aws.sitewise.datastore 'Collects and sends equipment data to'
-  factory.greengrass.gateway.streamManager -> aws.iotCore 'Publishes other industrial data feeds to'
+  factory.equipment -> factory.greengrass.sitewiseConnector 'Sends OPC-UA telemetry to'
+  factory.greengrass.sitewiseConnector -> aws.sitewise.datastore 'Collects and sends equipment data to'
+  factory.greengrass.streamManager -> aws.iotCore 'Publishes other industrial data feeds to'
   aws.iotCore -> aws.iotAnalytics 'Routes data through rules to'
   aws.sitewise.datastore -> aws.iotAnalytics.dataset 'Provides data for the container dataset'
   aws.ecr -> aws.iotAnalytics 'Provides the custom Docker image for the container dataset'
-  aws.sitewise.datastore -> aws.sitewiseMonitor.portal 'Provides factory data for the portal'
-  factoryUser -> aws.sitewiseMonitor.portal 'Views factory data in'
-  aws.identityCenter -> aws.sitewiseMonitor.portal 'Authenticates users of'
+  aws.sitewise.datastore -> aws.sitewiseMonitor 'Provides factory data for visualization'
+  factoryUser -> aws.sitewiseMonitor 'Views factory data in'
+  aws.identityCenter -> aws.sitewiseMonitor 'Authenticates users of'
   dataScientist -> aws.dataScience 'Builds predictive-maintenance models with'
   aws.iotAnalytics.dataset -> aws.dataScience 'Provides the dataset for the Jupyter notebook'
   aws.dataScience -> aws.sagemaker 'Uses for model training and deployment'
@@ -129,6 +122,6 @@ model {
 views {
   view index {
     title 'AWS Industrial IoT Predictive Maintenance ML Model'
-    include *, factory.*, factory.greengrass.*, factory.greengrass.gateway.*, aws.*
+    include *, factory.*, factory.greengrass.*, aws.*
   }
 }

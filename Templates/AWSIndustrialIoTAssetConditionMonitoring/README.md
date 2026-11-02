@@ -19,9 +19,8 @@ Monitor factory equipment health, detect fault conditions, provide operators wit
 | | |
 |---|---|
 | Zones | **Factory** (other) and **AWS Cloud** |
-| Platforms | AWS IoT Greengrass, AWS IoT SiteWise, AWS IoT SiteWise Monitor, AWS IoT Core, AWS IoT Analytics, AWS IoT Events, AWS Lambda, Amazon QuickSight, Amazon SNS |
-| Slots | **Factory systems and data sources**, **Factory edge gateway**, **Mitigation function**, **Equipment monitoring portal**, **Equipment analytics dashboard**, and **Fault notifications** systems; **Operations Engineer** and **Operations Manager** users |
-| Containers | AWS IoT SiteWise Connector and Greengrass connectors/local Lambda functions in the factory edge gateway |
+| Platforms | AWS IoT Greengrass and its SiteWise and Lambda connectors, AWS IoT SiteWise, AWS IoT SiteWise Monitor, AWS IoT Core, AWS IoT Analytics, AWS IoT Events, AWS Lambda, Amazon QuickSight, Amazon SNS |
+| System slots | **Factory systems and data sources** and **Mitigation function**; **Operations Engineer** and **Operations Manager** users |
 | Databases | Asset models and equipment data on AWS IoT SiteWise; telemetry data store on AWS IoT Analytics |
 
 The reference names no third-party cloud service. The factory equipment, OPC-UA server, and on-premises historian are customer-side dependencies; their vendors and implementations are not identified. OPC-UA, Modbus, MQTT, and HTTP are listed as protocols, not selected products.
@@ -38,3 +37,10 @@ This is an architecture template, not an AWS deployment plan. It does not prescr
 - Identify their specific factory equipment, historian, protocol adapters, gateway hardware, and security/network design.
 - Define telemetry models, SiteWise asset hierarchies, IoT Core rules, IoT Analytics processing, IoT Events detectors, dashboards, alert delivery, and mitigation safety controls.
 - Confirm service availability and suitability for their account and Region, and adapt the design to current service capabilities.
+
+## Classification updates
+
+- **System containers changed to managed-service platforms:** AWS IoT SiteWise Connector and the Greengrass connector for Lambda functions. These are deployed and configured edge products.
+- **Product-only system slots removed:** the factory gateway and the SiteWise Monitor portal, QuickSight dashboard, and SNS notification endpoints are represented by their managed-service platforms instead of system slots.
+- **Technologies reclassified as managed services:** `aws-iot-sitewise-connector` and `aws-iot-greengrass-lambda-connector`.
+- **Technologies left unchanged because they fit none of the system, managed-service, or library definitions:** OPC-UA, Modbus, MQTT, and HTTP are protocols.
