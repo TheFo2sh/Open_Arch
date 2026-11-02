@@ -1,0 +1,116 @@
+# Adapted for Open_Arch from SAP Architecture Center reference cd0961.
+# SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and architecture-center contributors
+# SPDX-License-Identifier: Apache-2.0
+technologies:
+  - key: sap-integration-suite
+    name: SAP Integration Suite
+    description: SAP BTP service for designing integrations, managing APIs, and monitoring integration runtimes.
+    vendor: SAP
+    url: https://help.sap.com/docs/integration-suite
+    types: [managed-service, compute-platform, third-party]
+    platform: other
+    hosts: [system]
+  - key: sap-edge-lifecycle-management
+    name: SAP Edge Lifecycle Management
+    description: Registers edge nodes and manages the lifecycle of solutions deployed to customer Kubernetes clusters.
+    vendor: SAP
+    url: https://help.sap.com/docs/EDGE_LIFECYCLE_MANAGEMENT
+    types: [managed-service, third-party]
+    platform: other
+    hosts: []
+  - key: sap-connectivity-service
+    name: SAP Connectivity Service
+    description: Provides SAP BTP connectivity to private SAP landscapes through SAP Cloud Connector.
+    vendor: SAP
+    url: https://help.sap.com/docs/connectivity
+    types: [managed-service, third-party]
+    platform: other
+    hosts: []
+  - key: sap-destination-service
+    name: SAP Destination Service
+    description: Manages connection destinations used by SAP BTP integrations to reach target systems.
+    vendor: SAP
+    url: https://help.sap.com/docs/connectivity/sap-btp-connectivity-cf/destination-service
+    types: [managed-service, third-party]
+    platform: other
+    hosts: []
+  - key: amazon-vpc
+    name: Amazon Virtual Private Cloud
+    description: Customer network with public subnets and private workload subnets across three availability zones.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/what-is-amazon-vpc.html
+    types: [compute-platform]
+    platform: aws
+    hosts: []
+  - key: amazon-eks
+    name: Amazon Elastic Kubernetes Service
+    description: Managed Kubernetes control plane with private worker nodes hosting the Edge Integration Cell runtime.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/eks/latest/userguide/what-is-eks.html
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
+  - key: amazon-route53
+    name: Amazon Route 53
+    description: DNS records map the custom Edge Integration Cell hostname to the load balancer endpoint.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/Route53/latest/DeveloperGuide/Welcome.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-network-load-balancer
+    name: AWS Network Load Balancer
+    description: Public ingress distributes requests to Edge Integration Cell services on private EKS workers.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/elasticloadbalancing/latest/network/introduction.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-nat-gateway
+    name: AWS NAT Gateway
+    description: Per-AZ public NAT gateways provide outbound connectivity for private workloads.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/vpc-nat-gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: aws-internet-gateway
+    name: AWS Internet Gateway
+    description: Connects the VPC public subnet routes to internet destinations.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/vpc/latest/userguide/VPC_Internet_Gateway.html
+    types: [managed-service]
+    platform: aws
+    hosts: []
+  - key: amazon-rds-postgresql
+    name: Amazon RDS for PostgreSQL
+    description: External relational persistence for Edge Integration Cell runtime data, configured for Multi-AZ availability.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/CHAP_PostgreSQL.html
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-elasticache-redis
+    name: Amazon ElastiCache for Redis OSS
+    description: External Redis store for Edge Integration Cell runtime state, caching, and asynchronous messaging.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/AmazonElastiCache/latest/dg/WhatIs.html
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-ebs
+    name: Amazon Elastic Block Store
+    description: Persistent block volumes for EKS workloads using ReadWriteOnce storage classes.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/ebs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
+  - key: amazon-efs
+    name: Amazon Elastic File System
+    description: Shared persistent file storage supporting ReadWriteMany access from runtime replicas.
+    vendor: Amazon Web Services
+    url: https://docs.aws.amazon.com/efs/
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]

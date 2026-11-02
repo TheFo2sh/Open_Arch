@@ -1,0 +1,209 @@
+// Adapted for Open_Arch from SAP Architecture Center reference cd0961.
+// SPDX-FileCopyrightText: 2024 SAP SE or an SAP affiliate company and architecture-center contributors
+// SPDX-License-Identifier: Apache-2.0
+// The model consolidates AZ replicas and separates NLB ingress from NAT egress.
+model {
+  integrationTeam = user 'Integration developer and operator' {
+    description 'Designs integration flows and APIs, registers edge nodes, and monitors the hybrid integration environment.'
+  }
+  apiConsumer = system 'Integration API consumer' {
+    description 'A project application that invokes integration endpoints exposed by Edge Integration Cell.'
+  }
+
+  btp = zone 'SAP BTP subaccount' {
+    description 'SAP-managed services provide integration design, monitoring, lifecycle management, and connectivity.'
+    metadata {
+      platform 'other'
+    }
+    suite = platform 'SAP Integration Suite' {
+      description 'Cloud services manage integration content and operations while Edge Integration Cell executes selected integrations in the customer landscape.'
+      metadata {
+        uses 'sap-integration-suite'
+      }
+      integrationManagement = system 'Integration design and operations' {
+        description 'The project integration management solution hosted in the SAP Integration Suite subscription.'
+        apiManagement = container 'API Management' {
+          description 'Defines and manages APIs using the API Gateway and Graph capabilities shown in the reference diagram.'
+        }
+        cloudIntegration = container 'Cloud Integration' {
+          description 'Designs integration flows, APIs, and adapter configurations for the selected runtime.'
+        }
+        monitoring = container 'Monitoring' {
+          description 'Provides integration, component, and Solace monitoring capabilities shown by the source.'
+        }
+      }
+    }
+    elm = platform 'Edge Lifecycle Management' {
+      description 'Registers the EKS cluster as an edge node, bootstraps it, and manages the Edge Integration Cell solution lifecycle.'
+      metadata {
+        uses 'sap-edge-lifecycle-management'
+      }
+    }
+    connectivity = platform 'SAP Connectivity Service' {
+      description 'Supports the SAP BTP to private SAP systems connection through Cloud Connector shown in the reference.'
+      metadata {
+        uses 'sap-connectivity-service'
+      }
+    }
+    destinations = platform 'SAP Destination Service' {
+      description 'Supplies destination configuration for SAP cloud application connections shown in the reference.'
+      metadata {
+        uses 'sap-destination-service'
+      }
+    }
+  }
+
+  aws = zone 'Customer AWS region' {
+    description 'Customer-managed infrastructure hosts the integration runtime and its persistence dependencies.'
+    metadata {
+      platform 'aws'
+    }
+    dns = platform 'Amazon Route 53' {
+      description 'Resolves the custom Edge Integration Cell endpoint hostname to its public NLB endpoint.'
+      metadata {
+        uses 'amazon-route53'
+      }
+    }
+    vpc = platform 'Three-AZ VPC' {
+      description 'Spans three availability zones, each with public and private subnets, security groups, and network ACLs.'
+      metadata {
+        uses 'amazon-vpc'
+      }
+      internetGateway = platform 'Internet gateway' {
+        description 'Provides internet connectivity for public subnet routing and the public NLB.'
+        metadata {
+          uses 'aws-internet-gateway'
+        }
+      }
+      nat = platform 'NAT gateways in three public subnets' {
+        description 'One NAT gateway per availability zone supplies outbound access for the private runtime workers.'
+        metadata {
+          uses 'aws-nat-gateway'
+        }
+      }
+      nlb = platform 'Public Network Load Balancer' {
+        description 'Distributes inbound integration requests across the private EKS worker services; it is separate from the NAT egress path.'
+        metadata {
+          uses 'aws-network-load-balancer'
+        }
+      }
+      eks = platform 'Amazon EKS with private workers across three AZs' {
+        description 'AWS manages the Kubernetes control plane; worker nodes and runtime replicas span private subnets in AZs 1a, 1b, and 1c.'
+        metadata {
+          uses 'amazon-eks'
+        }
+        runtime = system 'Edge integration runtime' {
+          description 'The project integration runtime implemented with SAP Edge Integration Cell, aggregated across its three-AZ worker deployment.'
+          flows = container 'Integration flows and APIs' {
+            description 'Executes the project integration flows and API scenarios inside the customer AWS landscape.'
+          }
+        }
+      }
+      rds = platform 'Amazon RDS for PostgreSQL, Multi-AZ' {
+        description 'Provides external relational persistence with Multi-AZ replication for runtime availability.'
+        metadata {
+          uses 'amazon-rds-postgresql'
+        }
+        runtimeData = database 'Runtime relational data' {
+          description 'Persists Edge Integration Cell runtime data in the configured external PostgreSQL database.'
+        }
+      }
+      redis = platform 'Amazon ElastiCache for Redis OSS' {
+        description 'Provides the external Redis dependency for the highly available Edge Integration Cell deployment.'
+        metadata {
+          uses 'amazon-elasticache-redis'
+        }
+        runtimeState = database 'Runtime cache and messaging state' {
+          description 'Stores runtime cache data and the asynchronous messaging state described by the linked SAP setup guide.'
+        }
+      }
+      ebs = platform 'Amazon EBS' {
+        description 'Provides persistent block storage provisioned through Kubernetes storage classes.'
+        metadata {
+          uses 'amazon-ebs'
+        }
+        volumes = database 'ReadWriteOnce application volumes' {
+          description 'Stores persistent application data on block volumes with RWO access semantics.'
+        }
+      }
+      efs = platform 'Amazon EFS' {
+        description 'Provides shared filesystem storage accessible by multiple runtime replicas.'
+        metadata {
+          uses 'amazon-efs'
+        }
+        files = database 'ReadWriteMany shared files' {
+          description 'Stores shared application files with RWX access semantics.'
+        }
+      }
+    }
+  }
+
+  privateSap = zone 'Private SAP landscape' {
+    description 'Existing SAP systems and a Cloud Connector installation form the private landscape shown in the reference.'
+    metadata {
+      platform 'other'
+    }
+    connector = system 'SAP Cloud Connector' {
+      description 'The project Cloud Connector installation provides the private SAP connectivity endpoint for SAP BTP.'
+    }
+    s4hana = system 'SAP S/4HANA system' {
+      description 'An existing SAP S/4HANA business system accessible through the configured private connectivity.'
+    }
+    ecc = system 'SAP ECC system' {
+      description 'An existing SAP ECC business system accessible through the configured private connectivity.'
+    }
+  }
+  cloudSap = zone 'SAP cloud application landscape' {
+    description 'SAP cloud applications are external integration targets shown in the source diagram.'
+    metadata {
+      platform 'other'
+    }
+    applications = system 'SAP cloud applications' {
+      description 'The project SAP cloud applications reached using configured integration destinations.'
+    }
+  }
+
+  integrationTeam -> btp.suite.integrationManagement 'Designs, deploys, and monitors integrations'
+  btp.suite.integrationManagement -> btp.elm 'Registers and manages edge nodes'
+  btp.elm -> aws.vpc.eks.runtime 'Bootstraps the edge node and manages solution lifecycle'
+  aws.vpc.eks.runtime -> btp.suite 'Uses cloud integration design and monitoring services over HTTPS'
+  btp.suite.integrationManagement -> btp.connectivity 'Uses private SAP connectivity'
+  btp.suite.integrationManagement -> btp.destinations 'Uses configured destinations'
+  btp.connectivity -> privateSap.connector 'Provides the HTTPS connectivity path shown in the reference'
+  privateSap.connector -> privateSap.s4hana 'Connects to configured SAP services'
+  privateSap.connector -> privateSap.ecc 'Connects to configured SAP services'
+  btp.destinations -> cloudSap.applications 'Provides the configured HTTPS destination'
+
+  apiConsumer -> aws.dns 'Resolves the integration endpoint hostname'
+  aws.dns -> aws.vpc.nlb 'Maps the endpoint hostname to the NLB address'
+  apiConsumer -> aws.vpc.nlb 'Invokes the integration endpoint over HTTPS'
+  aws.vpc.internetGateway -> aws.vpc.nlb 'Provides public ingress connectivity'
+  aws.vpc.nlb -> aws.vpc.eks.runtime.flows 'Distributes incoming requests to runtime services'
+  aws.vpc.eks.runtime -> aws.vpc.nat 'Uses the per-AZ outbound route'
+  aws.vpc.nat -> aws.vpc.internetGateway 'Routes outbound internet connections'
+  aws.vpc.eks.runtime -> aws.vpc.rds.runtimeData 'Reads and writes runtime data using PostgreSQL with TLS'
+  aws.vpc.eks.runtime -> aws.vpc.redis.runtimeState 'Uses external Redis with TLS'
+  aws.vpc.eks.runtime -> aws.vpc.ebs.volumes 'Mounts RWO persistent volumes'
+  aws.vpc.eks.runtime -> aws.vpc.efs.files 'Mounts RWX shared files'
+}
+
+views {
+  view index {
+    title 'SAP Integration Suite Edge Integration Cell on AWS'
+    include integrationTeam, apiConsumer, btp.*, btp.suite.integrationManagement,
+      aws.*, aws.vpc.*, aws.vpc.eks.runtime, privateSap.*, cloudSap.*
+    autoLayout LeftRight
+  }
+  view runtime {
+    title 'Private multi-AZ Edge Integration Cell runtime and persistence'
+    include apiConsumer, aws.*, aws.vpc.*, aws.vpc.eks.runtime,
+      aws.vpc.eks.runtime.flows, aws.vpc.rds.*, aws.vpc.redis.*, aws.vpc.ebs.*, aws.vpc.efs.*
+    autoLayout LeftRight
+  }
+  view sapServices {
+    title 'SAP BTP management and SAP application connectivity'
+    include integrationTeam, btp.*, btp.suite.integrationManagement,
+      btp.suite.integrationManagement.*, aws.vpc.eks.runtime, privateSap.*, cloudSap.*
+    autoLayout LeftRight
+  }
+}
