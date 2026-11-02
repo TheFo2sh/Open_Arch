@@ -21,9 +21,9 @@ Connect industrial assets to AWS using AWS IoT SiteWise Edge on Siemens Industri
 | | |
 |---|---|
 | Zones | **Shopfloor**, **Enterprise and edge management**, and **AWS Cloud** |
-| Platforms | Siemens Industrial Edge; AWS IoT SiteWise, SiteWise Monitor, TwinMaker, Amazon Managed Grafana, S3, Athena, QuickSight, and SageMaker Studio Lab |
-| System slots | Industrial Edge device; industrial assets and data sources; Industrial Edge management system; machine-learning model training; visualization and analytics applications |
-| Edge containers | Southbound connector applications, Industrial Edge apps and data layer, AWS IoT SiteWise Edge, edge AI inference/monitoring and model management, management hub/repository, and Siemens AI SDK packaging |
+| Platforms | Siemens Industrial Edge; Siemens Industrial Edge Management and Hub; Global Software and App Repository; Industrial Information Hub and Databus; AWS IoT SiteWise Edge; Mendix; Flow Creator; Docker; Siemens AI Model Manager, Inference Server, Model Monitor, and Monitor Agent; AWS IoT SiteWise, SiteWise Monitor, TwinMaker, Amazon Managed Grafana, S3, Athena, QuickSight, and SageMaker Studio Lab |
+| System slots | Industrial protocol connector code; Industrial Edge applications; industrial assets and data sources; machine-learning model training; visualization applications; Mendix analytics applications |
+| Containers | Southbound connector applications, custom IoT visualization applications, and Siemens AI SDK model packaging |
 | Databases | Industrial asset models and data on AWS IoT SiteWise; cold industrial IoT data on Amazon S3 |
 
 The source diagram does not depict human actors, so the template adds no user slots. M1Spec maps the listed systems to a project's own systems when the template is applied.
@@ -32,15 +32,18 @@ The source diagram does not depict human actors, so the template adds no user sl
 
 - The reference gives no device hardware, operating system, network topology, security design, connector configuration, data schemas, sampling rates, or retention settings. It names protocols and connector options, not specific connector products or configurations.
 - Industrial Edge Management may be on premises or in the cloud. The diagram shows self-managed Kubernetes or Amazon EKS as hosting options but does not choose one; this template leaves management hosting open.
+- Industrial Edge Management, Hub, the app repository, Industrial Information Hub, Databus, SiteWise Edge, Mendix, Flow Creator, Docker, and Siemens AI model-management/runtime components are configured products, not project code systems. The diagram does not identify a product for its southbound connectors, so those remain a project-owned system slot. The Mendix analytics application remains a system slot because its behavior is project-owned.
 - AWS describes visualization and analytics products as options. The relationships summarize the numbered flow; exact SiteWise, S3, Athena, Grafana, QuickSight, and Mendix configurations are not specified.
 - The source names AWS AI/ML services generically and shows Amazon SageMaker Studio Lab and a SageMaker model. It does not specify the training algorithm, model format, packaging details, inference interface, or model-monitoring criteria.
 - Siemens AI Model Manager, AI Inference Server, and AI Model Monitor are shown as edge capabilities; their versions, configuration, and deployment mechanics are not documented.
+
+OPC UA, Modbus, SIMATIC S7, EtherNet/IP, and TCP are protocols or connectivity standards rather than package-manager libraries; they remain unchanged as technologies because they fit none of the system, managed-service, or package-library definitions. Siemens AI SDK and AWS IoT App Kit remain libraries.
 
 This is an architecture template, not an AWS deployment plan. It does not prescribe a Region, VPC, Kubernetes/EKS deployment, IAM policy, availability design, infrastructure code, or service configuration.
 
 ## What teams usually customize
 
-- Map the shop-floor, edge device, edge management, model-training, and application slots to their own systems; identify actual equipment and data sources.
+- Map the shop-floor connector, edge application, model-training, and visualization slots to their own systems; identify actual equipment and data sources.
 - Select and configure connector apps, protocols, Industrial Edge applications, and any Industrial Edge Management hosting option.
 - Define SiteWise asset models, data retention and S3 organization, Athena queries, and visualization/analytics applications.
 - Specify the AWS AI/ML service and training workflow, model packaging and rollout, inference integration, and monitoring requirements.

@@ -13,31 +13,9 @@ technologies:
     description: Datavant's containerized software de-identifies and tokenizes source data, then links data with collaborators.
     vendor: Datavant
     url: https://datavant.com/
-    types: [library, third-party]
-  - key: aws-fargate
-    name: AWS Fargate
-    description: One of the container deployment methods supported for Datavant Switchboard; the source does not select a method.
-    vendor: Amazon Web Services
-    url: https://aws.amazon.com/fargate/
-    types: [managed-service, compute-platform]
+    types: [managed-service]
     platform: aws
-    hosts: [system]
-  - key: amazon-eks
-    name: Amazon Elastic Kubernetes Service
-    description: One of the container deployment methods supported for Datavant Switchboard; the source does not select a method.
-    vendor: Amazon Web Services
-    url: https://aws.amazon.com/eks/
-    types: [managed-service, compute-platform]
-    platform: aws
-    hosts: [system]
-  - key: amazon-ecs
-    name: Amazon Elastic Container Service
-    description: One of the container deployment methods supported for Datavant Switchboard; the source does not select a method.
-    vendor: Amazon Web Services
-    url: https://aws.amazon.com/ecs/
-    types: [managed-service, compute-platform]
-    platform: aws
-    hosts: [system]
+    hosts: []
   - key: aws-glue-crawler
     name: AWS Glue crawler
     description: Crawls linked tokenized data in Amazon S3 to discover its schema.

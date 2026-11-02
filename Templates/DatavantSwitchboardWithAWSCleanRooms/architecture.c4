@@ -31,14 +31,10 @@ model {
       }
     }
 
-    creatorWorkflow = system 'Creator data collaboration system' {
-      description 'Slot for the creator’s own system that processes data through Datavant Switchboard.'
-      switchboard = container 'Datavant Switchboard' {
-        description 'De-identifies and tokenizes source data, then links tokenized data with collaborators; AWS does not select a deployment method.'
-        technology 'Datavant Switchboard'
-        metadata {
-          uses 'datavant-switchboard'
-        }
+    creatorSwitchboard = platform 'Datavant Switchboard' {
+      description 'Configured product that de-identifies and tokenizes source data and links it with collaborators; AWS does not select a deployment method.'
+      metadata {
+        uses 'datavant-switchboard'
       }
     }
 
@@ -108,14 +104,10 @@ model {
       }
     }
 
-    memberWorkflow = system 'Member data collaboration system' {
-      description 'Slot for the member’s own system that processes data through Datavant Switchboard.'
-      switchboard = container 'Datavant Switchboard' {
-        description 'De-identifies and tokenizes the member’s source data, then links it with collaborators.'
-        technology 'Datavant Switchboard'
-        metadata {
-          uses 'datavant-switchboard'
-        }
+    memberSwitchboard = platform 'Datavant Switchboard' {
+      description 'Configured product that de-identifies and tokenizes member source data and links it with collaborators.'
+      metadata {
+        uses 'datavant-switchboard'
       }
     }
 
@@ -142,26 +134,26 @@ model {
     }
   }
 
-  creator -> creatorWorkflow 'Operates'
-  member -> memberWorkflow 'Operates'
+  creator -> creatorSwitchboard 'Operates'
+  member -> memberSwitchboard 'Operates'
 
-  creatorSourceData -> creatorWorkflow.switchboard 'Reads and tokenizes'
-  creatorWorkflow.switchboard -> creatorLinkedData 'Writes linked tokenized data to'
-  creatorWorkflow.switchboard -> memberWorkflow.switchboard 'Links tokenized data with'
+  creatorSourceData -> creatorSwitchboard 'Reads and tokenizes'
+  creatorSwitchboard -> creatorLinkedData 'Writes linked tokenized data to'
+  creatorSwitchboard -> memberSwitchboard 'Links tokenized data with'
   creatorLinkedData -> creatorCrawler 'Is crawled by'
   creatorCrawler -> creatorCatalog.creatorTables 'Registers discovered tables in'
   creatorCatalog.creatorTables -> creatorCleanRooms 'Configured tables are associated with'
   creatorCleanRooms -> creatorCatalog.creatorTables 'Service role accesses creator tables in'
 
-  memberSourceData -> memberWorkflow.switchboard 'Reads and tokenizes'
-  memberWorkflow.switchboard -> memberLinkedData 'Writes linked tokenized data to'
+  memberSourceData -> memberSwitchboard 'Reads and tokenizes'
+  memberSwitchboard -> memberLinkedData 'Writes linked tokenized data to'
   memberLinkedData -> memberCrawler 'Is crawled by'
   memberCrawler -> memberCatalog.memberTables 'Registers discovered tables in'
   memberCatalog.memberTables -> memberCleanRooms 'Configured tables are associated with'
   memberCleanRooms -> memberCatalog.memberTables 'Service role accesses member tables in'
 
   creatorCleanRooms -> memberCleanRooms 'Invites the member to the collaboration'
-  memberWorkflow -> memberCleanRooms 'Uses allowed AGGREGATE and LIST analysis functions in'
+  memberSwitchboard -> memberCleanRooms 'Uses allowed AGGREGATE and LIST analysis functions in'
   creatorCleanRooms -> queryResults 'Exports permitted query results to'
   queryResults -> redshift 'Can be analyzed with'
   queryResults -> athena 'Can be analyzed with'

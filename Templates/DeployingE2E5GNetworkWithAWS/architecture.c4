@@ -78,14 +78,32 @@ model {
             upf = container 'User Plane Function (UPF)' {
               description 'UPF microservices using multiple network interfaces and high-performance packet processing.'
               metadata {
-                uses 'multus, dpdk, sriov'
+                uses 'dpdk, sriov'
               }
             }
-            telemetry = container 'User-plane telemetry and logging' {
-              description 'Prometheus, Grafana, and Fluentd are shown beside the Outposts workload.'
-              metadata {
-                uses 'prometheus, grafana, fluentd'
-              }
+          }
+          multus = platform 'Multus' {
+            description 'Kubernetes network plugin that supplies multiple interfaces to the UPF pod.'
+            metadata {
+              uses 'multus'
+            }
+          }
+          prometheus = platform 'Prometheus' {
+            description 'Monitoring service shown beside the Outposts workload.'
+            metadata {
+              uses 'prometheus'
+            }
+          }
+          grafana = platform 'Grafana' {
+            description 'Metrics visualization service shown beside the Outposts workload.'
+            metadata {
+              uses 'grafana'
+            }
+          }
+          fluentd = platform 'Fluentd' {
+            description 'Log collection service shown beside the Outposts workload.'
+            metadata {
+              uses 'fluentd'
             }
           }
         }
@@ -386,6 +404,8 @@ model {
   radioSite.ran -> radioSite.snowballEdge 'Can deploy DU/CU workloads on'
   radioSite.ran -> outpostsSite.outposts.edgeVpc.edgeEks.userPlane 'Carries subscriber traffic to the user plane'
   outpostsSite.outposts.edgeVpc.edgeEks.userPlane -> outpostsSite.outposts.autoScaling 'Uses EC2 worker nodes managed by'
+  outpostsSite.outposts.edgeVpc.edgeEks.userPlane.upf -> outpostsSite.outposts.edgeVpc.edgeEks.multus 'Uses multiple network interfaces from'
+  outpostsSite.outposts.edgeVpc.edgeEks.userPlane -> outpostsSite.outposts.edgeVpc.edgeEks.prometheus 'Sends telemetry to'
   operatorCore.coreDataCenter -> region.directConnect 'Connects to the AWS Region through'
   operatorCore.dataNetwork -> region.directConnect 'Connects to the AWS Region through'
   region.directConnect -> region.vpc 'Connects on-premises 5G Core components to'

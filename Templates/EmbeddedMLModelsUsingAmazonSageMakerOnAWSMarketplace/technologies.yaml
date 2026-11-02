@@ -64,10 +64,3 @@ technologies:
     types: [managed-service]
     platform: aws
     hosts: []
-  - key: docker
-    name: Docker
-    description: The seller packages the model code as a Docker image for Amazon ECR and Amazon SageMaker AI.
-    vendor: Docker
-    url: https://www.docker.com/
-    types: [library]
-    packages: [{manager: docker, name: docker}]

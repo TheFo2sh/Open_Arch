@@ -6,7 +6,7 @@ Source: [Embedded ML models using Amazon SageMaker AI on AWS Marketplace](https:
 
 ## Use case
 
-The buyer consumes a seller's model through AWS Marketplace without giving the seller direct access to the buyer's data. The seller's model code remains in a container image; the buyer invokes an Amazon SageMaker AI endpoint in network isolation mode from the buyer-side request flow.
+The buyer consumes a seller's model through AWS Marketplace without giving the seller direct access to the buyer's data. The seller's model code remains in a Docker image; the image is a deployment artifact, not a package dependency of the model code. The buyer invokes an Amazon SageMaker AI endpoint in network isolation mode from the buyer-side request flow.
 
 ## Architecture and data flow
 

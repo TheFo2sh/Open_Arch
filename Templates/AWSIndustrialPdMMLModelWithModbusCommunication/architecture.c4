@@ -15,22 +15,16 @@ model {
         uses 'aws-iot-greengrass'
       }
 
-      gateway = system 'Industrial gateway' {
-        description 'Connects factory machine data to AWS IoT services.'
-
-        modbusConnector = container 'Greengrass Modbus Connector' {
-          description 'Sends machine Modbus data to AWS IoT Core.'
-          technology 'AWS IoT Greengrass Modbus Connector; Modbus'
-          metadata {
-            uses 'aws-iot-greengrass-modbus-connector'
-          }
+      modbusConnector = platform 'Greengrass Modbus Connector' {
+        description 'Configured connector that sends machine Modbus data to AWS IoT Core.'
+        metadata {
+          uses 'aws-iot-greengrass-modbus-connector'
         }
-        sitewiseConnector = container 'AWS IoT SiteWise Connector' {
-          description 'Connects factory OPC-UA servers to AWS IoT SiteWise.'
-          technology 'AWS IoT SiteWise Gateway; OPC Unified Architecture'
-          metadata {
-            uses 'aws-iot-sitewise-gateway'
-          }
+      }
+      sitewiseConnector = platform 'AWS IoT SiteWise Gateway' {
+        description 'Configured gateway software that connects factory OPC-UA servers to AWS IoT SiteWise.'
+        metadata {
+          uses 'aws-iot-sitewise-gateway'
         }
       }
     }
@@ -89,10 +83,10 @@ model {
     }
   }
 
-  factory.machines -> factory.greengrass.gateway.modbusConnector 'Sends Modbus data to'
-  factory.machines -> factory.greengrass.gateway.sitewiseConnector 'Exposes OPC-UA data to'
-  factory.greengrass.gateway.modbusConnector -> aws.iotCore 'Publishes Modbus data to'
-  factory.greengrass.gateway.sitewiseConnector -> aws.sitewise 'Sends factory metrics to'
+  factory.machines -> factory.greengrass.modbusConnector 'Sends Modbus data to'
+  factory.machines -> factory.greengrass.sitewiseConnector 'Exposes OPC-UA data to'
+  factory.greengrass.modbusConnector -> aws.iotCore 'Publishes Modbus data to'
+  factory.greengrass.sitewiseConnector -> aws.sitewise 'Sends factory metrics to'
   aws.iotCore -> aws.iotAnalytics 'Routes messages to'
   aws.sitewise.assetStore -> aws.iotAnalytics.containerDataset 'Provides source data to'
   aws.ecr -> aws.iotAnalytics.containerDataset 'Supplies the Docker image for'
@@ -104,6 +98,6 @@ model {
 views {
   view index {
     title 'AWS Industrial PdM ML Model with Modbus Communication'
-    include *, factory.*, factory.greengrass.*, factory.greengrass.gateway.*, aws.*
+    include *, factory.*, factory.greengrass.*, aws.*
   }
 }

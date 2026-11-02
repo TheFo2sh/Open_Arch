@@ -20,8 +20,8 @@ Distributing Perforce Helix Core close to developers while keeping a primary com
 |---|---|
 | Zones | Primary and secondary AWS Regions, plus a corporate data center zone |
 | Platforms | Amazon VPC, EC2, NAT Gateway, Transit Gateway, Direct Connect, Site-to-Site VPN, Client VPN, EBS gp3, EFS and AWS Backup |
-| Slots | In-office developer, remote developer, and Perforce server roles in the corporate data center and AWS Regions |
-| Containers | Perforce Helix Core commit, standby, Edge Server and client roles |
+| Slots | In-office developer and remote developer |
+| Managed-service platforms | Perforce Helix Core commit, standby, Edge Server and client roles in the corporate data center and AWS Regions |
 | Databases | Perforce server state on EBS and an alternative EFS-hosted depot for depots larger than 16 TB |
 
 ## Assumptions and details not specified by AWS
@@ -37,3 +37,9 @@ Distributing Perforce Helix Core close to developers while keeping a primary com
 - Select AWS Regions, Availability Zones, network layout, connectivity, instance sizing and access controls.
 - Choose EBS gp3 or EFS for the depot based on depot size, and define backup, restore, RPO and RTO policies.
 - Decide which commit and Edge Server roles to deploy, whether Edge Server HA is required, and how Perforce licensing, replication and client access are configured.
+
+## Classification updates
+
+- **System elements and containers changed to managed-service platforms:** the corporate Edge Server, primary-region commit and standby servers, primary- and secondary-region Edge Servers, and Helix Core client. These are deployed Perforce products configured by the adopting team, not code-owned application systems.
+- **Technology reclassified as a managed service:** `perforce-helix-core`.
+- **Technologies left unchanged because they fit none of the system, managed-service, or library definitions:** none.

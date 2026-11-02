@@ -36,7 +36,7 @@ The flow follows AWS's numbered architecture description:
 | Zone | **AWS Region**, on the AWS platform |
 | Platforms | Amazon VPC, separate Amazon EKS clusters for dev/test/production, VMware Cloud on AWS, EC2 bare-metal hosts with VMware ESXi, ENI integration, Route 53, Network Load Balancer, CodeCommit, CodePipeline, CodeBuild, and ECR |
 | Slots | **Application user**, **Development team**, **Modernized application**, and **Application source repository** |
-| Containers | UI microservice deployment, application microservice deployment, and Kubernetes Ingress Controller |
+| Managed-service platform | Kubernetes Ingress Controller, configured on EKS to route requests to application pods |
 | Database | **Legacy database tier** on VMware ESXi |
 
 ## Assumptions and details not specified
@@ -44,7 +44,7 @@ The flow follows AWS's numbered architecture description:
 - The blueprint groups the development, test, and production EKS clusters under one logical platform entry to keep the catalog concise; these are distinct clusters, not one shared cluster. AWS does not specify promotion order or which environment the illustrated ingress and pipeline target.
 - The source diagram shows a VPC and private subnet but does not prescribe CIDRs, routing, security groups, ports, or a full network topology. The template does not invent these deployment details.
 - AWS does not specify the legacy database engine or schema, microservice languages, APIs, service boundaries beyond the illustrated UI and application services, pod counts, or image-tag policy.
-- App2Container is mentioned as an example tool, not a required deployed service. The source names a Kubernetes Ingress Controller but does not identify a specific implementation or configuration.
+- App2Container is mentioned as an example tool, not a required deployed service. The Kubernetes Ingress Controller is a configured EKS product, not a project system slot or library; the source does not identify its implementation or configuration.
 - VMware Cloud on AWS and ESXi are the only non-AWS provider technologies in the documented architecture. No other third-party service is specified.
 - This is an architecture template, not an AWS infrastructure deployment plan.
 

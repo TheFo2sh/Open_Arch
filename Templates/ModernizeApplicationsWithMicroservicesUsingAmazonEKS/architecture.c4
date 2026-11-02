@@ -35,13 +35,10 @@ model {
           }
         }
 
-        ingressIntegration = system 'Cluster ingress integration' {
-          description 'Ingress integration slot for exposing applications through the Network Load Balancer.'
-          ingress = container 'Kubernetes Ingress Controller' {
-            description 'Integrates Kubernetes ingress with the Network Load Balancer.'
-            metadata {
-              uses 'kubernetes-ingress-controller'
-            }
+        ingress = platform 'Kubernetes Ingress Controller' {
+          description 'Managed controller configured on EKS to integrate Kubernetes ingress with the Network Load Balancer.'
+          metadata {
+            uses 'kubernetes-ingress-controller'
           }
         }
       }
@@ -121,9 +118,9 @@ model {
   client -> aws.vpc.eks.microservices 'Uses'
   developers -> aws.codecommit.repository 'Commits code to'
   aws.route53 -> aws.nlb 'Resolves requests to'
-  aws.nlb -> aws.vpc.eks.ingressIntegration.ingress 'Integrates with'
-  aws.vpc.eks.ingressIntegration.ingress -> aws.vpc.eks.microservices.ui 'Routes requests to'
-  aws.vpc.eks.ingressIntegration.ingress -> aws.vpc.eks.microservices.app 'Routes requests to'
+  aws.nlb -> aws.vpc.eks.ingress 'Integrates with'
+  aws.vpc.eks.ingress -> aws.vpc.eks.microservices.ui 'Routes requests to'
+  aws.vpc.eks.ingress -> aws.vpc.eks.microservices.app 'Routes requests to'
   aws.vpc.eks.microservices.app -> aws.vmware.ec2.esxi.legacyDb 'Uses the existing database tier'
   aws.vpc.eks -> aws.eni 'Connects to VMware Cloud on AWS through'
   aws.eni -> aws.vmware 'Integrates the SDDC network with'

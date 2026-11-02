@@ -113,7 +113,9 @@ technologies:
     description: Varnish Cache enterprise version used for the full-page cache pods.
     vendor: Varnish Software
     url: https://www.varnish-software.com/products/varnish-enterprise/
-    types: [library, third-party]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: magento-commerce
     name: Magento Open Source or Adobe Commerce
     description: Magento e-commerce application; the source allows either the Open Source or Commerce edition.
@@ -125,7 +127,9 @@ technologies:
     description: Web server included in each Magento pod.
     vendor: F5
     url: https://nginx.org/
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: php
     name: PHP
     description: Application runtime included in each Magento pod.

@@ -20,20 +20,16 @@ model {
         uses 'aws-iot-greengrass'
       }
 
-      edge = system 'Factory edge gateway' {
-        description 'Project system slot for the factory gateway and its edge integrations.'
-
-        sitewiseConnector = container 'AWS IoT SiteWise Connector' {
-          description 'Collects factory machine data using OPC-UA.'
-          metadata {
-            uses 'aws-iot-sitewise-connector'
-          }
+      sitewiseConnector = platform 'AWS IoT SiteWise Connector' {
+        description 'Configured Greengrass connector that collects factory machine data using OPC-UA.'
+        metadata {
+          uses 'aws-iot-sitewise-connector'
         }
-        localConnectors = container 'Greengrass connectors and local Lambda functions' {
-          description 'Interfaces with local Modbus, MQTT, or HTTP traffic.'
-          metadata {
-            uses 'aws-iot-greengrass-lambda-connector'
-          }
+      }
+      localConnectors = platform 'Greengrass connectors for Lambda functions' {
+        description 'Configured Greengrass connector that interfaces with local Modbus, MQTT, or HTTP traffic.'
+        metadata {
+          uses 'aws-iot-greengrass-lambda-connector'
         }
       }
     }
@@ -98,40 +94,28 @@ model {
       }
     }
 
-    monitoringPortal = system 'Equipment monitoring portal' {
-      description 'Project system slot for the SiteWise Monitor web portal.'
-    }
-    analyticsDashboard = system 'Equipment analytics dashboard' {
-      description 'Project system slot for dashboards backed by AWS IoT Analytics.'
-    }
-    faultNotifications = system 'Fault notifications' {
-      description 'Project system slot for notifications delivered to factory operators.'
-    }
   }
 
-  factory.equipment -> factory.greengrass.edge 'Provides machine telemetry to'
-  factory.greengrass.edge.sitewiseConnector -> aws.sitewise.assetModels 'Publishes OPC-UA equipment data to'
-  factory.greengrass.edge.localConnectors -> aws.iotCore 'Publishes device messages to'
+  factory.equipment -> factory.greengrass.sitewiseConnector 'Provides machine telemetry to'
+  factory.greengrass.sitewiseConnector -> aws.sitewise.assetModels 'Publishes OPC-UA equipment data to'
+  factory.greengrass.localConnectors -> aws.iotCore 'Publishes device messages to'
   aws.iotCore -> aws.iotEvents 'Routes rule-triggered messages to'
   aws.iotCore -> aws.iotAnalytics.telemetry 'Sends device telemetry to'
   aws.sitewise.assetModels -> aws.sitewiseMonitor 'Provides equipment data to'
-  aws.sitewiseMonitor -> aws.monitoringPortal 'Provides the monitoring portal'
   aws.iotAnalytics.telemetry -> aws.quickSight 'Provides processed telemetry to'
-  aws.quickSight -> aws.analyticsDashboard 'Provides analytics dashboards'
   aws.iotEvents -> aws.sns 'Publishes fault events to'
-  aws.sns -> aws.faultNotifications 'Delivers event notifications through'
-  aws.faultNotifications -> operationsEngineer 'Notifies'
-  aws.monitoringPortal -> operationsEngineer 'Shows equipment health to'
-  aws.analyticsDashboard -> operationsManager 'Shows telemetry insights to'
+  aws.sns -> operationsEngineer 'Notifies'
+  aws.sitewiseMonitor -> operationsEngineer 'Shows equipment health to'
+  aws.quickSight -> operationsManager 'Shows telemetry insights to'
   aws.iotEvents -> aws.lambda.mitigation 'Triggers mitigation for'
   aws.lambda.mitigation -> aws.iotCore 'Sends mitigation commands through'
-  aws.iotCore -> factory.greengrass.edge 'Forwards mitigation commands to'
-  factory.greengrass.edge -> factory.equipment 'Applies mitigation actions to'
+  aws.iotCore -> factory.greengrass.localConnectors 'Forwards mitigation commands to'
+  factory.greengrass.localConnectors -> factory.equipment 'Applies mitigation actions to'
 }
 
 views {
   view index {
     title 'AWS Industrial IoT Asset Condition Monitoring'
-    include *, factory.*, factory.greengrass.*, factory.greengrass.edge.*, aws.*, aws.sitewise.*, aws.iotAnalytics.*, aws.lambda.*
+    include *, factory.*, factory.greengrass.*, aws.*, aws.sitewise.*, aws.iotAnalytics.*, aws.lambda.*
   }
 }

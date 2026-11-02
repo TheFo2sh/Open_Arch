@@ -6,6 +6,8 @@ An M1Spec architecture template based on the AWS [Oracle E-Business Suite on AWS
 
 Use this blueprint as a starting point for a resilient Oracle E-Business Suite deployment in one AWS Region and VPC. It represents the application and Oracle database tiers across Availability Zones, plus the AWS services named in the reference.
 
+Oracle E-Business Suite, Oracle Database, and Oracle Data Guard are installed products configured on EC2, so they are modeled as managed-service platforms rather than libraries or system slots.
+
 ## Architecture and data flow
 
 1. The design uses one AWS Region and one VPC. The diagram shows multiple Availability Zones, public and private subnets, an internet gateway, and a NAT gateway in each AZ.
@@ -23,8 +25,8 @@ Use this blueprint as a starting point for a resilient Oracle E-Business Suite d
 |---|---|
 | Zone | **AWS Region**, on the AWS platform |
 | Platforms | Amazon VPC, Internet Gateway, NAT Gateways, external and internal Application Load Balancers, Amazon EC2, Route 53, WAF, WorkSpaces, Directory Service, S3, CloudWatch, Systems Manager, AWS Backup, and CloudFormation |
-| Slots | **Oracle E-Business Suite**, the project's application system; **Users**, mapped to the project's users |
-| Containers | **DMZ application tier** and **Application tier**, both using Oracle E-Business Suite |
+| User slots | **Users**, mapped to the project's users |
+| Managed-service platforms | Oracle E-Business Suite DMZ and application tiers, Oracle Database primary and standby instances, and Oracle Data Guard |
 | Databases | Primary and standby Oracle databases on Amazon EC2 |
 
 ## Assumptions and unspecified details

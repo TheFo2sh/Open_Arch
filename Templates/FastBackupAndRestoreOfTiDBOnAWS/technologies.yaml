@@ -7,7 +7,6 @@ technologies:
     url: https://aws.amazon.com/eks/
     types: [managed-service, compute-platform]
     platform: aws
-    hosts: [system]
   - key: amazon-ec2
     name: Amazon Elastic Compute Cloud
     description: EC2 instances that run the TiDB cluster nodes shown in the reference diagram.
@@ -15,7 +14,6 @@ technologies:
     url: https://aws.amazon.com/ec2/
     types: [managed-service, compute-platform]
     platform: aws
-    hosts: [system]
   - key: amazon-ebs
     name: Amazon Elastic Block Store
     description: Block volumes containing TiKV data and EBS snapshots used for backup and restore.
@@ -37,16 +35,23 @@ technologies:
     description: PingCAP Kubernetes operator that orchestrates TiDB backup and restore jobs and configures the cluster.
     vendor: PingCAP
     url: https://github.com/pingcap/tidb-operator
-    types: [library, third-party]
+    types: [managed-service, third-party]
+    platform: aws
+    packages: [{manager: helm, name: pingcap/tidb-operator}]
   - key: tidb
     name: TiDB
     description: Open-source MySQL-compatible HTAP database deployed as a cluster on AWS.
     vendor: PingCAP
     url: https://www.pingcap.com/tidb/
-    types: [library, third-party]
+    types: [managed-service, data-platform, third-party]
+    platform: aws
+    hosts: [database]
+    packages: [{manager: helm, name: pingcap/tidb-cluster}]
   - key: tikv
     name: TiKV
     description: Distributed key-value storage component whose data is persisted on Amazon EBS volumes.
     vendor: PingCAP
     url: https://tikv.org/
-    types: [library, third-party]
+    types: [managed-service, third-party]
+    platform: aws
+    packages: [{manager: helm, name: pingcap/tidb-cluster}]

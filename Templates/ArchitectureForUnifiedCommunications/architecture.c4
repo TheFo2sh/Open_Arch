@@ -83,57 +83,46 @@ model {
           uses 'amazon-ec2'
         }
 
-        avaya = system 'Avaya Aura Unified Communications' {
-          description 'Third-party UC platform deployed on EC2; the source does not specify instance sizes or detailed configuration.'
-
-          deviceServices = container 'Avaya Aura Device Services (AADS)' {
-            description 'Provides configuration to UC devices and soft clients.'
-            technology 'Avaya Aura'
-            metadata {
-              uses 'avaya-aura'
-            }
+        deviceServices = platform 'Avaya Aura Device Services (AADS)' {
+          description 'Configured Avaya service that provides configuration to UC devices and soft clients.'
+          metadata {
+            uses 'avaya-aura'
           }
-          borderControllers = container 'Session Border Controllers (SBCs)' {
-            description 'Session entry points managed by EMS and deployed in the public subnets.'
-            technology 'Avaya Aura'
-            metadata {
-              uses 'avaya-aura'
-            }
+        }
+        borderControllers = platform 'Session Border Controllers (SBCs)' {
+          description 'Configured Avaya session entry points managed by EMS and deployed in the public subnets.'
+          metadata {
+            uses 'avaya-aura'
           }
-          elementManagement = container 'Element Management System (EMS)' {
-            description 'Manages the SBC entry points; the diagram shows an active instance and a standby instance in separate Availability Zones.'
-            technology 'Avaya Aura'
-            metadata {
-              uses 'avaya-aura'
-            }
+        }
+        elementManagement = platform 'Element Management System (EMS)' {
+          description 'Configured Avaya management service for SBC entry points; the diagram shows active and standby instances.'
+          metadata {
+            uses 'avaya-aura'
           }
-          sessionManagers = container 'Session Managers' {
-            description 'Handle user authentication and session management in the private subnets.'
-            technology 'Avaya Aura'
-            metadata {
-              uses 'avaya-aura'
-            }
+        }
+        sessionManagers = platform 'Session Managers' {
+          description 'Configured Avaya services for user authentication and session management in private subnets.'
+          metadata {
+            uses 'avaya-aura'
           }
-          systemManager = container 'Avaya Aura System Manager' {
-            description 'Controls the Session Managers; this is the Avaya Aura role shown on EC2, not AWS Systems Manager.'
-            technology 'Avaya Aura'
-            metadata {
-              uses 'avaya-aura'
-            }
+        }
+        systemManager = platform 'Avaya Aura System Manager' {
+          description 'Configured Avaya service that controls Session Managers; not AWS Systems Manager.'
+          metadata {
+            uses 'avaya-aura'
           }
-          communicationManager = container 'Communication Manager' {
-            description 'Provides telephony features.'
-            technology 'Avaya Aura'
-            metadata {
-              uses 'avaya-aura'
-            }
+        }
+        communicationManager = platform 'Communication Manager' {
+          description 'Configured Avaya telephony service.'
+          metadata {
+            uses 'avaya-aura'
           }
-          mediaServers = container 'Media Servers' {
-            description 'Provide digital signal processing (DSP) resources for Communication Manager.'
-            technology 'Avaya Aura'
-            metadata {
-              uses 'avaya-aura'
-            }
+        }
+        mediaServers = platform 'Media Servers' {
+          description 'Configured Avaya services that provide digital signal processing (DSP) resources for Communication Manager.'
+          metadata {
+            uses 'avaya-aura'
           }
         }
       }
@@ -148,21 +137,21 @@ model {
   aws.siteToSiteVpn -> aws.vpc 'Provides VPN connectivity to'
   remoteWorkers -> publicInternet 'Connect through'
   publicInternet -> aws.vpc.internetGateway 'Reaches the VPC through'
-  aws.vpc.internetGateway -> aws.vpc.ec2.avaya.borderControllers 'Carries internet-facing sessions to'
-  ucClients -> aws.vpc.ec2.avaya.deviceServices 'Pull configuration from'
-  ucClients -> aws.vpc.ec2.avaya.borderControllers 'Establish sessions with'
-  aws.vpc.ec2.avaya.elementManagement -> aws.vpc.ec2.avaya.borderControllers 'Manages'
-  aws.vpc.ec2.avaya.borderControllers -> aws.vpc.ec2.avaya.sessionManagers 'Establish sessions with'
-  aws.vpc.ec2.avaya.sessionManagers -> aws.vpc.ec2.avaya.systemManager 'Are controlled by'
-  aws.vpc.ec2.avaya.communicationManager -> aws.vpc.ec2.avaya.mediaServers 'Uses DSP resources from'
+  aws.vpc.internetGateway -> aws.vpc.ec2.borderControllers 'Carries internet-facing sessions to'
+  ucClients -> aws.vpc.ec2.deviceServices 'Pull configuration from'
+  ucClients -> aws.vpc.ec2.borderControllers 'Establish sessions with'
+  aws.vpc.ec2.elementManagement -> aws.vpc.ec2.borderControllers 'Manages'
+  aws.vpc.ec2.borderControllers -> aws.vpc.ec2.sessionManagers 'Establish sessions with'
+  aws.vpc.ec2.sessionManagers -> aws.vpc.ec2.systemManager 'Are controlled by'
+  aws.vpc.ec2.communicationManager -> aws.vpc.ec2.mediaServers 'Uses DSP resources from'
   administrators -> aws.workspaces.managementWorkstation 'Manage the platform through'
-  aws.workspaces.managementWorkstation -> aws.vpc.ec2.avaya 'Provides bastion access to'
+  aws.workspaces.managementWorkstation -> aws.vpc.ec2.systemManager 'Provides bastion access to'
 
 }
 
 views {
   view index {
     title 'Architecture for Unified Communications'
-    include *, aws.*, aws.vpc.*, aws.vpc.ec2.*, aws.vpc.ec2.avaya.*
+    include *, aws.*, aws.vpc.*, aws.vpc.ec2.*
   }
 }

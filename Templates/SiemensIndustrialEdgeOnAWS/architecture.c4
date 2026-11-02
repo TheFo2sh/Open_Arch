@@ -11,36 +11,64 @@ model {
         uses 'siemens-industrial-edge'
       }
 
-      edgeDevice = system 'Industrial Edge device' {
-        description 'Project system slot for the physical or virtual Industrial Edge device and its applications.'
-
-        connectors = container 'Southbound connector applications' {
-          description 'Collects data from industrial assets using the connector choices shown in the AWS diagram.'
+      connectors = system 'Industrial protocol connectors' {
+        description 'Project-owned connector code for OPC UA, Modbus, SIMATIC S7, EtherNet/IP, and TCP; the reference does not identify connector products.'
+        connector = container 'Southbound connector applications' {
+          description 'Collects data from industrial assets using the protocol choices shown in the AWS diagram.'
           metadata {
             uses 'opc-ua, modbus, simatic-s7, ethernet-ip, tcp'
           }
         }
-        edgeApplications = container 'Industrial Edge applications' {
-          description 'Applications created through the options named by AWS.'
-          metadata {
-            uses 'mendix, flow-creator, docker'
-          }
+      }
+      informationHub = platform 'Industrial Information Hub' {
+        description 'Configured Siemens industrial data-layer service.'
+        metadata {
+          uses 'industrial-information-hub'
         }
-        dataLayer = container 'Industrial information and data layer' {
-          metadata {
-            uses 'industrial-information-hub, industrial-edge-databus'
-          }
+      }
+      dataBus = platform 'Industrial Edge Databus' {
+        description 'Configured Siemens data-bus service for Industrial Edge applications.'
+        metadata {
+          uses 'industrial-edge-databus'
         }
-        sitewiseEdge = container 'AWS IoT SiteWise Edge' {
-          description 'Collects and aggregates industrial data for delivery to AWS IoT SiteWise.'
-          metadata {
-            uses 'aws-iot-sitewise-edge'
-          }
+      }
+      sitewiseEdge = platform 'AWS IoT SiteWise Edge' {
+        description 'Configured edge software that collects and aggregates industrial data for AWS IoT SiteWise.'
+        metadata {
+          uses 'aws-iot-sitewise-edge'
         }
-        edgeInference = container 'Edge AI inference and monitoring' {
-          metadata {
-            uses 'siemens-ai-inference-server, siemens-ai-model-monitor-agent'
-          }
+      }
+      edgeInference = platform 'Siemens AI Inference Server' {
+        description 'Configured edge inference runtime for deployed machine-learning models.'
+        metadata {
+          uses 'siemens-ai-inference-server'
+        }
+      }
+      modelMonitorAgent = platform 'Siemens AI Model Monitor Agent' {
+        description 'Configured edge agent that monitors deployed machine-learning models.'
+        metadata {
+          uses 'siemens-ai-model-monitor-agent'
+        }
+      }
+      mendixEdge = platform 'Mendix on Industrial Edge' {
+        description 'Configured Mendix development and deployment platform option for Industrial Edge applications.'
+        metadata {
+          uses 'mendix'
+        }
+      }
+      flowCreator = platform 'Siemens Flow Creator' {
+        description 'Configured Siemens application development platform option for Industrial Edge apps.'
+        metadata {
+          uses 'flow-creator'
+        }
+      }
+      docker = platform 'Docker' {
+        description 'Configured container runtime option for Industrial Edge apps.'
+        metadata {
+          uses 'docker'
+        }
+        edgeApplications = system 'Industrial Edge applications' {
+          description 'Project-owned applications deployed to the Industrial Edge platform.'
         }
       }
     }
@@ -55,28 +83,50 @@ model {
       platform 'other'
     }
 
-    edgeManagement = system 'Industrial Edge management system' {
-      description 'Project system slot for centralized Industrial Edge device and application management; its hosting location is not specified.'
-
-      management = container 'Industrial Edge Management and Hub' {
-        metadata {
-          uses 'siemens-industrial-edge-management, siemens-industrial-edge-hub'
-        }
-      }
-      repository = container 'Global software and app repository' {
-        metadata {
-          uses 'siemens-global-software-app-repository'
-        }
+    edgeManagement = platform 'Siemens Industrial Edge Management' {
+      description 'Configured central management software for Industrial Edge devices and applications; hosting location is not specified.'
+      metadata {
+        uses 'siemens-industrial-edge-management'
       }
     }
+    edgeHub = platform 'Siemens Industrial Edge Hub' {
+      description 'Configured management and application-distribution capability for Industrial Edge.'
+      metadata {
+        uses 'siemens-industrial-edge-hub'
+      }
+    }
+    repository = platform 'Global Software and App Repository' {
+      description 'Configured repository for Industrial Edge software and applications.'
+      metadata {
+        uses 'siemens-global-software-app-repository'
+      }
+    }
+    modelManager = platform 'Siemens AI Model Manager' {
+      description 'Configured product for deploying and managing machine-learning models on Industrial Edge.'
+      metadata {
+        uses 'siemens-ai-model-manager'
+      }
+    }
+    modelMonitor = platform 'Siemens AI Model Monitor' {
+      description 'Configured product for monitoring machine-learning models on Industrial Edge.'
+      metadata {
+        uses 'siemens-ai-model-monitor'
+      }
+    }
+  }
 
-    edgeAiManagement = system 'Industrial Edge AI management device' {
-      description 'Project system slot for the edge-side model management device shown in the AWS diagram.'
+  mendixCloud = zone 'Mendix platform' {
+    metadata {
+      platform 'other'
+    }
 
-      modelManagement = container 'AI model management and monitoring' {
-        metadata {
-          uses 'siemens-ai-model-manager, siemens-ai-model-monitor'
-        }
+    mendix = platform 'Mendix' {
+      description 'Configured Mendix platform for industrial analytics applications; hosting location is not specified.'
+      metadata {
+        uses 'mendix'
+      }
+      analyticsApps = system 'Industrial analytics applications' {
+        description 'Project-owned analytics applications built and configured on Mendix.'
       }
     }
   }
@@ -144,21 +194,14 @@ model {
         }
       }
     }
-    mendixApps = system 'Industrial analytics applications' {
-      mendixAnalytics = container 'Mendix analytics apps' {
-        metadata {
-          uses 'mendix'
-        }
-      }
-    }
   }
 
-  shopfloor.assets -> shopfloor.industrialEdge.edgeDevice.connectors 'Provides industrial data to'
-  shopfloor.industrialEdge.edgeDevice.connectors -> shopfloor.industrialEdge.edgeDevice.sitewiseEdge 'Feeds collected data to'
-  shopfloor.industrialEdge.edgeDevice.sitewiseEdge -> aws.sitewise.industrialData 'Sends aggregated data to'
+  shopfloor.assets -> shopfloor.industrialEdge.connectors 'Provides industrial data to'
+  shopfloor.industrialEdge.connectors -> shopfloor.industrialEdge.sitewiseEdge 'Feeds collected data to'
+  shopfloor.industrialEdge.sitewiseEdge -> aws.sitewise.industrialData 'Sends aggregated data to'
 
-  enterprise.edgeManagement.management -> shopfloor.industrialEdge.edgeDevice 'Manages'
-  enterprise.edgeManagement.repository -> shopfloor.industrialEdge.edgeDevice.edgeApplications 'Distributes software and apps to'
+  enterprise.edgeManagement -> shopfloor.industrialEdge.docker.edgeApplications 'Manages'
+  enterprise.repository -> shopfloor.industrialEdge.docker.edgeApplications 'Distributes software and apps to'
   aws.sitewise.industrialData -> aws.s3.coldData 'Delivers cold industrial data to'
   aws.sitewise.industrialData -> aws.sitewiseMonitor 'Provides data for visualization'
   aws.sitewise.industrialData -> aws.twinmaker 'Provides data for digital twins'
@@ -167,8 +210,11 @@ model {
   aws.s3.coldData -> aws.athena 'Provides cold data for queries'
   aws.athena -> aws.grafana 'Provides query results to'
   aws.athena -> aws.quickSight 'Provides query results to'
-  aws.athena -> aws.mendixApps 'Provides query results to'
+  aws.athena -> mendixCloud.mendix.analyticsApps 'Provides query results to'
   aws.s3.coldData -> aws.studioLab.modelTraining 'Provides training data to'
-  aws.studioLab.modelTraining.modelPackaging -> enterprise.edgeAiManagement.modelManagement 'Delivers packaged models to'
-  enterprise.edgeAiManagement.modelManagement -> shopfloor.industrialEdge.edgeDevice.edgeInference 'Deploys and monitors models for'
+  aws.studioLab.modelTraining.modelPackaging -> enterprise.modelManager 'Delivers packaged models to'
+  enterprise.modelManager -> shopfloor.industrialEdge.edgeInference 'Deploys models for'
+  enterprise.modelMonitor -> shopfloor.industrialEdge.modelMonitorAgent 'Monitors models through'
+  shopfloor.industrialEdge.mendixEdge -> shopfloor.industrialEdge.docker.edgeApplications 'Builds and deploys applications on'
+  shopfloor.industrialEdge.flowCreator -> shopfloor.industrialEdge.docker.edgeApplications 'Builds applications on'
 }

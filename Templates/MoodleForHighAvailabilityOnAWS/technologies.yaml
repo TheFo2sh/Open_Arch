@@ -69,7 +69,7 @@ technologies:
     url: https://aws.amazon.com/ec2/
     types: [compute-platform]
     platform: aws
-    hosts: [system]
+    hosts: []
     packages: [{manager: terraform, name: hashicorp/aws}]
   - key: amazon-efs
     name: Amazon Elastic File System
@@ -166,10 +166,5 @@ technologies:
     description: Third-party learning management system deployed as the Moodle web application.
     vendor: Moodle Pty Ltd
     url: https://moodle.org/
-    types: [library]
-  - key: php
-    name: PHP
-    description: Runtime used by the Moodle web application.
-    vendor: The PHP Group
-    url: https://www.php.net/
-    types: [library]
+    types: [managed-service]
+    platform: aws

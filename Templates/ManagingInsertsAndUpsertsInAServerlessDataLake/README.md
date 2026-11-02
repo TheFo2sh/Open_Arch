@@ -12,20 +12,20 @@ The flow follows the seven steps in AWS's source:
 
 1. Source systems send batch, change data capture (CDC), or streaming data into raw Amazon S3 storage. AWS's diagram shows SFTP and AWS Database Migration Service (DMS) among the ingestion options; it does not identify an SFTP product.
 2. An AWS Glue crawler discovers persisted raw data and populates the AWS Glue Data Catalog.
-3. Amazon EMR reads raw data with Hive and Spark for cleaning and transformation.
-4. Apache Hudi runs on EMR, reads data through Spark APIs, and performs inserts and upserts on required datasets.
+3. Configured Apache Hive and Spark engines on Amazon EMR read raw data for cleaning and transformation.
+4. Apache Hudi, a Maven library used by the project-owned Spark jobs, performs inserts and upserts on required datasets.
 5. Cleaned and transformed data is persisted to Amazon S3 processed Parquet and reportable data sets.
 6. Amazon Athena queries reportable data on demand, or it is loaded into Amazon Redshift. The diagram also shows Amazon SageMaker consuming reportable data, Amazon QuickSight consuming Redshift data, and SQL Client, Jupyter Notebooks, and Application SDK consumers.
-7. Amazon Managed Workflows for Apache Airflow (MWAA) orchestrates data movement, on-demand EMR clusters for batch processing, and data loading.
+7. Amazon MWAA provides the configured Apache Airflow engine that runs project-owned workflows for data movement, on-demand EMR clusters, and data loading.
 
 ## What applying it brings
 
 | | |
 |---|---|
 | Zone | **AWS**, on the AWS platform or the project's AWS zone |
-| Platforms | AWS DMS, Amazon S3, AWS Glue, Amazon EMR, Amazon MWAA, Amazon Athena, Amazon Redshift, Amazon SageMaker, and Amazon QuickSight |
+| Platforms | AWS DMS, Amazon S3, AWS Glue, Amazon EMR with Apache Hive and Spark, Amazon MWAA with Apache Airflow, Amazon Athena, Amazon Redshift, Amazon SageMaker, and Amazon QuickSight |
 | Slots | **Source systems**, **Data lake processing**, **Data lake workflows**, **Consumer tools and resources**, and **Data consumer** |
-| Processing | Hive, Spark, and Apache Hudi jobs on EMR; Apache Airflow workflows on MWAA |
+| Processing | Project-owned Apache Hudi jobs on Spark/EMR; project-owned workflow code on Airflow/MWAA |
 | Data | Batch staging, real-time staging, Parquet datasets, reportable data sets, the Glue Data Catalog, and an enterprise data warehouse |
 
 ## Assumptions and limits
@@ -34,6 +34,7 @@ The flow follows the seven steps in AWS's source:
 - SFTP is shown as a generic ingestion option. Its server, provider, configuration, and relationship to the other ingestion options are not specified; the template does not assume AWS Transfer Family or a particular SFTP implementation.
 - AWS describes batch, CDC, and streaming ingestion but does not name a streaming service or detail the transport for each source. AWS DMS is shown as an ingestion option, not as the required path for all data.
 - The diagram's batch staging, real-time staging, Parquet, and reportable data sets are represented as databases on Amazon S3 because the custom architecture schema has no separate object-store element. These are logical data layers, not a claim about exact bucket counts or names.
+- Apache Hive, Spark, and Airflow are configured runnable products on EMR/MWAA, not project libraries. Apache Hudi remains a library because the Spark job depends on its Maven package.
 - AWS does not specify the Hudi table type, record keys, partitioning, transformation logic, schema evolution, file sizes, source-to-output mapping, or exact crawler configuration. The template does not invent these details.
 - MWAA's schedule, DAG definitions, EMR cluster configuration, and which movement or load operations it coordinates are not detailed. The workflow slot is illustrative of the documented orchestration responsibility.
 - The source does not specify a Redshift schema, load method, Amazon SageMaker setup, user identities, client products, network topology, security controls, retention, or service sizing. SQL Client, Jupyter Notebooks, and Application SDK are generic consumer examples, not assumed deployments.

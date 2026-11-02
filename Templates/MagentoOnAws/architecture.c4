@@ -31,7 +31,7 @@ model {
       }
     }
     alb = platform 'Elastic Load Balancing' {
-      description 'Application Load Balancers in front of the Varnish and the Magento tiers.'
+      description 'Application Load Balancers in front of Varnish and the Magento application.'
       metadata {
         uses 'elastic-load-balancing'
       }
@@ -43,16 +43,15 @@ model {
         uses 'amazon-ec2-auto-scaling'
       }
 
+      cache = platform 'Varnish Cache' {
+        description 'Configured HTTP accelerator that serves Magento full-page cache and passes cache misses to the Magento application.'
+        metadata {
+          uses 'varnish-cache'
+        }
+      }
       storefront = system 'Online store' {
         description 'The Magento store: catalog, cart, checkout and the admin.'
 
-        cache = container 'Full-page cache' {
-          description 'Varnish instances that serve cached pages and pass misses to Magento.'
-          technology 'Varnish Cache'
-          metadata {
-            uses 'varnish-cache'
-          }
-        }
         web = container 'Magento application' {
           description 'Magento on PHP: renders the store and runs checkout.'
           technology 'Magento Open Source, PHP'
@@ -99,8 +98,8 @@ model {
   aws.route53 -> aws.cloudfront 'Resolves the store domain to'
   aws.waf -> aws.cloudfront 'Filters requests to'
   aws.cloudfront -> aws.alb 'Forwards uncached requests to'
-  aws.alb -> aws.autoscaling.storefront.cache 'Balances requests over'
-  aws.autoscaling.storefront.cache -> aws.autoscaling.storefront.web 'Passes cache misses to'
+  aws.alb -> aws.autoscaling.cache 'Balances requests over'
+  aws.autoscaling.cache -> aws.autoscaling.storefront.web 'Passes cache misses to'
   aws.autoscaling.storefront.web -> aws.aurora.storeDb 'Reads from and writes to'
   aws.autoscaling.storefront.web -> aws.elasticache.sessionStore 'Keeps sessions and cache in'
   aws.autoscaling.storefront.web -> aws.opensearch.searchIndex 'Searches the catalog in'

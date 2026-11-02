@@ -12,7 +12,7 @@ The template is a starting point for teams running Alfresco Content Services (EC
 
 1. Knowledge workers use Alfresco applications from a workstation or mobile web browser.
 2. The Alfresco Content Connector provides an extended content store in Amazon S3 or Amazon S3 Glacier. Amazon EFS Intelligent-Tiering is shown as an option for shared storage.
-3. Alfresco Content Services provides ECM with information governance. The diagram shows Content Center administration, Identity Services, Digital Workspace, Governance Services, the Transform engine, and Alfresco Content Services across the application tiers.
+3. Alfresco Content Services provides ECM with information governance. Content Center, Identity Services, Digital Workspace, Governance Services, the Transform engine, and other Alfresco products are modeled as managed-service platforms on EC2 because they are deployed and configured, not code written by the adopting team.
 4. Alfresco Business Connectors integrate with Google Docs, Salesforce, SAP, SAP Cloud, Microsoft Teams, Outlook, and Office. The diagram also shows a Microsoft 365 Connector.
 5. Alfresco Intelligence Services extends the Transform engine and integrates with Amazon Textract for metadata extraction, Amazon Rekognition for image analysis, and Amazon Comprehend for text analysis.
 6. Alfresco Search and Insight Engine uses Solr on Amazon EC2 with Amazon EBS for full-text search across metadata stored in a database. Alfresco Search Enterprise with Amazon OpenSearch Service is an alternative. Amazon Kendra can be used with the Alfresco data source connector for intelligent enterprise searches.
@@ -24,8 +24,8 @@ The diagram also depicts Amazon MQ active and standby brokers, Internet and NAT 
 
 - **Zone:** AWS.
 - **Platforms:** The depicted AWS compute, load-balancing, network, storage, database, search, messaging, AI, identity, security, and operations services.
-- **Slots:** Knowledge worker, corporate content store, Microsoft 365, Google Docs, Salesforce, SAP, and the Alfresco Digital Business Platform.
-- **Containers:** Alfresco content, process, search, governance, transformation, intelligence, identity, workspace, and connector services.
+- **Slots:** Knowledge worker, corporate content store, Microsoft 365, Google Docs, Salesforce, SAP.
+- **Managed-service platforms:** Alfresco Content Services and its content, process, search, governance, transformation, intelligence, identity, workspace, and connector products; Apache Solr.
 - **Databases:** Extended content and archive stores, a Process Services relational database option, and search indexes where their hosting service is identified.
 
 ## Assumptions and limits

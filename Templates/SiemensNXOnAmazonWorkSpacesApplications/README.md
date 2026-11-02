@@ -31,9 +31,9 @@ This template captures AWS's options for delivering Siemens NX as a streamed app
 ## Assumptions and limits
 
 - The source does not identify AWS Regions, account layout, VPC ranges, subnet sizing, security-group rules, IAM permissions, EC2 instance types, WorkSpaces Applications fleet sizes, Siemens NX version or licensing, storage capacity/performance, or backup and recovery policies. This template does not invent them.
-- In the Teamcenter option, AWS does not specify the compute platform, deployment details, or version for Siemens Teamcenter. It is shown as a system slot connected through the documented separate VPC; the VPC peer's configuration is also unspecified.
+- In the Teamcenter option, AWS does not specify the compute platform, deployment details, or version for Siemens Teamcenter. It is shown as a managed-service platform in a separate VPC; the VPC peer's configuration is also unspecified.
 - AWS identifies Auth0 and SAML 2.0 for federation but does not provide tenant settings, trust metadata, or identity lifecycle details.
-- In the multi-Region option, the source names Microsoft Distributed File System Replication but does not specify where its software runs or the file-system configuration. The blueprint describes the replication relationship without assigning a host.
+- In the multi-Region option, the source names Microsoft Distributed File System Replication but does not specify where its software runs or the file-system configuration. It is represented as a managed-service platform in a logical replication zone, without assigning a host.
 - The source diagrams include file storage, not databases; the template intentionally does not create database elements for EBS or FSx.
 - Systems and the user are M1Spec slots to map onto a project's own systems and users. Services in different zones are mutually exclusive architecture alternatives in the source.
 - This is an architecture template, not an AWS infrastructure deployment.
@@ -45,3 +45,10 @@ This template captures AWS's options for delivering Siemens NX as a streamed app
 - Set up S3 home folders or EBS-backed SMB shares, or configure FSx and Active Directory access policies to suit the organization's storage needs.
 - For Teamcenter, identify the existing Teamcenter deployment and configure VPC peering and Auth0/Active Directory federation.
 - For multi-Region use, choose replication, failover, data-residency, and recovery policies; AWS's diagram does not define them.
+
+## Classification updates
+
+- **System/product hierarchies changed to managed-service platforms:** Siemens NX in each WorkSpaces Applications option; Siemens Teamcenter in its separate VPC; Microsoft Active Directory instances; and Auth0. These are deployed/configured products or services, not code-owned applications.
+- **Previously uncataloged product modeled as a managed-service platform:** Microsoft DFS Replication; its exact host is unspecified in the source.
+- **Technologies reclassified as managed services:** `siemens-nx`, `siemens-teamcenter`, `microsoft-active-directory`, `auth0`, and `microsoft-dfs-replication`.
+- **Technologies left unchanged because they fit none of the system, managed-service, or library definitions:** SMB, RDP, and SAML 2.0 are protocols.

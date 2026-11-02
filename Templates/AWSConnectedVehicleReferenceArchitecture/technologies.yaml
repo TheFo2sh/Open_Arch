@@ -83,7 +83,9 @@ technologies:
     description: Decodes vehicle network signals and collects data according to AWS IoT FleetWise campaigns.
     vendor: Amazon Web Services
     url: https://docs.aws.amazon.com/iotfleetwise/latest/developerguide/iot-fleetwise-edge-agent.html
-    types: [library]
+    types: [managed-service]
+    platform: other
+    hosts: []
   - key: amazon-timestream
     name: Amazon Timestream
     description: Stores selected time- and event-based vehicle campaign data.

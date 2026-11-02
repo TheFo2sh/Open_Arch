@@ -43,7 +43,7 @@ technologies:
     url: https://aws.amazon.com/ec2/
     types: [compute-platform]
     platform: aws
-    hosts: [system]
+    hosts: []
   - key: amazon-efs
     name: Amazon Elastic File System
     description: Shared file storage that can hold Moodle data and other content.
@@ -114,16 +114,12 @@ technologies:
     description: Optional instance agent that can provide Systems Manager access without exposing an SSH port.
     vendor: Amazon Web Services
     url: https://docs.aws.amazon.com/systems-manager/latest/userguide/ssm-agent.html
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: moodle
     name: Moodle
     description: Learning management system software for educators, administrators, and learners.
     vendor: Moodle
     url: https://moodle.org/
-    types: [library]
-  - key: php
-    name: PHP
-    description: Server-side programming language used by Moodle.
-    vendor: The PHP Group
-    url: https://www.php.net/
-    types: [library]
+    types: [managed-service]
+    platform: aws

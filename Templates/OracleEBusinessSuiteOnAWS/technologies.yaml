@@ -55,25 +55,28 @@ technologies:
     url: https://aws.amazon.com/ec2/
     types: [compute-platform]
     platform: aws
-    hosts: [system, database]
   - key: oracle-ebusiness-suite
     name: Oracle E-Business Suite
     description: Oracle enterprise application running in the DMZ and application tiers.
     vendor: Oracle
     url: https://www.oracle.com/applications/ebusiness/
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: oracle-database
     name: Oracle Database
     description: Self-managed Oracle database software shown on Amazon EC2.
     vendor: Oracle
     url: https://www.oracle.com/database/
-    types: [library]
+    types: [managed-service, data-platform]
+    platform: aws
+    hosts: [database]
   - key: oracle-data-guard
     name: Oracle Data Guard
     description: Synchronous replication between the Oracle database instances shown across Availability Zones.
     vendor: Oracle
     url: https://www.oracle.com/database/technologies/high-availability/data-guard.html
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: amazon-workspaces
     name: Amazon WorkSpaces
     description: Cloud desktop service used by Oracle E-Business Suite users.

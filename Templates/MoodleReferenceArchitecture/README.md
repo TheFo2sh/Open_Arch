@@ -9,7 +9,7 @@ An online learning service that needs a horizontally scalable Moodle application
 ## How it works
 
 1. **Amazon Route 53** directs learners to **Amazon CloudFront**, which serves cached content and forwards Moodle requests to an **Application Load Balancer**. **AWS Certificate Manager** provides SSL/TLS certificates for CloudFront or the load balancer.
-2. The load balancer distributes requests to the **Moodle application** running on **Amazon EC2** instances managed by **Amazon EC2 Auto Scaling** across multiple Availability Zones.
+2. The load balancer distributes requests to the **Moodle** managed-service platform installed on **Amazon EC2** instances managed by **Amazon EC2 Auto Scaling** across multiple Availability Zones.
 3. Moodle can store `moodledata` and other content on **Amazon EFS**, sessions and application caches in **Amazon ElastiCache**, and application data in **Amazon Aurora**.
 4. **AWS CodeCommit**, **AWS CodeBuild**, **AWS CodePipeline**, and **AWS CodeDeploy** provide source control and an automated build, test, and deployment flow. CodeDeploy can support blue/green deployments.
 5. **AWS Secrets Manager** protects application secrets, and **AWS Systems Manager Parameter Store** stores configuration such as shared-storage endpoints, database settings, and cache settings. The optional **Systems Manager Agent** can provide instance access without exposing an SSH port.
@@ -19,9 +19,9 @@ An online learning service that needs a horizontally scalable Moodle application
 | | |
 |---|---|
 | Zone | **AWS**, on the AWS platform - or the project's AWS zone, if it has one |
-| Platforms | Route 53, CloudFront, Certificate Manager, Elastic Load Balancing, EC2 Auto Scaling, EC2, EFS, ElastiCache, Aurora, CodeCommit, CodeBuild, CodeDeploy, CodePipeline, Secrets Manager, Systems Manager Parameter Store |
-| Slots | **Learner** and **Moodle LMS** |
-| Containers | **Moodle application** (Moodle and PHP) |
+| Platforms | Route 53, CloudFront, Certificate Manager, Elastic Load Balancing, EC2 Auto Scaling, EC2, Moodle, Systems Manager Agent, EFS, ElastiCache, Aurora, CodeCommit, CodeBuild, CodeDeploy, CodePipeline, Secrets Manager, Parameter Store |
+| Slots | **Learner** |
+| Managed products | Moodle, installed and configured on EC2; the optional Systems Manager Agent |
 | Databases | **Session and application cache** on ElastiCache; **Moodle database** on Aurora |
 
 ## Assumptions and details not specified
@@ -30,7 +30,7 @@ An online learning service that needs a horizontally scalable Moodle application
 - EFS is described as something that **can** be used, so shared file storage is optional.
 - The source describes multiple Availability Zones, but does not specify their count, instance sizes, scaling thresholds, or a detailed database topology.
 - VPCs, public and private subnets, the internet gateway, and NAT gateways are deployment networking rather than elements of this architecture blueprint. Infrastructure code supplies those details.
-- The source does not identify a required external third-party service. Moodle is the learning management software; no plugins or external integrations are assumed.
+- Moodle is third-party software deployed as-is and configured on EC2, not a system slot or a library dependency. No plugins or external integrations are assumed.
 - The source says blue/green deployment is possible; it does not prescribe that deployment strategy.
 
 ## What teams usually customize

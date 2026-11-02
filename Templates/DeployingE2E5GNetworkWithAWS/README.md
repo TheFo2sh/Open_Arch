@@ -30,7 +30,7 @@ Use the blueprint as a starting point for a communications service provider (CSP
 ## Assumptions and unspecified details
 
 - The systems and users are mapping slots. The RAN, corporate 5G Core, data network, 5G control plane, user plane, management/orchestration workloads, developer applications, subscribers, and developers must be mapped to the adopting project's own systems and users.
-- AWS does not identify vendors for the RAN, 5G Core network functions, MEC applications, or service design/orchestration/assurance workloads. Its diagram does name third-party or open-source tools (Multus, DPDK, Prometheus, Grafana, and Fluentd), which are cataloged without implying a particular network-function vendor.
+- AWS does not identify vendors for the RAN, 5G Core network functions, MEC applications, or service design/orchestration/assurance workloads. Multus, Prometheus, Grafana, and Fluentd are configured products deployed on EKS and are modeled as managed-service platforms; DPDK and SR-IOV remain unchanged as technologies used by the user-plane workload.
 - AWS does not define the user-plane/control-plane protocols, data schemas, subscriber databases, VPC CIDRs, subnet and routing configuration, Direct Connect capacity, precise service endpoint paths, or the topology for dual-homing. Those design choices are left to consumers.
 - The architecture diagram includes several regional storage and database services, but does not identify their datasets, schemas, or consumers. The blueprint therefore models the AWS services without inventing database resources or data flows.
 - The page is dated 2020; services and lifecycle status can change. In particular, verify AWS App Mesh availability and lifecycle before adopting the diagram's choice.
@@ -38,7 +38,7 @@ Use the blueprint as a starting point for a communications service provider (CSP
 ## What teams usually customize
 
 - Map the RAN, operator core and data network, control and user planes, MEC workloads, management functions, developers, and subscribers to existing project systems and users.
-- Select the RAN, 5G Core, MEC, and orchestration products and define their interfaces and operational ownership.
+- Select the RAN, 5G Core, MEC, and orchestration products, configure the EKS observability services, and define their interfaces and operational ownership.
 - Choose Outposts, Snow family, Wavelength, EC2/EKS/ECS placement, throughput, redundancy, and the optional regional UPF expansion.
 - Design the VPCs, Direct Connect and Transit Gateway attachments, route tables, service endpoints, dual-homing, and security controls.
 - Decide which of the diagram's management, observability, storage, and database services are required and document their data flows.

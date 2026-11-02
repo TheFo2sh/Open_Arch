@@ -91,12 +91,10 @@ model {
           metadata {
             uses 'amazon-ec2'
           }
-          applicationSystem = system 'Maintenix application tier' {
-            description 'The application tier of the IFS Maintenix deployment.'
-            application = container 'IFS Maintenix application' {
-              metadata {
-                uses 'ifs-maintenix'
-              }
+          applicationMaintenix = platform 'Maintenix application tier' {
+            description 'Configured IFS Maintenix application tier.'
+            metadata {
+              uses 'ifs-maintenix'
             }
           }
         }
@@ -110,12 +108,10 @@ model {
           metadata {
             uses 'amazon-ec2'
           }
-          integrationSystem = system 'Maintenix integration tier' {
-            description 'Internal-only integration tier of the IFS Maintenix deployment.'
-            integration = container 'IFS Maintenix integration' {
-              metadata {
-                uses 'ifs-maintenix'
-              }
+          integrationMaintenix = platform 'Maintenix integration tier' {
+            description 'Configured IFS Maintenix integration tier; internal traffic only.'
+            metadata {
+              uses 'ifs-maintenix'
             }
           }
         }
@@ -129,12 +125,10 @@ model {
           metadata {
             uses 'amazon-ec2'
           }
-          reportingSystem = system 'Maintenix reporting tier' {
-            description 'Internal-only reporting tier of the IFS Maintenix deployment.'
-            reporting = container 'IFS Maintenix reporting' {
-              metadata {
-                uses 'ifs-maintenix'
-              }
+          reportingMaintenix = platform 'Maintenix reporting tier' {
+            description 'Configured IFS Maintenix reporting tier; internal traffic only.'
+            metadata {
+              uses 'ifs-maintenix'
             }
           }
         }
@@ -168,17 +162,17 @@ model {
   aws.transitGateway -> aws.vpc.integrationAlb 'Carries on-premises traffic to'
   aws.transitGateway -> aws.vpc.reportingAlb 'Carries on-premises traffic to'
 
-  internetUsers -> aws.vpc.applicationScaling.applicationEc2.applicationSystem 'Accesses through Route 53, AWS WAF, and the public load balancer'
+  internetUsers -> aws.vpc.applicationScaling.applicationEc2.applicationMaintenix 'Accesses through Route 53, AWS WAF, and the public load balancer'
   aws.route53 -> aws.vpc.publicAlb 'Resolves the public endpoint to'
   aws.waf -> aws.vpc.publicAlb 'Protects'
-  aws.vpc.publicAlb -> aws.vpc.applicationScaling.applicationEc2.applicationSystem 'Routes internet traffic to'
-  aws.vpc.corporateAlb -> aws.vpc.applicationScaling.applicationEc2.applicationSystem 'Routes corporate traffic to'
+  aws.vpc.publicAlb -> aws.vpc.applicationScaling.applicationEc2.applicationMaintenix 'Routes internet traffic to'
+  aws.vpc.corporateAlb -> aws.vpc.applicationScaling.applicationEc2.applicationMaintenix 'Routes corporate traffic to'
 
-  aws.vpc.applicationScaling.applicationEc2.applicationSystem -> aws.vpc.maintenixDb 'Reads and writes Maintenix data'
-  aws.vpc.applicationScaling.applicationEc2.applicationSystem -> aws.vpc.integrationAlb 'Uses the internal integration endpoint'
-  aws.vpc.applicationScaling.applicationEc2.applicationSystem -> aws.vpc.reportingAlb 'Uses the internal reporting endpoint'
-  aws.vpc.integrationAlb -> aws.vpc.integrationScaling.integrationEc2.integrationSystem 'Routes internal traffic to'
-  aws.vpc.reportingAlb -> aws.vpc.reportingScaling.reportingEc2.reportingSystem 'Routes internal traffic to'
+  aws.vpc.applicationScaling.applicationEc2.applicationMaintenix -> aws.vpc.maintenixDb 'Reads and writes Maintenix data'
+  aws.vpc.applicationScaling.applicationEc2.applicationMaintenix -> aws.vpc.integrationAlb 'Uses the internal integration endpoint'
+  aws.vpc.applicationScaling.applicationEc2.applicationMaintenix -> aws.vpc.reportingAlb 'Uses the internal reporting endpoint'
+  aws.vpc.integrationAlb -> aws.vpc.integrationScaling.integrationEc2.integrationMaintenix 'Routes internal traffic to'
+  aws.vpc.reportingAlb -> aws.vpc.reportingScaling.reportingEc2.reportingMaintenix 'Routes internal traffic to'
   onPremises -> aws.vpc.integrationAlb 'Accesses the internal integration endpoint through Transit Gateway'
   onPremises -> aws.vpc.reportingAlb 'Accesses the internal reporting endpoint through Transit Gateway'
 

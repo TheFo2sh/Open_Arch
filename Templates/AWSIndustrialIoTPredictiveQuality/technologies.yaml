@@ -8,19 +8,23 @@ technologies:
     url: https://docs.aws.amazon.com/greengrass/v2/developerguide/
     types: [managed-service, compute-platform]
     platform: aws
-    hosts: [system]
+    hosts: []
   - key: aws-iot-sitewise-connector
     name: AWS IoT SiteWise Connector
     description: Greengrass connector that collects factory equipment data over OPC-UA for AWS IoT SiteWise.
     vendor: Amazon Web Services
     url: https://docs.aws.amazon.com/iot-sitewise/latest/userguide/
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: aws-iot-greengrass-lambda-connector
     name: AWS IoT Greengrass Connector for AWS Lambda functions
     description: Greengrass integration used for the diagram's local video-uploader and ML-inference functions.
     vendor: Amazon Web Services
     url: https://docs.aws.amazon.com/greengrass/v2/developerguide/
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    hosts: [system]
   - key: opc-ua
     name: OPC-UA
     description: Industrial protocol used by the AWS IoT SiteWise Connector to connect to factory equipment.

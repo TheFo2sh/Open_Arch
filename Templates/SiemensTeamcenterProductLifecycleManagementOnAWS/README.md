@@ -13,6 +13,8 @@ An AWS reference architecture for deploying Siemens Teamcenter with separate tes
 
 The design places Teamcenter on Amazon EC2 for high availability. Separate test and production URLs resolve through Amazon Route 53 to Application Load Balancers and the Teamcenter web tiers. A production stack spans Availability Zones and has a standby stack. Customer data-center users can reach the environments over Direct Connect, VPN, or HTTPS.
 
+Teamcenter, its supporting servers, and its license server are products deployed and configured on EC2, so the blueprint models them as managed-service platforms rather than project system slots.
+
 ## How it works
 
 1. End users connect to the test or production Teamcenter URL over HTTPS. Amazon Route 53 resolves each URL.
@@ -33,9 +35,9 @@ The design places Teamcenter on Amazon EC2 for high availability. Separate test 
 |---|---|
 | Zone | **AWS Cloud**, on the AWS platform |
 | Platforms | Route 53, VPCs and VPC Peering, Internet and VPN gateways, Elastic Load Balancing, EC2, RDS, EBS, EFS, FSx for NetApp ONTAP, Direct Connect, Site-to-Site VPN, Directory Service, Systems Manager, WorkSpaces Applications |
-| System slots | **Teamcenter Product Lifecycle Management**, **Siemens license service**, **Operations management**, and **Customer data-center services** |
+| System slots | **Operations management** and **Customer data-center services** |
 | User slots | Test and production users, data-center users, and IT support |
-| Teamcenter services | Test, production, and standby environments with web, enterprise, FMS, Active Workspace, Solr, Deployment Center, visualization, Dispatcher, and Application Integration |
+| Managed-service platforms | Teamcenter test, production, and standby environments with web, enterprise, FMS, Active Workspace, Solr, Deployment Center, visualization, Dispatcher, Application Integration, and license server |
 | Databases | Test, production, and standby PLM databases on Amazon RDS |
 
 ## Assumptions and details not specified by AWS
@@ -49,7 +51,7 @@ The design places Teamcenter on Amazon EC2 for high availability. Separate test 
 
 ## What teams usually customize
 
-- Map the system and user slots to the project's existing Teamcenter, operations, customer data-center systems, and user groups—or leave unused slots out.
+- Map the operations and customer data-center system slots, and the user slots, to existing project systems and user groups—or leave unused slots out.
 - Choose Oracle or SQL Server for RDS and select EBS, EFS, or FSx for NetApp ONTAP for file management.
 - Set Availability Zone count, database and license-server failover, backup/restore, capacity, and production/test isolation to the required service levels.
 - Select the customer directory and license-server implementations, network connectivity, administrator access method, monitoring product, and security policies.

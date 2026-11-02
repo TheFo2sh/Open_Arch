@@ -72,13 +72,25 @@ model {
         uses 'amazon-emr'
       }
 
-      lakeProcessing = system 'Data lake processing' {
-        description 'A project-owned processing workload hosted on Amazon EMR.'
+      hive = platform 'Apache Hive' {
+        description 'Configured Hive engine running on Amazon EMR.'
+        metadata {
+          uses 'apache-hive'
+        }
+      }
+      spark = platform 'Apache Spark' {
+        description 'Configured Spark engine running on Amazon EMR.'
+        metadata {
+          uses 'apache-spark'
+        }
+        lakeProcessing = system 'Data lake processing' {
+          description 'Project-owned processing workload hosted on Apache Spark on Amazon EMR.'
 
-        hudiJobs = container 'Hive, Spark, and Hudi jobs' {
-          description 'Reads raw data, cleans and transforms it, and performs inserts and upserts on required datasets.'
-          metadata {
-            uses 'apache-hive, apache-spark, apache-hudi'
+          hudiJobs = container 'Apache Hudi jobs' {
+            description 'Reads raw data, cleans and transforms it, and performs inserts and upserts on required datasets.'
+            metadata {
+              uses 'apache-hudi'
+            }
           }
         }
       }
@@ -90,13 +102,16 @@ model {
         uses 'amazon-mwaa'
       }
 
-      workflows = system 'Data lake workflows' {
-        description 'A project-owned workflow slot hosted by Amazon MWAA.'
+      airflow = platform 'Apache Airflow' {
+        description 'Configured workflow engine provided through Amazon MWAA.'
+        metadata {
+          uses 'apache-airflow'
+        }
+        workflows = system 'Data lake workflows' {
+          description 'Project-owned workflow code, such as DAGs, hosted on Amazon MWAA.'
 
-        dags = container 'Apache Airflow workflows' {
-          description 'Coordinates the end-to-end data movement and processing workflow.'
-          metadata {
-            uses 'apache-airflow'
+          dags = container 'Data lake workflow code' {
+            description 'Coordinates end-to-end data movement and processing.'
           }
         }
       }
@@ -142,10 +157,12 @@ model {
   aws.s3.batchStaging -> aws.glue.dataCatalog 'Crawler registers metadata in'
   aws.s3.realtimeStaging -> aws.glue.dataCatalog 'Crawler registers metadata in'
 
-  aws.emr.lakeProcessing.hudiJobs -> aws.s3.batchStaging 'Reads raw data from'
-  aws.emr.lakeProcessing.hudiJobs -> aws.s3.realtimeStaging 'Reads raw data from'
-  aws.emr.lakeProcessing.hudiJobs -> aws.s3.parquetData 'Persists cleaned and transformed data to'
-  aws.emr.lakeProcessing.hudiJobs -> aws.s3.reportableData 'Persists reportable datasets to'
+  aws.emr.spark.lakeProcessing.hudiJobs -> aws.s3.batchStaging 'Reads raw data from'
+  aws.emr.spark.lakeProcessing.hudiJobs -> aws.s3.realtimeStaging 'Reads raw data from'
+  aws.emr.spark.lakeProcessing.hudiJobs -> aws.s3.parquetData 'Persists cleaned and transformed data to'
+  aws.emr.spark.lakeProcessing.hudiJobs -> aws.s3.reportableData 'Persists reportable datasets to'
+
+  aws.emr.spark.lakeProcessing -> aws.emr.hive 'Uses Hive for data processing'
 
   aws.mwaa -> aws.emr 'Orchestrates on-demand batch clusters on'
   aws.mwaa -> aws.s3.parquetData 'Orchestrates data movement to'

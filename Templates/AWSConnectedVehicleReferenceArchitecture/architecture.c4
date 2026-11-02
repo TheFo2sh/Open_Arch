@@ -13,12 +13,23 @@ model {
     description 'Project workloads that consume vehicle data for analysis and ADAS or AV model improvement.'
   }
 
-  vehicle = system 'Connected vehicle and ECUs' {
-    description 'Vehicle sensors, telematics control unit, and ECUs that publish telemetry and receive commands.'
-    software = container 'Vehicle software and FleetWise Edge Agent' {
-      description 'Collects vehicle signals and exchanges MQTT messages; the IoT Device SDK and Encryption SDK are optional.'
+  vehicle = system 'Connected vehicle software and ECUs' {
+    description 'Vehicle application and ECU software that publishes telemetry and receives commands.'
+    software = container 'Vehicle software and device SDKs' {
+      description 'Vehicle code exchanges MQTT messages; the IoT Device SDK and Encryption SDK are optional.'
       metadata {
-        uses 'aws-iot-fleetwise-edge-agent, aws-iot-device-sdk, aws-encryption-sdk'
+        uses 'aws-iot-device-sdk, aws-encryption-sdk'
+      }
+    }
+  }
+  vehicleEdge = zone 'Vehicle edge runtime' {
+    metadata {
+      platform 'other'
+    }
+    fleetwiseAgent = platform 'AWS IoT FleetWise Edge Agent' {
+      description 'Configured vehicle-side agent that decodes signals and collects data according to AWS IoT FleetWise campaigns.'
+      metadata {
+        uses 'aws-iot-fleetwise-edge-agent'
       }
     }
   }
@@ -255,7 +266,9 @@ model {
   aws.iotCore -> aws.ecs.telemetryProcessing 'Routes encoded telemetry to workers on'
   aws.s3.descriptorFiles -> aws.iotCore 'Provides the descriptor used by rules to decode compressed messages'
   aws.iotCore -> aws.lambda.backend.registration 'Invokes for first-use certificate registration'
-  aws.fleetWise -> vehicle.software 'Defines data campaigns executed by the FleetWise Edge Agent in'
+  vehicle -> vehicleEdge.fleetwiseAgent 'Provides vehicle signals to'
+  aws.fleetWise -> vehicleEdge.fleetwiseAgent 'Defines data campaigns executed by'
+  vehicleEdge.fleetwiseAgent -> aws.iotCore 'Publishes selected vehicle data through'
   aws.fleetWise -> aws.iotCore 'Sends selected campaign payloads through'
   aws.fleetWise -> aws.timestream.campaignTimeseries 'Can deliver time- and event-based campaign data to'
   aws.fleetWise -> aws.s3.campaignData 'Can deliver selected campaign data to'

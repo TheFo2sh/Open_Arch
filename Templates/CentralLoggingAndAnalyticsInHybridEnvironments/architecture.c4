@@ -18,12 +18,11 @@ model {
 
       onPremVms = system 'On-premises virtual machines' {
         description 'Customer virtual machines that send metrics and logs to Amazon CloudWatch.'
-
-        agent = container 'CloudWatch agent' {
-          description 'Installed on the virtual machines to collect and send metrics and logs.'
-          metadata {
-            uses 'amazon-cloudwatch-agent'
-          }
+      }
+      agent = platform 'Amazon CloudWatch agent' {
+        description 'Installed and configured on the virtual machines to collect and send metrics and logs.'
+        metadata {
+          uses 'amazon-cloudwatch-agent'
         }
       }
     }
@@ -93,12 +92,11 @@ model {
 
           vmwareVms = system 'VMware Cloud on AWS virtual machines' {
             description 'VMware Cloud workloads that send CloudWatch data through an elastic network interface.'
-
-            agent = container 'CloudWatch agent' {
-              description 'Installed on the virtual machines to send metrics and logs to the customer VPC endpoint.'
-              metadata {
-                uses 'amazon-cloudwatch-agent'
-              }
+          }
+          agent = platform 'Amazon CloudWatch agent' {
+            description 'Installed and configured on the virtual machines to send metrics and logs to the customer VPC endpoint.'
+            metadata {
+              uses 'amazon-cloudwatch-agent'
             }
           }
         }
@@ -178,10 +176,10 @@ model {
     }
   }
 
-  datacenter.vsphere.onPremVms.agent -> aws.directConnect 'Sends data over private connectivity'
+  datacenter.vsphere.agent -> aws.directConnect 'Sends data over private connectivity'
   aws.directConnect -> aws.transitGateway 'Connects the customer data center to AWS'
   aws.transitGateway -> aws.customerVpc.cloudwatch 'Routes hybrid metrics and logs to'
-  aws.vmwareCloud.bareMetal.sddc.vmwareVms.agent -> aws.customerVpc.eni 'Sends CloudWatch data through'
+  aws.vmwareCloud.bareMetal.sddc.agent -> aws.customerVpc.eni 'Sends CloudWatch data through'
   aws.customerVpc.eni -> aws.customerVpc.cloudwatch 'Connects to the CloudWatch endpoint in'
   aws.customerVpc.cloudwatch.logData -> isv 'Can export log data to'
   aws.customerVpc.cloudwatch.logData -> aws.centralVpc.firehose 'Delivers subscribed log data to'

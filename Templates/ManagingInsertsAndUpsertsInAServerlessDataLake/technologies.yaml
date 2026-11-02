@@ -41,19 +41,23 @@ technologies:
     description: Reads raw data as part of the Hive and Spark processing on Amazon EMR.
     vendor: Apache Software Foundation
     url: https://hive.apache.org/
-    types: [library]
+    types: [managed-service, compute-platform]
+    platform: aws
   - key: apache-spark
     name: Apache Spark
     description: Reads, cleans, and transforms data on Amazon EMR; Apache Hudi uses its Spark APIs.
     vendor: Apache Software Foundation
     url: https://spark.apache.org/
-    types: [library]
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
   - key: apache-hudi
     name: Apache Hudi
     description: Performs inserts and upserts on required datasets using Spark APIs on Amazon EMR.
     vendor: Apache Software Foundation
     url: https://hudi.apache.org/
     types: [library]
+    packages: [{manager: maven, name: org.apache.hudi:hudi-spark3.5-bundle_2.12}]
   - key: amazon-mwaa
     name: Amazon Managed Workflows for Apache Airflow (MWAA)
     description: Orchestrates data movement, on-demand Amazon EMR clusters, and data loading.
@@ -68,8 +72,9 @@ technologies:
     description: Workflow engine used by Amazon MWAA to orchestrate the data lake workflows.
     vendor: Apache Software Foundation
     url: https://airflow.apache.org/
-    types: [library]
-    packages: [{manager: pypi, name: apache-airflow}]
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
   - key: amazon-athena
     name: Amazon Athena
     description: Queries reportable data on demand.

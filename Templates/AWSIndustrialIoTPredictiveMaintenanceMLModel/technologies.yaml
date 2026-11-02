@@ -8,19 +8,23 @@ technologies:
     url: https://docs.aws.amazon.com/greengrass/v2/developerguide/
     types: [managed-service, compute-platform]
     platform: aws
-    hosts: [system]
+    hosts: []
   - key: aws-iot-sitewise-connector
     name: AWS IoT SiteWise Connector
     description: Greengrass connector that collects factory machine data over OPC-UA for AWS IoT SiteWise.
     vendor: Amazon Web Services
     url: https://docs.aws.amazon.com/iot-sitewise/latest/userguide/
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: aws-iot-greengrass-stream-manager
     name: AWS IoT Greengrass Stream Manager
     description: Greengrass component that publishes other industrial data streams to AWS IoT Core.
     vendor: Amazon Web Services
     url: https://docs.aws.amazon.com/greengrass/v2/developerguide/stream-manager.html
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: opc-ua
     name: OPC-UA
     description: Industrial protocol used by the SiteWise Connector to collect factory machine data.

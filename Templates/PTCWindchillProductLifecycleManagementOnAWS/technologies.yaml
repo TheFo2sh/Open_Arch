@@ -15,7 +15,7 @@ technologies:
     url: https://aws.amazon.com/ec2/
     types: [compute-platform]
     platform: aws
-    hosts: [system]
+    hosts: []
   - key: elastic-load-balancing
     name: Elastic Load Balancing
     description: Load balancers route user traffic to Windchill web servers and client transactions to foreground Method Servers.
@@ -69,19 +69,25 @@ technologies:
     description: Solr index server on EC2 supports keyword searches, including searches across metadata stored in RDS.
     vendor: Apache Software Foundation
     url: https://solr.apache.org/
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: ptc-windchill
     name: PTC Windchill
     description: Third-party product lifecycle management application represented by the Windchill system and its server roles.
     vendor: PTC
     url: https://www.ptc.com/en/products/windchill
-    types: [third-party]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: ptc-solution-monitor
     name: PTC Solution Monitor
     description: Third-party real-time performance monitoring tool for the Windchill system, application, and database.
     vendor: PTC
     url: https://www.ptc.com/
-    types: [third-party]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: corporate-ldap
     name: Corporate LDAP
     description: Customer-provided LDAP directory integrated for Windchill authentication and account management; product and vendor are unspecified.

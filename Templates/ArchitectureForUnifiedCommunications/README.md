@@ -27,11 +27,9 @@ The diagram also shows a VPC with control, public, and private subnets, an Inter
 | | |
 |---|---|
 | Zone | **AWS Cloud**, on the AWS platform |
-| Platforms | Amazon VPC, Internet Gateway, EC2, Direct Connect, Site-to-Site VPN, Route 53, WorkSpaces, AWS Directory Service |
+| Platforms | Amazon VPC, Internet Gateway, EC2, Direct Connect, Site-to-Site VPN, Route 53, WorkSpaces, AWS Directory Service, Avaya Aura roles |
 | Slots | **Corporate users**, **Remote workers**, **UC administrators**, **Corporate network**, **Public internet**, **Public switched telephone network**, **Unified communications applications and devices** |
-| System | **Avaya Aura Unified Communications**, hosted on EC2 |
-| Containers | AADS, SBCs, EMS, Session Managers, Avaya Aura System Manager, Communication Manager, Media Servers |
-| Third-party technology | Avaya Aura |
+| Managed-service platforms | AADS, SBCs, EMS, Session Managers, Avaya Aura System Manager, Communication Manager, Media Servers, hosted on EC2 |
 
 ## Assumptions and unspecified details
 
@@ -48,3 +46,9 @@ The diagram also shows a VPC with control, public, and private subnets, an Inter
 - **Avaya deployment.** Confirm the supported Avaya Aura release, EC2 sizing, licensing, role placement, HA behavior, and configuration with Avaya's deployment guidance.
 - **Identity and telephony integrations.** Specify the Directory Service integration point and the PSTN/SBC connection path once those details are known.
 - **Management access.** Adapt the WorkSpaces bastion pattern to the organization's access controls and operational tooling.
+
+## Classification updates
+
+- **System containers changed to managed-service platforms:** AADS, SBCs, EMS, Session Managers, Avaya Aura System Manager, Communication Manager, and Media Servers. They are configured Avaya products, not code written by the adopting team.
+- **Technology reclassified as a managed service:** `avaya-aura`.
+- **Technologies left unchanged because they fit none of the system, managed-service, or library definitions:** none.

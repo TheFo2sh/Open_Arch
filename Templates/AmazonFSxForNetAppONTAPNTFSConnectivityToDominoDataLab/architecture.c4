@@ -52,38 +52,16 @@ model {
           uses 'amazon-eks'
         }
 
-        domino = system 'Domino Data Lab' {
-          description 'The Domino application, including its platform, compute, and GPU workloads.'
-
-          application = container 'Domino application' {
-            description 'Domino Data Lab application components running on EKS.'
-            technology 'Domino Data Lab'
-            metadata {
-              uses 'domino-data-lab'
-            }
-
-            platformServices = component 'Platform services' {
-              metadata {
-                uses 'domino-data-lab'
-              }
-            }
-            compute = component 'Compute workloads' {
-              metadata {
-                uses 'domino-data-lab'
-              }
-            }
-            gpu = component 'GPU workloads' {
-              metadata {
-                uses 'domino-data-lab'
-              }
-            }
-            trident = component 'NetApp Trident storage integration' {
-              description 'Provisions the NFS volumes Domino uses for FSx for ONTAP data.'
-              technology 'NetApp Trident'
-              metadata {
-                uses 'netapp-trident'
-              }
-            }
+        domino = platform 'Domino Data Lab' {
+          description 'Configured Domino data science platform, including its application, compute, and GPU workloads.'
+          metadata {
+            uses 'domino-data-lab'
+          }
+        }
+        trident = platform 'NetApp Trident' {
+          description 'Configured Kubernetes storage orchestrator that provisions Domino volumes on FSx for ONTAP.'
+          metadata {
+            uses 'netapp-trident'
           }
         }
       }
@@ -138,7 +116,9 @@ model {
   user -> aws.vpc.eks.domino 'Uses Domino in a browser over HTTPS'
   aws.route53 -> aws.vpc.loadBalancer 'Supports the Domino endpoint'
   aws.vpc.loadBalancer -> aws.vpc.eks.domino 'Routes HTTPS traffic to available Domino nodes'
-  aws.vpc.eks.domino.application -> aws.vpc.fsx.dataVolumes 'Accesses Trident-managed volumes over NFS using a service account'
+  aws.vpc.eks.domino -> aws.vpc.eks.trident 'Uses storage provisioned by'
+  aws.vpc.eks.trident -> aws.vpc.fsx.dataVolumes 'Provisions volumes on'
+  aws.vpc.eks.domino -> aws.vpc.fsx.dataVolumes 'Accesses Trident-managed volumes over NFS'
   user -> fileClient 'Uses a local machine to access files'
   fileClient -> aws.vpc.fsx.dataVolumes 'Reads and edits files directly over SMB or NFS'
   aws.vpc.directory -> aws.vpc.fsx 'Joins the SVM to Active Directory for SMB authentication and group-based volume access'

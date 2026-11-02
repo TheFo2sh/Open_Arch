@@ -25,24 +25,23 @@ model {
 
       workloads = system 'EC2 log-producing workloads' {
         description 'Slot for workloads that produce machine logs; the source does not identify an application.'
-
-        fluentBit = container 'Fluent Bit collector option' {
-          description 'One of the alternative collectors listed by AWS; it is not required alongside the other options.'
-          metadata {
-            uses 'fluent-bit'
-          }
+      }
+      fluentBit = platform 'Fluent Bit collector option' {
+        description 'One of the alternative collectors listed by AWS; it is not required alongside the other options.'
+        metadata {
+          uses 'fluent-bit'
         }
-        kinesisAgent = container 'Amazon Kinesis Agent collector option' {
-          description 'One of the alternative collectors listed by AWS; it is not required alongside the other options.'
-          metadata {
-            uses 'amazon-kinesis-agent'
-          }
+      }
+      kinesisAgent = platform 'Amazon Kinesis Agent collector option' {
+        description 'One of the alternative collectors listed by AWS; it is not required alongside the other options.'
+        metadata {
+          uses 'amazon-kinesis-agent'
         }
-        cloudWatchAgent = container 'Amazon CloudWatch Agent collector option' {
-          description 'One of the alternative collectors listed by AWS; it is not required alongside the other options.'
-          metadata {
-            uses 'amazon-cloudwatch-agent'
-          }
+      }
+      cloudWatchAgent = platform 'Amazon CloudWatch Agent collector option' {
+        description 'One of the alternative collectors listed by AWS; it is not required alongside the other options.'
+        metadata {
+          uses 'amazon-cloudwatch-agent'
         }
       }
     }
@@ -85,25 +84,16 @@ model {
       logIndex = database 'Searchable log data' {
         description 'JSON-formatted log lines delivered through the OpenSearch bulk API.'
       }
-      dashboards = system 'OpenSearch Dashboards' {
-        description 'Dashboard interface provided with OpenSearch Service; a slot for the project’s log analytics system.'
-        ui = container 'Log analytics interface' {
-          metadata {
-            uses 'opensearch-dashboards'
-          }
-        }
-      }
     }
   }
 
   cloudTrail -> aws.s3.rawLogs 'Stores CloudTrail logs in'
-  ec2.workloads.fluentBit -> aws.s3.rawLogs 'Collects machine logs to'
-  ec2.workloads.kinesisAgent -> aws.s3.rawLogs 'Collects machine logs to'
-  ec2.workloads.cloudWatchAgent -> aws.s3.rawLogs 'Collects machine logs to'
+  ec2.workloads -> aws.ec2.fluentBit 'Sends machine logs to'
+  ec2.workloads -> aws.ec2.kinesisAgent 'Sends machine logs to'
+  ec2.workloads -> aws.ec2.cloudWatchAgent 'Sends machine logs to'
   flowLogs -> aws.s3.rawLogs 'Stores flow logs in'
   aws.s3 -> aws.sqs 'Sends an object-create event to'
   aws.sqs -> aws.lambda.transform 'Invokes'
   aws.lambda.transform -> aws.openSearch 'Uses the bulk API to deliver structured logs to'
-  analyst -> aws.openSearch.dashboards 'Uses'
-  aws.openSearch.dashboards.ui -> aws.openSearch.logIndex 'Queries and visualizes'
+  analyst -> aws.openSearch 'Uses OpenSearch Dashboards to explore logs'
 }

@@ -12,9 +12,6 @@ model {
   sellerDevelopment = system 'Seller model development' {
     description 'The seller-authored model code and its packaged Docker image.'
     modelImage = container 'Model image' {
-      metadata {
-        uses 'docker'
-      }
     }
   }
 
@@ -76,9 +73,6 @@ model {
         modelEndpoint = system 'Model invocation endpoint' {
           description 'The network-isolated endpoint hosting the seller model container.'
           modelContainer = container 'Seller model container' {
-            metadata {
-              uses 'docker'
-            }
           }
         }
       }

@@ -19,7 +19,7 @@ The reference covers five related connected-vehicle capabilities: modernizing ve
 | | |
 |---|---|
 | Zone | **AWS**, on the AWS platform |
-| Platforms | AWS IoT Core, AWS PrivateLink, Amazon ECS, Amazon S3, Amazon API Gateway, Amazon DynamoDB, Amazon Route 53, AWS Lambda, AWS IoT FleetWise, Amazon Timestream, Amazon SageMaker AI, Amazon QuickSight, AWS IoT Device Management, AWS Private Certificate Authority, AWS IoT Device Defender, AWS Security Hub CSPM, Amazon EventBridge, AWS Step Functions, AWS KMS, AWS AppSync, Amazon SQS, Amazon SNS, Amazon CloudFront |
+| Platforms | AWS IoT Core, AWS PrivateLink, Amazon ECS, Amazon S3, Amazon API Gateway, Amazon DynamoDB, Amazon Route 53, AWS Lambda, AWS IoT FleetWise and its vehicle-side Edge Agent, Amazon Timestream, Amazon SageMaker AI, Amazon QuickSight, AWS IoT Device Management, AWS Private Certificate Authority, AWS IoT Device Defender, AWS Security Hub CSPM, Amazon EventBridge, AWS Step Functions, AWS KMS, AWS AppSync, Amazon SQS, Amazon SNS, Amazon CloudFront |
 | System slots | Connected vehicle and ECUs; companion applications; vehicle-management platform; fleet aggregators and external applications; certificate broker; private cellular network; vehicle security operations center; OEM operations; ECS telemetry workers; Lambda backend functions |
 | User slots | Vehicle owner, data scientist |
 | Client library | AWS Amplify for the companion applications; optional AWS IoT Device SDK and AWS Encryption SDK for vehicle clients |
@@ -44,5 +44,11 @@ The reference covers five related connected-vehicle capabilities: modernizing ve
 - Define certificate issuance and rotation policies, root-CA ownership, OCSP checks, IoT policies, key management, and security-finding response.
 - Select which remote-command and companion-application patterns to use, then implement APIs, authorization, retries, disconnected-device behavior, and application assets.
 - Decide which optional SDKs, FleetWise campaigns, analytics, and encryption paths are needed for the target fleet.
+
+## Classification updates
+
+- **System container changed to a managed-service platform:** AWS IoT FleetWise Edge Agent is deployed/configured vehicle software, not code written by the adopting team. The vehicle software system remains, using only the optional device and encryption SDK libraries.
+- **Technology reclassified as a managed service:** `aws-iot-fleetwise-edge-agent`.
+- **Technologies left unchanged because they fit none of the system, managed-service, or library definitions:** MQTT, MQTT 5, X.509, mutual TLS, OCSP, CSR, and WebSockets are protocols or security standards.
 
 This template describes an architecture blueprint; it does not deploy AWS infrastructure.

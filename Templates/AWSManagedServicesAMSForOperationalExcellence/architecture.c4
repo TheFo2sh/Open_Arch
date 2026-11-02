@@ -22,12 +22,32 @@ model {
   cloudArchitect = user 'Named cloud architect'
   deliveryManager = user 'Named service delivery manager'
 
-  customerItsm = system 'Customer / partner ITSM tooling' {
-    description 'Slot for the customer or partner service desk; AWS names ServiceNow and Jira SD integrations or AWS Support APIs.'
-    integration = container 'AWS Service Management Connector' {
-      description 'Optional connector for ITSM integration; named AWS Service Catalog Management Connectors in the helpdesk diagram.'
+  customerItsm = zone 'Customer / partner ITSM environment' {
+    metadata {
+      platform 'other'
+    }
+    serviceNow = platform 'ServiceNow' {
+      description 'Optional customer or partner ITSM service.'
       metadata {
-        uses 'aws-service-management-connector'
+        uses 'servicenow'
+      }
+      integration = platform 'AWS Service Management Connector' {
+        description 'Optional connector installed and configured for ITSM integration.'
+        metadata {
+          uses 'aws-service-management-connector'
+        }
+      }
+    }
+    jira = platform 'Jira Service Management' {
+      description 'Optional customer or partner ITSM service, called Jira SD in the AWS diagram.'
+      metadata {
+        uses 'jira-service-desk'
+      }
+      integration = platform 'AWS Service Management Connector' {
+        description 'Optional connector installed and configured for ITSM integration.'
+        metadata {
+          uses 'aws-service-management-connector'
+        }
       }
     }
   }
@@ -40,20 +60,20 @@ model {
       platform 'aws'
     }
 
-    customerWorkloads = system 'Customer application and infrastructure workloads' {
-      description 'Slot for the customer systems and resources AMS monitors and operates.'
-      cloudwatchAgent = container 'CloudWatch OS and application agent' {
-        metadata {
-          uses 'amazon-cloudwatch-agent'
-        }
+    ec2 = platform 'Amazon EC2' {
+    metadata {
+      uses 'amazon-ec2'
+    }
+    cloudwatchAgent = platform 'Amazon CloudWatch agent' {
+      description 'Installed and configured on EC2 instances to collect OS and application logs.'
+      metadata {
+        uses 'amazon-cloudwatch-agent'
       }
     }
-
-    ec2 = platform 'Amazon EC2' {
-      metadata {
-        uses 'amazon-ec2'
-      }
-      instances = system 'EC2 instances and OS workloads'
+    instances = system 'EC2 instances and OS workloads'
+    }
+    customerWorkloads = system 'Customer application and infrastructure workloads' {
+    description 'Slot for the customer systems and resources AMS monitors and operates.'
     }
     rds = platform 'Amazon RDS' {
       metadata {
@@ -267,9 +287,12 @@ model {
     }
   }
 
-  customer -> customerItsm 'Uses'
-  partner -> customerItsm 'Raises incidents and service requests through'
-  itsmTeam -> customerItsm 'Owns integration and service-level tooling for'
+  customer -> customerItsm.serviceNow 'Uses when selected'
+  customer -> customerItsm.jira 'Uses when selected'
+  partner -> customerItsm.serviceNow 'Raises incidents and service requests through when selected'
+  partner -> customerItsm.jira 'Raises incidents and service requests through when selected'
+  itsmTeam -> customerItsm.serviceNow 'Owns integration and service-level tooling for when selected'
+  itsmTeam -> customerItsm.jira 'Owns integration and service-level tooling for when selected'
   appOps -> customerWorkloads 'Implements application, OS, and infrastructure practices for'
   customer -> customerWorkloads 'Defines governance and operational policies for'
   amsOps -> customerWorkloads 'Monitors and operates 24x7'
@@ -277,8 +300,10 @@ model {
   cloudArchitect -> customerWorkloads 'Provides named architecture support for'
   deliveryManager -> customerWorkloads 'Provides named service delivery support for'
 
-  customerItsm -> supportServices.support 'Submits incidents and service requests through the connector or AWS Support APIs'
-  supportServices.support -> customerItsm 'Returns AMS updates and resolutions through the AWS Support portal'
+  customerItsm.serviceNow.integration -> supportServices.support 'Submits incidents and service requests through'
+  customerItsm.jira.integration -> supportServices.support 'Submits incidents and service requests through'
+  supportServices.support -> customerItsm.serviceNow 'Returns AMS updates and resolutions through the AWS Support portal'
+  supportServices.support -> customerItsm.jira 'Returns AMS updates and resolutions through the AWS Support portal'
   amsAccount.managedServices -> supportServices.support 'Provides AMS helpdesk and incident management through'
   amsAccount.managedServices -> customerWorkloads 'Provides managed operational services for'
 

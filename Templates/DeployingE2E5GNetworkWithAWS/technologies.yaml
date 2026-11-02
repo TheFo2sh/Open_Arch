@@ -268,7 +268,8 @@ technologies:
     description: Kubernetes CNI meta-plugin used to attach multiple network interfaces to a pod.
     vendor: Kubernetes SIG Network
     url: https://github.com/k8snetworkplumbingwg/multus-cni
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: dpdk
     name: Data Plane Development Kit
     description: Packet-processing toolkit identified by AWS for high-performance 5G Core user-plane microservices.
@@ -286,16 +287,22 @@ technologies:
     description: Monitoring system shown beside the Outposts user-plane workload.
     vendor: The Prometheus Authors
     url: https://prometheus.io/
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: helm, name: prometheus-community/prometheus}]
   - key: grafana
     name: Grafana
     description: Metrics visualization service shown beside the Outposts user-plane workload.
     vendor: Grafana Labs
     url: https://grafana.com/oss/grafana/
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: helm, name: grafana/grafana}]
   - key: fluentd
     name: Fluentd
     description: Log collection service shown beside the Outposts user-plane workload.
     vendor: Fluentd Project
     url: https://www.fluentd.org/
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: helm, name: fluent/fluentd}]

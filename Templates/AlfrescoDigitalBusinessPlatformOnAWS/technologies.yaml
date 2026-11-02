@@ -214,91 +214,106 @@ technologies:
     description: Enterprise content management with information governance.
     vendor: Hyland
     url: https://www.alfresco.com/products/content-services
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: alfresco-content-connector
     name: Alfresco Content Connector
     description: Connects Alfresco to extended content stores such as Amazon S3 and Amazon S3 Glacier.
     vendor: Hyland
     url: https://www.alfresco.com/
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: alfresco-content-center
     name: Alfresco Content Center
     description: Content management user interface shown with administrative access.
     vendor: Hyland
     url: https://www.alfresco.com/
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: alfresco-digital-workspace
     name: Alfresco Digital Workspace
     description: Browser-based Alfresco application for knowledge workers.
     vendor: Hyland
     url: https://www.alfresco.com/
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: alfresco-identity-services
     name: Alfresco Identity Services
     description: Identity services shown as part of the application tier.
     vendor: Hyland
     url: https://www.alfresco.com/
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: alfresco-microsoft-365-connector
     name: Alfresco Microsoft 365 Connector
     description: Connector shown for Microsoft 365 integrations.
     vendor: Hyland
     url: https://www.alfresco.com/
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: alfresco-business-connectors
     name: Alfresco Business Connectors
     description: Business connectors for external productivity and enterprise applications.
     vendor: Hyland
     url: https://www.alfresco.com/
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: alfresco-intelligence-services
     name: Alfresco Intelligence Services
     description: Add-on to the Alfresco Transform engine for machine-learning based metadata and image/text analysis.
     vendor: Hyland
     url: https://www.alfresco.com/
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: alfresco-transformation-engine
     name: Alfresco Transform Engine
     description: Document transformation engine extended by Alfresco Intelligence Services.
     vendor: Hyland
     url: https://www.alfresco.com/
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: alfresco-governance-services
     name: Alfresco Governance Services
     description: Information governance capabilities for Alfresco Content Services.
     vendor: Hyland
     url: https://www.alfresco.com/products/governance
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: alfresco-search-and-insight-engine
     name: Alfresco Search and Insight Engine
     description: Search engine based on Solr, shown on Amazon EC2 and Amazon EBS.
     vendor: Hyland
     url: https://www.alfresco.com/
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: alfresco-search-enterprise
     name: Alfresco Search Enterprise
     description: Alternative Alfresco search offering that uses Amazon OpenSearch Service.
     vendor: Hyland
     url: https://www.alfresco.com/
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: alfresco-process-services
     name: Alfresco Process Services
     description: Business process management for creating, publishing, and using business operations.
     vendor: Hyland
     url: https://www.alfresco.com/products/process-services
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: alfresco-kendra-connector
     name: Alfresco Amazon Kendra data source connector
     description: Alfresco data source connector for Amazon Kendra enterprise search.
     vendor: Hyland
     url: https://www.alfresco.com/
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: apache-solr
     name: Apache Solr
     description: Search engine used by Alfresco Search and Insight Engine.
     vendor: Apache Software Foundation
     url: https://solr.apache.org/
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: microsoft-365
     name: Microsoft 365
     description: External business application suite integrated through Alfresco connectors, including Microsoft Teams, Outlook, and Office.

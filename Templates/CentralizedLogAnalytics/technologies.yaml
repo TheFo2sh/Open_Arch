@@ -29,19 +29,23 @@ technologies:
     description: Open-source log collector listed by AWS as one possible collector.
     vendor: Fluent Bit
     url: https://fluentbit.io/
-    types: [library, third-party]
+    types: [managed-service, third-party]
+    platform: aws
+    packages: [{manager: docker, name: fluent/fluent-bit}]
   - key: amazon-kinesis-agent
     name: Amazon Kinesis Agent
     description: AWS log collector listed as one possible collector in the source.
     vendor: Amazon Web Services
     url: https://docs.aws.amazon.com/firehose/latest/dev/writing-with-agents.html
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: amazon-cloudwatch-agent
     name: Amazon CloudWatch Agent
     description: AWS log collector listed as one possible collector in the source.
     vendor: Amazon Web Services
     url: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: amazon-s3
     name: Amazon S3
     description: Stores log lines and emits object-create events for new objects.
@@ -73,10 +77,4 @@ technologies:
     url: https://aws.amazon.com/opensearch-service/
     types: [managed-service, data-platform]
     platform: aws
-    hosts: [system, database]
-  - key: opensearch-dashboards
-    name: OpenSearch Dashboards
-    description: Provides interactive log analytics, visualizations, notebooks, and dashboards.
-    vendor: OpenSearch Project
-    url: https://opensearch.org/docs/latest/dashboards/
-    types: [library]
+    hosts: [database]

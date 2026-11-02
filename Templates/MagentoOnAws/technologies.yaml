@@ -87,7 +87,9 @@ technologies:
     description: HTTP accelerator that serves Magento's full-page cache.
     vendor: Varnish Software
     url: https://varnish-cache.org/
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: magento-open-source
     name: Magento Open Source
     description: PHP e-commerce platform - catalog, cart, checkout and the admin.

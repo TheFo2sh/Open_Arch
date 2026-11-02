@@ -42,21 +42,25 @@ model {
         uses 'amazon-eks'
       }
 
-      store = system 'Magento e-commerce store' {
-        description 'The containerized Magento storefront and its full-page cache.'
-
-        varnish = container 'Varnish cache' {
-          description 'Varnish Cache Enterprise pods serve cached pages and forward cache misses to Magento.'
-          technology 'Varnish Cache Enterprise'
-          metadata {
-            uses 'varnish-cache-enterprise'
-          }
+      varnish = platform 'Varnish Cache Enterprise' {
+        description 'Configured HTTP acceleration service that serves cached Magento pages and forwards cache misses.'
+        metadata {
+          uses 'varnish-cache-enterprise'
         }
+      }
+      nginx = platform 'Nginx' {
+        description 'Configured web server included in each Magento pod.'
+        metadata {
+          uses 'nginx'
+        }
+      }
+      store = system 'Magento e-commerce store' {
+        description 'The code-owned Magento storefront.'
+
         magento = container 'Magento application' {
-          description 'Magento pods, each including Magento, Nginx, and PHP.'
-          technology 'Magento Open Source or Adobe Commerce, Nginx, PHP'
+          description 'Magento application code and PHP runtime.'
           metadata {
-            uses 'magento-commerce, nginx, php'
+            uses 'magento-commerce, php'
           }
 
           personalizeExtension = component 'Amazon Personalize extension' {
@@ -124,14 +128,16 @@ model {
   aws.route53 -> aws.cloudfront 'Provides DNS configuration for'
   aws.waf -> aws.cloudfront 'Protects Magento traffic through'
   aws.cloudfront -> aws.loadBalancer 'Forwards web traffic to'
-  aws.loadBalancer -> aws.eks.store.varnish 'Distributes requests across'
-  aws.eks.store.varnish -> aws.eks.store.magento 'Forwards cache misses to'
-  aws.ecr -> aws.eks.store.varnish 'Hosts the container image for'
+  aws.loadBalancer -> aws.eks.varnish 'Distributes requests across'
+  aws.eks.varnish -> aws.eks.nginx 'Forwards cache misses to'
+  aws.eks.nginx -> aws.eks.store.magento 'Serves requests to'
+  aws.ecr -> aws.eks.varnish 'Hosts the container image for'
+  aws.ecr -> aws.eks.nginx 'Hosts the container image for'
   aws.ecr -> aws.eks.store.magento 'Hosts the container image for'
   aws.eks.store.magento -> aws.opensearch.catalogIndex 'Searches the product catalog in'
   aws.eks.store.magento -> aws.elasticache.cache 'Uses Redis caching from'
   aws.eks.store.magento -> aws.aurora.storeData 'Reads and writes store data in'
-  aws.eks.store.varnish -> aws.efs 'Reads shared configuration from'
+  aws.eks.varnish -> aws.efs 'Reads shared configuration from'
   aws.eks.store.magento -> aws.efs 'Accesses shared media assets on'
   aws.eks.store.magento.personalizeExtension -> aws.s3.history 'Exports historical user data to'
   aws.s3.history -> aws.personalize 'Provides historical training data to'

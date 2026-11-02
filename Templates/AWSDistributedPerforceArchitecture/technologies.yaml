@@ -48,7 +48,7 @@ technologies:
     url: https://aws.amazon.com/ec2/
     types: [compute-platform]
     platform: aws
-    hosts: [system]
+    hosts: []
   - key: amazon-vpc-nat-gateway
     name: Amazon VPC NAT Gateway
     description: Allows instances in private subnets to connect to external services without accepting inbound connections from them.
@@ -83,7 +83,9 @@ technologies:
     hosts: []
   - key: perforce-helix-core
     name: Perforce Helix Core
-    description: Third-party version-control service used for the commit, standby and edge server roles.
+    description: Perforce version-control server and client software deployed and configured for the commit, standby, edge-server, and workstation roles.
     vendor: Perforce Software
     url: https://www.perforce.com/products/helix-core
-    types: [library, third-party]
+    types: [managed-service]
+    platform: aws
+    hosts: []

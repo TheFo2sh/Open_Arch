@@ -32,13 +32,10 @@ model {
           uses 'amazon-workspaces-applications'
         }
 
-        nxSessions = system 'Siemens NX streaming sessions' {
-          description 'The application sessions users reach through a browser or the WorkSpaces Applications Windows client.'
-
-          nx = container 'Siemens NX' {
-            metadata {
-              uses 'siemens-nx'
-            }
+        nx = platform 'Siemens NX' {
+          description 'Configured Siemens CAD application streamed to users through WorkSpaces Applications.'
+          metadata {
+            uses 'siemens-nx'
           }
         }
       }
@@ -106,11 +103,10 @@ model {
           uses 'amazon-workspaces-applications'
         }
 
-        nxSessions = system 'Siemens NX streaming sessions' {
-          nx = container 'Siemens NX' {
-            metadata {
-              uses 'siemens-nx'
-            }
+        nx = platform 'Siemens NX' {
+          description 'Configured Siemens CAD application streamed to users through WorkSpaces Applications.'
+          metadata {
+            uses 'siemens-nx'
           }
         }
       }
@@ -127,8 +123,17 @@ model {
         uses 'amazon-vpc-peering'
       }
     }
-    auth0 = system 'Auth0 identity provider' {
-      description 'Third-party identity service federated with Active Directory using SAML 2.0 for single sign-on.'
+  }
+
+  auth0Service = zone 'Auth0 SaaS' {
+    metadata {
+      platform 'other'
+    }
+    auth0 = platform 'Auth0 identity provider' {
+      description 'Configured third-party identity service federated with Active Directory using SAML 2.0 for single sign-on.'
+      metadata {
+        uses 'auth0'
+      }
     }
   }
 
@@ -142,13 +147,10 @@ model {
         uses 'amazon-vpc'
       }
     }
-    teamcenter = system 'Siemens Teamcenter' {
-      description 'Runs in the separate VPC; the source does not specify its compute or hosting details.'
-
-      plm = container 'Teamcenter PLM application' {
-        metadata {
-          uses 'siemens-teamcenter'
-        }
+    teamcenter = platform 'Siemens Teamcenter' {
+      description 'Configured product lifecycle management service in the separate VPC; compute and hosting details are unspecified.'
+      metadata {
+        uses 'siemens-teamcenter'
       }
     }
   }
@@ -164,11 +166,10 @@ model {
         uses 'amazon-workspaces-applications'
       }
 
-      nxSessions = system 'Siemens NX streaming sessions' {
-        nx = container 'Siemens NX' {
-          metadata {
-            uses 'siemens-nx'
-          }
+      nx = platform 'Siemens NX' {
+        description 'Configured Siemens CAD application streamed to users through WorkSpaces Applications.'
+        metadata {
+          uses 'siemens-nx'
         }
       }
     }
@@ -178,11 +179,10 @@ model {
         uses 'amazon-ec2'
       }
 
-      activeDirectory = system 'Microsoft Active Directory instances' {
-        directory = container 'Active Directory' {
-          metadata {
-            uses 'microsoft-active-directory'
-          }
+      activeDirectory = platform 'Microsoft Active Directory' {
+        description 'Configured Microsoft directory service deployed on EC2 instances.'
+        metadata {
+          uses 'microsoft-active-directory'
         }
       }
     }
@@ -205,11 +205,10 @@ model {
         uses 'amazon-workspaces-applications'
       }
 
-      nxSessions = system 'Siemens NX streaming sessions' {
-        nx = container 'Siemens NX' {
-          metadata {
-            uses 'siemens-nx'
-          }
+      nx = platform 'Siemens NX' {
+        description 'Configured Siemens CAD application streamed to users through WorkSpaces Applications.'
+        metadata {
+          uses 'siemens-nx'
         }
       }
     }
@@ -219,11 +218,10 @@ model {
         uses 'amazon-ec2'
       }
 
-      activeDirectory = system 'Microsoft Active Directory instances' {
-        directory = container 'Active Directory' {
-          metadata {
-            uses 'microsoft-active-directory'
-          }
+      activeDirectory = platform 'Microsoft Active Directory' {
+        description 'Configured Microsoft directory service deployed on EC2 instances.'
+        metadata {
+          uses 'microsoft-active-directory'
         }
       }
     }
@@ -235,29 +233,42 @@ model {
     }
   }
 
-  engineer -> ebsOption.vpc.workspaces.nxSessions 'Connects through a browser or the Windows client'
-  ebsOption.vpc.workspaces.nxSessions.nx -> ebsOption.vpc.fileServerCompute.fileServer.smbShare 'Uses the shared folder'
+  replicationServices = zone 'Multi-Region file replication' {
+    metadata {
+      platform 'other'
+    }
+    dfsReplication = platform 'Microsoft DFS Replication' {
+      description 'Configured software for bidirectional replication between the regional file systems; exact host is not specified.'
+      metadata {
+        uses 'microsoft-dfs-replication'
+      }
+    }
+  }
+
+  engineer -> ebsOption.vpc.workspaces.nx 'Connects through a browser or the Windows client'
+  ebsOption.vpc.workspaces.nx -> ebsOption.vpc.fileServerCompute.fileServer.smbShare 'Uses the shared folder'
   ebsOption.vpc.fileServerCompute.fileServer -> ebsOption.vpc.ebsVolume 'Serves the attached volume as an SMB share'
   ebsOption.vpc.jumpServerCompute.jumpServer.rdp -> ebsOption.vpc.fileServerCompute.fileServer 'Provides RDP access to the private-subnet instance'
-  ebsOption.vpc.workspaces.nxSessions -> ebsOption.s3 'Uses the selected S3 folder for user home data'
+  ebsOption.vpc.workspaces.nx -> ebsOption.s3 'Uses the selected S3 folder for user home data'
 
   teamcenterOption.workspacesVpc.directory -> teamcenterOption.workspacesVpc.workspaces 'Authorizes domain-joined streaming sessions'
   teamcenterOption.workspacesVpc.directory -> teamcenterOption.workspacesVpc.fsx 'Manages directory and access integration'
-  teamcenterOption.workspacesVpc.workspaces.nxSessions -> teamcenterOption.workspacesVpc.fsx 'Accesses configured user and shared folders'
-  teamcenterOption.workspacesVpc.directory -> teamcenterOption.auth0 'Federates Active Directory sign-in through SAML 2.0'
-  teamcenterOption.auth0 -> teamcenterOption.workspacesVpc.workspaces.nxSessions 'Provides single sign-on for authorized users'
+  teamcenterOption.workspacesVpc.workspaces.nx -> teamcenterOption.workspacesVpc.fsx 'Accesses configured user and shared folders'
+  teamcenterOption.workspacesVpc.directory -> auth0Service.auth0 'Federates Active Directory sign-in through SAML 2.0'
+  auth0Service.auth0 -> teamcenterOption.workspacesVpc.workspaces.nx 'Provides single sign-on for authorized users'
   teamcenterOption.vpcPeering -> teamcenterOption.workspacesVpc 'Connects the WorkSpaces Applications VPC'
   teamcenterOption.vpcPeering -> teamcenterVpc.vpc 'Connects the separate Teamcenter VPC'
-  teamcenterOption.workspacesVpc.workspaces.nxSessions.nx -> teamcenterVpc.teamcenter 'Communicates with Siemens Teamcenter through VPC peering'
+  teamcenterOption.workspacesVpc.workspaces.nx -> teamcenterVpc.teamcenter 'Communicates with Siemens Teamcenter through VPC peering'
 
-  engineer -> regionA.workspaces.nxSessions 'Connects to a regional streaming session'
-  engineer -> regionB.workspaces.nxSessions 'Connects to a regional streaming session'
-  regionA.workspaces.nxSessions -> regionA.ec2.activeDirectory 'Uses the closest Microsoft Active Directory'
-  regionB.workspaces.nxSessions -> regionB.ec2.activeDirectory 'Uses the closest Microsoft Active Directory'
-  regionA.workspaces.nxSessions -> regionA.fsx 'Accesses regional file storage'
-  regionB.workspaces.nxSessions -> regionB.fsx 'Accesses regional file storage'
+  engineer -> regionA.workspaces.nx 'Connects to a regional streaming session'
+  engineer -> regionB.workspaces.nx 'Connects to a regional streaming session'
+  regionA.workspaces.nx -> regionA.ec2.activeDirectory 'Uses the closest Microsoft Active Directory'
+  regionB.workspaces.nx -> regionB.ec2.activeDirectory 'Uses the closest Microsoft Active Directory'
+  regionA.workspaces.nx -> regionA.fsx 'Accesses regional file storage'
+  regionB.workspaces.nx -> regionB.fsx 'Accesses regional file storage'
   regionA.ec2.activeDirectory -> regionB.ec2.activeDirectory 'Replicates across Regions through Active Directory sites'
-  regionA.fsx -> regionB.fsx 'Replicates data bidirectionally using Microsoft DFS Replication'
+  replicationServices.dfsReplication -> regionA.fsx 'Replicates regional data in'
+  replicationServices.dfsReplication -> regionB.fsx 'Replicates data bidirectionally with'
 }
 
 views {

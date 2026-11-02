@@ -32,9 +32,9 @@ The blueprint separates AMS-managed application accounts, the AMS service accoun
 
 ## Assumptions and boundaries
 
-- The systems and users in the blueprint are mapping slots. Map them to the project's own workloads, ITSM system, users, and support roles when applying the template.
+- The customer workload and third-party security systems and the users in the blueprint are mapping slots. Map them to the project's own workloads, users, and support roles when applying the template.
 - AWS depicts application, AMS orchestrator, security, and logging VPC/account boundaries. Their topology, network controls, and deployment configuration are not specified here.
-- ServiceNow and Jira SD are alternatives for the customer/partner ITSM integration, not mandatory dependencies. AWS Support APIs are another documented integration path.
+- ServiceNow and Jira SD are optional managed-service alternatives for the customer/partner ITSM integration. AWS Support APIs are another documented integration path.
 - AWS says third-party security tools can send events to Security Hub but does not name vendors. The blueprint therefore uses an unnamed third-party system slot rather than inventing products.
 - The source says AMS enables five of six essential log types but details only CloudTrail API, CloudWatch OS/application, and VPC Flow Logs in the prose. The remaining log types are not named here.
 - AMS describes daily patch and backup coverage reporting, but does not specify report schemas, Athena queries, retention, or the underlying data stores. No such details are inferred.
@@ -46,3 +46,9 @@ The blueprint separates AMS-managed application accounts, the AMS service accoun
 - Select and configure the ITSM integration, security-event sources, policy frameworks, alarms, thresholds, and notification destinations.
 - Define account boundaries, log types and retention, patch groups and windows, backup plans and vaults, recovery objectives, and disaster-recovery testing.
 - Add deployment-specific network and service details only after confirming them against the chosen AMS operations plan and AWS account configuration.
+
+## Classification updates
+
+- **System elements changed to managed-service platforms:** Customer/partner ITSM tooling is represented as optional ServiceNow or Jira Service Management platforms, and the AWS Service Management Connector is a configured product rather than a system container. The CloudWatch agent is also modeled as a managed-service platform inside EC2.
+- **Technologies reclassified as managed services:** `servicenow`, `jira-service-desk`, `aws-service-management-connector`, and `amazon-cloudwatch-agent`.
+- **Technologies left unchanged because they fit none of the system, managed-service, or library definitions:** none.

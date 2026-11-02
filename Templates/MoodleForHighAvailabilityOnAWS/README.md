@@ -13,16 +13,16 @@ The design separates the Moodle application tier from shared data services and d
 3. The Moodle application uses **Amazon EFS** for shared Moodle data and content, **Amazon Aurora** for persistent application data, and **Amazon ElastiCache** for session and application caching.
 4. **AWS CodePipeline** coordinates the source, build, and deployment workflow using **CodeCommit**, **CodeBuild**, and **CodeDeploy**. **AWS Secrets Manager** protects application secrets, while **Systems Manager Parameter Store** holds environment configuration such as service endpoints.
 
-The application is third-party software: the template catalogs **Moodle** and its **PHP** runtime as libraries used by the Moodle application container. AWS's diagram does not identify any external third-party SaaS dependency, so none is added to the blueprint.
+Moodle is third-party software deployed as-is and configured on EC2, so the blueprint models it as a managed-service platform rather than a system slot or library. AWS's diagram does not identify any external third-party SaaS dependency, so none is added to the blueprint.
 
 ## What applying it brings
 
 | | |
 |---|---|
 | Zone | **AWS**, on the AWS platform |
-| Platforms | Route 53, CloudFront, Certificate Manager, Internet Gateway, NAT Gateway, Application Load Balancer, EC2 Auto Scaling, EC2, EFS, ElastiCache for Redis, Aurora, CodeCommit, CodeBuild, CodeDeploy, CodePipeline, Secrets Manager, Parameter Store |
-| Slots | **Moodle learning platform**, mapped to the project's Moodle system; **Moodle users**, mapped to the project's learners, educators, and administrators |
-| Containers | **Moodle web application**, built with Moodle and PHP |
+| Platforms | Route 53, CloudFront, Certificate Manager, Internet Gateway, NAT Gateway, Application Load Balancer, EC2 Auto Scaling, EC2, Moodle, EFS, ElastiCache for Redis, Aurora, CodeCommit, CodeBuild, CodeDeploy, CodePipeline, Secrets Manager, Parameter Store |
+| Slots | **Moodle users**, mapped to the project's learners, educators, and administrators |
+| Managed products | Moodle, installed and configured on EC2 |
 | Databases | **Session and application cache** on ElastiCache; **Moodle database** on Aurora |
 
 ## What teams usually customize

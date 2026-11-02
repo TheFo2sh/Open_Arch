@@ -19,12 +19,18 @@ Source: [AWS reference architecture](https://docs.aws.amazon.com/reference-archi
 | Zones | **Customer data center** on an unspecified platform; **AWS** |
 | Slots | **On-premises virtual machines**, **VMware Cloud on AWS virtual machines**, and an external **ISV integration** |
 | Platforms | VMware vSphere, VMware Cloud on AWS and its depicted EC2 bare metal/SDDC layers; Amazon VPC, CloudWatch, Direct Connect, Transit Gateway, elastic network interface, Data Firehose, S3, OpenSearch Service, Glue, Athena, Redshift, and QuickSight |
-| Containers | CloudWatch agent on both virtual-machine groups |
+| Managed-service platforms | Amazon CloudWatch agent, installed on both virtual-machine groups |
 | Databases | CloudWatch logs and metrics; S3 log archive; OpenSearch searchable log data; Glue Data Catalog; Redshift analytics data |
 
 ## Assumptions and unspecified details
 
 The source identifies the services and high-level flows but does not specify the ISV product, the exact VMware/EC2 configurations, account and VPC topology, Transit Gateway attachments, log-group selection or retention, agent configuration, subscription filters, Firehose buffering or transformations, S3 layout, OpenSearch sizing, Glue schemas and ETL logic, Athena queries, Redshift design, or QuickSight identity and dashboard configuration. The blueprint therefore keeps the ISV endpoint as a system slot, reflects only the infrastructure layers named in the diagram, and does not invent these implementation choices. Network boundaries and the underlying AWS resources are shown as architecture platforms, not as deployable infrastructure.
+
+## Classification updates
+
+- **System containers changed to managed-service platforms:** the Amazon CloudWatch agent on both virtual-machine groups; it is deployed as-is and configured, not code owned by the adopting team.
+- **Technology reclassified as a managed service:** `amazon-cloudwatch-agent`.
+- **Technologies left unchanged because they fit none of the system, managed-service, or library definitions:** none.
 
 ## What teams usually customize
 

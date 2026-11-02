@@ -77,22 +77,29 @@ technologies:
     description: Kubernetes CNI meta-plugin used to provide multiple network interfaces to a pod.
     vendor: Kubernetes SIG Network
     url: https://github.com/k8snetworkplumbingwg/multus-cni
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: prometheus
     name: Prometheus
     description: Monitoring system shown collecting telemetry from the Outposts workload.
     vendor: The Prometheus Authors
     url: https://prometheus.io/
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: helm, name: prometheus-community/prometheus}]
   - key: grafana
     name: Grafana
     description: Observability dashboard shown with the Outposts workload.
     vendor: Grafana Labs
     url: https://grafana.com/oss/grafana/
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: helm, name: grafana/grafana}]
   - key: fluentd
     name: Fluentd
     description: Log collector shown with the Outposts workload.
     vendor: Fluentd Project
     url: https://www.fluentd.org/
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    packages: [{manager: helm, name: fluent/fluentd}]

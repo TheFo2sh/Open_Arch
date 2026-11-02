@@ -17,18 +17,23 @@ Healthcare and life-sciences organizations can link de-identified, tokenized dat
 
 ## Model and assumptions
 
-- The two AWS zones represent the collaboration creator’s and member’s accounts. The creator and member are user slots; the data collaboration systems are system slots to map to the applying project’s own systems.
+- The two AWS zones represent the collaboration creator’s and member’s accounts. The creator and member are user slots; Datavant Switchboard is a configured managed-service platform in each account.
 - S3 buckets and Glue catalog tables are `database` elements because the template specification has no separate bucket, dataset, or catalog-table kind.
-- Datavant Switchboard is the required third-party container software. Its technology has both `third-party` and `library` types so the blueprint can attach it to a container under the current validator’s rule that container technologies are libraries; this does not assert that Switchboard is a conventional code dependency.
-- Fargate, EKS, and ECS are shown as alternatives because AWS lists supported deployment methods but does not choose a deployment. Select and place the method used by the project when applying the template.
+- AWS lists Fargate, EKS, and ECS as supported deployment methods but does not choose one. The blueprint therefore does not select or place a compute platform.
 - AWS’s diagram places the analytics services in the creator’s AWS cloud, while its numbered description says the member permitted to receive results can use analytics services. The results bucket and analytics services are drawn in the creator zone to follow the diagram; move them to the receiving member’s account if that is the intended arrangement.
 - AWS does not specify the tokenization configuration or algorithm, source schemas or formats, matching rules, account/network setup, table definitions, exact analysis rules, query, result format, analytics implementation, or detailed IAM policy. These details are intentionally not invented.
 - The diagram’s deployment choices and optional analytics services are architectural options, not a deployment plan. This template does not provision infrastructure.
 
 ## What teams usually customize
 
-- Map creator/member user and system slots to the actual participants and systems in the project.
-- Choose the supported container deployment method and define its environment-specific compute and networking.
+- Map creator/member user slots to the actual participants and choose a supported Switchboard deployment method and its environment-specific compute and networking.
 - Identify the source, linked-data, and result buckets, formats, catalog definitions, retention, and access controls.
 - Configure AWS Clean Rooms membership, permitted analysis rules/functions, query permissions, and result recipient.
 - Keep only the analytics services the recipient actually uses, and place the results bucket and services in the appropriate AWS account.
+
+## Classification updates
+
+- **System containers changed to managed-service platforms:** Datavant Switchboard in the creator and member accounts. It is deployed product software configured by each participant, not code written by the adopting team.
+- **Technologies reclassified as managed services:** `datavant-switchboard`.
+- **Unused technologies removed:** AWS Fargate, Amazon EKS, and Amazon ECS were catalog entries for unselected deployment alternatives and had no architecture elements using them.
+- **Technologies left unchanged because they fit none of the system, managed-service, or library definitions:** none.

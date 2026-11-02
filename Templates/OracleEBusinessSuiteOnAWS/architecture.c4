@@ -90,35 +90,48 @@ model {
           uses 'amazon-ec2'
         }
 
-        ebs = system 'Oracle E-Business Suite' {
-          description 'The application system, deployed in DMZ and application tiers.'
+        ebs = platform 'Oracle E-Business Suite' {
+          description 'Oracle enterprise software deployed and configured across the DMZ and application tiers.'
+          metadata {
+            uses 'oracle-ebusiness-suite'
+          }
 
-          dmz = container 'DMZ application tier' {
+          dmz = platform 'DMZ application tier' {
             description 'EC2 APPL_TOP instances in public subnets across Availability Zones.'
-            technology 'Oracle E-Business Suite'
             metadata {
               uses 'oracle-ebusiness-suite'
             }
           }
-          application = container 'Application tier' {
+          application = platform 'Application tier' {
             description 'EC2 APPL_TOP instances in private subnets across Availability Zones.'
-            technology 'Oracle E-Business Suite'
             metadata {
               uses 'oracle-ebusiness-suite'
             }
           }
         }
 
-        primaryDatabase = database 'Primary Oracle database' {
-          description 'Oracle database instance in a private subnet.'
+        primaryDatabase = platform 'Primary Oracle Database' {
+          description 'Self-managed Oracle database instance in a private subnet.'
           metadata {
-            uses 'oracle-database, oracle-data-guard'
+            uses 'oracle-database'
+          }
+          primaryData = database 'Primary E-Business Suite data' {
+            description 'Application data stored in the primary Oracle database.'
           }
         }
-        standbyDatabase = database 'Standby Oracle database' {
-          description 'Oracle database instance in another Availability Zone.'
+        standbyDatabase = platform 'Standby Oracle Database' {
+          description 'Self-managed Oracle database instance in another Availability Zone.'
           metadata {
-            uses 'oracle-database, oracle-data-guard'
+            uses 'oracle-database'
+          }
+          standbyData = database 'Standby E-Business Suite data' {
+            description 'Replicated application data in the standby Oracle database.'
+          }
+        }
+        dataGuard = platform 'Oracle Data Guard' {
+          description 'Synchronous replication configuration between the Oracle database instances.'
+          metadata {
+            uses 'oracle-data-guard'
           }
         }
       }
@@ -136,7 +149,7 @@ model {
   aws.vpc.ec2.ebs.dmz -> aws.vpc.internalAlb 'Forwards application requests to'
   aws.vpc.internalAlb -> aws.vpc.ec2.ebs.application 'Balances requests across'
   aws.vpc.ec2.ebs.application -> aws.vpc.ec2.primaryDatabase 'Uses'
-  aws.vpc.ec2.primaryDatabase -> aws.vpc.ec2.standbyDatabase 'Replicates synchronously with Oracle Data Guard to'
+  aws.vpc.ec2.dataGuard -> aws.vpc.ec2.standbyDatabase 'Replicates the primary database synchronously to'
 
   aws.cloudwatch -> aws.vpc.ec2.ebs 'Collects application logs and monitors'
   aws.systemsManager -> aws.vpc.ec2.ebs 'Provides bastion-less access and management for'

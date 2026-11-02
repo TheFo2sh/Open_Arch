@@ -42,17 +42,14 @@ model {
           uses 'amazon-ec2'
         }
 
-        moodle = system 'Moodle LMS' {
+        systemsManagerAgent = platform 'AWS Systems Manager Agent' {
           metadata {
             uses 'aws-systems-manager-agent'
           }
-
-          application = container 'Moodle application' {
-            description 'Moodle running on PHP and serving the learning management system.'
-            technology 'Moodle, PHP'
-            metadata {
-              uses 'moodle, php'
-            }
+        }
+        moodle = platform 'Moodle LMS' {
+          metadata {
+            uses 'moodle'
           }
         }
       }
@@ -116,15 +113,15 @@ model {
   aws.certificateManager -> aws.cloudfront 'Provides certificates for'
   aws.certificateManager -> aws.alb 'Provides certificates for'
   aws.alb -> aws.autoscaling.ec2.moodle 'Distributes requests to'
-  aws.autoscaling.ec2.moodle.application -> aws.efs 'Reads and writes Moodle content on'
-  aws.autoscaling.ec2.moodle.application -> aws.elasticache.cache 'Stores sessions and application caches in'
-  aws.autoscaling.ec2.moodle.application -> aws.aurora.moodleDatabase 'Reads and writes Moodle data in'
-  aws.autoscaling.ec2.moodle.application -> aws.secretsManager 'Gets application secrets from'
-  aws.autoscaling.ec2.moodle.application -> aws.parameterStore 'Gets configuration from'
+  aws.autoscaling.ec2.moodle -> aws.efs 'Reads and writes Moodle content on'
+  aws.autoscaling.ec2.moodle -> aws.elasticache.cache 'Stores sessions and application caches in'
+  aws.autoscaling.ec2.moodle -> aws.aurora.moodleDatabase 'Reads and writes Moodle data in'
+  aws.autoscaling.ec2.moodle -> aws.secretsManager 'Gets application secrets from'
+  aws.autoscaling.ec2.moodle -> aws.parameterStore 'Gets configuration from'
   aws.codePipeline -> aws.codeCommit 'Gets source from'
   aws.codePipeline -> aws.codeBuild 'Builds and tests with'
   aws.codePipeline -> aws.codeDeploy 'Deploys with'
-  aws.codeDeploy -> aws.autoscaling.ec2.moodle.application 'Deploys application updates to'
+  aws.codeDeploy -> aws.autoscaling.ec2.moodle 'Deploys application updates to'
 }
 
 views {

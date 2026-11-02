@@ -14,13 +14,10 @@ model {
       platform 'other'
     }
 
-    corporateEdge = system 'Corporate data center Perforce Edge Server' {
-      description 'On-premises Edge Server and edge storage; the source does not specify their hardware or storage technology.'
-      edge = container 'Helix Core Edge Server' {
-        description 'Provides the local Perforce Edge Server role for in-office developers.'
-        metadata {
-          uses 'perforce-helix-core'
-        }
+    corporateEdge = platform 'Corporate data center Perforce Edge Server' {
+      description 'Configured on-premises Perforce Edge Server; hardware and storage technology are unspecified.'
+      metadata {
+        uses 'perforce-helix-core'
       }
     }
   }
@@ -53,22 +50,16 @@ model {
         metadata {
           uses 'amazon-ec2'
         }
-        commitPrimary = system 'Primary Region commit server' {
-          description 'Primary Perforce commit server in the first Availability Zone.'
-          server = container 'Commit primary' {
-            description 'Accepts Perforce changes and serves the primary Region.'
-            metadata {
-              uses 'perforce-helix-core'
-            }
+        commitPrimary = platform 'Primary Region commit server' {
+          description 'Configured Perforce commit server that accepts changes and serves the primary Region.'
+          metadata {
+            uses 'perforce-helix-core'
           }
         }
-        edgePrimaryA = system 'Primary Region edge server — AZ A' {
-          description 'Perforce Edge Server in the first Availability Zone.'
-          server = container 'Edge Server' {
-            description 'Serves local Perforce operations and synchronizes with the commit server.'
-            metadata {
-              uses 'perforce-helix-core'
-            }
+        edgePrimaryA = platform 'Primary Region edge server — AZ A' {
+          description 'Configured Perforce Edge Server in the first Availability Zone.'
+          metadata {
+            uses 'perforce-helix-core'
           }
         }
       }
@@ -76,22 +67,16 @@ model {
         metadata {
           uses 'amazon-ec2'
         }
-        commitStandby = system 'Primary Region standby server' {
-          description 'Perforce standby server in a separate Availability Zone.'
-          server = container 'Commit standby' {
-            description 'Provides the standby/HA role alongside the primary commit server.'
-            metadata {
-              uses 'perforce-helix-core'
-            }
+        commitStandby = platform 'Primary Region standby server' {
+          description 'Configured Perforce standby server in a separate Availability Zone.'
+          metadata {
+            uses 'perforce-helix-core'
           }
         }
-        edgePrimaryB = system 'Primary Region edge server — AZ B' {
-          description 'Perforce Edge Server in the second Availability Zone.'
-          server = container 'Edge Server' {
-            description 'Serves local Perforce operations and synchronizes with the commit server.'
-            metadata {
-              uses 'perforce-helix-core'
-            }
+        edgePrimaryB = platform 'Primary Region edge server — AZ B' {
+          description 'Configured Perforce Edge Server in the second Availability Zone.'
+          metadata {
+            uses 'perforce-helix-core'
           }
         }
       }
@@ -176,22 +161,16 @@ model {
         metadata {
           uses 'amazon-ec2'
         }
-        edgeSecondaryA = system 'Secondary Region edge server — AZ A' {
-          description 'Perforce Edge Server in the secondary Region.'
-          server = container 'Edge Server' {
-            description 'Serves local Perforce operations and synchronizes with the commit server.'
-            metadata {
-              uses 'perforce-helix-core'
-            }
+        edgeSecondaryA = platform 'Secondary Region edge server — AZ A' {
+          description 'Configured Perforce Edge Server in the secondary Region.'
+          metadata {
+            uses 'perforce-helix-core'
           }
         }
-        workstations = system 'Remote virtual workstations' {
-          description 'Optional AWS-hosted workstations for remote developers.'
-          client = container 'Helix Core client' {
-            description 'Perforce client used from a virtual workstation.'
-            metadata {
-              uses 'perforce-helix-core'
-            }
+        client = platform 'Helix Core client' {
+          description 'Configured Perforce client used by remote developers, including from optional AWS-hosted workstations.'
+          metadata {
+            uses 'perforce-helix-core'
           }
         }
       }
@@ -199,13 +178,10 @@ model {
         metadata {
           uses 'amazon-ec2'
         }
-        edgeSecondaryB = system 'Secondary Region edge server — AZ B' {
-          description 'Perforce Edge Server HA instance; AWS notes its HA requirement depends on RPO and RTO.'
-          server = container 'Edge Server HA' {
-            description 'Optional high-availability Edge Server in a separate Availability Zone.'
-            metadata {
-              uses 'perforce-helix-core'
-            }
+        edgeSecondaryB = platform 'Secondary Region edge server — AZ B' {
+          description 'Optional configured Perforce Edge Server HA instance; its requirement depends on RPO and RTO.'
+          metadata {
+            uses 'perforce-helix-core'
           }
         }
       }
@@ -237,7 +213,7 @@ model {
   }
 
   inOfficeDeveloper -> corporate.corporateEdge 'Uses the local Edge Server'
-  remoteDeveloper -> secondaryRegion.secondaryVpc.ec2SecondaryA.workstations 'Uses through AWS Client VPN or an AWS virtual workstation'
+  remoteDeveloper -> secondaryRegion.secondaryVpc.ec2SecondaryA.client 'Uses through AWS Client VPN or an AWS virtual workstation'
   corporate.corporateEdge -> primaryRegion.transitGateway 'Connects to AWS through Direct Connect or Site-to-Site VPN'
   primaryRegion.directConnect -> primaryRegion.transitGateway 'Connects the corporate network through'
   primaryRegion.siteToSiteVpn -> primaryRegion.transitGateway 'Alternative corporate network connection through'
@@ -254,7 +230,7 @@ model {
   primaryRegion.primaryVpc.ec2PrimaryB.edgePrimaryB -> primaryRegion.primaryVpc.ec2PrimaryA.commitPrimary 'Uses commit-edge replication'
   corporate.corporateEdge -> primaryRegion.primaryVpc.ec2PrimaryA.commitPrimary 'Synchronizes over the corporate connection'
   primaryRegion.primaryVpc.ec2PrimaryA.commitPrimary -> secondaryRegion.secondaryVpc.ec2SecondaryA.edgeSecondaryA 'Replicates Perforce content across Regions'
-  secondaryRegion.secondaryVpc.ec2SecondaryA.workstations -> secondaryRegion.secondaryVpc.ec2SecondaryA.edgeSecondaryA 'Connects to Perforce from the workstation'
+  secondaryRegion.secondaryVpc.ec2SecondaryA.client -> secondaryRegion.secondaryVpc.ec2SecondaryA.edgeSecondaryA 'Connects to Perforce from the workstation'
 
   primaryRegion.primaryVpc.ec2PrimaryA.commitPrimary -> primaryRegion.primaryVpc.ebsPrimaryA.primaryState 'Persists server state on'
   primaryRegion.primaryVpc.ec2PrimaryB.commitStandby -> primaryRegion.primaryVpc.ebsPrimaryB.standbyState 'Persists server state on'

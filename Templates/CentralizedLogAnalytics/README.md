@@ -20,20 +20,20 @@ Collect machine logs centrally, transform them when needed, index them in Amazon
 |---|---|
 | Zone | **AWS**, on the AWS platform |
 | User slot | **Log analyst** |
-| System slots | **EC2 log-producing workloads**, **Log transformation function**, and **OpenSearch Dashboards** |
-| Platforms | AWS CloudTrail, Amazon EC2, Amazon VPC Flow Logs, Amazon S3, Amazon SQS, AWS Lambda, and Amazon OpenSearch Service |
-| Containers | Alternative EC2 log collectors (Fluent Bit, Amazon Kinesis Agent, or Amazon CloudWatch Agent); OpenSearch Dashboards interface |
+| System slots | **EC2 log-producing workloads**, **Log transformation function** |
+| Platforms | AWS CloudTrail, Amazon EC2, Fluent Bit, Amazon Kinesis Agent, Amazon CloudWatch Agent, Amazon VPC Flow Logs, Amazon S3, Amazon SQS, AWS Lambda, and Amazon OpenSearch Service |
+| Managed products | Fluent Bit, Amazon Kinesis Agent, and Amazon CloudWatch Agent are configured collectors running on EC2; OpenSearch Dashboards is part of OpenSearch Service |
 | Databases | **Collected log objects** on S3; **Searchable log data** on OpenSearch Service |
 
 ## Assumptions and unspecified details
 
-AWS does not identify the application running on EC2, the specific flow-log source (the diagram only says “flow logs”), collector configuration, or collector-specific delivery mechanism to S3. The template interprets the diagram's “flow logs” label as Amazon VPC Flow Logs and shows the collectors as alternatives, not services that must all run together. It depicts the documented logical flow to S3 without adding an intermediary service such as Kinesis Data Firehose.
+AWS does not identify the application running on EC2, the specific flow-log source (the diagram only says “flow logs”), collector configuration, or collector-specific delivery mechanism to S3. The template interprets the diagram's “flow logs” label as Amazon VPC Flow Logs and shows the collectors as alternatives, not services that must all run together. The collectors are managed products, not system slots; the application workload remains a system slot. It depicts the documented logical flow to S3 without adding an intermediary service such as Kinesis Data Firehose.
 
 The source does not specify an AWS account layout, a region name, bucket or index configuration, retention, access controls, Lambda runtime or implementation, transformation schema, or OpenSearch sizing. The AWS page names no mandatory third-party service; Fluent Bit is one optional third-party collector choice.
 
 ## What teams usually customize
 
 - Map the log analyst and EC2 workload slots to the project's actual people and systems.
-- Choose and configure the log producers and collector implementation; select one of the listed collectors or another supported option.
+- Choose, deploy, and configure the log producers and collector implementation; select one of the listed collectors or another supported option.
 - Define bucket and index names, retention, security, access, Lambda transformation logic, and the operational setup for the SQS notification.
 - Add any collection or delivery services that the chosen collector configuration requires, if those are part of the project architecture.

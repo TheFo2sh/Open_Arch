@@ -133,52 +133,61 @@ technologies:
     description: Product lifecycle management software used by the web and enterprise tiers.
     vendor: Siemens
     url: https://www.siemens.com/global/en/products/software/teamcenter.html
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: siemens-active-workspace
     name: Siemens Active Workspace
     description: Browser-based Teamcenter workspace shown as an additional Teamcenter service.
     vendor: Siemens
     url: https://www.siemens.com/global/en/products/software/teamcenter/active-workspace.html
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: siemens-teamcenter-fms
     name: Siemens Teamcenter File Management System
     description: Teamcenter service that stores and retrieves files using the selected AWS storage option.
     vendor: Siemens
     url: https://www.siemens.com/global/en/products/software/teamcenter.html
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: apache-solr
     name: Apache Solr
     description: Search service listed among the additional Teamcenter services.
     vendor: The Apache Software Foundation
     url: https://solr.apache.org/
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: siemens-deployment-center
     name: Siemens Deployment Center
     description: Deployment service listed among the additional Teamcenter services.
     vendor: Siemens
     url: https://www.siemens.com/global/en/products/software/teamcenter.html
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: siemens-teamcenter-visualization
     name: Siemens Teamcenter Visualization Server
     description: Visualization server shown in the Teamcenter stack.
     vendor: Siemens
     url: https://www.siemens.com/global/en/products/software/teamcenter.html
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: siemens-teamcenter-dispatcher
     name: Siemens Teamcenter Dispatcher
     description: Dispatcher server shown in the Teamcenter stack.
     vendor: Siemens
     url: https://www.siemens.com/global/en/products/software/teamcenter.html
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: siemens-application-integration
     name: Siemens Application Integration
     description: Application Integration server shown in the Teamcenter stack.
     vendor: Siemens
     url: https://www.siemens.com/global/en/products/software/teamcenter.html
-    types: [library]
+    types: [managed-service]
+    platform: aws
   - key: siemens-license-server
     name: Siemens License Server
     description: Teamcenter license server instances shown across availability zones.
     vendor: Siemens
     url: https://www.siemens.com/global/en/products/software/teamcenter.html
-    types: [library]
+    types: [managed-service]
+    platform: aws
