@@ -13,7 +13,9 @@ technologies:
     description: Installed on virtual machines to send their metrics and logs to Amazon CloudWatch.
     vendor: Amazon Web Services
     url: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: aws-transit-gateway
     name: AWS Transit Gateway
     description: Routes CloudWatch metrics and logs from hybrid environments to the customer-owned VPC.

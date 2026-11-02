@@ -22,19 +22,25 @@ technologies:
     description: Optional integration between customer ITSM tooling and AWS Support; the AMS diagram labels the connector AWS Service Catalog Management Connectors.
     vendor: Amazon Web Services
     url: https://aws.amazon.com/solutions/implementations/aws-service-management-connector/
-    types: [library]
+    types: [managed-service]
+    platform: other
+    hosts: []
   - key: servicenow
     name: ServiceNow
     description: Optional third-party ITSM platform that can integrate with AWS Support through the AWS Service Management Connector.
     vendor: ServiceNow
     url: https://www.servicenow.com/
-    types: [third-party]
+    types: [managed-service]
+    platform: other
+    hosts: []
   - key: jira-service-desk
     name: Jira Service Desk
     description: Optional third-party ITSM platform, identified as Jira SD in the AWS source, that can integrate with AWS Support through the AWS Service Management Connector.
     vendor: Atlassian
     url: https://www.atlassian.com/software/jira/service-management
-    types: [third-party]
+    types: [managed-service]
+    platform: other
+    hosts: []
   - key: amazon-vpc
     name: Amazon Virtual Private Cloud (Amazon VPC)
     description: VPC boundaries are shown for application, AMS orchestration, security, and logging accounts; the source does not specify their network design.
@@ -136,7 +142,9 @@ technologies:
     description: Agent used to collect operating-system and application logs for CloudWatch.
     vendor: Amazon Web Services
     url: https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Install-CloudWatch-Agent.html
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: aws-cloudtrail
     name: AWS CloudTrail
     description: Captures AWS API activity logs for CloudWatch and centralized logging.
