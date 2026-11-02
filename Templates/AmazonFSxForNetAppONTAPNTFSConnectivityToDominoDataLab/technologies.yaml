@@ -25,7 +25,7 @@ technologies:
     url: https://aws.amazon.com/eks/
     types: [managed-service, compute-platform]
     platform: aws
-    hosts: [system]
+    hosts: []
     packages: [{manager: terraform, name: hashicorp/aws}]
   - key: amazon-fsx-for-netapp-ontap
     name: Amazon FSx for NetApp ONTAP
@@ -77,13 +77,17 @@ technologies:
     description: Third-party data science platform deployed on Amazon EKS.
     vendor: Domino Data Lab
     url: https://www.dominodatalab.com/
-    types: [library, third-party]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: netapp-trident
     name: NetApp Trident
     description: Kubernetes storage orchestrator that provides Domino with Trident-managed FSx for ONTAP volumes over NFS.
     vendor: NetApp
     url: https://docs.netapp.com/us-en/trident/
-    types: [library, third-party]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: vpc-peering
     name: VPC Peering
     description: Optional connection for integrating data sources in another VPC.

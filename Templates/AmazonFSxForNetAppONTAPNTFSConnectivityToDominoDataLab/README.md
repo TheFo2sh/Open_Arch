@@ -20,8 +20,8 @@ Domino Data Lab runs on Amazon EKS and works with data on Amazon FSx for NetApp 
 |---|---|
 | Zone | **AWS**, with a VPC |
 | Platforms | Elastic Load Balancing, Amazon EKS, FSx for NetApp ONTAP, AWS Directory Service, Secrets Manager, ECR, Route 53, and optional external-connectivity services |
-| Slots | **Domino Data Lab**, the user's existing Domino system; **Domino user**; **Local file access client**; **External data sources** |
-| Containers and components | Domino application with platform, compute, GPU, and NetApp Trident storage integration |
+| Managed-service platforms | Domino Data Lab and NetApp Trident on Amazon EKS |
+| Slots | **Domino user**; **Local file access client**; **External data sources** |
 | Database | **Domino data volumes** on FSx for NetApp ONTAP |
 
 ## Assumptions and unspecified details
@@ -36,3 +36,10 @@ The connectivity services shown for external data are alternatives, not a requir
 - Choose their actual FSx for ONTAP SVMs and volumes, NTFS/AD permissions, mount paths, and NFS/SMB client needs.
 - Replace the generic network outline with their VPC, subnet, access-control, availability, and selected external connectivity design.
 - Align the Domino deployment, EKS sizing, and supporting AWS service configuration with their environment.
+
+## Classification updates
+
+- **System converted to a managed-service platform:** Domino Data Lab was a system/container hierarchy even though the adopting team configures the deployed product rather than writing its code.
+- **Component converted to a managed-service platform:** NetApp Trident is a configured Kubernetes storage orchestrator, not a package dependency.
+- **Technologies reclassified as managed services:** `domino-data-lab` and `netapp-trident`.
+- **Technologies left unchanged because they fit none of the system, managed-service, or library definitions:** NFS and SMB are file-access protocols; NTFS is a filesystem/security style.

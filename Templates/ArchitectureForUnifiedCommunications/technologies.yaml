@@ -69,4 +69,6 @@ technologies:
     description: Third-party unified communications software whose roles are hosted on Amazon EC2.
     vendor: Avaya
     url: https://www.avaya.com/en/products/unified-communications/
-    types: [library, third-party]
+    types: [managed-service]
+    platform: aws
+    hosts: []
