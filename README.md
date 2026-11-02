@@ -46,7 +46,13 @@ Templates/<Template>/
        packages: [{manager: terraform, name: hashicorp/aws}]
    ```
 
-   `types` are `library`, `managed-service`, `compute-platform`, `data-platform` and `third-party`. A container or component is built with libraries; a zone holds managed services and platforms. `packages` are optional: a catalog technology whose usage guides name one of them counts as the same technology.
+   `types` are `library`, `managed-service`, `compute-platform`, `data-platform` and `third-party`.
+
+   - A **system** is an application whose behaviour changes when the team changes its code. In a template it is a slot mapped onto one of the project's own systems.
+   - A **managed service** is software deployed as it is and changed only through configuration. It includes both cloud-provider services and products the team installs and runs itself, such as a Docker image, Helm chart, Terraform or Pulumi module, or VM installer. Plugins, settings and admin screens are configuration.
+   - A **library** is a package that a system's code depends on through a package manager, such as npm, NuGet, Maven, PyPI, Cargo, Go, Composer or RubyGems.
+
+   A system, container or component uses libraries only; a zone holds managed services and platforms. `packages` are optional: a catalog technology whose usage guides name one of them counts as the same technology.
 
 4. **Draw the blueprint in `architecture.c4`**, a [LikeC4](https://likec4.dev) model that uses the element kinds of `specification.c4` and nothing else:
 
@@ -88,7 +94,7 @@ Templates/<Template>/
    Relationships follow M1Spec's rules:
    - A platform is a relationship's end only when it is a managed service or a data platform; a compute platform is related through what runs on it.
    - What runs on a platform does not also relate to it.
-   - A user relates to systems, not to platforms.
+   - A user relates to systems, or directly to a managed service or data platform.
 
    A `views` block is welcome for previewing with LikeC4; M1Spec ignores it.
 

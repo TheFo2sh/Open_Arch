@@ -146,6 +146,21 @@ const RULES = [
     },
   },
   {
+    name: "libraries-are-packages",
+    check: (t) => (t.technologies?.technologies ?? []).flatMap((technology) => {
+      const packages = technology.packages ?? [];
+      const errors = [];
+      if (technology.types.includes("library") && packages.some((pkg) => ["docker", "helm", "terraform", "pulumi"].includes(pkg.manager))) {
+        errors.push(`${technology.key} is a library but its package is managed by Docker, Helm, Terraform or Pulumi`);
+      }
+      if (technology.types.some((type) => ["managed-service", "compute-platform", "data-platform"].includes(type))
+        && packages.some((pkg) => ["npm", "nuget", "maven", "pypi", "cargo", "go", "composer", "rubygems"].includes(pkg.manager))) {
+        errors.push(`${technology.key} is a managed service or platform but its package is a library package`);
+      }
+      return errors;
+    }),
+  },
+  {
     name: "runs-where-it-is-hosted",
     check: (t) => {
       const technologies = new Map((t.technologies?.technologies ?? []).map((technology) => [technology.key, technology]));
@@ -181,7 +196,6 @@ const RULES = [
             problems.push(`${label}: ${element.title} is a compute platform only; relate what runs on it`);
           }
           if (runsOn(other, end)) problems.push(`${label}: what runs on ${element.title} can't also relate to it`);
-          if (byId.get(other)?.kind === "user") problems.push(`${label}: a user relates to a system, not to a platform`);
         }
         return problems;
       });
