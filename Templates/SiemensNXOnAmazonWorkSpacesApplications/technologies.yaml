@@ -8,7 +8,7 @@ technologies:
     url: https://docs.aws.amazon.com/appstream2/latest/developerguide/
     types: [managed-service, compute-platform]
     platform: aws
-    hosts: [system]
+    hosts: []
   - key: amazon-vpc
     name: Amazon Virtual Private Cloud
     description: Network boundary containing the streaming, storage, and administration resources in the relevant deployment.
@@ -86,13 +86,17 @@ technologies:
     description: Siemens computer-aided design application streamed through Amazon WorkSpaces Applications.
     vendor: Siemens
     url: https://www.sw.siemens.com/en-US/products/nx/
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: siemens-teamcenter
     name: Siemens Teamcenter
     description: Product lifecycle management system that Siemens NX communicates with in the Teamcenter option.
     vendor: Siemens
     url: https://www.sw.siemens.com/en-US/digital-thread/
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: microsoft-smb
     name: Server Message Block
     description: File-sharing protocol used by the EC2 instance that exports its attached EBS volume as a shared folder.
@@ -110,19 +114,25 @@ technologies:
     description: Directory software running on EC2 instances in each Region of the multi-Region option.
     vendor: Microsoft
     url: https://www.microsoft.com/en-us/windows-server/active-directory
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: microsoft-dfs-replication
     name: Microsoft Distributed File System Replication
     description: Microsoft replication technology identified for bidirectional Amazon FSx data replication in the multi-Region option.
     vendor: Microsoft
     url: https://learn.microsoft.com/en-us/windows-server/storage/dfs-replication/dfsr-overview
-    types: [library]
+    types: [managed-service]
+    platform: aws
+    hosts: []
   - key: auth0
     name: Auth0
     description: Third-party identity service used with Active Directory SAML 2.0 federation for single sign-on in the Teamcenter option.
     vendor: Auth0
     url: https://auth0.com/
-    types: [third-party]
+    types: [managed-service]
+    platform: other
+    hosts: []
   - key: saml-2-0
     name: SAML 2.0
     description: Federation protocol used between Active Directory and Auth0 for single sign-on in the Teamcenter option.
