@@ -4,7 +4,7 @@
 PackageId: OpenArch.SAPIntegrationSuiteEdgeIntegrationCellOnAWS
 Name: SAP Integration Suite Edge Integration Cell on AWS
 Description: SAP BTP design and lifecycle management with an Edge Integration Cell runtime on private, multi-AZ Amazon EKS and managed PostgreSQL, Redis, and persistent storage.
-Version: 1.0.0
+Version: 1.1.0
 Icon: logos:sap
 Publisher: Open_Arch
 Tags: [sap, aws, integration, hybrid-cloud, eks, high-availability]

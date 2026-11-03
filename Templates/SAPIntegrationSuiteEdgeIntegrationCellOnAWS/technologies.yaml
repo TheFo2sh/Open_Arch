@@ -50,6 +50,14 @@ technologies:
     types: [managed-service, compute-platform]
     platform: aws
     hosts: [system]
+  - key: sap-edge-integration-cell
+    name: SAP Edge Integration Cell
+    description: SAP Integration Suite runtime that Edge Lifecycle Management deploys onto the customer's Kubernetes cluster; it executes the integration flows and APIs designed in SAP Integration Suite.
+    vendor: SAP
+    url: https://help.sap.com/docs/integration-suite
+    types: [managed-service, compute-platform]
+    platform: aws
+    hosts: [system]
   - key: amazon-route53
     name: Amazon Route 53
     description: DNS records map the custom Edge Integration Cell hostname to the load balancer endpoint.
