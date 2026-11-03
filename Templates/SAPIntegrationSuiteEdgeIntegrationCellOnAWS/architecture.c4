@@ -92,10 +92,16 @@ model {
         metadata {
           uses 'amazon-eks'
         }
-        runtime = system 'Edge integration runtime' {
-          description 'The project integration runtime implemented with SAP Edge Integration Cell, aggregated across its three-AZ worker deployment.'
-          flows = container 'Integration flows and APIs' {
-            description 'Executes the project integration flows and API scenarios inside the customer AWS landscape.'
+        eic = platform 'SAP Edge Integration Cell' {
+          description 'Deployed onto the EKS cluster by Edge Lifecycle Management and replicated across the three AZs; it runs the integration content designed in SAP Integration Suite.'
+          metadata {
+            uses 'sap-edge-integration-cell'
+          }
+          runtime = system 'Edge integration content' {
+            description 'The project integration flows and APIs, designed in SAP Integration Suite and deployed to Edge Integration Cell.'
+            flows = container 'Integration flows and APIs' {
+              description 'Executes the project integration flows and API scenarios inside the customer AWS landscape.'
+            }
           }
         }
       }
@@ -165,8 +171,9 @@ model {
 
   integrationTeam -> btp.suite.integrationManagement 'Designs, deploys, and monitors integrations'
   btp.suite.integrationManagement -> btp.elm 'Registers and manages edge nodes'
-  btp.elm -> aws.vpc.eks.runtime 'Bootstraps the edge node and manages solution lifecycle'
-  aws.vpc.eks.runtime -> btp.suite 'Uses cloud integration design and monitoring services over HTTPS'
+  btp.elm -> aws.vpc.eks.eic 'Bootstraps the edge node and manages the Edge Integration Cell solution lifecycle'
+  btp.suite.integrationManagement -> aws.vpc.eks.eic.runtime 'Deploys integration flows and APIs to'
+  aws.vpc.eks.eic -> btp.suite 'Uses cloud integration design and monitoring services over HTTPS'
   btp.suite.integrationManagement -> btp.connectivity 'Uses private SAP connectivity'
   btp.suite.integrationManagement -> btp.destinations 'Uses configured destinations'
   btp.connectivity -> privateSap.connector 'Provides the HTTPS connectivity path shown in the reference'
@@ -178,32 +185,32 @@ model {
   aws.dns -> aws.vpc.nlb 'Maps the endpoint hostname to the NLB address'
   apiConsumer -> aws.vpc.nlb 'Invokes the integration endpoint over HTTPS'
   aws.vpc.internetGateway -> aws.vpc.nlb 'Provides public ingress connectivity'
-  aws.vpc.nlb -> aws.vpc.eks.runtime.flows 'Distributes incoming requests to runtime services'
-  aws.vpc.eks.runtime -> aws.vpc.nat 'Uses the per-AZ outbound route'
+  aws.vpc.nlb -> aws.vpc.eks.eic 'Distributes incoming requests to the Edge Integration Cell services'
+  aws.vpc.eks.eic -> aws.vpc.nat 'Uses the per-AZ outbound route'
   aws.vpc.nat -> aws.vpc.internetGateway 'Routes outbound internet connections'
-  aws.vpc.eks.runtime -> aws.vpc.rds.runtimeData 'Reads and writes runtime data using PostgreSQL with TLS'
-  aws.vpc.eks.runtime -> aws.vpc.redis.runtimeState 'Uses external Redis with TLS'
-  aws.vpc.eks.runtime -> aws.vpc.ebs.volumes 'Mounts RWO persistent volumes'
-  aws.vpc.eks.runtime -> aws.vpc.efs.files 'Mounts RWX shared files'
+  aws.vpc.eks.eic -> aws.vpc.rds.runtimeData 'Reads and writes runtime data using PostgreSQL with TLS'
+  aws.vpc.eks.eic -> aws.vpc.redis.runtimeState 'Uses external Redis with TLS'
+  aws.vpc.eks.eic -> aws.vpc.ebs.volumes 'Mounts RWO persistent volumes'
+  aws.vpc.eks.eic -> aws.vpc.efs.files 'Mounts RWX shared files'
 }
 
 views {
   view index {
     title 'SAP Integration Suite Edge Integration Cell on AWS'
     include integrationTeam, apiConsumer, btp.*, btp.suite.integrationManagement,
-      aws.*, aws.vpc.*, aws.vpc.eks.runtime, privateSap.*, cloudSap.*
+      aws.*, aws.vpc.*, aws.vpc.eks.eic, aws.vpc.eks.eic.runtime, privateSap.*, cloudSap.*
     autoLayout LeftRight
   }
   view runtime {
     title 'Private multi-AZ Edge Integration Cell runtime and persistence'
-    include apiConsumer, aws.*, aws.vpc.*, aws.vpc.eks.runtime,
-      aws.vpc.eks.runtime.flows, aws.vpc.rds.*, aws.vpc.redis.*, aws.vpc.ebs.*, aws.vpc.efs.*
+    include apiConsumer, aws.*, aws.vpc.*, aws.vpc.eks.eic, aws.vpc.eks.eic.runtime,
+      aws.vpc.eks.eic.runtime.flows, aws.vpc.rds.*, aws.vpc.redis.*, aws.vpc.ebs.*, aws.vpc.efs.*
     autoLayout LeftRight
   }
   view sapServices {
     title 'SAP BTP management and SAP application connectivity'
     include integrationTeam, btp.*, btp.suite.integrationManagement,
-      btp.suite.integrationManagement.*, aws.vpc.eks.runtime, privateSap.*, cloudSap.*
+      btp.suite.integrationManagement.*, aws.vpc.eks.eic, aws.vpc.eks.eic.runtime, privateSap.*, cloudSap.*
     autoLayout LeftRight
   }
 }
