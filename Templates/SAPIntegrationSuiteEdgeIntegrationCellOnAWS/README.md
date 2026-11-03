@@ -30,8 +30,7 @@ This is a conceptual architecture template. It supplies no Terraform, Kubernetes
 - [Source text at commit 0bb8914](https://github.com/SAP/architecture-center/blob/0bb8914e9390b7eb2acce1c791c694abf60336f4/docs/ref-arch/RA0008/1-edge-integration-cell-on-aws/readme.md) and [original draw.io diagram](https://github.com/SAP/architecture-center/blob/0bb8914e9390b7eb2acce1c791c694abf60336f4/docs/ref-arch/RA0008/1-edge-integration-cell-on-aws/drawio/sap-edge-integration-cell-aws.drawio). The diagram itself is dated February 18, 2025.
 - [SAP's linked AWS deployment guide](https://github.com/SAP-archive/btp-edge-integration-cell-aws/tree/bcbfeabec27521190f44e1391a43d6a55f787b5e), now archived, clarifies NLB ingress, DNS mapping, and external PostgreSQL/Redis TLS connections. Its historical component versions are not pinned by this template; consult current SAP support and sizing guidance, including [SAP Note 3247839](https://me.sap.com/notes/3247839).
 
-Open_Arch re-expresses the source architecture in M1Spec/LikeC4, consolidates repeated AZ resources, separates inbound NLB routing from outbound NAT routing, and adds the lifecycle service described in the source text. It does not reproduce the original diagram artwork. The application and integration contracts remain project choices.
-Edge Integration Cell is modelled as a platform inside EKS, because it is deployed as it is and configured; only the integration content is a system.
+Open_Arch re-expresses the source architecture in M1Spec/LikeC4, consolidates repeated AZ resources, separates inbound NLB routing from outbound NAT routing, and adds the lifecycle service described in the source text. It does not reproduce the original diagram artwork. The application and integration contracts remain project choices. Edge Integration Cell is modelled as a platform inside EKS, because it is deployed as it is and configured; only the integration content is a system.
 
 ## Attribution and license
 
