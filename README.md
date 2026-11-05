@@ -54,6 +54,8 @@ Templates/<Template>/
 
    A system, container or component uses libraries only; a zone holds managed services and platforms. `packages` are optional: a catalog technology whose usage guides name one of them counts as the same technology.
 
+   A product the team installs itself (from a Docker image or a Helm chart) also lists the Terraform or Pulumi package that deploys it: `hashicorp/helm` for a Helm chart on Kubernetes, the cloud provider's own (`hashicorp/aws`) for an EKS add-on, a VM's software or a function's image. A catalog for infrastructure as code takes only that one.
+
 4. **Draw the blueprint in `architecture.c4`**, a [LikeC4](https://likec4.dev) model that uses the element kinds of `specification.c4` and nothing else:
 
    | Kind | Is | Where it goes |

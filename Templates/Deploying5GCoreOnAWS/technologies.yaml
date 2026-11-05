@@ -86,7 +86,7 @@ technologies:
     url: https://prometheus.io/
     types: [managed-service]
     platform: aws
-    packages: [{manager: helm, name: prometheus-community/prometheus}]
+    packages: [{manager: helm, name: prometheus-community/prometheus}, {manager: terraform, name: hashicorp/helm}]
   - key: grafana
     name: Grafana
     description: Observability dashboard shown with the Outposts workload.
@@ -94,7 +94,7 @@ technologies:
     url: https://grafana.com/oss/grafana/
     types: [managed-service]
     platform: aws
-    packages: [{manager: helm, name: grafana/grafana}]
+    packages: [{manager: helm, name: grafana/grafana}, {manager: terraform, name: hashicorp/helm}]
   - key: fluentd
     name: Fluentd
     description: Log collector shown with the Outposts workload.
@@ -102,4 +102,4 @@ technologies:
     url: https://www.fluentd.org/
     types: [managed-service]
     platform: aws
-    packages: [{manager: helm, name: fluent/fluentd}]
+    packages: [{manager: helm, name: fluent/fluentd}, {manager: terraform, name: hashicorp/helm}]

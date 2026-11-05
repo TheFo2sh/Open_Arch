@@ -161,6 +161,18 @@ const RULES = [
     }),
   },
   {
+    name: "self-run-products-say-how-they-are-deployed",
+    check: (t) => (t.technologies?.technologies ?? []).flatMap((technology) => {
+      const managers = (technology.packages ?? []).map((pkg) => pkg.manager);
+      const runs = technology.types.some((type) => ["managed-service", "compute-platform", "data-platform"].includes(type));
+      const installed = managers.some((manager) => manager === "docker" || manager === "helm");
+      const deployed = managers.some((manager) => manager === "terraform" || manager === "pulumi");
+      return runs && installed && !deployed
+        ? [`${technology.key} is installed from a Docker image or Helm chart but no Terraform or Pulumi package says how it is deployed`]
+        : [];
+    }),
+  },
+  {
     name: "runs-where-it-is-hosted",
     check: (t) => {
       const technologies = new Map((t.technologies?.technologies ?? []).map((technology) => [technology.key, technology]));

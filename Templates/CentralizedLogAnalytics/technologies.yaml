@@ -31,7 +31,7 @@ technologies:
     url: https://fluentbit.io/
     types: [managed-service, third-party]
     platform: aws
-    packages: [{manager: docker, name: fluent/fluent-bit}]
+    packages: [{manager: docker, name: fluent/fluent-bit}, {manager: terraform, name: hashicorp/aws}]
   - key: amazon-kinesis-agent
     name: Amazon Kinesis Agent
     description: AWS log collector listed as one possible collector in the source.

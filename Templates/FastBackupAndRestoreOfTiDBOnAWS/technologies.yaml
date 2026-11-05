@@ -37,7 +37,7 @@ technologies:
     url: https://github.com/pingcap/tidb-operator
     types: [managed-service, third-party]
     platform: aws
-    packages: [{manager: helm, name: pingcap/tidb-operator}]
+    packages: [{manager: helm, name: pingcap/tidb-operator}, {manager: terraform, name: hashicorp/helm}]
   - key: tidb
     name: TiDB
     description: Open-source MySQL-compatible HTAP database deployed as a cluster on AWS.
@@ -46,7 +46,7 @@ technologies:
     types: [managed-service, data-platform, third-party]
     platform: aws
     hosts: [database]
-    packages: [{manager: helm, name: pingcap/tidb-cluster}]
+    packages: [{manager: helm, name: pingcap/tidb-cluster}, {manager: terraform, name: hashicorp/helm}]
   - key: tikv
     name: TiKV
     description: Distributed key-value storage component whose data is persisted on Amazon EBS volumes.
@@ -54,4 +54,4 @@ technologies:
     url: https://tikv.org/
     types: [managed-service, third-party]
     platform: aws
-    packages: [{manager: helm, name: pingcap/tidb-cluster}]
+    packages: [{manager: helm, name: pingcap/tidb-cluster}, {manager: terraform, name: hashicorp/helm}]

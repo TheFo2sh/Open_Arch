@@ -30,7 +30,7 @@ technologies:
     url: https://github.com/kubernetes-sigs/aws-load-balancer-controller
     types: [managed-service]
     platform: aws
-    packages: [{manager: helm, name: eks/aws-load-balancer-controller}]
+    packages: [{manager: helm, name: eks/aws-load-balancer-controller}, {manager: terraform, name: hashicorp/helm}]
   - key: aws-nat-gateway
     name: AWS NAT Gateway
     description: NAT gateways in public subnets provide outbound internet connectivity for workloads in private subnets.

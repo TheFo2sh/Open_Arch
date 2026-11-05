@@ -8,7 +8,7 @@ technologies:
     url: https://fluentbit.io/
     types: [managed-service, third-party]
     platform: aws
-    packages: [{manager: docker, name: fluent/fluent-bit}]
+    packages: [{manager: docker, name: fluent/fluent-bit}, {manager: helm, name: fluent/fluent-bit}, {manager: terraform, name: hashicorp/helm}]
   - key: opensearch-data-prepper
     name: OpenSearch Data Prepper
     description: Open-source collector that transforms and enriches logs and traces before forwarding them to Amazon OpenSearch Service.
@@ -16,7 +16,7 @@ technologies:
     url: https://opensearch.org/docs/latest/data-prepper/
     types: [managed-service, third-party]
     platform: aws
-    packages: [{manager: docker, name: opensearchproject/data-prepper}]
+    packages: [{manager: docker, name: opensearchproject/data-prepper}, {manager: helm, name: opensearch/data-prepper}, {manager: terraform, name: hashicorp/helm}]
   - key: aws-distro-for-opentelemetry
     name: AWS Distro for OpenTelemetry
     description: OpenTelemetry metric scrapers forward metrics to Amazon Managed Service for Prometheus and traces to OpenSearch Data Prepper.
@@ -24,7 +24,7 @@ technologies:
     url: https://aws-otel.github.io/
     types: [managed-service]
     platform: aws
-    packages: [{manager: docker, name: public.ecr.aws/aws-observability/aws-otel-collector}]
+    packages: [{manager: docker, name: public.ecr.aws/aws-observability/aws-otel-collector}, {manager: terraform, name: hashicorp/aws}]
   - key: amazon-opensearch-service
     name: Amazon OpenSearch Service
     description: Managed data store for logs and traces received from OpenSearch Data Prepper; provides OpenSearch Dashboards.
